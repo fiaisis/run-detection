@@ -1,0 +1,19 @@
+[project]
+name = "run-detection"
+readme = "README.md"
+version = "0.0.1"
+
+
+[project.optional-dependencies]
+formatting = [
+    "toml==0.10.2",
+    "yapf==0.32.0"
+]
+
+ci = [
+    "run-detection[formatting]",
+]
+
+[tool.yapf]
+based_on_style = "pep8"
+column_limit = 120

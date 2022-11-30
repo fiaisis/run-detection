@@ -1,0 +1,33 @@
+---
+on:
+  push:
+    branches:
+      - main
+jobs:
+  yapf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[ci]
+
+      - name: Run yapf
+        run: |
+          yapf -irp .
+
+      - name: Commit changes
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "YAPF auto commit" || true
+          git push
