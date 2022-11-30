@@ -19,4 +19,12 @@ jobs:
 
       - name: Run yapf
         run: |
-          yapf -rpd .
+          yapf -irp .
+
+      - name: Commit changes
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "YAPF auto commit"
+          git push
