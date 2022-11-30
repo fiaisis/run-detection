@@ -19,4 +19,4 @@ jobs:
 
       - name: Run yapf
         run: |
-          yapf -rpd --style='{column_limit: 120}' .
+          yapf -rpd .
