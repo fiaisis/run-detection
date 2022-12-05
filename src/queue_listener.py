@@ -27,9 +27,8 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
     incoming messages and message acknowledgements
     """
 
-    def __init__(self, message_queue: SimpleQueue[Message], ack_queue: SimpleQueue[Message]) -> None:
+    def __init__(self, message_queue: SimpleQueue[Message]) -> None:
         self._message_queue = message_queue
-        self._ack_queue = ack_queue
         self._connection: Connection = Connection()
         self._subscription_id = "1"
         super().__init__()
