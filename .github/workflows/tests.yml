@@ -2,7 +2,7 @@
 on: push
 
 jobs:
-  code-inspection:
+  pylint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
@@ -16,10 +16,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install .[code-inspection]
+          python -m pip install .[test]
 
-      - name: Run pylint
-        run: pylint main.py src test
-
-      - name: Run MyPy
-        run: mypy --strict .
+      - name: Run pytest
+        run: pytest .
