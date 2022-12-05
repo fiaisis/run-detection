@@ -1,7 +1,7 @@
 """queue listener module containing classes relating to consuming messages from ICAT pre queue on activemq message
 broker """
 from dataclasses import dataclass
-from multiprocessing import SimpleQueue
+from queue import SimpleQueue
 
 from stomp import Connection  # type: ignore
 from stomp.listener import ConnectionListener  # type: ignore
@@ -25,10 +25,11 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
     incoming messages and message acknowledgements
     """
 
-    # pylint: disable=(unsubscriptable-object)
     def __init__(self, message_queue: SimpleQueue[Message], ack_queue: SimpleQueue[Message]) -> None:
-        self.message_queue = message_queue
-        self.ack_queue = ack_queue
+        self._message_queue = message_queue
+        self._ack_queue = ack_queue
+        self._connection: Connection = Connection()
+        self._subscription_id = "1"
         super().__init__()
 
     def on_message(self, frame: Frame) -> None:
@@ -36,19 +37,33 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         Called on message received, Creates the message object and passes into the internal message queue
         :param frame: The frame recieved by the queue Listener
         """
-        self.message_queue.put(Message(value=frame.body, id=frame.headers["message-id"]))
+        self._message_queue.put(Message(value=frame.body, id=frame.headers["message-id"]))
+
+    def on_disconnected(self) -> None:
+        """
+        Called on disconnection from message broker. Will attempt to reconnect.
+        """
+        print("Disconnected, attempting reconnect...")
+        self._connect_and_subscribe()
+        print("Reconnected")
+
+    def _connect_and_subscribe(self) -> None:
+        self._connection.connect("admin", "admin")
+        self._connection.set_listener(listener=self, name="run-detection-listener")
+        self._connection.subscribe(destination="Interactive-Reduction", id=self._subscription_id)
 
     def run(self) -> None:
         """
-        Connect to activemq and start listening for messages
+        Connect to activemq and start listening for messages. The queue listener is non blocking and runs
+        asynchronously.
         :return: None
         """
-        connection = Connection()
-        subscription_id = "1"
-        connection.connect('admin', 'admin')
-        connection.set_listener(listener=self, name="run-detection-queue-listener")
-        connection.subscribe(destination="Interactive-Reduction", id=subscription_id, ack="client")
-        while True:
-            message = self.ack_queue.get()
-            if message:
-                connection.ack(message.id, subscription_id)
+        self._connect_and_subscribe()
+
+    def acknowledge(self, message: Message) -> None:
+        """
+        Sends acknowledgement to the message broker that the was consumed
+        :param message: The message to acknowledge
+        :return: None
+        """
+        self._connection.ack(message.id, self._subscription_id)
