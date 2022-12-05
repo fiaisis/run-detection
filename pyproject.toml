@@ -8,15 +8,18 @@ dependencies = [
 
 
 [project.optional-dependencies]
-code-inspection = [
+formatting = [
     "toml==0.10.2",
     "yapf==0.32.0",
+]
+
+code-inspection = [
     "pylint==2.15.7",
     "mypy==0.991"
 ]
 
-ci = [
-    "run-detection[code-inspection]",
+test = [
+    "pytest==7.2.0"
 ]
 
 [tool.yapf]
