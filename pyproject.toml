@@ -5,13 +5,15 @@ version = "0.0.1"
 
 
 [project.optional-dependencies]
-formatting = [
+code-inspection = [
     "toml==0.10.2",
-    "yapf==0.32.0"
+    "yapf==0.32.0",
+    "pylint==2.15.7",
+    "mypy==0.991"
 ]
 
 ci = [
-    "run-detection[formatting]",
+    "run-detection[code-inspection]",
 ]
 
 [tool.yapf]
