@@ -2,7 +2,7 @@
 on: push
 
 jobs:
-  pylint:
+  pytest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
