@@ -19,7 +19,7 @@ jobs:
           python -m pip install .[ci]
 
       - name: Run pylint
-        run: pylint .
+        run: pylint main.py src test
 
       - name: Run MyPy
         run: mypy --strict .
