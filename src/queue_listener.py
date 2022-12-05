@@ -1,9 +1,11 @@
 """queue listener module containing classes relating to consuming messages from ICAT pre queue on activemq message
 broker """
+import time
 from dataclasses import dataclass
 from queue import SimpleQueue
 
 from stomp import Connection  # type: ignore
+from stomp.exception import ConnectFailedException  # type: ignore
 from stomp.listener import ConnectionListener  # type: ignore
 from stomp.utils import Frame  # type: ignore
 
@@ -43,14 +45,20 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         """
         Called on disconnection from message broker. Will attempt to reconnect.
         """
+
         print("Disconnected, attempting reconnect...")
         self._connect_and_subscribe()
-        print("Reconnected")
 
     def _connect_and_subscribe(self) -> None:
-        self._connection.connect("admin", "admin")
-        self._connection.set_listener(listener=self, name="run-detection-listener")
-        self._connection.subscribe(destination="Interactive-Reduction", id=self._subscription_id)
+        try:
+            print("Attempting connection")
+            self._connection.connect("admin", "admin")
+            self._connection.set_listener(listener=self, name="run-detection-listener")
+            self._connection.subscribe(destination="Interactive-Reduction", id=self._subscription_id)
+        except ConnectFailedException:
+            print("Failed to reconnect, attempting again in 30 seconds")
+            time.sleep(30)
+            self._connect_and_subscribe()
 
     def run(self) -> None:
         """
