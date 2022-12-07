@@ -8,6 +8,7 @@ from unittest.mock import patch, Mock
 
 import pytest
 
+from src.notifications import Notification
 from src.queue_listener import Message
 from src.run_detection import RunDetector
 
@@ -21,18 +22,17 @@ def detector() -> RunDetector:
     return RunDetector()
 
 
-@patch("src.run_detection.print")
-def test__process_message(mock_print: Mock, detector: RunDetector) -> None:
+def test__process_message(detector: RunDetector) -> None:
     """
     Testing for message processing
-    :param mock_print: patched print mock
     :param detector: RunDetector Fixture
     :return: None
     """
     detector._queue_listener = Mock()
+    detector._notifier = Mock()
     message = Message(id="id", value="value")
     detector._process_message(message)
-    mock_print.assert_called_with(message)
+    detector._notifier.notify.assert_called_with(Notification(message.value))
     assert message.processed is True
     detector._queue_listener.acknowledge.assert_called_once_with(message)
 
