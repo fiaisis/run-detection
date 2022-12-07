@@ -19,7 +19,7 @@ jobs:
           python -m pip install .[code-inspection]
 
       - name: Run pylint
-        run: pylint main.py src
+        run: pylint main.py src test
 
       - name: Run MyPy
         run: mypy --strict main.py src
