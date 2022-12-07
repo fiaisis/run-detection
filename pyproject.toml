@@ -2,19 +2,28 @@
 name = "run-detection"
 readme = "README.md"
 version = "0.0.1"
+dependencies = [
+    "stomp.py==8.1.0"
+]
 
 
 [project.optional-dependencies]
-code-inspection = [
+formatting = [
     "toml==0.10.2",
     "yapf==0.32.0",
-    "pylint==2.15.7",
-    "mypy==0.991"
 ]
 
-ci = [
-    "run-detection[code-inspection]",
+
+test = [
+    "pytest==7.2.0"
 ]
+
+code-inspection = [
+    "pylint==2.15.7",
+    "mypy==0.991",
+    "run-detection[test]"
+]
+
 
 [tool.yapf]
 based_on_style = "pep8"
