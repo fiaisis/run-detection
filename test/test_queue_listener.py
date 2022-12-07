@@ -4,7 +4,7 @@ Unit tests for queue listener
 # pylint: disable=protected-access, redefined-outer-name
 import unittest
 from queue import SimpleQueue
-from unittest.mock import MagicMock, patch, Mock, call
+from unittest.mock import MagicMock, patch, Mock
 
 import pytest
 from stomp.exception import ConnectFailedException  # type: ignore
@@ -35,8 +35,7 @@ def test_on_message_creates_message_and_puts_to_queue(listener: QueueListener) -
     assert listener._message_queue.get() == Message(value="body text", id="1")
 
 
-@patch("src.queue_listener.print")
-def test_will_attempt_reconnect_on_disconnect(mock_print: Mock, listener: QueueListener) -> None:
+def test_will_attempt_reconnect_on_disconnect(listener: QueueListener) -> None:
     """
     Tests that reconnection is attempted on disconnect
     :param listener: Queue Listener Fixture
@@ -44,13 +43,11 @@ def test_will_attempt_reconnect_on_disconnect(mock_print: Mock, listener: QueueL
     """
     listener._connection = Mock()
     listener.on_disconnected()
-    mock_print.assert_has_calls([call("Disconnected, attempting reconnect..."), call("Attempting connection")])
     assert_connect_and_subscribe(listener)
 
 
-@patch("src.queue_listener.print")
 @patch("src.queue_listener.time")
-def test_will_wait_30_seconds_on_failure_to_reconnect(mock_time: Mock, mock_print: Mock,
+def test_will_wait_30_seconds_on_failure_to_reconnect(mock_time: Mock,
                                                       listener: QueueListener) -> None:
     """
     Tests will attempt to reconnect after 30 seconds on connection failure
@@ -63,12 +60,6 @@ def test_will_wait_30_seconds_on_failure_to_reconnect(mock_time: Mock, mock_prin
     listener._connection.connect.side_effect = [ConnectFailedException, None]
     listener.on_disconnected()
     mock_time.sleep.assert_called_once_with(30)
-    mock_print.assert_has_calls([
-        call("Disconnected, attempting reconnect..."),
-        call("Attempting connection"),
-        call("Failed to reconnect, attempting again in 30 seconds"),
-        call("Attempting connection")
-    ])
 
 
 def test_acknowledge_sends_acknowledgment(listener: QueueListener) -> None:
@@ -83,8 +74,7 @@ def test_acknowledge_sends_acknowledgment(listener: QueueListener) -> None:
     listener._connection.ack.assert_called_once_with(message.id, listener._subscription_id)
 
 
-@patch("src.queue_listener.print")
-def test_run_connects_queue_listener(mock_print: Mock, listener: QueueListener) -> None:
+def test_run_connects_queue_listener(listener: QueueListener) -> None:
     """
     Tests the queue listener will attempt to connect on run
     :param listener: QueueListener fixture
@@ -93,7 +83,6 @@ def test_run_connects_queue_listener(mock_print: Mock, listener: QueueListener) 
     listener._connection = Mock()
     listener.run()
     assert_connect_and_subscribe(listener)
-    mock_print.assert_called_once_with("Attempting connection")
 
 
 def assert_connect_and_subscribe(listener: QueueListener) -> None:

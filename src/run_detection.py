@@ -1,11 +1,14 @@
 """
 Run detection module holds the RunDetector main class
 """
+import logging
 import time
 from queue import SimpleQueue
 
 from src.notifications import Notifier, Notification
 from src.queue_listener import Message, QueueListener
+
+logger = logging.getLogger(__name__)
 
 
 class RunDetector:
@@ -23,12 +26,14 @@ class RunDetector:
         """
         Starts the run detector
         """
+        logging.info("Starting RunDetector")
         self._queue_listener.run()
         while True:
             self._process_message(self._message_queue.get())
             time.sleep(0.1)
 
     def _process_message(self, message: Message) -> None:
+        logger.info("Processing message: %s", message)
         notification = Notification(message.value)
         self._notifier.notify(notification)
         message.processed = True
