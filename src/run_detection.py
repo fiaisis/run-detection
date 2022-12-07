@@ -27,6 +27,6 @@ class RunDetector:
             time.sleep(0.1)
 
     def _process_message(self, message: Message) -> None:
-        print(message)
+        print(message)  # TODO: Replace with notifier
         message.processed = True
         self._queue_listener.acknowledge(message)
