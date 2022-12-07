@@ -13,14 +13,17 @@ formatting = [
     "yapf==0.32.0",
 ]
 
-code-inspection = [
-    "pylint==2.15.7",
-    "mypy==0.991"
-]
 
 test = [
     "pytest==7.2.0"
 ]
+
+code-inspection = [
+    "pylint==2.15.7",
+    "mypy==0.991",
+    "run-detection[test]"
+]
+
 
 [tool.yapf]
 based_on_style = "pep8"
