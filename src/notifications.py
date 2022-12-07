@@ -2,7 +2,10 @@
 Notifications module contains the Notification class and the Notifier class. Notifications to be consumed by a Notifier
 instance to send detected runs downstream.
 """
+import logging
 from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -25,4 +28,5 @@ class Notifier:
         :param notification: The notification to be sent
         :return: None
         """
+        logger.info("Sending notification: %s", notification)
         print(notification)
