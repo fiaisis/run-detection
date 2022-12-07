@@ -1,3 +1,8 @@
+"""
+Tests for run detection module
+"""
+# pylint: disable=protected-access, redefined-outer-name
+
 import unittest
 from unittest.mock import patch, Mock
 
@@ -8,12 +13,22 @@ from src.run_detection import RunDetector
 
 
 @pytest.fixture
-def detector():
+def detector() -> RunDetector:
+    """
+    Sets up and returns a run detector
+    :return: RunDetector
+    """
     return RunDetector()
 
 
 @patch("src.run_detection.print")
-def test__process_message(mock_print: Mock, detector):
+def test__process_message(mock_print: Mock, detector: RunDetector) -> None:
+    """
+    Testing for message processing
+    :param mock_print: patched print mock
+    :param detector: RunDetector Fixture
+    :return: None
+    """
     detector._queue_listener = Mock()
     message = Message(id="id", value="value")
     detector._process_message(message)
@@ -23,9 +38,15 @@ def test__process_message(mock_print: Mock, detector):
 
 
 @patch("src.run_detection.time.sleep", side_effect=InterruptedError)
-def test_run(mock_sleep: Mock, detector):
+def test_run(_: Mock, detector: RunDetector) -> None:
+    """
+    Test that run is processing messages and queue listener is started
+    :param _: time.sleep patched mock
+    :param detector:
+    :return: None
+    """
     detector._queue_listener = Mock()
-    detector._process_message = Mock()
+    detector._process_message = Mock()  # type: ignore
     detector._message_queue = Mock()
     mock_message = Mock()
     detector._message_queue.get.return_value = mock_message
