@@ -4,6 +4,7 @@ Run detection module holds the RunDetector main class
 import time
 from queue import SimpleQueue
 
+from src.notifications import Notifier, Notification
 from src.queue_listener import Message, QueueListener
 
 
@@ -16,6 +17,7 @@ class RunDetector:
     def __init__(self) -> None:
         self._message_queue: SimpleQueue[Message] = SimpleQueue()
         self._queue_listener: QueueListener = QueueListener(self._message_queue)
+        self._notifier: Notifier = Notifier()
 
     def run(self) -> None:
         """
@@ -27,6 +29,7 @@ class RunDetector:
             time.sleep(0.1)
 
     def _process_message(self, message: Message) -> None:
-        print(message)  # TODO: Replace with notifier
+        notification = Notification(message.value)
+        self._notifier.notify(notification)
         message.processed = True
         self._queue_listener.acknowledge(message)
