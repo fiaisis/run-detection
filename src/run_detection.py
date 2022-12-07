@@ -33,6 +33,7 @@ class RunDetector:
             time.sleep(0.1)
 
     def _process_message(self, message: Message) -> None:
+        logger.info("Processing message: %s", message)
         notification = Notification(message.value)
         self._notifier.notify(notification)
         message.processed = True
