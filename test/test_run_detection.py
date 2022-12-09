@@ -8,9 +8,9 @@ from unittest.mock import patch, Mock
 
 import pytest
 
-from src.notifications import Notification
-from src.queue_listener import Message
-from src.run_detection import RunDetector
+from rundetection.notifications import Notification
+from rundetection.queue_listener import Message
+from rundetection.run_detection import RunDetector
 
 
 @pytest.fixture

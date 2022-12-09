@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch, Mock
 import pytest
 from stomp.exception import ConnectFailedException  # type: ignore
 
-from src.queue_listener import QueueListener, Message
+from rundetection.queue_listener import QueueListener, Message
 
 
 @pytest.fixture
