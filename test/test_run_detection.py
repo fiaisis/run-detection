@@ -37,7 +37,7 @@ def test__process_message(detector: RunDetector) -> None:
     detector._queue_listener.acknowledge.assert_called_once_with(message)
 
 
-@patch("src.run_detection.time.sleep", side_effect=InterruptedError)
+@patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError)
 def test_run(_: Mock, detector: RunDetector) -> None:
     """
     Test that run is processing messages and queue listener is started

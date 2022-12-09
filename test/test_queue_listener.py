@@ -46,7 +46,7 @@ def test_will_attempt_reconnect_on_disconnect(listener: QueueListener) -> None:
     assert_connect_and_subscribe(listener)
 
 
-@patch("src.queue_listener.time")
+@patch("rundetection.queue_listener.time")
 def test_will_wait_30_seconds_on_failure_to_reconnect(mock_time: Mock, listener: QueueListener) -> None:
     """
     Tests will attempt to reconnect after 30 seconds on connection failure

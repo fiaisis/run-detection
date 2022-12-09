@@ -6,7 +6,7 @@ from unittest.mock import patch, Mock
 from rundetection.notifications import Notification, Notifier
 
 
-@patch("src.notifications.print")
+@patch("rundetection.notifications.print")
 def test_notify(mock_print: Mock) -> None:
     """
     Test that notify prints to console
