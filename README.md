@@ -5,7 +5,7 @@
 To run:
 
 - `pip install .`
-- `python main.py`
+- `run-detection`
 
 To demo and test.
 The easiest way to test the whole run detection currently:
