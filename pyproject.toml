@@ -6,6 +6,11 @@ dependencies = [
     "stomp.py==8.1.0"
 ]
 
+[project.urls]
+"Repository" = "https://github.com/interactivereduction/run-detection"
+
+[project.scripts]
+run-detection = "rundetection.run_detection:main"
 
 [project.optional-dependencies]
 formatting = [
@@ -24,6 +29,8 @@ code-inspection = [
     "run-detection[test]"
 ]
 
+[tool.setuptools]
+packages = ["rundetection"]
 
 [tool.yapf]
 based_on_style = "pep8"

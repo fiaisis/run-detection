@@ -2,18 +2,24 @@
 Run detection module holds the RunDetector main class
 """
 import logging
+import sys
 import time
 from queue import SimpleQueue
 
-from src.notifications import Notifier, Notification
-from src.queue_listener import Message, QueueListener
+from rundetection.notifications import Notifier, Notification
+from rundetection.queue_listener import Message, QueueListener
 
+file_handler = logging.FileHandler(filename="run-detection.log")
+stdout_handler = logging.StreamHandler(stream=sys.stdout)
+logging.basicConfig(handlers=[file_handler, stdout_handler],
+                    format="[%(asctime)s]-%(name)s-%(levelname)s: %(message)s",
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class RunDetector:
     """
-    Run Detector class orchestrates the the complete run detection process, from consuming messages from icat
+    Run Detector class orchestrates the complete run detection process, from consuming messages from icat
     pre-queue, to notifying downstream
     """
 
@@ -38,3 +44,17 @@ class RunDetector:
         self._notifier.notify(notification)
         message.processed = True
         self._queue_listener.acknowledge(message)
+
+
+def main() -> None:
+    """
+    run-detection entrypoint.
+    :return: None
+    """
+    logger.info("Starting run detection")
+    run_detector = RunDetector()
+    run_detector.run()
+
+
+if __name__ == "__main__":
+    main()

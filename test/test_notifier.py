@@ -3,10 +3,10 @@ Unit tests for notification and notifier
 """
 from unittest.mock import patch, Mock
 
-from src.notifications import Notification, Notifier
+from rundetection.notifications import Notification, Notifier
 
 
-@patch("src.notifications.print")
+@patch("rundetection.notifications.print")
 def test_notify(mock_print: Mock) -> None:
     """
     Test that notify prints to console

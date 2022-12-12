@@ -19,7 +19,7 @@ jobs:
           python -m pip install .[code-inspection]
 
       - name: Run pylint
-        run: pylint main.py src test
+        run: pylint rundetection test
 
       - name: Run MyPy
-        run: mypy --strict main.py src
+        run: mypy --strict rundetection

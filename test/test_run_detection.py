@@ -8,9 +8,9 @@ from unittest.mock import patch, Mock
 
 import pytest
 
-from src.notifications import Notification
-from src.queue_listener import Message
-from src.run_detection import RunDetector
+from rundetection.notifications import Notification
+from rundetection.queue_listener import Message
+from rundetection.run_detection import RunDetector
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def test__process_message(detector: RunDetector) -> None:
     detector._queue_listener.acknowledge.assert_called_once_with(message)
 
 
-@patch("src.run_detection.time.sleep", side_effect=InterruptedError)
+@patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError)
 def test_run(_: Mock, detector: RunDetector) -> None:
     """
     Test that run is processing messages and queue listener is started
