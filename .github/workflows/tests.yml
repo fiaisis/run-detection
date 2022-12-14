@@ -43,6 +43,8 @@ jobs:
 
       - name: View detector logs on fail
         if: failure()
-        run: docker-compose logs run-detection
+        run: |
+          cd test
+          docker-compose logs run-detection
 
 
