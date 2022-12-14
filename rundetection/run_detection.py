@@ -3,6 +3,7 @@ Run detection module holds the RunDetector main class
 """
 import argparse
 import logging
+import os
 import sys
 import time
 from queue import SimpleQueue
@@ -29,12 +30,12 @@ class RunDetector:
         self._queue_listener: QueueListener = QueueListener(self._message_queue)
         self._notifier: Notifier = Notifier()
 
-    def run(self, args: argparse.Namespace) -> None:
+    def run(self, activemq_ip: str, activemq_user: str, activemq_pass: str) -> None:
         """
         Starts the run detector
         """
         logging.info("Starting RunDetector")
-        self._queue_listener.run(ip=args.activemqip, user=args.activemqpass, password=args.activemquser)
+        self._queue_listener.run(ip=activemq_ip, user=activemq_user, password=activemq_pass)
         while True:
             self._process_message(self._message_queue.get())
             time.sleep(0.1)
@@ -49,18 +50,16 @@ class RunDetector:
 
 def main() -> None:
     """
-    run-detection entrypoint.
+    run-detection entrypoint. Also handles the environment variables.
     :return: None
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--activemqip", "-i", help="The IP for ActiveMQ", default="localhost")
-    parser.add_argument("--activemquser", "-u", help="The username for ActiveMQ", default="admin")
-    parser.add_argument("--activemqpass", "-p", help="The password for ActiveMQ", default="admin")
-    args = parser.parse_args()
+    activemq_ip = os.environ.get("ACTIVEMQ_IP", "localhost")
+    activemq_user = os.environ.get("ACTIVEMQ_USER", "admin")
+    activemq_pass = os.environ.get("ACTIVEMQ_PASS", "admin")
 
     logger.info("Starting run detection")
     run_detector = RunDetector()
-    run_detector.run(args)
+    run_detector.run(activemq_ip, activemq_user, activemq_pass)
 
 
 if __name__ == "__main__":
