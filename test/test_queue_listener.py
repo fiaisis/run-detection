@@ -132,7 +132,8 @@ def test_connection_username_and_password_defaults_are_set() -> None:
 
 def test_connection_username_and_password_can_be_set_by_environment_variable() -> None:
     """
-    Test that the queue listener sets the username and password for connecting to activemq using the environment variables
+    Test that the queue listener sets the username and password for connecting to activemq using the environment
+    variables
     """
     os.environ["ACTIVEMQ_USER"] = "great_username"
     os.environ["ACTIVEMQ_PASS"] = "great_password"
