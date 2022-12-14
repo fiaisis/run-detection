@@ -2,7 +2,6 @@
 Run detection module holds the RunDetector main class
 """
 import logging
-import os
 import sys
 import time
 from queue import SimpleQueue
@@ -29,12 +28,12 @@ class RunDetector:
         self._queue_listener: QueueListener = QueueListener(self._message_queue)
         self._notifier: Notifier = Notifier()
 
-    def run(self, activemq_ip: str = "localhost", activemq_user: str = "admin", activemq_pass: str = "admin") -> None:
+    def run(self) -> None:
         """
         Starts the run detector
         """
         logging.info("Starting RunDetector")
-        self._queue_listener.run(ip=activemq_ip, user=activemq_user, password=activemq_pass)
+        self._queue_listener.run()
         while True:
             self._process_message(self._message_queue.get())
             time.sleep(0.1)
@@ -52,13 +51,9 @@ def main() -> None:
     run-detection entrypoint. Also handles the environment variables.
     :return: None
     """
-    activemq_ip = os.environ.get("ACTIVEMQ_IP", "localhost")
-    activemq_user = os.environ.get("ACTIVEMQ_USER", "admin")
-    activemq_pass = os.environ.get("ACTIVEMQ_PASS", "admin")
-
     logger.info("Starting run detection")
     run_detector = RunDetector()
-    run_detector.run(activemq_ip, activemq_user, activemq_pass)
+    run_detector.run()
 
 
 if __name__ == "__main__":
