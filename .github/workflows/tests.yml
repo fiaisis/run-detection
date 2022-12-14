@@ -39,6 +39,6 @@ jobs:
           cd test
           docker-compose up -d
       - name: Run e2e test
-        run: pytest test_e2e.py
+        run: pytest test/test_e2e.py
 
 
