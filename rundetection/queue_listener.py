@@ -32,7 +32,7 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
 
     def __init__(self, message_queue: SimpleQueue[Message]) -> None:
         self._message_queue = message_queue
-        self._connection: Connection = Connection()
+        self._connection: Connection = Connection([("activemq", 61613)])  # There is an issue to make this configurable
         self._subscription_id = "1"
         super().__init__()
 
