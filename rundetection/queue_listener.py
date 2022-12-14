@@ -69,7 +69,7 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
             time.sleep(30)
             self._connect_and_subscribe()
 
-    def run(self, ip: str = "localhost", user: str = "admin", password: str = "admin") -> None:
+    def run(self, ip: str = "localhost", user: str = "admin", password: str = "admin") -> None:  # pylint: disable=C0103
         """
         Connect to activemq and start listening for messages. The queue listener is non blocking and runs
         asynchronously.
