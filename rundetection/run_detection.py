@@ -1,6 +1,7 @@
 """
 Run detection module holds the RunDetector main class
 """
+import argparse
 import logging
 import sys
 import time
@@ -28,12 +29,12 @@ class RunDetector:
         self._queue_listener: QueueListener = QueueListener(self._message_queue)
         self._notifier: Notifier = Notifier()
 
-    def run(self) -> None:
+    def run(self, args: argparse.Namespace) -> None:
         """
         Starts the run detector
         """
         logging.info("Starting RunDetector")
-        self._queue_listener.run()
+        self._queue_listener.run(ip=args.activemqip, user=args.activemqpass, password=args.activemquser)
         while True:
             self._process_message(self._message_queue.get())
             time.sleep(0.1)
@@ -51,9 +52,15 @@ def main() -> None:
     run-detection entrypoint.
     :return: None
     """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--activemqip", "-i", help="The IP for ActiveMQ", default="localhost")
+    parser.add_argument("--activemquser", "-u", help="The username for ActiveMQ", default="admin")
+    parser.add_argument("--activemqpass", "-p", help="The password for ActiveMQ", default="admin")
+    args = parser.parse_args()
+
     logger.info("Starting run detection")
     run_detector = RunDetector()
-    run_detector.run()
+    run_detector.run(args)
 
 
 if __name__ == "__main__":

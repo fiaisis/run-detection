@@ -32,7 +32,10 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
 
     def __init__(self, message_queue: SimpleQueue[Message]) -> None:
         self._message_queue = message_queue
-        self._connection: Connection = Connection()
+        self._connection: Connection = None
+        self._user: str = "admin"
+        self._password: str = "admin"
+        self._ip: str = "localhost"
         self._subscription_id = "1"
         super().__init__()
 
@@ -56,7 +59,9 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
     def _connect_and_subscribe(self) -> None:
         try:
             logger.info("Attempting connection")
-            self._connection.connect("admin", "admin")
+            if self._connection is None:
+                self._connection = Connection([(self._ip, 61613)])
+            self._connection.connect(username=self._user, password=self._password)
             self._connection.set_listener(listener=self, name="run-detection-listener")
             self._connection.subscribe(destination="Interactive-Reduction", id=self._subscription_id)
         except ConnectFailedException:
@@ -64,13 +69,16 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
             time.sleep(30)
             self._connect_and_subscribe()
 
-    def run(self) -> None:
+    def run(self, ip: str, user: str, password: str) -> None:
         """
         Connect to activemq and start listening for messages. The queue listener is non blocking and runs
         asynchronously.
         :return: None
         """
         logger.info("Starting queue listener")
+        self._ip = ip
+        self._user = user
+        self._password = password
         self._connect_and_subscribe()
 
     def acknowledge(self, message: Message) -> None:
