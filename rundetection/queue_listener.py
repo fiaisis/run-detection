@@ -1,6 +1,7 @@
 """queue listener module containing classes relating to consuming messages from ICAT pre queue on activemq message
 broker """
 import logging
+import os
 import time
 from dataclasses import dataclass
 from queue import SimpleQueue
@@ -32,7 +33,10 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
 
     def __init__(self, message_queue: SimpleQueue[Message]) -> None:
         self._message_queue = message_queue
-        self._connection: Connection = Connection()
+        self._ip: str = os.environ.get("ACTIVEMQ_IP", "localhost")
+        self._user: str = os.environ.get("ACTIVEMQ_USER", "admin")
+        self._password: str = os.environ.get("ACTIVEMQ_PASS", "admin")
+        self._connection: Connection = Connection([(self._ip, 61613)])
         self._subscription_id = "1"
         super().__init__()
 
@@ -56,7 +60,7 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
     def _connect_and_subscribe(self) -> None:
         try:
             logger.info("Attempting connection")
-            self._connection.connect("admin", "admin")
+            self._connection.connect(username=self._user, password=self._password)
             self._connection.set_listener(listener=self, name="run-detection-listener")
             self._connection.subscribe(destination="Interactive-Reduction", id=self._subscription_id)
         except ConnectFailedException:
