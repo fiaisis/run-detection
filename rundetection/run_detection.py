@@ -1,7 +1,6 @@
 """
 Run detection module holds the RunDetector main class
 """
-import argparse
 import logging
 import os
 import sys
@@ -30,7 +29,7 @@ class RunDetector:
         self._queue_listener: QueueListener = QueueListener(self._message_queue)
         self._notifier: Notifier = Notifier()
 
-    def run(self, activemq_ip: str, activemq_user: str, activemq_pass: str) -> None:
+    def run(self, activemq_ip: str = "localhost", activemq_user: str = "admin", activemq_pass: str = "admin") -> None:
         """
         Starts the run detector
         """

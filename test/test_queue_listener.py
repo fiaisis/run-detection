@@ -90,7 +90,7 @@ def assert_connect_and_subscribe(listener: QueueListener) -> None:
     :param listener: QueueListener
     :return: None
     """
-    listener._connection.connect.assert_called_once_with("admin", "admin")
+    listener._connection.connect.assert_called_once_with(username="admin", password="admin")
     listener._connection.set_listener.assert_called_once_with(listener=listener, name="run-detection-listener")
     listener._connection.subscribe.assert_called_once_with(destination="Interactive-Reduction",
                                                            id=listener._subscription_id)
