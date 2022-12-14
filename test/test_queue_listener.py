@@ -2,6 +2,7 @@
 Unit tests for queue listener
 """
 # pylint: disable=protected-access, redefined-outer-name
+import os
 import unittest
 from queue import SimpleQueue
 from unittest.mock import MagicMock, patch, Mock
@@ -51,7 +52,6 @@ def test_will_wait_30_seconds_on_failure_to_reconnect(mock_time: Mock, listener:
     """
     Tests will attempt to reconnect after 30 seconds on connection failure
     :param mock_time: patched time mock
-    :param mock_print: patched print mock
     :param listener: QueueListener fixture
     :return: None
     """
@@ -84,13 +84,77 @@ def test_run_connects_queue_listener(listener: QueueListener) -> None:
     assert_connect_and_subscribe(listener)
 
 
-def assert_connect_and_subscribe(listener: QueueListener) -> None:
+@patch("rundetection.queue_listener.Connection")
+def test_connection_default_with_no_environment_vars_is_setup_with_localhost(connection: Mock) -> None:
+    """
+    Ensure that localhost is the default to connect to when no env variable is set
+    """
+    os.environ.pop('ACTIVEMQ_IP', None)
+
+    message_queue: SimpleQueue[Message] = SimpleQueue()
+    listener = QueueListener(message_queue)
+
+    assert listener._connection == connection.return_value
+    connection.assert_called_once_with([("localhost", 61613)])
+
+
+@patch("rundetection.queue_listener.Connection")
+def test_connection_ip_is_setup_with_environment_variables(connection: Mock) -> None:
+    """
+    Ensure that the environment variable is used to connect to when environment variable is set
+    """
+    os.environ['ACTIVEMQ_IP'] = "192.168.0.1"
+
+    message_queue: SimpleQueue[Message] = SimpleQueue()
+    listener = QueueListener(message_queue)
+
+    assert listener._connection == connection.return_value
+    connection.assert_called_once_with([("192.168.0.1", 61613)])
+
+
+def test_connection_username_and_password_defaults_are_set() -> None:
+    """
+    Test that the queue listener has defaults that are set when no environment variable is set
+    """
+    os.environ.pop('ACTIVEMQ_USER', None)
+    os.environ.pop('ACTIVEMQ_PASS', None)
+
+    message_queue: SimpleQueue[Message] = SimpleQueue()
+    listener = QueueListener(message_queue)
+
+    assert listener._user == "admin"
+    assert listener._password == "admin"
+
+    listener._connection = Mock()
+    listener.run()
+    assert_connect_and_subscribe(listener, username="admin", password="admin")
+
+
+def test_connection_username_and_password_can_be_set_by_environment_variable() -> None:
+    """
+    Test that the queue listener sets the username and password for connecting to activemq using the environment
+    variables
+    """
+    os.environ["ACTIVEMQ_USER"] = "great_username"
+    os.environ["ACTIVEMQ_PASS"] = "great_password"
+
+    message_queue: SimpleQueue[Message] = SimpleQueue()
+    listener = QueueListener(message_queue)
+
+    assert listener._user == "great_username"
+    assert listener._password == "great_password"
+
+    listener._connection = Mock()
+    listener.run()
+    assert_connect_and_subscribe(listener, username="great_username", password="great_password")
+
+
+def assert_connect_and_subscribe(listener: QueueListener, username: str = "admin", password: str = "admin") -> None:
     """
     Assert the given queue listener attempted to connect
-    :param listener: QueueListener
     :return: None
     """
-    listener._connection.connect.assert_called_once_with("admin", "admin")
+    listener._connection.connect.assert_called_once_with(username=username, password=password)
     listener._connection.set_listener.assert_called_once_with(listener=listener, name="run-detection-listener")
     listener._connection.subscribe.assert_called_once_with(destination="Interactive-Reduction",
                                                            id=listener._subscription_id)
