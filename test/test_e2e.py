@@ -5,8 +5,6 @@ import unittest
 
 import pytest
 from confluent_kafka import Consumer
-from confluent_kafka.admin import AdminClient
-from confluent_kafka.cimpl import NewTopic
 from stomp import Connection
 
 
@@ -19,14 +17,10 @@ def amq_connection() -> Connection:
 
 @pytest.fixture
 def kafka_consumer() -> Consumer:
-    admin_client = AdminClient({"bootstrap.servers": "localhost:29092"})
-    topic = NewTopic("detected-runs", 1, 1)
-    admin_client.create_topics([topic])
     consumer = Consumer({
-        'auto.offset.reset': 'latest',
-        "enable.auto.commit": True,
         "bootstrap.servers": "localhost:29092",
-        "group.id": "test"
+        "group.id": "test",
+        'auto.offset.reset': 'earliest'
     })
     consumer.subscribe(["detected-runs"])
     return consumer
@@ -40,8 +34,10 @@ def test_end_to_end_run_should_be_processed(amq_connection: Connection, kafka_co
 
     amq_connection.send("Interactive-Reduction", r"\\isis\inst$\cycle_22_4\NDXGEM\GEM92450.nxs")
 
-    for _ in range(30):
+    for _ in range(60):
+        
         msg = kafka_consumer.poll(timeout=1.0)
+        print(msg)
         if msg is None:
             continue
         if msg.error():
@@ -49,7 +45,6 @@ def test_end_to_end_run_should_be_processed(amq_connection: Connection, kafka_co
         try:
             assert msg.value() == br"\\isis\inst$\cycle_22_4\NDXGEM\GEM92450.nxs"
         finally:
-            kafka_consumer.commit(asynchronous=False)
             kafka_consumer.close()
         break
     else:
