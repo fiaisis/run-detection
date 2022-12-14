@@ -41,4 +41,8 @@ jobs:
       - name: Run e2e test
         run: pytest test/test_e2e.py
 
+      - name: View detector logs on fail
+        if: failure()
+        run: docker-compose logs run-detection
+
 
