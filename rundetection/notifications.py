@@ -6,7 +6,7 @@ import logging
 import socket
 from dataclasses import dataclass
 
-from confluent_kafka import Producer
+from confluent_kafka import Producer  # type: ignore
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,7 @@
 """
 End to end tests
 """
+# pylint: disable=redefined-outer-name
 import unittest
 
 import pytest
@@ -43,7 +44,7 @@ def test_end_to_end_run_should_be_processed(amq_connection: Connection, kafka_co
     amq_connection.send("Interactive-Reduction", r"\\isis\inst$\cycle_22_4\NDXGEM\GEM92450.nxs")
 
     for _ in range(60):
-        
+
         msg = kafka_consumer.poll(timeout=1.0)
         print(msg)
         if msg is None:
