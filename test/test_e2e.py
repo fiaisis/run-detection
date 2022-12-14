@@ -10,6 +10,10 @@ from stomp import Connection
 
 @pytest.fixture
 def amq_connection() -> Connection:
+    """
+    Setup and return stomp connection
+    :return: stomp connection
+    """
     conn = Connection()
     conn.connect("admin", "admin")
     return conn
@@ -17,6 +21,10 @@ def amq_connection() -> Connection:
 
 @pytest.fixture
 def kafka_consumer() -> Consumer:
+    """
+    Setup and return the kafka consumer
+    :return: kafka consumer
+    """
     consumer = Consumer({
         "bootstrap.servers": "localhost:29092",
         "group.id": "test",

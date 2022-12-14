@@ -49,3 +49,5 @@ services:
         condition: service_started
       activemq:
         condition: service_healthy
+    environment:
+      ACTIVEMQ_IP: activemq
