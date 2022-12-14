@@ -48,7 +48,7 @@ class RunDetector:
 
 def main() -> None:
     """
-    run-detection entrypoint. Also handles the environment variables.
+    run-detection entrypoint.
     :return: None
     """
     logger.info("Starting run detection")
