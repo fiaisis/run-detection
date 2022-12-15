@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   activemq:
-    image: rmohr/activemq:latest
+    image: rmohr/activemq:5.15.9  # This is not the version of activemq used in production, but it's the closest container version available, and the version used for testing by ingest
     ports:
       - "61616:61616"
       - "61613:61613"
