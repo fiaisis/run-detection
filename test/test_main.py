@@ -31,9 +31,9 @@ class MainTest(unittest.TestCase):
         with self.assertLogs('rundetection.run_detection', level='INFO') as info_logs:
             if not Path("/archive/ndxalf").exists():
                 # If archive does not exist
-                with TemporaryDirectory() as td:
-                    Path(td, "NDXALF").mkdir()
-                    main(td)
+                with TemporaryDirectory() as temp_dir:
+                    Path(temp_dir, "NDXALF").mkdir()
+                    main(temp_dir)
 
             else:
                 # If archive exists and is mounted on the system
@@ -68,7 +68,8 @@ class MainTest(unittest.TestCase):
         """
         main()
 
-        run_detector.return_value.run.assert_called_once()
+        run_detector.return_value.run.assert_called_once_with()
+
 
 
 if __name__ == '__main__':

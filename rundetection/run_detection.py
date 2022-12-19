@@ -4,7 +4,6 @@ Run detection module holds the RunDetector main class
 import logging
 import sys
 import time
-import os
 from pathlib import Path
 from queue import SimpleQueue
 
