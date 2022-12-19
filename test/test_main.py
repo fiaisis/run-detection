@@ -15,19 +15,26 @@ class MainTest(unittest.TestCase):
     """
     The main test class
     """
+    @staticmethod
+    def generate_string():
+        """
+        Generate a fake directory name that is 20 characters long from upper and lower case characters
+        """
+        return ''.join(random.choice(string.ascii_letters) for _ in range(20))
+
     @mock.patch("rundetection.run_detection.RunDetector")
     def test_main_finds_archive_if_present(self, _: Mock) -> None:
         """
         Testing that it checks for the archive being present by checking for /archive/ndxalf
         """
-        expected_path = "/archive/ndxalf"
+        result_str = self.generate_string()
+        expected_path = f"/tmp/{result_str}"
         with self.assertLogs('rundetection.run_detection', level='INFO') as info_logs:
             if not os.path.exists(expected_path):
                 # If archive does not exist
-                os.umask(0)
-                os.makedirs(expected_path, mode=0o777)
+                os.makedirs(expected_path)
                 main()
-                os.removedirs(expected_path)
+                os.rmdir(expected_path)
             else:
                 # If archive exists and is mounted on the system
                 main()
@@ -44,8 +51,7 @@ class MainTest(unittest.TestCase):
         with self.assertLogs('rundetection.run_detection', level='ERROR') as error_logs:
             if os.path.exists("/archive/ndxalf"):
                 # If archive does exist
-                letters = string.ascii_letters
-                result_str = ''.join(random.choice(letters) for _ in range(20))
+                result_str = self.generate_string()
                 main(f"/tmp/{result_str}")
             else:
                 # If archive does not exist
