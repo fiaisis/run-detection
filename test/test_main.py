@@ -30,11 +30,11 @@ class MainTest(unittest.TestCase):
         result_str = self.generate_string()
         expected_path = f"/tmp/{result_str}"
         with self.assertLogs('rundetection.run_detection', level='INFO') as info_logs:
-            if not os.path.exists(expected_path):
+            if not os.path.exists("/archive/ndxalf"):
                 # If archive does not exist
-                os.makedirs(expected_path)
-                main()
-                os.rmdir(expected_path)
+                os.makedirs(os.path.join(expected_path, "NDXALF"))
+                main(expected_path)
+                os.removedirs(os.path.join(expected_path, "NDXALF"))
             else:
                 # If archive exists and is mounted on the system
                 main()
@@ -48,11 +48,12 @@ class MainTest(unittest.TestCase):
         """
         Testing that it checks for the archive being present by checking for /archive/ndxalf
         """
+        result_str = self.generate_string()
+        expected_path = f"/tmp/{result_str}"
         with self.assertLogs('rundetection.run_detection', level='ERROR') as error_logs:
             if os.path.exists("/archive/ndxalf"):
-                # If archive does exist
-                result_str = self.generate_string()
-                main(f"/tmp/{result_str}")
+                # If archive does exist, use a fake directory
+                main(expected_path)
             else:
                 # If archive does not exist
                 main()
