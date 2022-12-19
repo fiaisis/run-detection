@@ -24,7 +24,7 @@ The easiest way to test the whole run detection currently:
 - Construct the container by running:
 
 ```shell
-docker build . -f ./container/rundetection.D -t ghcr.io/interactivereduction/rundetection
+docker build . -f ./container/rundetection.D -t ghcr.io/interactivereduction/rundetection -t ghrc.io/interactivereduction/rundetection:$(date +"%Y-%m-%dT%H-%M-%S")
 ```
 
 - Run the container by running:
@@ -38,7 +38,7 @@ docker run -it --rm --name rundetection ghcr.io/interactivereduction/rundetectio
 - Upload the container by running (should be handled by CI, but this can be done manually if needed):
 
 ```shell
-docker push ghcr.io/interactivereduction/rundetection
+docker push ghcr.io/interactivereduction/rundetection -a
 ```
 
 - To pull containers you will also need the permissions set above in
