@@ -1,0 +1,68 @@
+version: "3.7"
+
+networks:
+  app:
+    driver: bridge
+
+services:
+  activemq:
+    image: rmohr/activemq:5.15.9  # This is not the version of activemq used in production, but it's the closest container version available, and the version used for testing by ingest
+    ports:
+      - "61616:61616"
+      - "61613:61613"
+      - "8161:8161"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:61616" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - app
+
+
+  zookeeper:
+    image:
+      bitnami/zookeeper:3.8.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ALLOW_ANONYMOUS_LOGIN: "true"
+    networks:
+      - app
+
+  broker:
+    image: bitnami/kafka:3.3.1
+    container_name: broker
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    depends_on:
+      - zookeeper
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: "true"
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CLIENT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CLIENT://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,CLIENT://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+    networks:
+      - app
+
+  run-detection:
+    build:
+      context: ../
+      dockerfile: container/rundetection.D
+    depends_on:
+      broker:
+        condition: service_started
+      activemq:
+        condition: service_healthy
+    environment:
+      ACTIVEMQ_IP: activemq
+    networks:
+      - app

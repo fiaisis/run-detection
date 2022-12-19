@@ -1,19 +1,18 @@
 """
 Unit tests for notification and notifier
 """
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from rundetection.notifications import Notification, Notifier
 
 
-@patch("rundetection.notifications.print")
-def test_notify(mock_print: Mock) -> None:
+@patch("rundetection.notifications.Producer", return_value=Mock())
+def test_notify(mock_producer: Mock) -> None:
     """
-    Test that notify prints to console
-    :param mock_print: patched print
+    Test that notify producer produces a message for kafka
     :return: None
     """
     notification = Notification("foo")
     notifier = Notifier()
     notifier.notify(notification)
-    mock_print.assert_called_once_with(notification)
+    mock_producer.return_value.produce.assert_called_once_with("detected-runs", value=notification.value)

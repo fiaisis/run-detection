@@ -3,7 +3,10 @@ Notifications module contains the Notification class and the Notifier class. Not
 instance to send detected runs downstream.
 """
 import logging
+import socket
 from dataclasses import dataclass
+
+from confluent_kafka import Producer  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +24,10 @@ class Notifier:
     Notifier is used to send notifications downstream.
     """
 
+    def __init__(self) -> None:
+        config = {'bootstrap.servers': "broker", 'client.id': socket.gethostname()}
+        self._producer = Producer(config)
+
     # This could be static currently, but not once this does more than print
     def notify(self, notification: Notification) -> None:
         """
@@ -29,4 +36,4 @@ class Notifier:
         :return: None
         """
         logger.info("Sending notification: %s", notification)
-        print(notification)
+        self._producer.produce("detected-runs", value=notification.value)
