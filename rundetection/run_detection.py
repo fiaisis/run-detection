@@ -47,7 +47,7 @@ class RunDetector:
         self._queue_listener.acknowledge(message)
 
 
-def main(archive_path="/archive") -> None:
+def main(archive_path: str = "/archive") -> None:
     """
     run-detection entrypoint.
     :arg archive_path: Added purely for testing purposes, but should also be potentially useful.

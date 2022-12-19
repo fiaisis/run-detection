@@ -46,7 +46,7 @@ class MainTest(unittest.TestCase):
     @mock.patch("rundetection.run_detection.RunDetector")
     def test_main_outputs_error_if_archive_not_present(self, _: Mock) -> None:
         """
-        Testing that it checks for the archive being present by checking for /archive/ndxalf
+        Testing that it checks for the archive not being present by checking for /archive/ndxalf
         """
         result_str = self.generate_string()
         expected_path = f"/tmp/{result_str}"
