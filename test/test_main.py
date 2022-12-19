@@ -24,7 +24,8 @@ class MainTest(unittest.TestCase):
         with self.assertLogs('rundetection.run_detection', level='INFO') as info_logs:
             if not os.path.exists(expected_path):
                 # If archive does not exist
-                os.makedirs(expected_path)
+                os.umask(0)
+                os.makedirs(expected_path, mode=0o777)
                 main()
                 os.removedirs(expected_path)
             else:
