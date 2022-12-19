@@ -4,7 +4,8 @@ Tests for run detection module's main function
 import random
 import string
 import unittest
-import os
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest import mock
 from unittest.mock import Mock
 
@@ -27,14 +28,13 @@ class MainTest(unittest.TestCase):
         """
         Testing that it checks for the archive being present by checking for /archive/ndxalf
         """
-        result_str = self.generate_string()
-        expected_path = f"/tmp/{result_str}"
         with self.assertLogs('rundetection.run_detection', level='INFO') as info_logs:
-            if not os.path.exists("/archive/ndxalf"):
+            if not Path("/archive/ndxalf").exists():
                 # If archive does not exist
-                os.makedirs(os.path.join(expected_path, "NDXALF"))
-                main(expected_path)
-                os.removedirs(os.path.join(expected_path, "NDXALF"))
+                with TemporaryDirectory() as td:
+                    Path(td, "NDXALF").mkdir()
+                    main(td)
+
             else:
                 # If archive exists and is mounted on the system
                 main()
@@ -51,7 +51,7 @@ class MainTest(unittest.TestCase):
         result_str = self.generate_string()
         expected_path = f"/tmp/{result_str}"
         with self.assertLogs('rundetection.run_detection', level='ERROR') as error_logs:
-            if os.path.exists("/archive/ndxalf"):
+            if Path("/archive/ndxalf").exists():
                 # If archive does exist, use a fake directory
                 main(expected_path)
             else:
@@ -68,7 +68,7 @@ class MainTest(unittest.TestCase):
         """
         main()
 
-        run_detector.return_value.run.assert_called_once_with()
+        run_detector.return_value.run.assert_called_once()
 
 
 if __name__ == '__main__':

@@ -5,6 +5,7 @@ import logging
 import sys
 import time
 import os
+from pathlib import Path
 from queue import SimpleQueue
 
 from rundetection.notifications import Notifier, Notification
@@ -54,7 +55,7 @@ def main(archive_path: str = "/archive") -> None:
     :return: None
     """
     # Check that the archive can be accessed
-    if os.path.exists(os.path.join(archive_path, "NDXALF")):
+    if Path(archive_path, "NDXALF").exists():
         logger.info("The archive has been mounted correctly, and can be accessed.")
     else:
         logger.error("The archive has not been mounted correctly, and cannot be accessed.")
