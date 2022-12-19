@@ -1,7 +1,7 @@
 """
-End to end tests
+End-to-end tests
 """
-# pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name, no-name-in-module
 import unittest
 
 import pytest
@@ -31,11 +31,7 @@ def kafka_consumer() -> Consumer:
     admin_client = AdminClient({"bootstrap.servers": "localhost:29092"})
     topic = NewTopic("detected-runs", 1, 1)
     admin_client.create_topics([topic])
-    consumer = Consumer({
-        "bootstrap.servers": "localhost:29092",
-        "group.id": "test",
-        'auto.offset.reset': 'earliest'
-    })
+    consumer = Consumer({"bootstrap.servers": "localhost:29092", "group.id": "test", 'auto.offset.reset': 'earliest'})
     consumer.subscribe(["detected-runs"])
     return consumer
 

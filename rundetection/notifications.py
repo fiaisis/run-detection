@@ -25,8 +25,7 @@ class Notifier:
     """
 
     def __init__(self) -> None:
-        config = {'bootstrap.servers': "broker",
-                  'client.id': socket.gethostname()}
+        config = {'bootstrap.servers': "broker", 'client.id': socket.gethostname()}
         self._producer = Producer(config)
 
     # This could be static currently, but not once this does more than print
