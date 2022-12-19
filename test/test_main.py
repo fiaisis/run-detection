@@ -18,11 +18,13 @@ class MainTest(unittest.TestCase):
         """
         Testing that it checks for the archive being present by checking for /archive/ndxalf
         """
+        expected_path = "/archive/ndxalf"
         with self.assertLogs('rundetection.run_detection', level='INFO') as cm:
-            if not os.path.exists("/archive/ndxalf"):
+            if not os.path.exists(expected_path):
                 # If archive does not exist
-                with tempfile.TemporaryDirectory(dir="/archive/ndxalf"):
-                    main()
+                os.makedirs(expected_path)
+                main()
+                os.removedirs(expected_path)
             else:
                 # If archive exists and is mounted on the system
                 main()
