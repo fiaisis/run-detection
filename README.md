@@ -30,7 +30,7 @@ docker build . -f ./container/rundetection.D -t ghcr.io/interactivereduction/run
 - Run the container by running:
 
 ```shell
-docker run -it --rm --name rundetection ghcr.io/interactivereduction/rundetection
+docker run -it --rm --mount source=/archive,target=/archive --name rundetection ghcr.io/interactivereduction/rundetection
 ```
 
 - To push containers you will need to setup the correct access for it, you can follow

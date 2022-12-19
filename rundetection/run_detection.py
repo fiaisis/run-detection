@@ -4,6 +4,7 @@ Run detection module holds the RunDetector main class
 import logging
 import sys
 import time
+import os
 from queue import SimpleQueue
 
 from rundetection.notifications import Notifier, Notification
@@ -46,11 +47,18 @@ class RunDetector:
         self._queue_listener.acknowledge(message)
 
 
-def main() -> None:
+def main(archive_path="/archive") -> None:
     """
     run-detection entrypoint.
+    :arg archive_path: Added purely for testing purposes, but should also be potentially useful.
     :return: None
     """
+    # Check that the archive can be accessed
+    if os.path.exists(os.path.join(archive_path, "NDXALF")):
+        logger.info("The archive has been mounted correctly, and can be accessed.")
+    else:
+        logger.error("The archive has not been mounted correctly, and cannot be accessed.")
+
     logger.info("Starting run detection")
     run_detector = RunDetector()
     run_detector.run()
