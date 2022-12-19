@@ -157,7 +157,8 @@ def assert_connect_and_subscribe(listener: QueueListener, username: str = "admin
     listener._connection.connect.assert_called_once_with(username=username, password=password)
     listener._connection.set_listener.assert_called_once_with(listener=listener, name="run-detection-listener")
     listener._connection.subscribe.assert_called_once_with(destination="Interactive-Reduction",
-                                                           id=listener._subscription_id, ack="client")
+                                                           id=listener._subscription_id,
+                                                           ack="client")
 
 
 if __name__ == '__main__':
