@@ -16,6 +16,7 @@ class MainTest(unittest.TestCase):
     """
     The main test class
     """
+
     @staticmethod
     def generate_string():
         """
@@ -38,10 +39,10 @@ class MainTest(unittest.TestCase):
             else:
                 # If archive exists and is mounted on the system
                 main()
-        self.assertEqual(info_logs.output,
-                         ['INFO:rundetection.run_detection:The archive has been mounted correctly, and can be '
-                          'accessed.',
-                          'INFO:rundetection.run_detection:Starting run detection'])
+        self.assertEqual(info_logs.output, [
+            'INFO:rundetection.run_detection:The archive has been mounted correctly, and can be '
+            'accessed.', 'INFO:rundetection.run_detection:Starting run detection'
+        ])
 
     @mock.patch("rundetection.run_detection.RunDetector")
     def test_main_outputs_error_if_archive_not_present(self, _: Mock) -> None:
@@ -57,9 +58,10 @@ class MainTest(unittest.TestCase):
             else:
                 # If archive does not exist
                 main()
-        self.assertEqual(error_logs.output,
-                         ['ERROR:rundetection.run_detection:The archive has not been mounted correctly, and cannot '
-                          'be accessed.'])
+        self.assertEqual(
+            error_logs.output,
+            ['ERROR:rundetection.run_detection:The archive has not been mounted correctly, and cannot '
+             'be accessed.'])
 
     @mock.patch("rundetection.run_detection.RunDetector")
     def test_main_uses_activemq_env_vars(self, run_detector: Mock) -> None:
@@ -69,7 +71,6 @@ class MainTest(unittest.TestCase):
         main()
 
         run_detector.return_value.run.assert_called_once_with()
-
 
 
 if __name__ == '__main__':
