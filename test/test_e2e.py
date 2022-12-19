@@ -6,6 +6,8 @@ import unittest
 
 import pytest
 from confluent_kafka import Consumer
+from confluent_kafka.admin import AdminClient
+from confluent_kafka.cimpl import NewTopic
 from stomp import Connection
 
 
@@ -26,6 +28,9 @@ def kafka_consumer() -> Consumer:
     Setup and return the kafka consumer
     :return: kafka consumer
     """
+    admin_client = AdminClient({"bootstrap.servers": "localhost:29092"})
+    topic = NewTopic("detected-runs", 1, 1)
+    admin_client.create_topics([topic])
     consumer = Consumer({
         "bootstrap.servers": "localhost:29092",
         "group.id": "test",
