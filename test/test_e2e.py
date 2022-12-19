@@ -51,19 +51,18 @@ def test_end_to_end_run_should_be_processed(amq_connection: Connection, kafka_co
     for _ in range(60):
 
         msg = kafka_consumer.poll(timeout=1.0)
-        print(msg)
         if msg is None:
             continue
-        if msg.error():
-            pytest.fail("Failed to consume from broker")
         try:
+            if msg.error():
+                pytest.fail(f"Failed to consume from broker: {msg.error()}")
             assert msg.value() == br"\\isis\inst$\cycle_22_4\NDXGEM\GEM92450.nxs"
         finally:
             kafka_consumer.close()
         break
     else:
         kafka_consumer.close()
-        pytest.fail("Message was never consumed")
+        pytest.fail("No message could be consumed")
 
 
 def test_end_to_end_run_should_not_be_processed() -> None:
