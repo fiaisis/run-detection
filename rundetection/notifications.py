@@ -28,8 +28,8 @@ class Notifier:
     def __init__(self) -> None:
         broker_ip = os.environ.get("KAFKA_IP", "broker")
         config = {'bootstrap.servers': broker_ip, 'client.id': socket.gethostname()}
-        self._producer = Producer(config)
         logger.info(f"Connecting to kafka using the ip: {broker_ip}")
+        self._producer = Producer(config)
 
     def notify(self, notification: Notification) -> None:
         """
@@ -38,4 +38,11 @@ class Notifier:
         :return: None
         """
         logger.info("Sending notification: %s", notification)
-        self._producer.produce("detected-runs", value=notification.value)
+        self._producer.produce("detected-runs", value=notification.value, callback=self._delivery_callback)
+
+    @staticmethod
+    def _delivery_callback(err, msg):
+        if err:
+            logger.error(f"Delivery failed for message {msg.value()}: {err}")
+        else:
+            logger.info(f"Delivered message to {msg.topic()} [{msg.partition()}]")
