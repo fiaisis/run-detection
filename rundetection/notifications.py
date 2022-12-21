@@ -29,6 +29,7 @@ class Notifier:
         broker_ip = os.environ.get("KAFKA_IP", "broker")
         config = {'bootstrap.servers': broker_ip, 'client.id': socket.gethostname()}
         self._producer = Producer(config)
+        logger.info(f"Connecting to kafka using the ip: {broker_ip}")
 
     def notify(self, notification: Notification) -> None:
         """
