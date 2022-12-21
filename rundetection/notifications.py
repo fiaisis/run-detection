@@ -3,6 +3,7 @@ Notifications module contains the Notification class and the Notifier class. Not
 instance to send detected runs downstream.
 """
 import logging
+import os
 import socket
 from dataclasses import dataclass
 
@@ -25,10 +26,10 @@ class Notifier:
     """
 
     def __init__(self) -> None:
-        config = {'bootstrap.servers': "broker", 'client.id': socket.gethostname()}
+        broker_ip = os.environ.get("KAFKA_IP", "broker")
+        config = {'bootstrap.servers': broker_ip, 'client.id': socket.gethostname()}
         self._producer = Producer(config)
 
-    # This could be static currently, but not once this does more than print
     def notify(self, notification: Notification) -> None:
         """
         Sends the given notification downstream
