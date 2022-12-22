@@ -16,6 +16,7 @@ class Notification:
     """
     Notification dataclass to store information about runs ready for reduction to be passed to notifier to be sent.
     """
+
     value: str
 
 
@@ -25,10 +26,9 @@ class Notifier:
     """
 
     def __init__(self) -> None:
-        config = {'bootstrap.servers': "broker", 'client.id': socket.gethostname()}
+        config = {"bootstrap.servers": "broker", "client.id": socket.gethostname()}
         self._producer = Producer(config)
 
-    # This could be static currently, but not once this does more than print
     def notify(self, notification: Notification) -> None:
         """
         Sends the given notification downstream
