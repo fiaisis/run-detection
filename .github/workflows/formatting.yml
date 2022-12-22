@@ -4,7 +4,7 @@ on:
     branches:
       - main
 jobs:
-  yapf:
+  black:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
@@ -20,14 +20,14 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install .[formatting]
 
-      - name: Run yapf
+      - name: Run black
         run: |
-          yapf -irp .
+          black --line-length 120 .
 
       - name: Commit changes
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "YAPF auto commit" || true
+          git commit -m "black auto commit" || true
           git push
