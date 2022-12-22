@@ -3,18 +3,30 @@ Ingest and metadata tests
 """
 import unittest
 from pathlib import Path
+from typing import Tuple, List
 
 from rundetection.ingest import NexusMetadata, ingest
 
-TEST_FILE_METADATA_PAIRS = [
-    ("e2e_data/1510111/ENGINX00241391.nxs",
-     NexusMetadata(run_number=241391, instrument="ENGINX", experiment_title="CeO2 4 x 4 x 15",
-                   experiment_number="1510111")),
-    ("e2e_data/1600007/IMAT00004217.nxs",
-     NexusMetadata(run_number=4217, instrument='IMAT', experiment_title='Check DAE and end of run working after move',
-                   experiment_number='1600007')),
-    ("e2e_data/1920302/ALF82301.nxs",
-     NexusMetadata(run_number=82301, instrument='ALF', experiment_title='YbCl3 rot=0', experiment_number='1920302'))
+TEST_FILE_METADATA_PAIRS: List[Tuple[str, NexusMetadata]] = [
+    (
+        "e2e_data/1510111/ENGINX00241391.nxs",
+        NexusMetadata(
+            run_number=241391, instrument="ENGINX", experiment_title="CeO2 4 x 4 x 15", experiment_number="1510111"
+        ),
+    ),
+    (
+        "e2e_data/1600007/IMAT00004217.nxs",
+        NexusMetadata(
+            run_number=4217,
+            instrument="IMAT",
+            experiment_title="Check DAE and end of run working after move",
+            experiment_number="1600007",
+        ),
+    ),
+    (
+        "e2e_data/1920302/ALF82301.nxs",
+        NexusMetadata(run_number=82301, instrument="ALF", experiment_title="YbCl3 rot=0", experiment_number="1920302"),
+    ),
 ]
 
 # Allows test to be run via pycharm play button or from project root
@@ -26,9 +38,9 @@ def test_ingest() -> None:
     Test the metadata is built from test nexus files
     :return: None
     """
-    for file in TEST_FILE_METADATA_PAIRS:
-        nexus_file = TEST_DATA_PATH / file[0]
-        assert (ingest(nexus_file)) == file[1]
+    for pair in TEST_FILE_METADATA_PAIRS:
+        nexus_file = TEST_DATA_PATH / pair[0]
+        assert (ingest(nexus_file)) == pair[1]
 
 
 def test_to_json_string() -> None:
@@ -36,11 +48,14 @@ def test_to_json_string() -> None:
     Test valid json string can be built from metadata
     :return: None
     """
-    nexus_metadata = NexusMetadata(run_number=12345, instrument="LARMOR", experiment_number="54321",
-                                   experiment_title="my experiment")
-    assert nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": ' \
-                                              '"my experiment", "experiment_number": "54321"}'
+    nexus_metadata = NexusMetadata(
+        run_number=12345, instrument="LARMOR", experiment_number="54321", experiment_title="my experiment"
+    )
+    assert (
+        nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
+        '"my experiment", "experiment_number": "54321"}'
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
