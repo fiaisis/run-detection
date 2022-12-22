@@ -65,9 +65,9 @@ class InstrumentSpecification:
 
     def _load_rules(self) -> None:
         with open(
-            f"specifications/{self._instrument}_specification.json",
-            "r",
-            encoding="utf-8",
+                f"/rundetection/specifications/{self._instrument.lower()}_specification.json",
+                "r",
+                encoding="utf-8",
         ) as spec_file:
             spec: dict[str, Any] = json.load(spec_file)
             self._rules = [rule_factory(key, value) for key, value in spec.items()]
