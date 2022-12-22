@@ -17,6 +17,7 @@ class NexusMetadata:
     """
     Dataclass of metadata built from nexus files. Includes method to return object as json string
     """
+
     run_number: int
     instrument: str
     experiment_title: str
@@ -40,10 +41,12 @@ def ingest(path: Path) -> NexusMetadata:
     file = File(path)
     key = list(file.keys())[0]
     dataset = file[key]
-    metadata = NexusMetadata(dataset.get('run_number')[0],
-                             dataset.get("beamline")[0].decode("utf-8"),
-                             dataset.get("title")[0].decode("utf-8"),
-                             dataset.get("experiment_identifier")[0].decode("utf-8"))
+    metadata = NexusMetadata(
+        int(dataset.get("run_number")[0]),  # cast to int as i32 is not json serializable
+        dataset.get("beamline")[0].decode("utf-8"),
+        dataset.get("title")[0].decode("utf-8"),
+        dataset.get("experiment_identifier")[0].decode("utf-8"),
+    )
 
     logger.info("extracted metadata: %s", metadata)
     return metadata
