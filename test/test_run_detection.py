@@ -4,6 +4,7 @@ Tests for run detection module
 # pylint: disable=protected-access, redefined-outer-name
 
 import unittest
+from pathlib import Path
 from unittest.mock import patch, Mock
 
 import pytest
@@ -58,5 +59,16 @@ def test_run(_: Mock, detector: RunDetector) -> None:
         detector._queue_listener.run.assert_called_once()
 
 
-if __name__ == '__main__':
+def test__map_path(detector) -> None:
+    """
+    Test that the given path is mapped to use the expected /archive
+    :param detector: The run detector fixture
+    :return: None
+    """
+    initial_path_string = r"\\isis\foo\bar\baz.nxs"
+    expected_path = Path("/archive/foo/bar/baz.nxs")
+    assert detector._map_path(initial_path_string) == expected_path
+
+
+if __name__ == "__main__":
     unittest.main()
