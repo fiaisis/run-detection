@@ -8,7 +8,7 @@ from pathlib import Path
 from queue import SimpleQueue
 
 from rundetection.notifications import Notifier, Notification
-from rundetection.queue_listener import Message, QueueListener
+from rundetection.topic_listener import Message, TopicListener
 
 file_handler = logging.FileHandler(filename="run-detection.log")
 stdout_handler = logging.StreamHandler(stream=sys.stdout)
@@ -26,7 +26,7 @@ class RunDetector:
 
     def __init__(self) -> None:
         self._message_queue: SimpleQueue[Message] = SimpleQueue()
-        self._queue_listener: QueueListener = QueueListener(self._message_queue)
+        self._queue_listener: TopicListener = TopicListener(self._message_queue)
         self._notifier: Notifier = Notifier()
 
     def run(self) -> None:

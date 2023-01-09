@@ -9,7 +9,7 @@ from unittest.mock import patch, Mock
 import pytest
 
 from rundetection.notifications import Notification
-from rundetection.queue_listener import Message
+from rundetection.topic_listener import Message
 from rundetection.run_detection import RunDetector
 
 
