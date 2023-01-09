@@ -24,7 +24,7 @@ The easiest way to test the whole run detection currently:
 - Construct the container by running:
 
 ```shell
-docker build . -f ./container/rundetection.D -t ghcr.io/interactivereduction/rundetection -t ghcr.io/interactivereduction/rundetection:on-k8s
+docker build . -f ./container/rundetection.D -t ghcr.io/interactivereduction/rundetection
 ```
 
 - Run the container by running:
