@@ -17,8 +17,9 @@ def test_notify(mock_producer: Mock) -> None:
     notification = Notification("foo")
     notifier = Notifier()
     notifier.notify(notification)
-    mock_producer.return_value.produce.assert_called_once_with("detected-runs", value=notification.value,
-                                                               callback=notifier._delivery_callback)
+    mock_producer.return_value\
+        .produce.assert_called_once_with("detected-runs", value=notification.value,
+                                         callback=notifier._delivery_callback)  # pylint: disable=W0212
 
 
 @patch("rundetection.notifications.Producer")
