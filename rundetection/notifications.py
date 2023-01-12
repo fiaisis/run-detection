@@ -6,6 +6,7 @@ import logging
 import os
 import socket
 from dataclasses import dataclass
+from typing import Any
 
 from confluent_kafka import Producer  # type: ignore
 
@@ -41,7 +42,7 @@ class Notifier:
         self._producer.produce("detected-runs", value=notification.value, callback=self._delivery_callback)
 
     @staticmethod
-    def _delivery_callback(err, msg):
+    def _delivery_callback(err: Any, msg: Any):
         if err:
             logger.error("Delivery failed for message %s: %s", msg.value(), err)
         else:
