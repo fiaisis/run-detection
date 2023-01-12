@@ -42,7 +42,7 @@ class Notifier:
         self._producer.produce("detected-runs", value=notification.value, callback=self._delivery_callback)
 
     @staticmethod
-    def _delivery_callback(err: Any, msg: Any):
+    def _delivery_callback(err: Any, msg: Any) -> None:
         if err:
             logger.error("Delivery failed for message %s: %s", msg.value(), err)
         else:
