@@ -25,9 +25,9 @@ class Message:
     processed: bool = False
 
 
-class TopicListener(ConnectionListener):  # type: ignore # No Library stub
+class QueueListener(ConnectionListener):  # type: ignore # No Library stub
     """
-    TopicListener wraps stomp.py ConnectionListener. Handles Connection and disconnection from ActiveMQ,
+    QueueListener wraps stomp.py ConnectionListener. Handles Connection and disconnection from ActiveMQ,
     incoming messages and message acknowledgements
     """
 
