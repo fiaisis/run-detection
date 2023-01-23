@@ -62,7 +62,8 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
             logger.info("Attempting connection")
             self._connection.connect(username=self._user, password=self._password)
             self._connection.set_listener(listener=self, name="run-detection-listener")
-            self._connection.subscribe(destination="Interactive-Reduction", id=self._subscription_id, ack="client")
+            self._connection.subscribe(destination="Interactive-Reduction", id=self._subscription_id,
+                                       ack="client")
         except ConnectFailedException:
             logger.warning("Failed to reconnect, attempting again in 30 seconds")
             time.sleep(30)
