@@ -42,7 +42,7 @@ def test_end_to_end_run_should_be_processed(amq_connection: Connection, kafka_co
     :return: None
     """
 
-    amq_connection.send("/topic/Interactive-Reduction", r"\\isis\inst$\cycle_22_4\NDXGEM\GEM92450.nxs")
+    amq_connection.send("Interactive-Reduction", r"\\isis\inst$\cycle_22_4\NDXGEM\GEM92450.nxs")
 
     for _ in range(60):
 
