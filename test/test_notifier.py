@@ -43,5 +43,7 @@ def test_notify_calls_producer_with_kafka_ip_when_kafka_in_env(mock_producer: Mo
     os.environ["KAFKA_IP"] = "kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local"
 
     Notifier()
-    mock_producer.assert_called_once_with({'bootstrap.servers': "kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local",
-                                           'client.id': socket.gethostname()})
+    mock_producer.assert_called_once_with({
+        'bootstrap.servers': "kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local",
+        'client.id': socket.gethostname()
+    })
