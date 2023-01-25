@@ -5,6 +5,9 @@ import unittest
 from pathlib import Path
 from typing import Tuple, List
 
+import pytest
+from _pytest.logging import LogCaptureFixture
+
 from rundetection.ingest import NexusMetadata, ingest
 
 TEST_FILE_METADATA_PAIRS: List[Tuple[str, NexusMetadata]] = [
@@ -52,9 +55,21 @@ def test_to_json_string() -> None:
         run_number=12345, instrument="LARMOR", experiment_number="54321", experiment_title="my experiment"
     )
     assert (
-        nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
-        '"my experiment", "experiment_number": "54321"}'
+            nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
+                                               '"my experiment", "experiment_number": "54321"}'
     )
+
+
+def test_logging_and_exception_when_nexus_file_does_not_exit(caplog: LogCaptureFixture):
+    """
+    Test correct logging and exception reraised when nexus file is missing
+    :param caplog: LogCaptureFixture
+    :return: None
+    """
+    with pytest.raises(FileNotFoundError):
+        ingest(Path("e2e_data/foo/bar.nxs"))
+
+    assert "Nexus file could not be found: e2e_data/foo/bar.nxs" in caplog.text
 
 
 if __name__ == "__main__":

@@ -38,15 +38,19 @@ def ingest(path: Path) -> NexusMetadata:
     :return: The NexusMetadata of the given nexus file
     """
     logger.info("Ingesting file: %s", path)
-    file = File(path)
-    key = list(file.keys())[0]
-    dataset = file[key]
-    metadata = NexusMetadata(
-        int(dataset.get("run_number")[0]),  # cast to int as i32 is not json serializable
-        dataset.get("beamline")[0].decode("utf-8"),
-        dataset.get("title")[0].decode("utf-8"),
-        dataset.get("experiment_identifier")[0].decode("utf-8"),
-    )
+    try:
+        file = File(path)
+        key = list(file.keys())[0]
+        dataset = file[key]
+        metadata = NexusMetadata(
+            int(dataset.get("run_number")[0]),  # cast to int as i32 is not json serializable
+            dataset.get("beamline")[0].decode("utf-8"),
+            dataset.get("title")[0].decode("utf-8"),
+            dataset.get("experiment_identifier")[0].decode("utf-8"),
+        )
 
-    logger.info("extracted metadata: %s", metadata)
-    return metadata
+        logger.info("extracted metadata: %s", metadata)
+        return metadata
+    except FileNotFoundError:
+        logger.error("Nexus file could not be found: %s", path)
+        raise
