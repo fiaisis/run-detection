@@ -3,12 +3,14 @@ Contains the InstrumentSpecification class, the abstract Rule Class and Rule Imp
 """
 
 import json
+import logging
 from abc import ABC, abstractmethod
 from typing import Any, List, TypeVar, Generic
 
 from rundetection.ingest import NexusMetadata
 
 T_co = TypeVar("T_co", str, bool, int, float, None, List[str], covariant=True)
+logger = logging.getLogger(__name__)
 
 
 class Rule(Generic[T_co], ABC):
@@ -64,13 +66,17 @@ class InstrumentSpecification:
         self._load_rules()
 
     def _load_rules(self) -> None:
-        with open(
-                f"/rundetection/specifications/{self._instrument.lower()}_specification.json",
-                "r",
-                encoding="utf-8",
-        ) as spec_file:
-            spec: dict[str, Any] = json.load(spec_file)
-            self._rules = [rule_factory(key, value) for key, value in spec.items()]
+        try:
+            with open(
+                    f"/rundetection/specifications/{self._instrument.lower()}_specification.json",
+                    "r",
+                    encoding="utf-8",
+            ) as spec_file:
+                spec: dict[str, Any] = json.load(spec_file)
+                self._rules = [rule_factory(key, value) for key, value in spec.items()]
+        except FileNotFoundError:
+            logger.error("No specification for file: %s", self._instrument)
+            raise
 
     def verify(self, metadata: NexusMetadata) -> bool:
         """

@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 
 from rundetection.ingest import NexusMetadata
 from rundetection.specifications import InstrumentSpecification, rule_factory, EnabledRule, MissingRuleError
@@ -23,7 +24,7 @@ def test_rule_factory_returns_correct_rule() -> None:
 
 def test_raises_exception_for_missing_rule_class() -> None:
     """
-    Test exception raised when non existent rule name is given
+    Test exception raised when non-existent rule name is given
     :return: None
     """
     with pytest.raises(MissingRuleError):
@@ -136,6 +137,18 @@ def test_enabled_rule_when_not_enabled() -> None:
     """
     rule = EnabledRule(False)
     assert rule.verify(NexusMetadata(1, "1", "1", "1")) is False
+
+
+def test_specification_file_missing(caplog: LogCaptureFixture):
+    """
+    Test logging and exception raised when specification file is missing
+    :param caplog:
+    :return:
+    """
+    with pytest.raises(FileNotFoundError):
+        InstrumentSpecification("foo")
+
+    assert "No specification for file: foo" in caplog.text
 
 
 if __name__ == "__main__":
