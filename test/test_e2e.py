@@ -67,7 +67,7 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
 
     assert received == [
         b'{"run_number": 241391, "instrument": "ENGINX", "experiment_title": "CeO2 4 x'
-        b' 4 x 15", "experiment_number": "1510111", "filepath": "/archive/1510111/ENGINX241391.nxs"}',
+        b' 4 x 15", "experiment_number": "1510111", "filepath": "/archive/1510111/ENGINX00241391.nxs"}',
         b'{"run_number": 82301, "instrument": "ALF", "experiment_title": "YbCl3 rot=0"'
         b', "experiment_number": "1920302", "filepath": "/archive/1920302/ALF82301.nxs"}',
     ]
