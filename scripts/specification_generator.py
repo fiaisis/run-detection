@@ -65,7 +65,7 @@ ALL_INSTRUMENTS = [
 ]
 
 
-def generate_specification(instrument: str, enabled=True) -> None:
+def generate_specification(instrument: str, enabled: bool = True) -> None:
     """
     Generate an empty specification file for the given instrument
     :param enabled: Whether or not reduction should be enabled

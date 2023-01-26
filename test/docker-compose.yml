@@ -67,4 +67,5 @@ services:
     networks:
       - app
     volumes:
-      - ./test_data/e2e_data:/archive
+      - ../test/test_data/e2e_data:/archive
+

@@ -65,10 +65,12 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         kafka_consumer.close()
         pytest.fail("No message could be consumed")
 
-    assert received == [b'{"run_number": 241391, "instrument": "ENGINX", "experiment_title": "CeO2 4 x'
-                        b' 4 x 15", "experiment_number": "1510111"}',
-                        b'{"run_number": 82301, "instrument": "ALF", "experiment_title": "YbCl3 rot=0"'
-                        b', "experiment_number": "1920302"}']
+    assert received == [
+        b'{"run_number": 241391, "instrument": "ENGINX", "experiment_title": "CeO2 4 x'
+        b' 4 x 15", "experiment_number": "1510111"}',
+        b'{"run_number": 82301, "instrument": "ALF", "experiment_title": "YbCl3 rot=0"'
+        b', "experiment_number": "1920302"}',
+    ]
 
 
 if __name__ == "__main__":

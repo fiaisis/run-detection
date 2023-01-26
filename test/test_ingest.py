@@ -14,8 +14,11 @@ TEST_FILE_METADATA_PAIRS: List[Tuple[str, NexusMetadata]] = [
     (
         "e2e_data/1510111/ENGINX00241391.nxs",
         NexusMetadata(
-            run_number=241391, instrument="ENGINX", experiment_title="CeO2 4 x 4 x 15", experiment_number="1510111",
-            filepath="test/test_data/e2e_data/1510111/ENGINX00241391.nxs"
+            run_number=241391,
+            instrument="ENGINX",
+            experiment_title="CeO2 4 x 4 x 15",
+            experiment_number="1510111",
+            filepath="test/test_data/e2e_data/1510111/ENGINX00241391.nxs",
         ),
     ),
     (
@@ -25,13 +28,18 @@ TEST_FILE_METADATA_PAIRS: List[Tuple[str, NexusMetadata]] = [
             instrument="IMAT",
             experiment_title="Check DAE and end of run working after move",
             experiment_number="1600007",
-            filepath="test/test_data/e2e_data/1600007/IMAT00004217.nxs"
+            filepath="test/test_data/e2e_data/1600007/IMAT00004217.nxs",
         ),
     ),
     (
         "e2e_data/1920302/ALF82301.nxs",
-        NexusMetadata(run_number=82301, instrument="ALF", experiment_title="YbCl3 rot=0", experiment_number="1920302",
-                      filepath="test/test_data/e2e_data/1920302/ALF82301.nxs"),
+        NexusMetadata(
+            run_number=82301,
+            instrument="ALF",
+            experiment_title="YbCl3 rot=0",
+            experiment_number="1920302",
+            filepath="test/test_data/e2e_data/1920302/ALF82301.nxs",
+        ),
     ),
 ]
 
@@ -55,12 +63,15 @@ def test_to_json_string() -> None:
     :return: None
     """
     nexus_metadata = NexusMetadata(
-        run_number=12345, instrument="LARMOR", experiment_number="54321", experiment_title="my experiment",
-        filepath="e2e_data/1920302/ALF82301.nxs"
+        run_number=12345,
+        instrument="LARMOR",
+        experiment_number="54321",
+        experiment_title="my experiment",
+        filepath="e2e_data/1920302/ALF82301.nxs",
     )
     assert (
-            nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
-                                               '"my experiment", "experiment_number": "54321", "filepath": "e2e_data/1920302/ALF82301.nxs"}'
+        nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
+        '"my experiment", "experiment_number": "54321", "filepath": "e2e_data/1920302/ALF82301.nxs"}'
     )
 
 

@@ -41,8 +41,13 @@ def test__process_message_specification_met(mock_ingest, mock_specification, det
     :param detector: RunDetector fixture
     :return: None
     """
-    metadata = NexusMetadata(run_number=123, instrument="mari", experiment_number="32131",
-                             experiment_title="title", filepath="/archive/mari/32131/123.nxs")
+    metadata = NexusMetadata(
+        run_number=123,
+        instrument="mari",
+        experiment_number="32131",
+        experiment_title="title",
+        filepath="/archive/mari/32131/123.nxs",
+    )
     mock_ingest.return_value = metadata
     detector._process_message(MESSAGE)
     mock_specification = mock_specification.return_value
@@ -61,8 +66,13 @@ def test__process_message_specification_not_met(mock_ingest, _, detector):
     :param detector: RunDetector fixture
     :return: None
     """
-    metadata = NexusMetadata(run_number=123, instrument="mari", experiment_number="32131",
-                             experiment_title="title", filepath="/archive/mari/32131/123.nxs")
+    metadata = NexusMetadata(
+        run_number=123,
+        instrument="mari",
+        experiment_number="32131",
+        experiment_title="title",
+        filepath="/archive/mari/32131/123.nxs",
+    )
     mock_ingest.return_value = metadata
     detector._process_message(MESSAGE)
 
