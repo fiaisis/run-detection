@@ -8,10 +8,14 @@ from pathlib import Path
 from unittest.mock import patch, Mock
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 
+from rundetection.ingest import NexusMetadata
 from rundetection.notifications import Notification
 from rundetection.queue_listener import Message
 from rundetection.run_detection import RunDetector
+
+MESSAGE = Message(id="id", value="value")
 
 
 @pytest.fixture
@@ -20,22 +24,64 @@ def detector() -> RunDetector:
     Sets up and returns a run detector
     :return: RunDetector
     """
-    return RunDetector()
+    detector_ = RunDetector()
+    detector_._queue_listener = Mock()
+    detector_._message_queue = Mock()
+    detector_._notifier = Mock()
+    return detector_
 
 
-def test__process_message(detector: RunDetector) -> None:
+@patch("rundetection.run_detection.InstrumentSpecification")
+@patch("rundetection.run_detection.ingest")
+def test__process_message_specification_met(mock_ingest, mock_specification, detector):
     """
-    Testing for message processing
+    Test process message and specification is met
+    :param mock_ingest: mock ingest function
+    :param mock_specification: mock specification
+    :param detector: RunDetector fixture
+    :return: None
+    """
+    metadata = NexusMetadata(run_number=123, instrument="mari", experiment_number="32131",
+                             experiment_title="title", filepath="/archive/mari/32131/123.nxs")
+    mock_ingest.return_value = metadata
+    detector._process_message(MESSAGE)
+    mock_specification = mock_specification.return_value
+    mock_specification.verify.return_value = True
+    detector._notifier.notify.assert_called_once_with(Notification(metadata.to_json_string()))
+    detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
+
+
+@patch("rundetection.run_detection.InstrumentSpecification.verify", return_value=False)
+@patch("rundetection.run_detection.ingest")
+def test__process_message_specification_not_met(mock_ingest, _, detector):
+    """
+    Test message processed when specification is not met
+    :param mock_ingest: Mock ingest function
+    :param _: Throwaway mock specification
+    :param detector: RunDetector fixture
+    :return: None
+    """
+    metadata = NexusMetadata(run_number=123, instrument="mari", experiment_number="32131",
+                             experiment_title="title", filepath="/archive/mari/32131/123.nxs")
+    mock_ingest.return_value = metadata
+    detector._process_message(MESSAGE)
+
+    detector._notifier.notify.assert_not_called()
+    detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
+
+
+@patch("rundetection.run_detection.ingest", side_effect=FileNotFoundError)
+def test__process_message_exception_logged(_: Mock, caplog: LogCaptureFixture, detector: RunDetector):
+    """
+    Test that any exception raise by the RunDetector is caught and logged and the message is still acknowledged
+    :param _: Throwaway ingest mock
+    :param caplog: LogCaptureFixture
     :param detector: RunDetector Fixture
     :return: None
     """
-    detector._queue_listener = Mock()
-    detector._notifier = Mock()
-    message = Message(id="id", value="value")
-    detector._process_message(message)
-    detector._notifier.notify.assert_called_with(Notification(message.value))
-    assert message.processed is True
-    detector._queue_listener.acknowledge.assert_called_once_with(message)
+    detector._process_message(MESSAGE)
+    assert "Problem processing message: value" in caplog.text
+    detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
 
 
 @patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError)
@@ -43,7 +89,7 @@ def test_run(_: Mock, detector: RunDetector) -> None:
     """
     Test that run is processing messages and queue listener is started
     :param _: time.sleep patched mock
-    :param detector:
+    :param detector: RunDetector Fixture
     :return: None
     """
     detector._queue_listener = Mock()

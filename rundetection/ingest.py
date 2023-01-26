@@ -22,6 +22,7 @@ class NexusMetadata:
     instrument: str
     experiment_title: str
     experiment_number: str
+    filepath: str
 
     def to_json_string(self) -> str:
         """
@@ -47,6 +48,7 @@ def ingest(path: Path) -> NexusMetadata:
             dataset.get("beamline")[0].decode("utf-8"),
             dataset.get("title")[0].decode("utf-8"),
             dataset.get("experiment_identifier")[0].decode("utf-8"),
+            str(path),
         )
 
         logger.info("extracted metadata: %s", metadata)

@@ -11,6 +11,8 @@ from _pytest.logging import LogCaptureFixture
 from rundetection.ingest import NexusMetadata
 from rundetection.specifications import InstrumentSpecification, rule_factory, EnabledRule, MissingRuleError
 
+METADATA = NexusMetadata(1, "larmor", "1", "1", "/archive/larmor/1/1.nxs")
+
 
 def test_rule_factory_returns_correct_rule() -> None:
     """
@@ -61,10 +63,7 @@ def test_specification_verify_passes_for_all_rules_pass(specification: Instrumen
     mock_rule = Mock()
     specification._rules = [mock_rule, mock_rule, mock_rule]
     mock_rule.verify.return_value = True
-
-    metadata = NexusMetadata(1, "larmor", "1", "1")
-
-    assert specification.verify(metadata) is True
+    assert specification.verify(METADATA) is True
 
 
 def test_specification_verify_fails_when_a_rule_fails(specification) -> None:
@@ -77,10 +76,7 @@ def test_specification_verify_fails_when_a_rule_fails(specification) -> None:
     pass_rule.verify.return_value = True
     fail_rule.verify.return_value = False
     specification._rules = [pass_rule, fail_rule]
-
-    metadata = NexusMetadata(1, "larmor", "1", "1")
-
-    assert specification.verify(metadata) is False
+    assert specification.verify(METADATA) is False
 
 
 def test_specification_verify_fails_with_only_failing_rules(specification) -> None:
@@ -92,10 +88,7 @@ def test_specification_verify_fails_with_only_failing_rules(specification) -> No
     rule = Mock()
     rule.verify.return_value = False
     specification._rules = [rule, rule]
-
-    metadata = NexusMetadata(1, "larmor", "1", "1")
-
-    assert specification.verify(metadata) is False
+    assert specification.verify(METADATA) is False
 
 
 def test_specification_verify_fails_with_no_rules(specification) -> None:
@@ -104,8 +97,7 @@ def test_specification_verify_fails_with_no_rules(specification) -> None:
     :param specification: Specification fixture
     :return: None
     """
-    metadata = NexusMetadata(1, "larmor", "1", "1")
-    assert specification.verify(metadata) is False
+    assert specification.verify(METADATA) is False
 
 
 def test_specification_loads_correct_rule() -> None:
@@ -117,8 +109,8 @@ def test_specification_loads_correct_rule() -> None:
     mari_specification = InstrumentSpecification("mari")
     chronus_specification = InstrumentSpecification("chronus")
 
-    assert mari_specification.verify(NexusMetadata(1, "1", "1", "1"))
-    assert chronus_specification.verify(NexusMetadata(1, "1", "1", "1")) is False
+    assert mari_specification.verify(METADATA)
+    assert chronus_specification.verify(METADATA) is False
 
 
 def test_enabled_rule_when_enabled() -> None:
@@ -127,7 +119,7 @@ def test_enabled_rule_when_enabled() -> None:
     :return: None
     """
     rule = EnabledRule(True)
-    assert rule.verify(NexusMetadata(1, "1", "1", "1")) is True
+    assert rule.verify(METADATA) is True
 
 
 def test_enabled_rule_when_not_enabled() -> None:
@@ -136,7 +128,7 @@ def test_enabled_rule_when_not_enabled() -> None:
     :return:
     """
     rule = EnabledRule(False)
-    assert rule.verify(NexusMetadata(1, "1", "1", "1")) is False
+    assert rule.verify(METADATA) is False
 
 
 def test_specification_file_missing(caplog: LogCaptureFixture):

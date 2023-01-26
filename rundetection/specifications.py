@@ -68,7 +68,7 @@ class InstrumentSpecification:
     def _load_rules(self) -> None:
         try:
             with open(
-                    f"/rundetection/specifications/{self._instrument.lower()}_specification.json",
+                    f"rundetection/specifications/{self._instrument.lower()}_specification.json",
                     "r",
                     encoding="utf-8",
             ) as spec_file:
