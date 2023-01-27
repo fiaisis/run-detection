@@ -22,14 +22,14 @@ class MainTest(unittest.TestCase):
         """
         Generate a fake directory name that is 20 characters long from upper and lower case characters
         """
-        return ''.join(random.choice(string.ascii_letters) for _ in range(20))
+        return "".join(random.choice(string.ascii_letters) for _ in range(20))
 
     @mock.patch("rundetection.run_detection.RunDetector")
     def test_main_finds_archive_if_present(self, _: Mock) -> None:
         """
         Testing that it checks for the archive being present by checking for /archive/ndxalf
         """
-        with self.assertLogs('rundetection.run_detection', level='INFO') as info_logs:
+        with self.assertLogs("rundetection.run_detection", level="INFO") as info_logs:
             if not Path("/archive/ndxalf").exists():
                 # If archive does not exist
                 with TemporaryDirectory() as temp_dir:
@@ -39,10 +39,13 @@ class MainTest(unittest.TestCase):
             else:
                 # If archive exists and is mounted on the system
                 main()
-        self.assertEqual(info_logs.output, [
-            'INFO:rundetection.run_detection:The archive has been mounted correctly, and can be '
-            'accessed.', 'INFO:rundetection.run_detection:Starting run detection'
-        ])
+        self.assertEqual(
+            info_logs.output,
+            [
+                "INFO:rundetection.run_detection:The archive has been mounted correctly, and can be accessed.",
+                "INFO:rundetection.run_detection:Starting run detection",
+            ],
+        )
 
     @mock.patch("rundetection.run_detection.RunDetector")
     def test_main_outputs_error_if_archive_not_present(self, _: Mock) -> None:
@@ -51,7 +54,7 @@ class MainTest(unittest.TestCase):
         """
         result_str = self.generate_string()
         expected_path = f"/tmp/{result_str}"
-        with self.assertLogs('rundetection.run_detection', level='ERROR') as error_logs:
+        with self.assertLogs("rundetection.run_detection", level="ERROR") as error_logs:
             if Path("/archive/ndxalf").exists():
                 # If archive does exist, use a fake directory
                 main(expected_path)
@@ -60,8 +63,8 @@ class MainTest(unittest.TestCase):
                 main()
         self.assertEqual(
             error_logs.output,
-            ['ERROR:rundetection.run_detection:The archive has not been mounted correctly, and cannot '
-             'be accessed.'])
+            ["ERROR:rundetection.run_detection:The archive has not been mounted correctly, and cannot be accessed."],
+        )
 
     @mock.patch("rundetection.run_detection.RunDetector")
     def test_main_uses_activemq_env_vars(self, run_detector: Mock) -> None:
@@ -73,5 +76,5 @@ class MainTest(unittest.TestCase):
         run_detector.return_value.run.assert_called_once_with()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

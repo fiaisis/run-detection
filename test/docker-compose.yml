@@ -66,3 +66,6 @@ services:
       ACTIVEMQ_IP: activemq
     networks:
       - app
+    volumes:
+      - ../test/test_data/e2e_data:/archive
+

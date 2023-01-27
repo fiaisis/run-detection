@@ -3,8 +3,10 @@ name = "run-detection"
 readme = "README.md"
 version = "0.0.1"
 dependencies = [
-    "stomp.py==8.1.0",
-    "confluent-kafka==1.9.2"
+    "confluent-kafka==1.9.2",
+    "h5py==3.7.0",
+    "stomp.py==8.1.0"
+
 ]
 
 [project.urls]
@@ -15,8 +17,7 @@ run-detection = "rundetection.run_detection:main"
 
 [project.optional-dependencies]
 formatting = [
-    "toml==0.10.2",
-    "yapf==0.32.0",
+    "black==22.12.0"
 ]
 
 test = [
@@ -29,9 +30,10 @@ code-inspection = [
     "run-detection[test]"
 ]
 
+dev = [
+    "run-detection[code-inspection]"
+]
+
+
 [tool.setuptools]
 packages = ["rundetection"]
-
-[tool.yapf]
-based_on_style = "pep8"
-column_limit = 120

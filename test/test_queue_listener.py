@@ -89,7 +89,7 @@ def test_connection_default_with_no_environment_vars_is_setup_with_localhost(con
     """
     Ensure that localhost is the default to connect to when no env variable is set
     """
-    os.environ.pop('ACTIVEMQ_IP', None)
+    os.environ.pop("ACTIVEMQ_IP", None)
 
     message_queue: SimpleQueue[Message] = SimpleQueue()
     listener = QueueListener(message_queue)
@@ -103,7 +103,7 @@ def test_connection_ip_is_setup_with_environment_variables(connection: Mock) -> 
     """
     Ensure that the environment variable is used to connect to when environment variable is set
     """
-    os.environ['ACTIVEMQ_IP'] = "192.168.0.1"
+    os.environ["ACTIVEMQ_IP"] = "192.168.0.1"
 
     message_queue: SimpleQueue[Message] = SimpleQueue()
     listener = QueueListener(message_queue)
@@ -116,8 +116,8 @@ def test_connection_username_and_password_defaults_are_set() -> None:
     """
     Test that the queue listener has defaults that are set when no environment variable is set
     """
-    os.environ.pop('ACTIVEMQ_USER', None)
-    os.environ.pop('ACTIVEMQ_PASS', None)
+    os.environ.pop("ACTIVEMQ_USER", None)
+    os.environ.pop("ACTIVEMQ_PASS", None)
 
     message_queue: SimpleQueue[Message] = SimpleQueue()
     listener = QueueListener(message_queue)
@@ -156,10 +156,10 @@ def assert_connect_and_subscribe(listener: QueueListener, username: str = "admin
     """
     listener._connection.connect.assert_called_once_with(username=username, password=password)
     listener._connection.set_listener.assert_called_once_with(listener=listener, name="run-detection-listener")
-    listener._connection.subscribe.assert_called_once_with(destination="Interactive-Reduction",
-                                                           id=listener._subscription_id,
-                                                           ack="client")
+    listener._connection.subscribe.assert_called_once_with(
+        destination="Interactive-Reduction", id=listener._subscription_id, ack="client"
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
