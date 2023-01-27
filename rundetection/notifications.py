@@ -18,6 +18,7 @@ class Notification:
     """
     Notification dataclass to store information about runs ready for reduction to be passed to notifier to be sent.
     """
+
     value: str
 
 
@@ -28,7 +29,7 @@ class Notifier:
 
     def __init__(self) -> None:
         broker_ip = os.environ.get("KAFKA_IP", "broker")
-        config = {'bootstrap.servers': broker_ip, 'client.id': socket.gethostname()}
+        config = {"bootstrap.servers": broker_ip, "client.id": socket.gethostname()}
         logger.info("Connecting to kafka using the ip: %s", broker_ip)
         self._producer = Producer(config)
 
