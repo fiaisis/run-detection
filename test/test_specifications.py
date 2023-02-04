@@ -8,10 +8,13 @@ from unittest.mock import Mock, patch
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rundetection.ingest import NexusMetadata
-from rundetection.specifications import InstrumentSpecification, rule_factory, EnabledRule, MissingRuleError
+from rundetection.ingest import DetectedRun
+from rundetection.rules.common_rules import EnabledRule
+from rundetection.rules.factory import rule_factory
+from rundetection.rules.rule import MissingRuleError
+from rundetection.specifications import InstrumentSpecification
 
-METADATA = NexusMetadata(1, "larmor", "1", "1", "/archive/larmor/1/1.nxs")
+METADATA = DetectedRun(1, "larmor", "1", "1", "/archive/larmor/1/1.nxs")
 
 
 def test_rule_factory_returns_correct_rule() -> None:

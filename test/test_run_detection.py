@@ -10,7 +10,7 @@ from unittest.mock import patch, Mock
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rundetection.ingest import NexusMetadata
+from rundetection.ingest import DetectedRun
 from rundetection.notifications import Notification
 from rundetection.queue_listener import Message
 from rundetection.run_detection import RunDetector
@@ -41,18 +41,18 @@ def test__process_message_specification_met(mock_ingest, mock_specification, det
     :param detector: RunDetector fixture
     :return: None
     """
-    metadata = NexusMetadata(
+    run = DetectedRun(
         run_number=123,
         instrument="mari",
         experiment_number="32131",
         experiment_title="title",
         filepath="/archive/mari/32131/123.nxs",
     )
-    mock_ingest.return_value = metadata
+    mock_ingest.return_value = run
     detector._process_message(MESSAGE)
     mock_specification = mock_specification.return_value
     mock_specification.verify.return_value = True
-    detector._notifier.notify.assert_called_once_with(Notification(metadata.to_json_string()))
+    detector._notifier.notify.assert_called_once_with(Notification(run.to_json_string()))
     detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
 
 
@@ -66,14 +66,14 @@ def test__process_message_specification_not_met(mock_ingest, _, detector):
     :param detector: RunDetector fixture
     :return: None
     """
-    metadata = NexusMetadata(
+    run = DetectedRun(
         run_number=123,
         instrument="mari",
         experiment_number="32131",
         experiment_title="title",
         filepath="/archive/mari/32131/123.nxs",
     )
-    mock_ingest.return_value = metadata
+    mock_ingest.return_value = run
     detector._process_message(MESSAGE)
 
     detector._notifier.notify.assert_not_called()
