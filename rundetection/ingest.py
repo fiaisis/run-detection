@@ -32,7 +32,9 @@ class DetectedRun:
         Returns the metadata as a json string
         :return: The json string
         """
-        return json.dumps(dataclasses.asdict(self))
+        dict_ = dataclasses.asdict(self)
+        dict_["filepath"] = str(dict_["filepath"])
+        return json.dumps(dict_)
 
 
 def ingest(path: Path) -> DetectedRun:

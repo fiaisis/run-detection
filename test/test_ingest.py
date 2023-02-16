@@ -69,7 +69,7 @@ def test_to_json_string() -> None:
         instrument="LARMOR",
         experiment_number="54321",
         experiment_title="my experiment",
-        filepath="e2e_data/1920302/ALF82301.nxs",
+        filepath=Path("e2e_data/1920302/ALF82301.nxs"),
     )
     assert (
         nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
@@ -111,7 +111,7 @@ def test_get_sibling_runs(mock_ingest: Mock):
     :param mock_ingest: Mock ingest
     :return: None
     """
-    run = DetectedRun(1, "inst", "title", "num", "path")
+    run = DetectedRun(1, "inst", "title", "num", Path("path"))
     mock_ingest.return_value = run
     with TemporaryDirectory() as temp_dir:
         Path(temp_dir, "1.nxs").touch()
