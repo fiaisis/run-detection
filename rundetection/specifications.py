@@ -27,9 +27,9 @@ class InstrumentSpecification:
     def _load_rules(self) -> None:
         try:
             with open(
-                    f"rundetection/specifications/{self._instrument.lower()}_specification.json",
-                    "r",
-                    encoding="utf-8",
+                f"rundetection/specifications/{self._instrument.lower()}_specification.json",
+                "r",
+                encoding="utf-8",
             ) as spec_file:
                 spec: dict[str, Any] = json.load(spec_file)
                 self._rules = [rule_factory(key, value) for key, value in spec.items()]
@@ -37,23 +37,16 @@ class InstrumentSpecification:
             logger.error("No specification for file: %s", self._instrument)
             raise
 
-    def verify(self, metadata: NexusMetadata) -> bool:
+    def verify(self, run: DetectedRun) -> None:
         """
-        Verify that every rule for the NexusMetadata is met, and that the specification contains at least one rule.
+        Verify that every rule for the DetectedRun is met, and that the specification contains at least one rule.
         If the specification is empty verify will return false
-        :param metadata:
+        :param run: A DetectedRun
         :return: whether the specification is met
         """
+        if len(self._rules) == 0:
+            run.will_reduce = False
         for rule in self._rules:
-            if not rule.verify(metadata):
-                return False
-        return len(self._rules) != 0
-
-
-class EnabledRule(Rule[bool]):
-    """
-    Rule concretion for the enabled setting in specifications.
-    """
-
-    def verify(self, metadata: NexusMetadata) -> bool:
-        return self._value
+            rule.verify(run)
+            if run.will_reduce is False:
+                break  # Stop processing as soon as one rule is not met.
