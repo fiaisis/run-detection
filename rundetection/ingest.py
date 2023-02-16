@@ -39,6 +39,8 @@ def ingest(path: Path) -> NexusMetadata:
     :return: The NexusMetadata of the given nexus file
     """
     logger.info("Ingesting file: %s", path)
+    if path.suffix != ".nxs":
+        raise ValueError(f"File: {path} is not a nexus file")
     try:
         file = File(path)
         key = list(file.keys())[0]

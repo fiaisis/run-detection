@@ -57,6 +57,15 @@ def test_ingest() -> None:
         assert (ingest(nexus_file)) == pair[1]
 
 
+def test_ingest_raises_exception_non_nexus_file() -> None:
+    """
+    Test value error is raised when a non nexus file is given to be ingested
+    :return: None
+    """
+    with pytest.raises(ValueError):
+        ingest(Path("foo.log"))
+
+
 def test_to_json_string() -> None:
     """
     Test valid json string can be built from metadata
