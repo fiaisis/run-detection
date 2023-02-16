@@ -33,7 +33,7 @@ def detector() -> RunDetector:
 
 @patch("rundetection.run_detection.InstrumentSpecification")
 @patch("rundetection.run_detection.ingest")
-def test__process_message_specification_met(mock_ingest, mock_specification, detector):
+def test__process_message_specification_met(mock_ingest, _, detector):
     """
     Test process message and specification is met
     :param mock_ingest: mock ingest function

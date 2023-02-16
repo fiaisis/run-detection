@@ -14,6 +14,10 @@ from rundetection.specifications import InstrumentSpecification
 
 @pytest.fixture
 def run():
+    """
+    DetectedRun fixture
+    :return: The detected run fixture
+    """
     return DetectedRun(1, "larmor", "1", "1", "/archive/larmor/1/1,nxs")
 
 
@@ -71,18 +75,18 @@ def test_specification_will_stop_checking_rules_on_first_failure(specification, 
     assert run.will_reduce is False
 
 
-def test_run_will_not_be_reduced_for_a_no_rule_specification(specification, run: DetectedRun) -> None:
+def test_run_will_not_be_reduced_for_a_no_rule_specification(specification, run_: DetectedRun) -> None:
     """
     Test that run.will_reduce will be set to false when there are no rules in the relevant specification
     :param specification: Specification fixture
     :param run: DetectedRun fixture
     :return: None
     """
-    specification.verify(run)
-    assert run.will_reduce is False
+    specification.verify(run_)
+    assert run_.will_reduce is False
 
 
-def test_specification_rule_loading(run) -> None:
+def test_specification_rule_loading() -> None:
     """
     Test that the correct spec for each instrument is loaded. Currently specs can only have 1 rule, enabled is true
     or false

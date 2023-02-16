@@ -92,22 +92,31 @@ def test_logging_and_exception_when_nexus_file_does_not_exit(caplog: LogCaptureF
 
 
 def test_get_sibling_nexus_files():
-    with TemporaryDirectory() as td:
-        Path(td, "1.nxs").touch()
-        Path(td, "2.nxs").touch()
-        Path(td, "1.log").touch()
-        sibling_files = get_sibling_nexus_files(Path(td, "1.nxs"))
-        assert sibling_files == [Path(td, "2.nxs")]
+    """
+    Test that nexus files from within the same directory are returned
+    :return: None
+    """
+    with TemporaryDirectory() as temp_dir:
+        Path(temp_dir, "1.nxs").touch()
+        Path(temp_dir, "2.nxs").touch()
+        Path(temp_dir, "1.log").touch()
+        sibling_files = get_sibling_nexus_files(Path(temp_dir, "1.nxs"))
+        assert sibling_files == [Path(temp_dir, "2.nxs")]
 
 
 @patch("rundetection.ingest.ingest")
 def test_get_sibling_runs(mock_ingest: Mock):
+    """
+    Tests that a list of detected runs are returned when ingesting sibling nexus files
+    :param mock_ingest: Mock ingest
+    :return: None
+    """
     run = DetectedRun(1, "inst", "title", "num", "path")
     mock_ingest.return_value = run
-    with TemporaryDirectory() as td:
-        Path(td, "1.nxs").touch()
-        Path(td, "2.nxs").touch()
-        assert get_sibling_runs(Path(td, "1.nxs")) == [run]
+    with TemporaryDirectory() as temp_dir:
+        Path(temp_dir, "1.nxs").touch()
+        Path(temp_dir, "2.nxs").touch()
+        assert get_sibling_runs(Path(temp_dir, "1.nxs")) == [run]
 
 
 if __name__ == "__main__":

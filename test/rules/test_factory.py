@@ -1,3 +1,7 @@
+"""
+Rule factory unit tests
+"""
+# pylint: disable=protected-access
 import unittest
 
 import pytest

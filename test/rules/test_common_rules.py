@@ -1,3 +1,7 @@
+"""
+Unit tests for common rles
+"""
+# pylint: disable=redefined-outer-name
 import unittest
 
 import pytest
@@ -8,6 +12,10 @@ from rundetection.rules.common_rules import EnabledRule
 
 @pytest.fixture
 def run():
+    """
+    DetectedRun Fixture
+    :return: DetectedRun
+    """
     return DetectedRun(1, "larmor", "1", "1", "/archive/larmor/1/1.nxs")
 
 
