@@ -74,7 +74,7 @@ def test_to_json_string() -> None:
     assert (
         nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
         '"my experiment", "experiment_number": "54321", "filepath": '
-        '"e2e_data/1920302/ALF82301.nxs", "will_reduce": true, '
+        '"e2e_data/1920302/ALF82301.nxs", '
         '"additional_values": {}}'
     )
 

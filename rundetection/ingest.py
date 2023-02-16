@@ -34,6 +34,7 @@ class DetectedRun:
         """
         dict_ = dataclasses.asdict(self)
         dict_["filepath"] = str(dict_["filepath"])
+        del dict_["will_reduce"]
         return json.dumps(dict_)
 
 
