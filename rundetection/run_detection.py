@@ -62,6 +62,7 @@ class RunDetector:
             specification = InstrumentSpecification(run.instrument)
             specification.verify(run)
             if run.will_reduce:
+                logger.info("Specification met for run: %s", run)
                 notification = Notification(run.to_json_string())
                 self._notifier.notify(notification)
             else:
