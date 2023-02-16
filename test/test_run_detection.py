@@ -50,13 +50,13 @@ def test__process_message_specification_met(mock_ingest, mock_specification, det
     )
     mock_ingest.return_value = run
     detector._process_message(MESSAGE)
-    mock_specification = mock_specification.return_value
-    mock_specification.verify.return_value = True
     detector._notifier.notify.assert_called_once_with(Notification(run.to_json_string()))
     detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
 
 
-@patch("rundetection.run_detection.InstrumentSpecification.verify", return_value=False)
+@patch(
+    "rundetection.run_detection.InstrumentSpecification.verify", side_effect=lambda x: x.setattr("will_reduce", False)
+)
 @patch("rundetection.run_detection.ingest")
 def test__process_message_specification_not_met(mock_ingest, _, detector):
     """
