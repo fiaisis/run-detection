@@ -9,6 +9,7 @@ dependencies = [
 
 ]
 
+
 [project.urls]
 "Repository" = "https://github.com/interactivereduction/run-detection"
 
@@ -36,4 +37,4 @@ dev = [
 
 
 [tool.setuptools]
-packages = ["rundetection"]
+packages = ["rundetection", "rundetection.rules"]
