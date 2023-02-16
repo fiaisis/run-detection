@@ -61,7 +61,7 @@ class RunDetector:
             run = ingest(data_path)
             specification = InstrumentSpecification(run.instrument)
             specification.verify(run)
-            if run.will_reduce():
+            if run.will_reduce:
                 notification = Notification(run.to_json_string())
                 self._notifier.notify(notification)
             else:
@@ -69,9 +69,9 @@ class RunDetector:
         # pylint: disable = broad-except
         except Exception:
             logger.exception("Problem processing message: %s", message.value)
-
-        message.processed = True
-        self._queue_listener.acknowledge(message)
+        finally:
+            message.processed = True
+            self._queue_listener.acknowledge(message)
 
 
 def main(archive_path: str = "/archive") -> None:
