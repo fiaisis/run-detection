@@ -75,15 +75,15 @@ def test_specification_will_stop_checking_rules_on_first_failure(specification, 
     assert run.will_reduce is False
 
 
-def test_run_will_not_be_reduced_for_a_no_rule_specification(specification, run_: DetectedRun) -> None:
+def test_run_will_not_be_reduced_for_a_no_rule_specification(specification, run: DetectedRun) -> None:
     """
     Test that run.will_reduce will be set to false when there are no rules in the relevant specification
     :param specification: Specification fixture
     :param run: DetectedRun fixture
     :return: None
     """
-    specification.verify(run_)
-    assert run_.will_reduce is False
+    specification.verify(run)
+    assert run.will_reduce is False
 
 
 def test_specification_rule_loading() -> None:
