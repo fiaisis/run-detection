@@ -19,7 +19,7 @@ jobs:
           python -m pip install .[test]
 
       - name: Run pytest
-        run: pytest --cov rundetection . --ignore test/test_e2e.py
+        run: pytest --cov rundetection --cov-report lcov . --ignore test/test_e2e.py
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
