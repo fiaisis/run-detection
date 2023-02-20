@@ -4,7 +4,7 @@ readme = "README.md"
 version = "0.0.1"
 dependencies = [
     "confluent-kafka==1.9.2",
-    "h5py==3.7.0",
+    "h5py==3.8.0",
     "stomp.py==8.1.0"
 
 ]
