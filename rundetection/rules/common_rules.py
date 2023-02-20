@@ -7,7 +7,7 @@ from rundetection.rules.rule import Rule
 
 class EnabledRule(Rule[bool]):
     """
-    Rule concretion for the enabled setting in specifications. If enabled is True, the run will be reduced, if not,
+    Rule for the enabled setting in specifications. If enabled is True, the run will be reduced, if not,
     it will be skipped
     """
 
