@@ -4,54 +4,14 @@ Contains the InstrumentSpecification class, the abstract Rule Class and Rule Imp
 
 import json
 import logging
-from abc import ABC, abstractmethod
-from typing import Any, List, TypeVar, Generic
+from typing import Any, List
 
-from rundetection.ingest import NexusMetadata
+from rundetection.ingest import DetectedRun
+from rundetection.rules.rule import Rule
+from rundetection.rules.factory import rule_factory
 
-T_co = TypeVar("T_co", str, bool, int, float, None, List[str], covariant=True)
+
 logger = logging.getLogger(__name__)
-
-
-class Rule(Generic[T_co], ABC):
-    """
-    Abstract Rule, implement to define a rule that must be followed to allow a reduction to be run on a nexus file
-    """
-
-    def __init__(self, value: T_co):
-        self._value: T_co = value
-
-    @abstractmethod
-    def verify(self, metadata: NexusMetadata) -> bool:
-        """
-        Given a NexusMetadata determine if the rule is met for the file.
-        :param metadata: The metadata to check
-        :return: true if rule is met, else false
-        """
-
-
-class MissingRuleError(Exception):
-    """
-    When a Rule concretion is searched for but does not exist
-    """
-
-
-def rule_factory(key_: str, value: T_co) -> Rule[T_co]:
-    """
-    Given the rule key, and rule value, return the rule implementation
-    :param key_: The key of the rule
-    :param value: The value of the rule
-    :return: The Rule implementation
-    """
-    match key_.lower():
-        case "enabled":
-            if isinstance(value, bool):
-                return EnabledRule(value)
-
-            raise ValueError(f"Bad value: {value} in rule: {key_}")
-
-        case _:
-            raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 
 
 class InstrumentSpecification:
@@ -61,6 +21,7 @@ class InstrumentSpecification:
     """
 
     def __init__(self, instrument: str) -> None:
+        logger.info("Loading instrument specification for: %s", instrument)
         self._instrument = instrument
         self._rules: List[Rule[Any]] = []
         self._load_rules()
@@ -78,23 +39,18 @@ class InstrumentSpecification:
             logger.error("No specification for file: %s", self._instrument)
             raise
 
-    def verify(self, metadata: NexusMetadata) -> bool:
+    def verify(self, run: DetectedRun) -> None:
         """
-        Verify that every rule for the NexusMetadata is met, and that the specification contains at least one rule.
+        Verify that every rule for the DetectedRun is met, and that the specification contains at least one rule.
         If the specification is empty verify will return false
-        :param metadata:
+        :param run: A DetectedRun
         :return: whether the specification is met
         """
+        if len(self._rules) == 0:
+            run.will_reduce = False
         for rule in self._rules:
-            if not rule.verify(metadata):
-                return False
-        return len(self._rules) != 0
-
-
-class EnabledRule(Rule[bool]):
-    """
-    Rule concretion for the enabled setting in specifications.
-    """
-
-    def verify(self, metadata: NexusMetadata) -> bool:
-        return self._value
+            logger.info("verifying rule: %s", rule)
+            rule.verify(run)
+            if run.will_reduce is False:
+                logger.info("Rule %s not met for run %s", rule, run)
+                break  # Stop processing as soon as one rule is not met.

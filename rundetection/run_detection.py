@@ -58,20 +58,21 @@ class RunDetector:
         logger.info("Processing message: %s", message)
         try:
             data_path = self._map_path(message.value)
-            metadata = ingest(data_path)
-            specification = InstrumentSpecification(metadata.instrument)
-
-            if specification.verify(metadata):
-                notification = Notification(metadata.to_json_string())
+            run = ingest(data_path)
+            specification = InstrumentSpecification(run.instrument)
+            specification.verify(run)
+            if run.will_reduce:
+                logger.info("Specification met for run: %s", run)
+                notification = Notification(run.to_json_string())
                 self._notifier.notify(notification)
             else:
-                logger.info("Specificaiton not met, skipping file: %s", metadata)
+                logger.info("Specificaiton not met, skipping run: %s", run)
         # pylint: disable = broad-except
         except Exception:
             logger.exception("Problem processing message: %s", message.value)
-
-        message.processed = True
-        self._queue_listener.acknowledge(message)
+        finally:
+            message.processed = True
+            self._queue_listener.acknowledge(message)
 
 
 def main(archive_path: str = "/archive") -> None:

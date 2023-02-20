@@ -106,12 +106,12 @@ Below is an example of adding a new rule. The example is unrealistic, but it sho
     ```python
     class SkipTitlesIncludingRule(Rule[List[str]]):
   
-      def verify(self, metadata: NexusMetadata):
-          return any(word in metadata.experiment_title for word in self._value)
+      def verify(self, run: DetectedRun) -> None:
+          run.will_reduce =  any(word in run.experiment_title for word in self._value)
     ```
 3. Update the `RuleFactory`:
     ```python
-    def rule_factory(key: str, value: T) -> Rule[T]:
+    def rule_factory(key: str, value: T_co) -> Rule[T_co]:
         """
         Given the rule key, and rule value, return the rule implementation
         :param key: The key of the rule

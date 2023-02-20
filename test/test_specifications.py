@@ -2,46 +2,23 @@
 Specification unit test module
 """
 # pylint: disable=protected-access, redefined-outer-name
-import unittest
 from unittest.mock import Mock, patch
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rundetection.ingest import NexusMetadata
-from rundetection.specifications import InstrumentSpecification, rule_factory, EnabledRule, MissingRuleError
+from rundetection.ingest import DetectedRun
+from rundetection.rules.common_rules import EnabledRule
+from rundetection.specifications import InstrumentSpecification
 
-METADATA = NexusMetadata(1, "larmor", "1", "1", "/archive/larmor/1/1.nxs")
 
-
-def test_rule_factory_returns_correct_rule() -> None:
+@pytest.fixture
+def run():
     """
-    Test that the rule factory will return the correct rule
-    :return: None
+    DetectedRun fixture
+    :return: The detected run fixture
     """
-    rule = rule_factory("enabled", True)
-    assert isinstance(rule, EnabledRule)
-    assert rule._value is True
-
-
-def test_raises_exception_for_missing_rule_class() -> None:
-    """
-    Test exception raised when non-existent rule name is given
-    :return: None
-    """
-    with pytest.raises(MissingRuleError):
-        rule_factory("foo", "bar")
-
-
-def test_raises_exception_for_incorrect_rule_value_type() -> None:
-    """
-    Test exception raised when incorrect value type
-    :return: None
-    """
-    with pytest.raises(ValueError):
-        rule_factory("enabled", "string")
-    with pytest.raises(ValueError):
-        rule_factory("enabled", 1)
+    return DetectedRun(1, "larmor", "1", "1", "/archive/larmor/1/1,nxs")
 
 
 @pytest.fixture
@@ -54,81 +31,76 @@ def specification(_) -> InstrumentSpecification:
     return InstrumentSpecification("foo")
 
 
-def test_specification_verify_passes_for_all_rules_pass(specification: InstrumentSpecification) -> None:
+def test_run_will_be_reduced_when_all_rules_are_ment(specification: InstrumentSpecification, run: DetectedRun) -> None:
     """
-    Test specification verify returns true when all rules pass
+    Test that a run.will_reduce remains set to true when its relevant specification is met
     :param specification: specification fixture
+    :param run: DetectedRun fixture
     :return: None
     """
     mock_rule = Mock()
     specification._rules = [mock_rule, mock_rule, mock_rule]
-    mock_rule.verify.return_value = True
-    assert specification.verify(METADATA) is True
+    specification.verify(run)
+    assert run.will_reduce
 
 
-def test_specification_verify_fails_when_a_rule_fails(specification) -> None:
+def test_run_will_not_be_reduced_when_a_rule_is_not_met(specification, run) -> None:
     """
-    Test Specification verify returns False when a rule fails
+    Test that a run.will_reduce will be marked as false when its relvant specification is not met.
     :param specification: specification fixture
+    :param run: DetectedRun fixture
     :return: None
     """
-    pass_rule, fail_rule = Mock(), Mock()
-    pass_rule.verify.return_value = True
-    fail_rule.verify.return_value = False
-    specification._rules = [pass_rule, fail_rule]
-    assert specification.verify(METADATA) is False
+    mock_rule = Mock()
+    mock_rule.verify.side_effect = lambda r: setattr(r, "will_reduce", False)
+    specification._rules = [mock_rule]
+    specification.verify(run)
+    assert run.will_reduce is False
 
 
-def test_specification_verify_fails_with_only_failing_rules(specification) -> None:
+def test_specification_will_stop_checking_rules_on_first_failure(specification, run) -> None:
     """
-    Test specification verify returns false with only failing rules
-    :param specification:
+    Tests that no further rules will be checked as soon as one fails
+    :param specification: specification fixutre
+    :param run: DetectedRun fixture
     :return: None
     """
-    rule = Mock()
-    rule.verify.return_value = False
-    specification._rules = [rule, rule]
-    assert specification.verify(METADATA) is False
+    first_rule = Mock()
+    first_rule.verify.side_effect = lambda r: setattr(r, "will_reduce", False)
+    second_rule = Mock()
+    specification._rules = [first_rule, second_rule]
+    specification.verify(run)
+    first_rule.verify.assert_called_once_with(run)
+    second_rule.verify.assert_not_called()
+    assert run.will_reduce is False
 
 
-def test_specification_verify_fails_with_no_rules(specification) -> None:
+def test_run_will_not_be_reduced_for_a_no_rule_specification(specification, run: DetectedRun) -> None:
     """
-    Specification verify fails if a specification has no rules
+    Test that run.will_reduce will be set to false when there are no rules in the relevant specification
     :param specification: Specification fixture
+    :param run: DetectedRun fixture
     :return: None
     """
-    assert specification.verify(METADATA) is False
+    specification.verify(run)
+    assert run.will_reduce is False
 
 
-def test_specification_loads_correct_rule() -> None:
+def test_specification_rule_loading() -> None:
     """
     Test that the correct spec for each instrument is loaded. Currently specs can only have 1 rule, enabled is true
     or false
+    :param run: Run Fixture
     :return: None
     """
     mari_specification = InstrumentSpecification("mari")
     chronus_specification = InstrumentSpecification("chronus")
 
-    assert mari_specification.verify(METADATA)
-    assert chronus_specification.verify(METADATA) is False
+    assert isinstance(mari_specification._rules[0], EnabledRule)
+    assert mari_specification._rules[0]._value
 
-
-def test_enabled_rule_when_enabled() -> None:
-    """
-    Test verify method will return true when value is true
-    :return: None
-    """
-    rule = EnabledRule(True)
-    assert rule.verify(METADATA) is True
-
-
-def test_enabled_rule_when_not_enabled() -> None:
-    """
-    Test verify method will return false when value is false
-    :return:
-    """
-    rule = EnabledRule(False)
-    assert rule.verify(METADATA) is False
+    assert isinstance(chronus_specification._rules[0], EnabledRule)
+    assert chronus_specification._rules[0]._value is False
 
 
 def test_specification_file_missing(caplog: LogCaptureFixture):
@@ -141,7 +113,3 @@ def test_specification_file_missing(caplog: LogCaptureFixture):
         InstrumentSpecification("foo")
 
     assert "No specification for file: foo" in caplog.text
-
-
-if __name__ == "__main__":
-    unittest.main()
