@@ -44,10 +44,11 @@ jobs:
       - name: Run e2e test
         run: pytest test/test_e2e.py
 
-      - name: View detector logs on fail
+      - name: View logs on fail
         if: failure()
         run: |
           cd test
           docker-compose logs run-detection
-
+          docker-compose logs broker
+          docker-compose logs activemq
 
