@@ -76,7 +76,6 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         b', "experiment_number": "1920302", "filepath": "/archive/1920302/ALF82301.nxs", '
         b'"run_start": "2019-11-12T14:30:39", "run_end": "2019-11-12T14:34:20", "ra'
         b'w_frames": 2998, "good_frames": 2998, "users": "Zhao", '
-
         b'"additional_values": {}}',
     ]
 
