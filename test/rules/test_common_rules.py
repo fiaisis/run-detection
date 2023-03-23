@@ -3,6 +3,7 @@ Unit tests for common rles
 """
 # pylint: disable=redefined-outer-name
 import unittest
+from pathlib import Path
 
 import pytest
 
@@ -16,7 +17,7 @@ def run():
     DetectedRun Fixture
     :return: DetectedRun
     """
-    return DetectedRun(1, "larmor", "1", "1", "/archive/larmor/1/1.nxs")
+    return DetectedRun(1, "larmor", "1", "1", Path("/archive/larmor/1/1.nxs"), "start time", "end time", 1, 1, "users")
 
 
 def test_enabled_rule_when_enabled(run) -> None:
