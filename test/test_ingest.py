@@ -154,7 +154,7 @@ def test_ingest_to_json_string_produces_no_decode_errors():
     Test the full process from ingestion to json string. Specifically to check for decode errors
     :return: None
     """
-    run = ingest(Path("e2e_data/1510111/ENGINX00241391.nxs"))
+    run = ingest(Path(TEST_DATA_PATH, "e2e_data/1510111/ENGINX00241391.nxs"))
     run.to_json_string()
 
 
