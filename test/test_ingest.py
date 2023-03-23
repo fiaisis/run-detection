@@ -36,11 +36,11 @@ TEST_FILE_METADATA_PAIRS: List[Tuple[str, DetectedRun]] = [
             experiment_title="Check DAE and end of run working after move",
             experiment_number="1600007",
             filepath=Path("test/test_data/e2e_data/1600007/IMAT00004217.nxs"),
-            run_start="",
-            run_end="",
-            raw_frames=0,
-            good_frames=0,
-            users="ben",
+            run_start="2017-04-26T17:22:50",
+            run_end="2017-04-26T17:22:57",
+            raw_frames=1,
+            good_frames=1,
+            users="Salvato,Kockelmann,Aliotta,Minniti,Ponterio,Vasi,Ewings",
         ),
     ),
     (
@@ -51,11 +51,11 @@ TEST_FILE_METADATA_PAIRS: List[Tuple[str, DetectedRun]] = [
             experiment_title="YbCl3 rot=0",
             experiment_number="1920302",
             filepath=Path("test/test_data/e2e_data/1920302/ALF82301.nxs"),
-            run_start="",
-            run_end="",
-            raw_frames=0,
-            good_frames=0,
-            users="ben",
+            run_start="2019-11-12T14:30:39",
+            run_end="2019-11-12T14:34:20",
+            raw_frames=2998,
+            good_frames=2998,
+            users="Zhao",
         ),
     ),
 ]
@@ -101,11 +101,11 @@ def test_to_json_string() -> None:
         users="Keiran",
     )
     assert (
-        nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
-        '"my experiment", "experiment_number": "54321", "filepath": '
-        '"e2e_data/1920302/ALF82301.nxs", "run_start": "2015-07-01T15:29:17", '
-        '"run_end": "2015-07-01T15:53:16", "raw_frames": 23740, "good_frames": 18992, '
-        '"users": "Keiran", "additional_values": {}}'
+            nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
+                                               '"my experiment", "experiment_number": "54321", "filepath": '
+                                               '"e2e_data/1920302/ALF82301.nxs", "run_start": "2015-07-01T15:29:17", '
+                                               '"run_end": "2015-07-01T15:53:16", "raw_frames": 23740, "good_frames": 18992, '
+                                               '"users": "Keiran", "additional_values": {}}'
     )
 
 
