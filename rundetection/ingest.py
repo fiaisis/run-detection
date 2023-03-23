@@ -13,6 +13,8 @@ from h5py import File  # type: ignore
 logger = logging.getLogger(__name__)
 
 
+# splitting this class would be worse than this disable
+# pylint: disable = too-many-instance-attributes
 @dataclass
 class DetectedRun:
     """
