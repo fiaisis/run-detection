@@ -24,6 +24,11 @@ class DetectedRun:
     experiment_title: str
     experiment_number: str
     filepath: Path
+    run_start: str
+    run_end: str
+    raw_frames: int
+    good_frames: int
+    users: str
     will_reduce: bool = True
     additional_values: Dict[str, Any] = dataclasses.field(default_factory=dict)
 
@@ -51,10 +56,21 @@ def ingest(path: Path) -> DetectedRun:
         file = File(path)
         key = list(file.keys())[0]
         dataset = file[key]
+        print(dataset.keys())
+        print(f"\nuser: {dataset.get('user_1').get('name')[0]}")
+        print(f"good_frames: {dataset.get('good_frames')[0]}")
+        print(f"raw_frames: {dataset.get('raw_frames')[0]}")
+        print(f"start_time: {dataset.get('start_time')[0]}")
+        print(f"end_time: {dataset.get('end_time')[0]}")
         detection_result = DetectedRun(
             run_number=int(dataset.get("run_number")[0]),  # cast to int as i32 is not json serializable
             instrument=dataset.get("beamline")[0].decode("utf-8"),
             experiment_title=dataset.get("title")[0].decode("utf-8"),
+            run_start=dataset.get("start_time")[0].decode("utf-8"),
+            run_end=dataset.get("end_time")[0].decode("utf-8"),
+            raw_frames=dataset.get("raw_frames")[0],
+            good_frames=dataset.get("good_frames")[0],
+            users=dataset.get("user_1").get("name")[0].decode("utf-8"),
             experiment_number=dataset.get("experiment_identifier")[0].decode("utf-8"),
             filepath=path,
         )

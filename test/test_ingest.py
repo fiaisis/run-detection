@@ -21,6 +21,11 @@ TEST_FILE_METADATA_PAIRS: List[Tuple[str, DetectedRun]] = [
             experiment_title="CeO2 4 x 4 x 15",
             experiment_number="1510111",
             filepath=Path("test/test_data/e2e_data/1510111/ENGINX00241391.nxs"),
+            run_start="2015-07-01T15:29:17",
+            run_end="2015-07-01T15:53:16",
+            raw_frames=23740,
+            good_frames=18992,
+            users="Liu,Andriotis,Smith,Hallam,Flewitt,Kabra",
         ),
     ),
     (
@@ -31,6 +36,11 @@ TEST_FILE_METADATA_PAIRS: List[Tuple[str, DetectedRun]] = [
             experiment_title="Check DAE and end of run working after move",
             experiment_number="1600007",
             filepath=Path("test/test_data/e2e_data/1600007/IMAT00004217.nxs"),
+            run_start="",
+            run_end="",
+            raw_frames=0,
+            good_frames=0,
+            users="ben",
         ),
     ),
     (
@@ -41,6 +51,11 @@ TEST_FILE_METADATA_PAIRS: List[Tuple[str, DetectedRun]] = [
             experiment_title="YbCl3 rot=0",
             experiment_number="1920302",
             filepath=Path("test/test_data/e2e_data/1920302/ALF82301.nxs"),
+            run_start="",
+            run_end="",
+            raw_frames=0,
+            good_frames=0,
+            users="ben",
         ),
     ),
 ]
@@ -79,12 +94,18 @@ def test_to_json_string() -> None:
         experiment_number="54321",
         experiment_title="my experiment",
         filepath=Path("e2e_data/1920302/ALF82301.nxs"),
+        run_start="2015-07-01T15:29:17",
+        run_end="2015-07-01T15:53:16",
+        raw_frames=23740,
+        good_frames=18992,
+        users="Keiran",
     )
     assert (
         nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
         '"my experiment", "experiment_number": "54321", "filepath": '
-        '"e2e_data/1920302/ALF82301.nxs", '
-        '"additional_values": {}}'
+        '"e2e_data/1920302/ALF82301.nxs", "run_start": "2015-07-01T15:29:17", '
+        '"run_end": "2015-07-01T15:53:16", "raw_frames": 23740, "good_frames": 18992, '
+        '"users": "Keiran", "additional_values": {}}'
     )
 
 
@@ -120,7 +141,7 @@ def test_get_sibling_runs(mock_ingest: Mock):
     :param mock_ingest: Mock ingest
     :return: None
     """
-    run = DetectedRun(1, "inst", "title", "num", Path("path"))
+    run = DetectedRun(1, "inst", "title", "num", Path("path"), "", "", 1, 1, "")
     mock_ingest.return_value = run
     with TemporaryDirectory() as temp_dir:
         Path(temp_dir, "1.nxs").touch()
