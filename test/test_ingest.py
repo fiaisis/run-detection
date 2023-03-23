@@ -101,11 +101,11 @@ def test_to_json_string() -> None:
         users="Keiran",
     )
     assert (
-        nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
-        '"my experiment", "experiment_number": "54321", "filepath": '
-        '"e2e_data/1920302/ALF82301.nxs", "run_start": "2015-07-01T15:29:17", '
-        '"run_end": "2015-07-01T15:53:16", "raw_frames": 23740, "good_frames": 18992, '
-        '"users": "Keiran", "additional_values": {}}'
+            nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
+                                               '"my experiment", "experiment_number": "54321", "filepath": '
+                                               '"e2e_data/1920302/ALF82301.nxs", "run_start": "2015-07-01T15:29:17", '
+                                               '"run_end": "2015-07-01T15:53:16", "raw_frames": 23740, "good_frames": 18992, '
+                                               '"users": "Keiran", "additional_values": {}}'
     )
 
 
@@ -154,8 +154,7 @@ def test_ingest_to_json_string_produces_no_decode_errors():
     Test the full process from ingestion to json string. Specifically to check for decode errors
     :return: None
     """
-    # run = ingest(Path("e2e_data/1510111/ENGINX00241391.nxs"))
-    run = ingest(Path("../test/test_data/e2e_data/1510111/ENGINX00241391.nxs"))
+    run = ingest(Path("e2e_data/1510111/ENGINX00241391.nxs"))
     run.to_json_string()
 
 
