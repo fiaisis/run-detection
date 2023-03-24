@@ -13,6 +13,8 @@ from h5py import File  # type: ignore
 logger = logging.getLogger(__name__)
 
 
+# splitting this class would be worse than this disable
+# pylint: disable = too-many-instance-attributes
 @dataclass
 class DetectedRun:
     """
@@ -24,6 +26,11 @@ class DetectedRun:
     experiment_title: str
     experiment_number: str
     filepath: Path
+    run_start: str
+    run_end: str
+    raw_frames: int
+    good_frames: int
+    users: str
     will_reduce: bool = True
     additional_values: Dict[str, Any] = dataclasses.field(default_factory=dict)
 
@@ -55,6 +62,11 @@ def ingest(path: Path) -> DetectedRun:
             run_number=int(dataset.get("run_number")[0]),  # cast to int as i32 is not json serializable
             instrument=dataset.get("beamline")[0].decode("utf-8"),
             experiment_title=dataset.get("title")[0].decode("utf-8"),
+            run_start=dataset.get("start_time")[0].decode("utf-8"),
+            run_end=dataset.get("end_time")[0].decode("utf-8"),
+            raw_frames=int(dataset.get("raw_frames")[0]),
+            good_frames=int(dataset.get("good_frames")[0]),
+            users=dataset.get("user_1").get("name")[0].decode("utf-8"),
             experiment_number=dataset.get("experiment_identifier")[0].decode("utf-8"),
             filepath=path,
         )

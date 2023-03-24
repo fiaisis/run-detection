@@ -2,6 +2,7 @@
 Tests for inter specific rules
 """
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from rundetection.ingest import DetectedRun
@@ -15,11 +16,33 @@ def test_verify(mock_get_siblings):
     :param mock_get_siblings: mocked function
     :return: (None)
     """
-    run = DetectedRun(1, "inst", "D2O/air h-DODAB ML Proteolip Thu post 300mM NaCl  th=2.3", "sd", "/archive/foo")
-    related_run = DetectedRun(
-        1, "inst", "D2O/air h-DODAB ML Proteolip Thu post 300mM NaCl  th=2.4", "sd", "/archive/foo/related.nxs"
+    run = DetectedRun(
+        1,
+        "inst",
+        "D2O/air h-DODAB ML Proteolip Thu post 300mM NaCl  th=2.3",
+        "sd",
+        Path("/archive/foo"),
+        "start time",
+        "end time",
+        1,
+        1,
+        "users",
     )
-    unrelated_run = DetectedRun(1, "inst", "ost 300mM NaCl  th=2.3", "sd", "/archive/foo")
+    related_run = DetectedRun(
+        1,
+        "inst",
+        "D2O/air h-DODAB ML Proteolip Thu post 300mM NaCl  th=2.4",
+        "sd",
+        Path("/archive/foo/related.nxs"),
+        "start time",
+        "end time",
+        1,
+        1,
+        "users",
+    )
+    unrelated_run = DetectedRun(
+        1, "inst", "ost 300mM NaCl  th=2.3", "sd", Path("/archive/foo"), "start time", "end time", 1, 1, "users"
+    )
     mock_get_siblings.return_value = [related_run, unrelated_run]
     rule = InterStitchRule(True)
 
