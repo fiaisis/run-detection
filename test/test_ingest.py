@@ -4,7 +4,6 @@ Ingest and metadata tests
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Tuple, List
 from unittest.mock import Mock, patch
 
 import pytest
@@ -12,51 +11,52 @@ from _pytest.logging import LogCaptureFixture
 
 from rundetection.ingest import ingest, DetectedRun, get_sibling_nexus_files, get_sibling_runs
 
-TEST_FILE_METADATA_PAIRS: List[Tuple[str, DetectedRun]] = [
-    (
-        "e2e_data/1510111/ENGINX00241391.nxs",
-        DetectedRun(
-            run_number=241391,
-            instrument="ENGINX",
-            experiment_title="CeO2 4 x 4 x 15",
-            experiment_number="1510111",
-            filepath=Path("test/test_data/e2e_data/1510111/ENGINX00241391.nxs"),
-        ),
-    ),
-    (
-        "e2e_data/1600007/IMAT00004217.nxs",
-        DetectedRun(
-            run_number=4217,
-            instrument="IMAT",
-            experiment_title="Check DAE and end of run working after move",
-            experiment_number="1600007",
-            filepath=Path("test/test_data/e2e_data/1600007/IMAT00004217.nxs"),
-        ),
-    ),
-    (
-        "e2e_data/1920302/ALF82301.nxs",
-        DetectedRun(
-            run_number=82301,
-            instrument="ALF",
-            experiment_title="YbCl3 rot=0",
-            experiment_number="1920302",
-            filepath=Path("test/test_data/e2e_data/1920302/ALF82301.nxs"),
-        ),
-    ),
-]
-
 # Allows test to be run via pycharm play button or from project root
 TEST_DATA_PATH = Path("test_data") if Path("test_data").exists() else Path("test", "test_data")
 
 
-def test_ingest() -> None:
+@pytest.mark.parametrize(
+    "pair",
+    [
+        (
+            "e2e_data/1510111/ENGINX00241391.nxs",
+            DetectedRun(
+                run_number=241391,
+                instrument="ENGINX",
+                experiment_title="CeO2 4 x 4 x 15",
+                experiment_number="1510111",
+                filepath=Path("test/test_data/e2e_data/1510111/ENGINX00241391.nxs"),
+            ),
+        ),
+        (
+            "e2e_data/1600007/IMAT00004217.nxs",
+            DetectedRun(
+                run_number=4217,
+                instrument="IMAT",
+                experiment_title="Check DAE and end of run working after move",
+                experiment_number="1600007",
+                filepath=Path("test/test_data/e2e_data/1600007/IMAT00004217.nxs"),
+            ),
+        ),
+        (
+            "e2e_data/1920302/ALF82301.nxs",
+            DetectedRun(
+                run_number=82301,
+                instrument="ALF",
+                experiment_title="YbCl3 rot=0",
+                experiment_number="1920302",
+                filepath=Path("test/test_data/e2e_data/1920302/ALF82301.nxs"),
+            ),
+        ),
+    ],
+)
+def test_ingest(pair) -> None:
     """
     Test the metadata is built from test nexus files
     :return: None
     """
-    for pair in TEST_FILE_METADATA_PAIRS:
-        nexus_file = TEST_DATA_PATH / pair[0]
-        assert (ingest(nexus_file)) == pair[1]
+    nexus_file = TEST_DATA_PATH / pair[0]
+    assert (ingest(nexus_file)) == pair[1]
 
 
 def test_ingest_raises_exception_non_nexus_file() -> None:
