@@ -1,6 +1,6 @@
-"""
-Ingest module holds the DetectedRun class and the ingest function used to build DetectedRumns from nexus files
-"""
+"""Ingest module holds the DetectedRun class and the ingest function used to build DetectedRuns from nexus files."""
+from __future__ import annotations
+
 import dataclasses
 import json
 import logging
