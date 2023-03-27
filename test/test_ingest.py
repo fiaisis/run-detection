@@ -88,6 +88,37 @@ def test_to_json_string() -> None:
     )
 
 
+def test_split_runs():
+    detected_run = DetectedRun(
+        run_number=1,
+        instrument="MARI",
+        experiment_title="Run Title A",
+        experiment_number="123",
+        filepath=Path("MARI0001.nxs"),
+        will_reduce=True,
+        additional_values={},
+    )
+
+    additional_run = DetectedRun(
+        run_number=2,
+        instrument="MARI",
+        experiment_title="Run Title B",
+        experiment_number="123",
+        filepath=Path("MARI0002.nxs"),
+        will_reduce=True,
+        additional_values={},
+    )
+
+    detected_run.additional_runs.append(additional_run)
+
+    split_detected_runs = detected_run.split_runs()
+
+    # Check if the returned list contains both the detected_run and additional_run
+    assert len(split_detected_runs) == 2
+    assert detected_run in split_detected_runs
+    assert additional_run in split_detected_runs
+
+
 def test_logging_and_exception_when_nexus_file_does_not_exit(caplog: LogCaptureFixture):
     """
     Test correct logging and exception reraised when nexus file is missing

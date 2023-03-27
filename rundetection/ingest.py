@@ -6,7 +6,7 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Callable
 
 from h5py import File  # type: ignore
 
@@ -26,16 +26,26 @@ class DetectedRun:
     filepath: Path
     will_reduce: bool = True
     additional_values: Dict[str, Any] = dataclasses.field(default_factory=dict)
+    additional_runs: List[DetectedRun] = dataclasses.field(default_factory=list)
 
     def to_json_string(self) -> str:
         """
-        Returns the metadata as a json string
+        Returns the metadata as a json string.
         :return: The json string
         """
         dict_ = dataclasses.asdict(self)
         dict_["filepath"] = str(dict_["filepath"])
         del dict_["will_reduce"]
+        del dict_["additional_runs"]
         return json.dumps(dict_)
+
+    def split_runs(self) -> List[DetectedRun]:
+        """
+        Return a list of additional runs, when a rule produces additional runs.
+        :return: List[DetectedRun]
+        """
+        self.additional_runs.append(self)
+        return self.additional_runs
 
 
 def ingest(path: Path) -> DetectedRun:
