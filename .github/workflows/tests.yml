@@ -22,7 +22,10 @@ jobs:
           python -m pip install .[test]
 
       - name: Run pytest
-        run: pytest . --ignore test/test_e2e.py
+        run: pytest . --ignore test/test_e2e.py --cov --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
 
   e2e:
     runs-on: ubuntu-latest
