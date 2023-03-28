@@ -1,6 +1,7 @@
 """
 Ingest and metadata tests
 """
+import logging
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -9,7 +10,15 @@ from unittest.mock import Mock, patch
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rundetection.ingest import ingest, DetectedRun, get_sibling_nexus_files, get_sibling_runs
+from rundetection.ingest import (
+    ingest,
+    DetectedRun,
+    get_sibling_nexus_files,
+    get_sibling_runs,
+    skip_extract,
+    get_extraction_function,
+    get_run_title,
+)
 
 # Allows test to be run via pycharm play button or from project root
 TEST_DATA_PATH = Path("test_data") if Path("test_data").exists() else Path("test", "test_data")
@@ -129,6 +138,20 @@ def test_logging_and_exception_when_nexus_file_does_not_exit(caplog: LogCaptureF
         ingest(Path("e2e_data/foo/bar.nxs"))
 
     assert "Nexus file could not be found: e2e_data/foo/bar.nxs" in caplog.text
+
+
+@patch("rundetection.ingest.ingest")
+def test_get_run_title(mock_ingest):
+    """
+    Test file ingested and title returned
+    :param mock_ingest: Mock ingest function
+    :return: None
+    """
+    mock_run = Mock()
+    mock_run.experiment_title = "foo"
+    mock_ingest.return_value = mock_run
+    assert get_run_title(Path("/dir/file.nxs")) == "foo"
+    mock_ingest.assert_called_once_with(Path("/dir/file.nxs"))
 
 
 def test_get_sibling_nexus_files():

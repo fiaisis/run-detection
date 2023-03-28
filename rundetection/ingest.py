@@ -92,3 +92,12 @@ def get_sibling_runs(nexus_path: Path) -> List[DetectedRun]:
     :return: List of DetectedRun Objects
     """
     return [ingest(file) for file in get_sibling_nexus_files(nexus_path)]
+
+
+def get_run_title(nexus_path: Path) -> str:
+    """
+    Given the path of a nexus file, get the run title for that file
+    :param nexus_path: Path - the nexus file path
+    :return: str - The title of the files run
+    """
+    return ingest(nexus_path).experiment_title
