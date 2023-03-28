@@ -68,6 +68,9 @@ def ingest(path: Path) -> DetectedRun:
             experiment_number=dataset.get("experiment_identifier")[0].decode("utf-8"),
             filepath=path,
         )
+        logger.info("Extracting instrument specific metadata...")
+        additional_extraction_function = get_extraction_function(detection_result.instrument)
+        detection_result = additional_extraction_function(detection_result, dataset)
 
         logger.info("extracted metadata: %s", detection_result)
         return detection_result
