@@ -18,10 +18,22 @@ from rundetection.ingest import (
     skip_extract,
     get_extraction_function,
     get_run_title,
+    mari_extract,
 )
 
 # Allows test to be run via pycharm play button or from project root
 TEST_DATA_PATH = Path("test_data") if Path("test_data").exists() else Path("test", "test_data")
+
+
+@pytest.fixture()
+def detected_run():
+    return DetectedRun(
+        run_number=12345,
+        instrument="instrument",
+        experiment_title="experiment title",
+        filepath=Path("./25581.nxs"),
+        experiment_number="experiment number",
+    )
 
 
 @pytest.mark.parametrize(
@@ -57,8 +69,27 @@ TEST_DATA_PATH = Path("test_data") if Path("test_data").exists() else Path("test
                 filepath=Path(TEST_DATA_PATH, "e2e_data/1920302/ALF82301.nxs"),
             ),
         ),
+        (
+            "e2e_data/25581/MAR25581.nxs",
+            DetectedRun(
+                run_number=25581,
+                instrument="MARI",
+                experiment_title="Whitebeam - vanadium - detector tests - vacuum bad - HT on not on all LAB",
+                experiment_number="1820497",
+                filepath=Path(TEST_DATA_PATH, "e2e_data/25581/MAR25581.nxs"),
+                additional_values={
+                    "ei": "auto",
+                    "monovan": 0,
+                    "runno": 25581,
+                    "sam_mass": 0.0,
+                    "sam_rmm": 0.0,
+                    "sum_runs": False,
+                    "remove_bkg": True,
+                },
+            ),
+        ),
     ],
-    ids=["ENGINX00241391.nxs", "IMAT00004217.nxs", "ALF82301.nxs"],
+    ids=["ENGINX00241391.nxs", "IMAT00004217.nxs", "ALF82301.nxs", "MARI25581.nxs"],
 )
 def test_ingest(pair) -> None:
     """
@@ -75,7 +106,7 @@ def test_ingest_raises_exception_non_nexus_file() -> None:
     :return: None
     """
     with pytest.raises(ValueError):
-        ingest(Path("foo.log"))
+        ingest(Path("25581.log"))
 
 
 def test_to_json_string() -> None:
@@ -96,6 +127,21 @@ def test_to_json_string() -> None:
         '"e2e_data/1920302/ALF82301.nxs", '
         '"additional_values": {}}'
     )
+
+
+@patch("rundetection.ingest.ingest")
+def test_get_sibling_runs(mock_ingest: Mock):
+    """
+    Tests that a list of detected runs are returned when ingesting sibling nexus files
+    :param mock_ingest: Mock ingest
+    :return: None
+    """
+    run = DetectedRun(1, "inst", "title", "num", Path("path"))
+    mock_ingest.return_value = run
+    with TemporaryDirectory() as temp_dir:
+        Path(temp_dir, "1.nxs").touch()
+        Path(temp_dir, "2.nxs").touch()
+        assert get_sibling_runs(Path(temp_dir, "1.nxs")) == [run]
 
 
 def test_split_runs():
@@ -136,9 +182,9 @@ def test_logging_and_exception_when_nexus_file_does_not_exit(caplog: LogCaptureF
     :return: None
     """
     with pytest.raises(FileNotFoundError):
-        ingest(Path("e2e_data/foo/bar.nxs"))
+        ingest(Path("e2e_data/25581/bar.nxs"))
 
-    assert "Nexus file could not be found: e2e_data/foo/bar.nxs" in caplog.text
+    assert "Nexus file could not be found: e2e_data/25581/bar.nxs" in caplog.text
 
 
 @patch("rundetection.ingest.ingest")
@@ -149,9 +195,9 @@ def test_get_run_title(mock_ingest):
     :return: None
     """
     mock_run = Mock()
-    mock_run.experiment_title = "foo"
+    mock_run.experiment_title = "25581"
     mock_ingest.return_value = mock_run
-    assert get_run_title(Path("/dir/file.nxs")) == "foo"
+    assert get_run_title(Path("/dir/file.nxs")) == "25581"
     mock_ingest.assert_called_once_with(Path("/dir/file.nxs"))
 
 
@@ -168,19 +214,112 @@ def test_get_sibling_nexus_files():
         assert sibling_files == [Path(temp_dir, "2.nxs")]
 
 
-@patch("rundetection.ingest.ingest")
-def test_get_sibling_runs(mock_ingest: Mock):
+def test_skip_extract(caplog: LogCaptureFixture):
     """
+    Test that run remains unchanged and log is made
+    :param caplog: LogCaptureFixture
     Tests that a list of detected runs are returned when ingesting sibling nexus files
-    :param mock_ingest: Mock ingest
     :return: None
     """
-    run = DetectedRun(1, "inst", "title", "num", Path("path"))
-    mock_ingest.return_value = run
-    with TemporaryDirectory() as temp_dir:
-        Path(temp_dir, "1.nxs").touch()
-        Path(temp_dir, "2.nxs").touch()
-        assert get_sibling_runs(Path(temp_dir, "1.nxs")) == [run]
+    run = Mock()
+    run.instrument = "instrument"
+    run.run_number = 123
+    with caplog.at_level(logging.INFO):
+        run_ = skip_extract(run, object())
+        assert "No additional extraction needed for run: instrument 123" in caplog.text
+        assert run_ == run
+
+
+def test_get_extraction_function():
+    """
+    Test correct function returned from factory function
+    :return: None
+    """
+    skip_extract_func = get_extraction_function("LET")
+    assert skip_extract_func.__name__ == "skip_extract"
+    mari_extract_func = get_extraction_function("mari")
+    assert mari_extract_func.__name__ == "mari_extract"
+
+
+def test_mari_extract_single_ei(detected_run: DetectedRun):
+    """
+    Test mari extract with single ei value. we use a dict instead of a h5py group since they have identical API
+    :param detected_run: Detected Run fixture
+    :return: None
+    """
+    dataset = {"ei": [10.0], "sam_mass": [5.0], "sam_rmm": [100.0]}
+    result = mari_extract(detected_run, dataset)
+
+    assert result.additional_values["ei"] == 10.0
+    assert result.additional_values["sam_mass"] == 5.0
+    assert result.additional_values["sam_rmm"] == 100.0
+    assert result.additional_values["monovan"] == 12345
+    assert result.additional_values["remove_bkg"] is True
+
+
+def test_mari_extract_multiple_ei(detected_run: DetectedRun):
+    """
+    Test mari extract with multiple ei values. we use a dict instead of a h5py group since they have identical API
+    :param detected_run: Detected Run fixture
+    :return: None
+    """
+    dataset = {"ei": [10.0, 20.0], "sam_mass": [5.0], "sam_rmm": [100.0]}
+    result = mari_extract(detected_run, dataset)
+
+    assert result.additional_values["ei"] == [10.0, 20.0]
+    assert result.additional_values["sam_mass"] == 5.0
+    assert result.additional_values["sam_rmm"] == 100.0
+    assert result.additional_values["monovan"] == 12345
+    assert result.additional_values["remove_bkg"] is True
+
+
+def test_mari_extract_no_ei(detected_run: DetectedRun):
+    """
+    Test mari extract with no ei values. we use a dict instead of a h5py group since they have identical API
+    :param detected_run: Detected Run fixture
+    :return: None
+    """
+    dataset = {"sam_mass": [5.0], "sam_rmm": [100.0]}
+    result = mari_extract(detected_run, dataset)
+
+    assert result.additional_values["ei"] == "auto"
+    assert result.additional_values["sam_mass"] == 5.0
+    assert result.additional_values["sam_rmm"] == 100.0
+    assert result.additional_values["monovan"] == 12345
+    assert result.additional_values["remove_bkg"] is True
+
+
+def test_mari_extract_no_sam_mass_or_sam_rmm(detected_run: DetectedRun):
+    """
+    Test mari extract with no sample values. we use a dict instead of a h5py group since they have identical API
+    :param detected_run: Detected Run fixture
+    :return: None
+    """
+    dataset = {"ei": [10.0]}
+    result = mari_extract(detected_run, dataset)
+
+    assert result.additional_values["ei"] == 10.0
+    assert result.additional_values["sam_mass"] == 0.0
+    assert result.additional_values["sam_rmm"] == 0.0
+    assert result.additional_values["monovan"] == 0
+    assert result.additional_values["remove_bkg"] is True
+
+
+def test_mari_extract_remove_bkg_false(detected_run: DetectedRun):
+    """
+    Test mari extract with no background radiation correction we use a dict instead of a h5py group since they have
+    identical API
+    :param detected_run: Detected Run fixture
+    :return: None
+    """
+    dataset = {"ei": [10.0], "sam_mass": [5.0], "sam_rmm": [100.0], "remove_bkg": [False]}
+    result = mari_extract(detected_run, dataset)
+
+    assert result.additional_values["ei"] == 10.0
+    assert result.additional_values["sam_mass"] == 5.0
+    assert result.additional_values["sam_rmm"] == 100.0
+    assert result.additional_values["monovan"] == 12345
+    assert result.additional_values["remove_bkg"] is False
 
 
 if __name__ == "__main__":

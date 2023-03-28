@@ -76,6 +76,80 @@ def ingest(path: Path) -> DetectedRun:
         raise
 
 
+def skip_extract(run: DetectedRun, _: Any) -> DetectedRun:
+    """
+    Skips the extraction of additional metadata for a given DetectedRun instance and dataset, when the extraction of
+    additional metadata is not required or not applicable for a specific instrument or dataset.
+
+    :param run: DetectedRun instance for which the additional metadata extraction should be skipped
+    :param _: The dataset from which the additional metadata extraction is to be skipped
+    :return: DetectedRun instance without updating additional metadata
+
+    """
+    logger.info("No additional extraction needed for run: %s %s", run.instrument, run.run_number)
+    return run
+
+
+def mari_extract(run: DetectedRun, dataset: Any) -> DetectedRun:
+    """
+    Extracts additional metadata specific to the MARI instrument from the given dataset and updates the DetectedRun
+    instance. If the metadata does not exist, the default values will be set instead.
+
+    :param run: DetectedRun instance for which to extract additional metadata
+    :param dataset: The dataset from which to extract additional MARI-specific metadata. (The type is a h5py group)
+    :return: DetectedRun instance with updated additional metadata
+
+    This function extracts MARI-specific metadata including incident energy (ei), sample mass (sam_mass),
+    sample relative molecular mass (sam_rmm), monovanadium run number (monovan), and background removal flag
+    (remove_bkg). The extracted metadata is stored in the additional_values attribute of the DetectedRun instance.
+    """
+
+    ei = dataset.get("ei")
+    if ei and len(ei) == 1:
+        ei = float(ei[0])
+    elif ei and len(ei) > 1:
+        ei = [float(val) for val in ei]
+    else:
+        ei = "auto"
+
+    if dataset.get("sam_mass") is not None:
+        sam_mass = float(dataset.get("sam_mass")[0])
+    else:
+        sam_mass = 0.0
+    if dataset.get("sam_rmm") is not None:
+        sam_rmm = float(dataset.get("sam_rmm")[0])
+    else:
+        sam_rmm = 0.0
+
+    if dataset.get("remove_bkg") is not None:
+        remove_bkg = bool(dataset.get("remove_bkg")[0])
+    else:
+        remove_bkg = True
+
+    run.additional_values["ei"] = ei
+    run.additional_values["sam_mass"] = sam_mass
+    run.additional_values["sam_rmm"] = sam_rmm
+    run.additional_values["monovan"] = run.run_number if (sam_rmm != 0 and sam_mass != 0) else 0
+    run.additional_values["remove_bkg"] = remove_bkg
+    run.additional_values["sum_runs"] = False
+    run.additional_values["runno"] = run.run_number
+
+    return run
+
+
+def get_extraction_function(instrument: str) -> Callable[[DetectedRun, Any], DetectedRun]:
+    """
+    Given an instrument name, return the additional metadata extraction function for the instrument
+    :param instrument: str - instrument name
+    :return: Callable[[DetectedRun, Any], DetectedRun]: The additional metadata extraction function for the instrument
+    """
+    match instrument.lower():
+        case "mari":
+            return mari_extract
+        case _:
+            return skip_extract
+
+
 def get_sibling_nexus_files(nexus_path: Path) -> List[Path]:
     """
     Given the path of a nexus file, return a list of any other nexus files in the same directory
