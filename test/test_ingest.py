@@ -34,7 +34,7 @@ TEST_DATA_PATH = Path("test_data") if Path("test_data").exists() else Path("test
                 instrument="ENGINX",
                 experiment_title="CeO2 4 x 4 x 15",
                 experiment_number="1510111",
-                filepath=Path("test/test_data/e2e_data/1510111/ENGINX00241391.nxs"),
+                filepath=Path(TEST_DATA_PATH, "e2e_data/1510111/ENGINX00241391.nxs"),
             ),
         ),
         (
@@ -44,7 +44,7 @@ TEST_DATA_PATH = Path("test_data") if Path("test_data").exists() else Path("test
                 instrument="IMAT",
                 experiment_title="Check DAE and end of run working after move",
                 experiment_number="1600007",
-                filepath=Path("test/test_data/e2e_data/1600007/IMAT00004217.nxs"),
+                filepath=Path(TEST_DATA_PATH, "e2e_data/1600007/IMAT00004217.nxs"),
             ),
         ),
         (
@@ -54,10 +54,11 @@ TEST_DATA_PATH = Path("test_data") if Path("test_data").exists() else Path("test
                 instrument="ALF",
                 experiment_title="YbCl3 rot=0",
                 experiment_number="1920302",
-                filepath=Path("test/test_data/e2e_data/1920302/ALF82301.nxs"),
+                filepath=Path(TEST_DATA_PATH, "e2e_data/1920302/ALF82301.nxs"),
             ),
         ),
     ],
+    ids=["ENGINX00241391.nxs", "IMAT00004217.nxs", "ALF82301.nxs"],
 )
 def test_ingest(pair) -> None:
     """
