@@ -81,7 +81,7 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         b'{"run_number": 25581, "instrument": "MARI", "experiment_title": "Whitebeam - vanadium - detector tests - '
         b'vacuum bad - HT on not on all LAB", "experiment_number": "1820497", "filepath": '
         b'"/archive/25581/MAR25581.nxs", '
-        b'"run_start": "2019-03-22T10:15:44", "run_end": "2019-03-22T10:18:26"'
+        b'"run_start": "2019-03-22T10:15:44", "run_end": "2019-03-22T10:18:26", '
         b'"raw_frames": 8067, "good_frames": 6452, '
         b'"users": "Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara"'
         b'"additional_values": {"ei": "auto", "sam_mass": 0.0, '
