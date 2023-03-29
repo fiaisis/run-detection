@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 import pytest
 from _pytest.logging import LogCaptureFixture
 
+
 from rundetection.ingest import (
     ingest,
     DetectedRun,
@@ -20,6 +21,7 @@ from rundetection.ingest import (
     get_run_title,
     mari_extract,
 )
+
 
 # Allows test to be run via pycharm play button or from project root
 TEST_DATA_PATH = Path("test_data") if Path("test_data").exists() else Path("test", "test_data")
@@ -120,12 +122,18 @@ def test_to_json_string() -> None:
         experiment_number="54321",
         experiment_title="my experiment",
         filepath=Path("e2e_data/1920302/ALF82301.nxs"),
+        run_start="2015-07-01T15:29:17",
+        run_end="2015-07-01T15:53:16",
+        raw_frames=23740,
+        good_frames=18992,
+        users="Keiran",
     )
     assert (
         nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
         '"my experiment", "experiment_number": "54321", "filepath": '
-        '"e2e_data/1920302/ALF82301.nxs", '
-        '"additional_values": {}}'
+        '"e2e_data/1920302/ALF82301.nxs", "run_start": "2015-07-01T15:29:17", '
+        '"run_end": "2015-07-01T15:53:16", "raw_frames": 23740, "good_frames": 18992, '
+        '"users": "Keiran", "additional_values": {}}'
     )
 
 
@@ -289,6 +297,15 @@ def test_mari_extract_remove_bkg_false(detected_run: DetectedRun):
     assert result.additional_values["sam_rmm"] == 100.0
     assert result.additional_values["monovan"] == 12345
     assert result.additional_values["remove_bkg"] is False
+
+
+def test_ingest_to_json_string_produces_no_decode_errors():
+    """
+    Test the full process from ingestion to json string. Specifically to check for decode errors
+    :return: None
+    """
+    run = ingest(Path(TEST_DATA_PATH, "e2e_data/1510111/ENGINX00241391.nxs"))
+    run.to_json_string()
 
 
 if __name__ == "__main__":

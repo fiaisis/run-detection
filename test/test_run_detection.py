@@ -37,7 +37,7 @@ def test__process_message_specification_met(mock_ingest, _, detector):
     """
     Test process message and specification is met
     :param mock_ingest: mock ingest function
-    :param mock_specification: mock specification
+    :param _: mock specification
     :param detector: RunDetector fixture
     :return: None
     """
@@ -46,7 +46,12 @@ def test__process_message_specification_met(mock_ingest, _, detector):
         instrument="mari",
         experiment_number="32131",
         experiment_title="title",
-        filepath="/archive/mari/32131/123.nxs",
+        filepath=Path("/archive/mari/32131/123.nxs"),
+        run_start="start time",
+        run_end="end time",
+        users="Keiran",
+        raw_frames=1,
+        good_frames=1,
     )
     mock_ingest.return_value = run
     detector._process_message(MESSAGE)
@@ -71,7 +76,12 @@ def test__process_message_specification_not_met(mock_ingest, _, detector):
         instrument="mari",
         experiment_number="32131",
         experiment_title="title",
-        filepath="/archive/mari/32131/123.nxs",
+        filepath=Path("/archive/mari/32131/123.nxs"),
+        run_start="start time",
+        run_end="end time",
+        users="bill, ben",
+        raw_frames=0,
+        good_frames=0,
     )
     mock_ingest.return_value = run
     detector._process_message(MESSAGE)

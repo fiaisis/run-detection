@@ -1,6 +1,8 @@
 """
 Specification unit test module
 """
+from pathlib import Path
+
 # pylint: disable=protected-access, redefined-outer-name
 from unittest.mock import Mock, patch
 
@@ -19,7 +21,7 @@ def run():
     DetectedRun fixture
     :return: The detected run fixture
     """
-    return DetectedRun(1, "larmor", "1", "1", "/archive/larmor/1/1,nxs")
+    return DetectedRun(1, "larmor", "1", "1", Path("/archive/larmor/1/1,nxs"), "start time", "end time", 1, 1, "user")
 
 
 @pytest.fixture
