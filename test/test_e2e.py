@@ -74,7 +74,7 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         b', "experiment_number": "1920302", "filepath": "/archive/1920302/ALF82301.nxs", "additional_values": {}}',
         b'{"run_number": 25581, "instrument": "MARI", "experiment_title": "Whitebeam - vanadium - detector tests - '
         b'vacuum bad - HT on not on all LAB", "experiment_number": "1820497", "filepath": '
-        b'"../test/test_data/e2e_data/25581/MAR25581.nxs", "additional_values": {"ei": "auto", "sam_mass": 0.0, '
+        b'"/archive/25581/MAR25581.nxs", "additional_values": {"ei": "auto", "sam_mass": 0.0, '
         b'"sam_rmm": 0.0, "monovan": 0, "remove_bkg": true, "sum_runs": false, "runno": 25581}}',
     ]
 
