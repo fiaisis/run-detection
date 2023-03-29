@@ -39,14 +39,6 @@ class DetectedRun:
         del dict_["additional_runs"]
         return json.dumps(dict_)
 
-    def split_runs(self) -> List[DetectedRun]:
-        """
-        Return a list of additional runs, when a rule produces additional runs.
-        :return: List[DetectedRun]
-        """
-        self.additional_runs.append(self)
-        return self.additional_runs
-
 
 def ingest(path: Path) -> DetectedRun:
     """
