@@ -1,6 +1,7 @@
 """
 Ingest and metadata tests
 """
+# pylint: disable=redefined-outer-name
 import logging
 import unittest
 from pathlib import Path
@@ -9,7 +10,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from _pytest.logging import LogCaptureFixture
-
 
 from rundetection.ingest import (
     ingest,
@@ -22,19 +22,24 @@ from rundetection.ingest import (
     mari_extract,
 )
 
-
 # Allows test to be run via pycharm play button or from project root
 TEST_DATA_PATH = Path("test_data") if Path("test_data").exists() else Path("test", "test_data")
 
 
 @pytest.fixture()
 def detected_run():
+    """Detected run fixture"""
     return DetectedRun(
         run_number=12345,
         instrument="instrument",
         experiment_title="experiment title",
         filepath=Path("./25581.nxs"),
         experiment_number="experiment number",
+        raw_frames=0,
+        good_frames=0,
+        run_start="",
+        run_end="",
+        users="",
     )
 
 
@@ -49,6 +54,11 @@ def detected_run():
                 experiment_title="CeO2 4 x 4 x 15",
                 experiment_number="1510111",
                 filepath=Path(TEST_DATA_PATH, "e2e_data/1510111/ENGINX00241391.nxs"),
+                run_start="2015-07-01T15:29:17",
+                run_end="2015-07-01T15:53:16",
+                raw_frames=23740,
+                good_frames=18992,
+                users="Liu,Andriotis,Smith,Hallam,Flewitt,Kabra",
             ),
         ),
         (
@@ -59,6 +69,11 @@ def detected_run():
                 experiment_title="Check DAE and end of run working after move",
                 experiment_number="1600007",
                 filepath=Path(TEST_DATA_PATH, "e2e_data/1600007/IMAT00004217.nxs"),
+                run_start="2017-04-26T17:22:50",
+                run_end="2017-04-26T17:22:57",
+                raw_frames=1,
+                good_frames=1,
+                users="Salvato,Kockelmann,Aliotta,Minniti,Ponterio,Vasi,Ewings",
             ),
         ),
         (
@@ -69,6 +84,11 @@ def detected_run():
                 experiment_title="YbCl3 rot=0",
                 experiment_number="1920302",
                 filepath=Path(TEST_DATA_PATH, "e2e_data/1920302/ALF82301.nxs"),
+                run_start="2019-11-12T14:30:39",
+                run_end="2019-11-12T14:34:20",
+                raw_frames=2998,
+                good_frames=2998,
+                users="Zhao",
             ),
         ),
         (
@@ -79,6 +99,11 @@ def detected_run():
                 experiment_title="Whitebeam - vanadium - detector tests - vacuum bad - HT on not on all LAB",
                 experiment_number="1820497",
                 filepath=Path(TEST_DATA_PATH, "e2e_data/25581/MAR25581.nxs"),
+                raw_frames=8067,
+                good_frames=6452,
+                run_start="2019-03-22T10:15:44",
+                run_end="2019-03-22T10:18:26",
+                users="Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara",
                 additional_values={
                     "ei": "auto",
                     "monovan": 0,
@@ -144,7 +169,7 @@ def test_get_sibling_runs(mock_ingest: Mock):
     :param mock_ingest: Mock ingest
     :return: None
     """
-    run = DetectedRun(1, "inst", "title", "num", Path("path"))
+    run = DetectedRun(1, "inst", "title", "num", Path("path"), "run_start", "run_end", 0, 0, "users")
     mock_ingest.return_value = run
     with TemporaryDirectory() as temp_dir:
         Path(temp_dir, "1.nxs").touch()
