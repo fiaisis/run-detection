@@ -65,6 +65,9 @@ class RunDetector:
                 logger.info("Specification met for run: %s", run)
                 notification = Notification(run.to_json_string())
                 self._notifier.notify(notification)
+                for additional_run in run.additional_runs:
+                    self._notifier.notify(Notification(additional_run.to_json_string()))
+
             else:
                 logger.info("Specificaiton not met, skipping run: %s", run)
         # pylint: disable = broad-except

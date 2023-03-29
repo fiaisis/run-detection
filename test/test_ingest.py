@@ -40,53 +40,53 @@ def detected_run():
     "pair",
     [
         (
-                "e2e_data/1510111/ENGINX00241391.nxs",
-                DetectedRun(
-                    run_number=241391,
-                    instrument="ENGINX",
-                    experiment_title="CeO2 4 x 4 x 15",
-                    experiment_number="1510111",
-                    filepath=Path(TEST_DATA_PATH, "e2e_data/1510111/ENGINX00241391.nxs"),
-                ),
+            "e2e_data/1510111/ENGINX00241391.nxs",
+            DetectedRun(
+                run_number=241391,
+                instrument="ENGINX",
+                experiment_title="CeO2 4 x 4 x 15",
+                experiment_number="1510111",
+                filepath=Path(TEST_DATA_PATH, "e2e_data/1510111/ENGINX00241391.nxs"),
+            ),
         ),
         (
-                "e2e_data/1600007/IMAT00004217.nxs",
-                DetectedRun(
-                    run_number=4217,
-                    instrument="IMAT",
-                    experiment_title="Check DAE and end of run working after move",
-                    experiment_number="1600007",
-                    filepath=Path(TEST_DATA_PATH, "e2e_data/1600007/IMAT00004217.nxs"),
-                ),
+            "e2e_data/1600007/IMAT00004217.nxs",
+            DetectedRun(
+                run_number=4217,
+                instrument="IMAT",
+                experiment_title="Check DAE and end of run working after move",
+                experiment_number="1600007",
+                filepath=Path(TEST_DATA_PATH, "e2e_data/1600007/IMAT00004217.nxs"),
+            ),
         ),
         (
-                "e2e_data/1920302/ALF82301.nxs",
-                DetectedRun(
-                    run_number=82301,
-                    instrument="ALF",
-                    experiment_title="YbCl3 rot=0",
-                    experiment_number="1920302",
-                    filepath=Path(TEST_DATA_PATH, "e2e_data/1920302/ALF82301.nxs"),
-                ),
+            "e2e_data/1920302/ALF82301.nxs",
+            DetectedRun(
+                run_number=82301,
+                instrument="ALF",
+                experiment_title="YbCl3 rot=0",
+                experiment_number="1920302",
+                filepath=Path(TEST_DATA_PATH, "e2e_data/1920302/ALF82301.nxs"),
+            ),
         ),
         (
-                "e2e_data/25581/MAR25581.nxs",
-                DetectedRun(
-                    run_number=25581,
-                    instrument="MARI",
-                    experiment_title="Whitebeam - vanadium - detector tests - vacuum bad - HT on not on all LAB",
-                    experiment_number="1820497",
-                    filepath=Path(TEST_DATA_PATH, "e2e_data/25581/MAR25581.nxs"),
-                    additional_values={
-                        "ei": "auto",
-                        "monovan": 0,
-                        "runno": 25581,
-                        "sam_mass": 0.0,
-                        "sam_rmm": 0.0,
-                        "sum_runs": False,
-                        "remove_bkg": True,
-                    },
-                ),
+            "e2e_data/25581/MAR25581.nxs",
+            DetectedRun(
+                run_number=25581,
+                instrument="MARI",
+                experiment_title="Whitebeam - vanadium - detector tests - vacuum bad - HT on not on all LAB",
+                experiment_number="1820497",
+                filepath=Path(TEST_DATA_PATH, "e2e_data/25581/MAR25581.nxs"),
+                additional_values={
+                    "ei": "auto",
+                    "monovan": 0,
+                    "runno": 25581,
+                    "sam_mass": 0.0,
+                    "sam_rmm": 0.0,
+                    "sum_runs": False,
+                    "remove_bkg": True,
+                },
+            ),
         ),
     ],
     ids=["ENGINX00241391.nxs", "IMAT00004217.nxs", "ALF82301.nxs", "MARI25581.nxs"],
@@ -122,10 +122,10 @@ def test_to_json_string() -> None:
         filepath=Path("e2e_data/1920302/ALF82301.nxs"),
     )
     assert (
-            nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
-                                               '"my experiment", "experiment_number": "54321", "filepath": '
-                                               '"e2e_data/1920302/ALF82301.nxs", '
-                                               '"additional_values": {}}'
+        nexus_metadata.to_json_string() == '{"run_number": 12345, "instrument": "LARMOR", "experiment_title": '
+        '"my experiment", "experiment_number": "54321", "filepath": '
+        '"e2e_data/1920302/ALF82301.nxs", '
+        '"additional_values": {}}'
     )
 
 
