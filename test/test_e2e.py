@@ -83,7 +83,7 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         b'"/archive/25581/MAR25581.nxs", '
         b'"run_start": "2019-03-22T10:15:44", "run_end": "2019-03-22T10:18:26", '
         b'"raw_frames": 8067, "good_frames": 6452, '
-        b'"users": "Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara"'
+        b'"users": "Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara", '
         b'"additional_values": {"ei": "auto", "sam_mass": 0.0, '
         b'"sam_rmm": 0.0, "monovan": 0, "remove_bkg": true, "sum_runs": false, "runno": 25581}}',
     ]
