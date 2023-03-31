@@ -29,7 +29,6 @@ class MariStitchRule(Rule[bool]):
         return run_numbers
 
     def verify(self, run: DetectedRun) -> None:
-
         if not self._value:  # if the stitch rule is set to false, skip
             return
 
