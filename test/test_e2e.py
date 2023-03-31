@@ -45,10 +45,11 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
     amq_connection.send("Interactive-Reduction", r"\\isis\1600007\IMAT00004217.nxs")
     amq_connection.send("Interactive-Reduction", r"\\isis\1510111\ENGINX00241391.nxs")
     amq_connection.send("Interactive-Reduction", r"\\isis\1920302\ALF82301.nxs")
+    amq_connection.send("Interactive-Reduction", r"\\isis\25581\MAR25581.nxs")
 
     received = []
     for _ in range(60):
-        if len(received) >= 2:
+        if len(received) >= 3:
             break
         msg = kafka_consumer.poll(timeout=1.0)
         if msg is None:
@@ -77,6 +78,14 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         b'"run_start": "2019-11-12T14:30:39", "run_end": "2019-11-12T14:34:20", "ra'
         b'w_frames": 2998, "good_frames": 2998, "users": "Zhao", '
         b'"additional_values": {}}',
+        b'{"run_number": 25581, "instrument": "MARI", "experiment_title": "Whitebeam - vanadium - detector tests - '
+        b'vacuum bad - HT on not on all LAB", "experiment_number": "1820497", "filepath": '
+        b'"/archive/25581/MAR25581.nxs", '
+        b'"run_start": "2019-03-22T10:15:44", "run_end": "2019-03-22T10:18:26", '
+        b'"raw_frames": 8067, "good_frames": 6452, '
+        b'"users": "Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara", '
+        b'"additional_values": {"ei": "auto", "sam_mass": 0.0, '
+        b'"sam_rmm": 0.0, "monovan": 0, "remove_bkg": true, "sum_runs": false, "runno": 25581}}',
     ]
 
 

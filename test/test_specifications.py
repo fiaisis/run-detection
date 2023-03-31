@@ -11,6 +11,7 @@ from _pytest.logging import LogCaptureFixture
 
 from rundetection.ingest import DetectedRun
 from rundetection.rules.common_rules import EnabledRule
+from rundetection.rules.mari_rules import MariStitchRule
 from rundetection.specifications import InstrumentSpecification
 
 
@@ -90,8 +91,7 @@ def test_run_will_not_be_reduced_for_a_no_rule_specification(specification, run:
 
 def test_specification_rule_loading() -> None:
     """
-    Test that the correct spec for each instrument is loaded. Currently specs can only have 1 rule, enabled is true
-    or false
+    Test that the correct spec for each instrument is loaded.
     :param run: Run Fixture
     :return: None
     """
@@ -100,6 +100,8 @@ def test_specification_rule_loading() -> None:
 
     assert isinstance(mari_specification._rules[0], EnabledRule)
     assert mari_specification._rules[0]._value
+    assert isinstance(mari_specification._rules[1], MariStitchRule)
+    assert mari_specification._rules[1]._value
 
     assert isinstance(chronus_specification._rules[0], EnabledRule)
     assert chronus_specification._rules[0]._value is False

@@ -76,6 +76,64 @@ pytest test/test_e2e.py
 This will pull the kafka/activemq containers and build the run detection container.
 Any code changes made after starting run detection will require the run detection container to be rebuilt.
 
+## Adding additional nexus extraction rules
+
+In certain cases, specific instruments may include additional metadata that can be used as run inputs. As these metadata
+are instrument-specific, they will not apply to all Nexus files. To accommodate these additional metadata, you can
+create custom extraction functions for the ingestion process (e.g., mari_extract).
+
+Adding Custom Nexus Extraction Rules
+
+In certain cases, specific instruments may include additional metadata that can be used as run inputs. As these metadata
+are instrument-specific, they will not apply to all Nexus files. To accommodate these additional metadata, you can
+create custom extraction functions for the ingestion process (e.g., mari_extract).
+
+To add a custom extraction function, follow these steps:
+
+1.
+
+```python
+def my_instrument_extract(run: DetectedRun, dataset: Any) -> DetectedRun
+    """
+    Extracts additional metadata specific to my instrument from the given dataset and updates the DetectedRun
+    instance. If the metadata does not exist, the default values will be set instead.
+
+    :param run: DetectedRun instance for which to extract additional metadata
+    :param dataset: The dataset from which to extract additional MARI-specific metadata.
+    :return: DetectedRun instance with updated additional metadata
+    """
+    run.additional_values["some_key"] = dataset.get("some_key")
+    return run
+```
+
+Where the extraction function has the type `Callable[[DetectedRun, Any] DetectedRun]`
+While Any is listed, it is actually a h5py group, but the library does not have any type stubs.
+
+Next update the extraction factory function:
+
+2.
+
+```python
+def get_extraction_function(instrument: str) -> Callable[[DetectedRun, Any], DetectedRun]:
+    """
+    Given an instrument name, return the additional metadata extraction function for the instrument
+    :param instrument: str - instrument name
+    :return: Callable[[DetectedRun, Any], DetectedRun]: The additional metadata extraction function for the instrument
+    """
+    match instrument.lower():
+        case "mari":
+            return mari_extract
+        case "my_instrument":
+            return my_instrument_extract
+        case _:
+            return skip_extract
+
+
+```
+
+After making these two changes, when a run for your instrument is detected, the new extraction function will be
+automatically called, and the DetectedRun.additional_values will be updated accordingly.
+
 ## Adding to Instrument Specifications
 
 For a run to be sent downstream the metadata of the recieved file must meet the specification for that instrument.
@@ -100,7 +158,7 @@ Below is an example of adding a new rule. The example is unrealistic, but it sho
     ```json
     {
      "enabled": true,
-     "skipTitlesIncluding": ["foo", "bar", "baz"] 
+     "skipTitlesIncluding": ["25581", "bar", "baz"] 
     }
     ```
 2. Create the `Rule` implementation:

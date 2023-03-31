@@ -184,8 +184,8 @@ good-names=i,
            __,
            ___,
            id,
-           ip
-
+           ip,
+           ei
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
 good-names-rgxs=
