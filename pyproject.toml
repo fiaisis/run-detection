@@ -18,7 +18,7 @@ run-detection = "rundetection.run_detection:main"
 
 [project.optional-dependencies]
 formatting = [
-    "black==23.1.0"
+    "black==23.3.0"
 ]
 
 test = [
@@ -28,7 +28,7 @@ test = [
 
 code-inspection = [
     "pylint==2.17.1",
-    "mypy==1.1.1",
+    "mypy==1.2.0",
     "run-detection[test]"
 ]
 
