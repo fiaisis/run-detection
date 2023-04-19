@@ -36,6 +36,5 @@ dev = [
     "run-detection[code-inspection]"
 ]
 
-
 [tool.setuptools]
 packages = ["rundetection", "rundetection.rules"]
