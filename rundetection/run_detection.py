@@ -53,7 +53,8 @@ class RunDetector:
         :return: The mapped path object
         """
         match = re.search(r"cycle_(\d{2})_(\d+)\\NDX(\w+)\\[a-zA-Z]+(\d+)\.nxs", path_str)
-
+        if match is None:
+            raise ValueError(f"Path was not in expected format: {path_str}")
         year, cycle, instrument, run_number = match.groups()
 
         # Creating the new path format

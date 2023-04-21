@@ -139,5 +139,16 @@ def test__map_path(detector) -> None:
     assert result == expected_output
 
 
+def test__map_path_raises_for_bad_path(detector) -> None:
+    """
+    Test that value error if bad path is given
+    :param detector: run detector fixture
+    :return: None
+    """
+    input_path = "foo"
+    with pytest.raises(ValueError):
+        detector._map_path(input_path)
+
+
 if __name__ == "__main__":
     unittest.main()
