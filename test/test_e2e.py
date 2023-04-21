@@ -41,11 +41,10 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
     Test message that is sent to activemq is processed and arrives at kafka instance
     :return: None
     """
-
-    amq_connection.send("Interactive-Reduction", r"\\isis\1600007\IMAT00004217.nxs")
-    amq_connection.send("Interactive-Reduction", r"\\isis\1510111\ENGINX00241391.nxs")
-    amq_connection.send("Interactive-Reduction", r"\\isis\1920302\ALF82301.nxs")
-    amq_connection.send("Interactive-Reduction", r"\\isis\25581\MAR25581.nxs")
+    amq_connection.send("Interactive-Reduction", r"\\isis\inst$\Cycles$\cycle_22_04\NDXIMAT\IMAT00004217.nxs")
+    amq_connection.send("Interactive-Reduction", r"\\isis\inst$\Cycles$\cycle_22_04\NDXENGINX\ENGINX00241391.nxs")
+    amq_connection.send("Interactive-Reduction", r"\\isis\inst$\Cycles$\cycle_22_04\NDXALF\ALF82301.nxs")
+    amq_connection.send("Interactive-Reduction", r"\\isis\inst$\Cycles$\cycle_22_04\NDXMAR\MAR25581.nxs")
 
     received = []
     for _ in range(60):

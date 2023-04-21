@@ -15,7 +15,7 @@ from rundetection.notifications import Notification
 from rundetection.queue_listener import Message
 from rundetection.run_detection import RunDetector
 
-MESSAGE = Message(id="id", value="value")
+MESSAGE = Message(id="id", value=r"\\isis\inst$\Cycles$\cycle_22_04\NDXGEM\GEM12345.nxs")
 
 
 @pytest.fixture
@@ -24,6 +24,7 @@ def detector() -> RunDetector:
     Sets up and returns a run detector
     :return: RunDetector
     """
+
     detector_ = RunDetector()
     detector_._queue_listener = Mock()
     detector_._message_queue = Mock()
@@ -100,7 +101,7 @@ def test__process_message_exception_logged(_: Mock, caplog: LogCaptureFixture, d
     :return: None
     """
     detector._process_message(MESSAGE)
-    assert "Problem processing message: value" in caplog.text
+    assert r"Problem processing message: \\isis\inst$\Cycles$\cycle_22_04\NDXGEM\GEM12345.nxs" in caplog.text
     detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
 
 
@@ -131,9 +132,11 @@ def test__map_path(detector) -> None:
     :param detector: The run detector fixture
     :return: None
     """
-    initial_path_string = r"\\isis\foo\bar\baz.nxs"
-    expected_path = Path("/archive/foo/bar/baz.nxs")
-    assert detector._map_path(initial_path_string) == expected_path
+
+    input_path = r"\\isis\inst$\Cycles$\cycle_22_04\NDXGEM\GEM12345.nxs"
+    expected_output = Path("/archive/NDXGEM/Instrument/data/cycle_22_04/GEM12345.nxs")
+    result = detector._map_path(input_path)
+    assert result == expected_output
 
 
 if __name__ == "__main__":
