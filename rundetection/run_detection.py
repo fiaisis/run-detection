@@ -2,6 +2,7 @@
 Run detection module holds the RunDetector main class
 """
 import logging
+import re
 import sys
 import time
 from pathlib import Path
@@ -51,8 +52,14 @@ class RunDetector:
         :param path_str: The path string to map
         :return: The mapped path object
         """
-        path_str = path_str.replace(r"\\isis", r"\archive") if path_str.startswith(r"\\isis") else path_str
-        return Path("/archive", "/".join(path_str.split("\\")))
+        match = re.search(r"cycle_(\d{2})_(\d+)\\NDX(\w+)\\[a-zA-Z]+(\d+)\.nxs", path_str)
+        if match is None:
+            raise ValueError(f"Path was not in expected format: {path_str}")
+        year, cycle, instrument, run_number = match.groups()
+
+        # Creating the new path format
+        converted_path = f"/archive/NDX{instrument}/Instrument/data/cycle_{year}_{cycle}/{instrument}{run_number}.nxs"
+        return Path(converted_path)
 
     def _process_message(self, message: Message) -> None:
         logger.info("Processing message: %s", message)
