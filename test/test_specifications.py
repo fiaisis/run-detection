@@ -2,6 +2,7 @@
 Specification unit test module
 """
 from pathlib import Path
+
 # pylint: disable=protected-access, redefined-outer-name
 from unittest.mock import Mock, patch
 
