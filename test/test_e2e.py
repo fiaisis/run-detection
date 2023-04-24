@@ -59,9 +59,8 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         except KafkaError as exc:
             kafka_consumer.close()
             pytest.fail("Problem with kafka consumer", exc)
-    else:
-        kafka_consumer.close()
-        pytest.fail("No message could be consumed")
+
+    kafka_consumer.close()
 
     assert received == [
         b'{"run_number": 25581, "instrument": "MARI", "experiment_title": "Whitebeam - vanadium - detector tests - '
