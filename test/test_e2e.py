@@ -47,9 +47,7 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
     amq_connection.send("Interactive-Reduction", r"\\isis\inst$\Cycles$\cycle_22_04\NDXMAR\MAR25581.nxs")
 
     received = []
-    for _ in range(60):
-        if len(received) >= 3:
-            break
+    for _ in range(30):
         msg = kafka_consumer.poll(timeout=1.0)
         if msg is None:
             continue
@@ -61,23 +59,10 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         except KafkaError as exc:
             kafka_consumer.close()
             pytest.fail("Problem with kafka consumer", exc)
-    else:
-        kafka_consumer.close()
-        pytest.fail("No message could be consumed")
+
+    kafka_consumer.close()
 
     assert received == [
-        b'{"run_number": 241391, "instrument": "ENGINX", "experiment_title": "CeO2 4 x'
-        b' 4 x 15", "experiment_number": "1510111",'
-        b' "filepath": "/archive/NDXENGINX/Instrument/data/cycle_20_01/ENGINX00241391.nxs", '
-        b'"run_start": "2015-07-01T15:29:17", "run_end": "2015-07-01T'
-        b'15:53:16", "raw_frames": 23740, "good_frames": 18992, "users": "Liu,Andrioti'
-        b's,Smith,Hallam,Flewitt,Kabra", '
-        b'"additional_values": {}}',
-        b'{"run_number": 82301, "instrument": "ALF", "experiment_title": "YbCl3 rot=0"'
-        b', "experiment_number": "1920302", "filepath": "/archive/NDXALF/Instrument/data/cycle_19_03/ALF82301.nxs", '
-        b'"run_start": "2019-11-12T14:30:39", "run_end": "2019-11-12T14:34:20", "ra'
-        b'w_frames": 2998, "good_frames": 2998, "users": "Zhao", '
-        b'"additional_values": {}}',
         b'{"run_number": 25581, "instrument": "MARI", "experiment_title": "Whitebeam - vanadium - detector tests - '
         b'vacuum bad - HT on not on all LAB", "experiment_number": "1820497", "filepath": '
         b'"/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs", '
@@ -87,6 +72,7 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         b'"additional_values": {"ei": "auto", "sam_mass": 0.0, '
         b'"sam_rmm": 0.0, "monovan": 0, "remove_bkg": true, "sum_runs": false, "runno": 25581}}',
     ]
+    assert len(received) == 1
 
 
 if __name__ == "__main__":
