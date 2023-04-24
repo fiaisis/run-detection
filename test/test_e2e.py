@@ -47,9 +47,7 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
     amq_connection.send("Interactive-Reduction", r"\\isis\inst$\Cycles$\cycle_22_04\NDXMAR\MAR25581.nxs")
 
     received = []
-    for _ in range(60):
-        if len(received) >= 3:
-            break
+    for _ in range(30):
         msg = kafka_consumer.poll(timeout=1.0)
         if msg is None:
             continue
