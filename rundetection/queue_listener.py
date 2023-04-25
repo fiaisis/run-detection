@@ -58,10 +58,16 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         logger.warning("Disconnected, attempting reconnect...")
         self._connect_and_subscribe()
 
+    def on_error(self, frame: Frame) -> None:
+        """
+        Called on error from message broker.
+        """
+        logger.warning("Error recieved from message broker: %s", frame.body)
+
     def _connect_and_subscribe(self) -> None:
         try:
             logger.info("Attempting connection")
-            self._connection.connect(username=self._user, password=self._password)
+            self._connection.connect(username=self._user, passcode=self._password)
             self._connection.set_listener(listener=self, name="run-detection-listener")
             self._connection.subscribe(
                 destination=self._queue,
