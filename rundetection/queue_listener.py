@@ -36,6 +36,7 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         self._ip: str = os.environ.get("ACTIVEMQ_IP", "localhost")
         self._user: str = os.environ.get("ACTIVEMQ_USER", "admin")
         self._password: str = os.environ.get("ACTIVEMQ_PASS", "admin")
+        self._queue: str = os.environ.get("ACTIVEMQ_QUEUE", "Interactive-Reduction")
         self._connection: Connection = Connection([(self._ip, 61613)])
         self._subscription_id = "1"
         super().__init__()
@@ -63,7 +64,7 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
             self._connection.connect(username=self._user, password=self._password)
             self._connection.set_listener(listener=self, name="run-detection-listener")
             self._connection.subscribe(
-                destination="Interactive-Reduction",
+                destination=self._queue,
                 id=self._subscription_id,
                 ack="client",
             )

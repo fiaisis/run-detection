@@ -161,5 +161,25 @@ def assert_connect_and_subscribe(listener: QueueListener, username: str = "admin
     )
 
 
+def test_connect_and_subscribe_with_queue_var() -> None:
+    """
+    Assert the given queue listener attempted to connect
+    :return: None
+    """
+    os.environ["ACTIVEMQ_QUEUE"] = "fancy_queue"
+    message_queue: SimpleQueue[Message] = SimpleQueue()
+    listener = QueueListener(message_queue)
+
+    listener._connection = Mock()
+    listener.run()
+
+    listener._connection.connect.assert_called_once_with(username="admin", password="admin")
+    listener._connection.set_listener.assert_called_once_with(listener=listener, name="run-detection-listener")
+    listener._connection.subscribe.assert_called_once_with(
+        destination="fancy_queue", id=listener._subscription_id, ack="client"
+    )
+    os.environ.pop("ACTIVEMQ_QUEUE", None)
+
+
 if __name__ == "__main__":
     unittest.main()
