@@ -148,6 +148,9 @@ def test_connection_username_and_password_can_be_set_by_environment_variable() -
     listener.run()
     assert_connect_and_subscribe(listener, username="great_username", password="great_password")
 
+    os.environ.pop("ACTIVEMQ_USER", None)
+    os.environ.pop("ACTIVEMQ_PASS", None)
+
 
 def assert_connect_and_subscribe(listener: QueueListener, username: str = "admin", password: str = "admin") -> None:
     """
