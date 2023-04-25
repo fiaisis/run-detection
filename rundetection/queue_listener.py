@@ -3,6 +3,7 @@ broker """
 import logging
 import os
 import time
+import uuid
 from dataclasses import dataclass
 from queue import SimpleQueue
 
@@ -38,7 +39,7 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         self._password: str = os.environ.get("ACTIVEMQ_PASS", "admin")
         self._queue: str = os.environ.get("ACTIVEMQ_QUEUE", "Interactive-Reduction")
         self._connection: Connection = Connection([(self._ip, 61613)])
-        self._subscription_id = "1"
+        self._subscription_id = str(uuid.uuid4())
         super().__init__()
 
     def on_message(self, frame: Frame) -> None:
