@@ -52,13 +52,13 @@ class RunDetector:
         :param path_str: The path string to map
         :return: The mapped path object
         """
-        match = re.search(r"cycle_(\d{2})_(\d+)\\(NDX\w+)\\([a-zA-Z]+)(\d+)\.nxs", path_str)
+        match = re.search(r"cycle_(\d{2})_(\d+)\\(NDX\w+)\\([a-zA-Z]+\d+\.nxs)", path_str)
         if match is None:
             raise ValueError(f"Path was not in expected format: {path_str}")
-        year, cycle, ndx_name, instrument, run_number = match.groups()
+        year, cycle, ndx_name, filename = match.groups()
 
         # Creating the new path format
-        converted_path = f"/archive/{ndx_name}/Instrument/data/cycle_{year}_{cycle}/{instrument}{run_number}.nxs"
+        converted_path = f"/archive/{ndx_name}/Instrument/data/cycle_{year}_{cycle}/{filename}"
         return Path(converted_path)
 
     def _process_message(self, message: Message) -> None:
