@@ -139,6 +139,18 @@ def test__map_path(detector) -> None:
     assert result == expected_output
 
 
+def test__map_path_short_name_used(detector) -> None:
+    """
+    Test that the given path is mapped correctly using a short name
+    :param detector:
+    :return:
+    """
+    input_path = r"\\isis\inst$\Cycles$\cycle_23_01\NDXMARI\MAR28573.nxs"
+    expected_output = Path("/archive/NDXMARI/Instrument/data/cycle_23_01/MAR28573.nxs")
+    result = detector._map_path(input_path)
+    assert result == expected_output
+
+
 def test__map_path_raises_for_bad_path(detector) -> None:
     """
     Test that value error if bad path is given
