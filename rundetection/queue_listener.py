@@ -3,6 +3,7 @@ broker """
 import logging
 import os
 import time
+import uuid
 from dataclasses import dataclass
 from queue import SimpleQueue
 
@@ -38,7 +39,7 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         self._password: str = os.environ.get("ACTIVEMQ_PASS", "admin")
         self._queue: str = os.environ.get("ACTIVEMQ_QUEUE", "Interactive-Reduction")
         self._connection: Connection = Connection([(self._ip, 61613)])
-        self._subscription_id = "1"
+        self._subscription_id = str(uuid.uuid4())
         super().__init__()
 
     def on_message(self, frame: Frame) -> None:
@@ -58,10 +59,16 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         logger.warning("Disconnected, attempting reconnect...")
         self._connect_and_subscribe()
 
+    def on_error(self, frame: Frame) -> None:
+        """
+        Called on error from message broker.
+        """
+        logger.warning("Error recieved from message broker: %s", frame.body)
+
     def _connect_and_subscribe(self) -> None:
         try:
             logger.info("Attempting connection")
-            self._connection.connect(username=self._user, password=self._password)
+            self._connection.connect(username=self._user, passcode=self._password)
             self._connection.set_listener(listener=self, name="run-detection-listener")
             self._connection.subscribe(
                 destination=self._queue,
