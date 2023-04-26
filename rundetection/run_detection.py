@@ -7,6 +7,7 @@ import sys
 import time
 from pathlib import Path
 from queue import SimpleQueue
+from typing import Dict
 
 from rundetection.ingest import ingest
 from rundetection.notifications import Notifier, Notification
@@ -52,13 +53,13 @@ class RunDetector:
         :param path_str: The path string to map
         :return: The mapped path object
         """
-        match = re.search(r"cycle_(\d{2})_(\d+)\\NDX(\w+)\\[a-zA-Z]+(\d+)\.nxs", path_str)
+        match = re.search(r"cycle_(\d{2})_(\d+)\\(NDX\w+)\\([a-zA-Z]+)(\d+)\.nxs", path_str)
         if match is None:
             raise ValueError(f"Path was not in expected format: {path_str}")
-        year, cycle, instrument, run_number = match.groups()
+        year, cycle, NDX_name, instrument, run_number = match.groups()
 
         # Creating the new path format
-        converted_path = f"/archive/NDX{instrument}/Instrument/data/cycle_{year}_{cycle}/{instrument}{run_number}.nxs"
+        converted_path = f"/archive/{NDX_name}/Instrument/data/cycle_{year}_{cycle}/{instrument}{run_number}.nxs"
         return Path(converted_path)
 
     def _process_message(self, message: Message) -> None:
@@ -100,6 +101,32 @@ def main(archive_path: str = "/archive") -> None:
     logger.info("Starting run detection")
     run_detector = RunDetector()
     run_detector.run()
+
+
+class Instrument:
+    _name_mapper: Dict[str, str] = {
+        "MARI": "MAR",
+        "MAR": "MARI",
+    }
+
+    def __init__(self, name: str):
+        self._name = name
+
+    @property
+    def name(self) -> str:
+        return None
+
+    @property
+    def short_name(self) -> str:
+        return None
+
+    def __repr__(self) -> str:
+        return f"<Instrument(name={self.name})>"
+
+    def __eq__(self, other: object):
+        if not isinstance(other, Instrument):
+            return False
+        return self.name == other.name
 
 
 if __name__ == "__main__":
