@@ -157,7 +157,7 @@ def assert_connect_and_subscribe(listener: QueueListener, username: str = "admin
     Assert the given queue listener attempted to connect
     :return: None
     """
-    listener._connection.connect.assert_called_once_with(username=username, password=password)
+    listener._connection.connect.assert_called_once_with(username=username, passcode=password)
     listener._connection.set_listener.assert_called_once_with(listener=listener, name="run-detection-listener")
     listener._connection.subscribe.assert_called_once_with(
         destination="Interactive-Reduction", id=listener._subscription_id, ack="client"
@@ -176,7 +176,7 @@ def test_connect_and_subscribe_with_queue_var() -> None:
     listener._connection = Mock()
     listener.run()
 
-    listener._connection.connect.assert_called_once_with(username="admin", password="admin")
+    listener._connection.connect.assert_called_once_with(username="admin", passcode="admin")
     listener._connection.set_listener.assert_called_once_with(listener=listener, name="run-detection-listener")
     listener._connection.subscribe.assert_called_once_with(
         destination="fancy_queue", id=listener._subscription_id, ack="client"
