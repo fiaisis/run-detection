@@ -117,7 +117,7 @@ def mari_extract(run: DetectedRun, dataset: Any) -> DetectedRun:
     elif ei and len(ei) > 1:
         ei = [float(val) for val in ei]
     else:
-        ei = "auto"
+        ei = "'auto'"
 
     if dataset.get("sam_mass") is not None:
         sam_mass = float(dataset.get("sam_mass")[0])

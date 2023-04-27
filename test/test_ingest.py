@@ -105,7 +105,7 @@ def detected_run():
                 run_end="2019-03-22T10:18:26",
                 users="Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara",
                 additional_values={
-                    "ei": "auto",
+                    "ei": "'auto'",
                     "monovan": 0,
                     "runno": 25581,
                     "sam_mass": 0.0,
@@ -284,7 +284,7 @@ def test_mari_extract_no_ei(detected_run: DetectedRun):
     dataset = {"sam_mass": [5.0], "sam_rmm": [100.0]}
     result = mari_extract(detected_run, dataset)
 
-    assert result.additional_values["ei"] == "auto"
+    assert result.additional_values["ei"] == "'auto'"
     assert result.additional_values["sam_mass"] == 5.0
     assert result.additional_values["sam_rmm"] == 100.0
     assert result.additional_values["monovan"] == 12345
