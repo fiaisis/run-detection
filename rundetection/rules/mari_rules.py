@@ -1,12 +1,15 @@
 """
 Mari Rules
 """
+import logging
 from copy import deepcopy
 from pathlib import Path
 from typing import List
 
 from rundetection.ingest import DetectedRun, get_run_title
 from rundetection.rules.rule import Rule
+
+logger = logging.getLogger(__name__)
 
 
 class MariStitchRule(Rule[bool]):
@@ -38,3 +41,12 @@ class MariStitchRule(Rule[bool]):
             additional_run.additional_values["runno"] = run_numbers
             additional_run.additional_values["sum_runs"] = True
             run.additional_runs.append(additional_run)
+
+
+class MariMaskFileRule(Rule[str]):
+    """
+    Adds the permalink of the maskfile to the additional outputs
+    """
+
+    def verify(self, run: DetectedRun) -> None:
+        run.additional_values["mask_file_link"] = self._value
