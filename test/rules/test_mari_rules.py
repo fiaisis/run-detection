@@ -1,13 +1,13 @@
 """
 Test for mari rules
 """
-# pylint:disable = redefined-outer-name
+# pylint:disable = redefined-outer-name, protected-access
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
-from rundetection.ingestion.detected_run import DetectedRun
+from rundetection.ingest import DetectedRun
 from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule
 
 
