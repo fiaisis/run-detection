@@ -71,8 +71,8 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         b'"users": "Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara", '
         b'"additional_values": {"ei": "\'auto\'", "sam_mass": 0.0, '
         b'"sam_rmm": 0.0, "monovan": 0, "remove_bkg": true, "sum_runs": false, "runno": 25581, '
-        b'"mask_file_link": "https://raw.githubusercontent.com/interactivereduction/autoreduction-scripts/'
-        b'99b8059634aa3439944da591aa59fa3523e72873/MARI/reduce.py"}}',
+        b'"mask_file_link": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/'
+        b'964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml"}}',
     ]
     assert len(received) == 1
 

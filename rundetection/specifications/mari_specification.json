@@ -1,5 +1,5 @@
 {
   "enabled": true,
   "maristitch": false,
-  "marimaskfile": "https://raw.githubusercontent.com/interactivereduction/autoreduction-scripts/99b8059634aa3439944da591aa59fa3523e72873/MARI/reduce.py"
+  "marimaskfile": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml"
 }
