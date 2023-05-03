@@ -131,7 +131,7 @@ def mari_extract(run: DetectedRun, dataset: Any) -> DetectedRun:
     if dataset.get("remove_bkg") is not None:
         remove_bkg = bool(dataset.get("remove_bkg")[0])
     else:
-        remove_bkg = True
+        remove_bkg = False
 
     run.additional_values["ei"] = ei
     run.additional_values["sam_mass"] = sam_mass
