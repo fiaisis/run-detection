@@ -39,6 +39,10 @@ def test_raises_exception_for_incorrect_rule_value_type() -> None:
         rule_factory("enabled", "string")
     with pytest.raises(ValueError):
         rule_factory("enabled", 1)
+    with pytest.raises(ValueError):
+        rule_factory("maristitch", 4)
+    with pytest.raises(ValueError):
+        rule_factory("marimaskfile", 5)
 
 
 if __name__ == "__main__":
