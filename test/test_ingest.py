@@ -111,7 +111,7 @@ def detected_run():
                     "sam_mass": 0.0,
                     "sam_rmm": 0.0,
                     "sum_runs": False,
-                    "remove_bkg": True,
+                    "remove_bkg": False,
                 },
             ),
         ),
@@ -256,7 +256,7 @@ def test_mari_extract_single_ei(detected_run: DetectedRun):
     assert result.additional_values["sam_mass"] == 5.0
     assert result.additional_values["sam_rmm"] == 100.0
     assert result.additional_values["monovan"] == 12345
-    assert result.additional_values["remove_bkg"] is True
+    assert result.additional_values["remove_bkg"] is False
 
 
 def test_mari_extract_multiple_ei(detected_run: DetectedRun):
@@ -272,7 +272,7 @@ def test_mari_extract_multiple_ei(detected_run: DetectedRun):
     assert result.additional_values["sam_mass"] == 5.0
     assert result.additional_values["sam_rmm"] == 100.0
     assert result.additional_values["monovan"] == 12345
-    assert result.additional_values["remove_bkg"] is True
+    assert result.additional_values["remove_bkg"] is False
 
 
 def test_mari_extract_no_ei(detected_run: DetectedRun):
@@ -288,7 +288,7 @@ def test_mari_extract_no_ei(detected_run: DetectedRun):
     assert result.additional_values["sam_mass"] == 5.0
     assert result.additional_values["sam_rmm"] == 100.0
     assert result.additional_values["monovan"] == 12345
-    assert result.additional_values["remove_bkg"] is True
+    assert result.additional_values["remove_bkg"] is False
 
 
 def test_mari_extract_no_sam_mass_or_sam_rmm(detected_run: DetectedRun):
@@ -304,24 +304,24 @@ def test_mari_extract_no_sam_mass_or_sam_rmm(detected_run: DetectedRun):
     assert result.additional_values["sam_mass"] == 0.0
     assert result.additional_values["sam_rmm"] == 0.0
     assert result.additional_values["monovan"] == 0
-    assert result.additional_values["remove_bkg"] is True
+    assert result.additional_values["remove_bkg"] is False
 
 
-def test_mari_extract_remove_bkg_false(detected_run: DetectedRun):
+def test_mari_extract_remove_bkg_true(detected_run: DetectedRun):
     """
     Test mari extract with no background radiation correction we use a dict instead of a h5py group since they have
     identical API
     :param detected_run: Detected Run fixture
     :return: None
     """
-    dataset = {"ei": [10.0], "sam_mass": [5.0], "sam_rmm": [100.0], "remove_bkg": [False]}
+    dataset = {"ei": [10.0], "sam_mass": [5.0], "sam_rmm": [100.0], "remove_bkg": [True]}
     result = mari_extract(detected_run, dataset)
 
     assert result.additional_values["ei"] == 10.0
     assert result.additional_values["sam_mass"] == 5.0
     assert result.additional_values["sam_rmm"] == 100.0
     assert result.additional_values["monovan"] == 12345
-    assert result.additional_values["remove_bkg"] is False
+    assert result.additional_values["remove_bkg"] is True
 
 
 def test_ingest_to_json_string_produces_no_decode_errors():
