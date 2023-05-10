@@ -3,7 +3,7 @@ Module containing the factory function for each rule
 """
 from rundetection.rules.common_rules import EnabledRule
 from rundetection.rules.inter_rules import InterStitchRule
-from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule
+from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
 from rundetection.rules.rule import T_co, Rule, MissingRuleError
 
 
@@ -31,6 +31,10 @@ def rule_factory(key_: str, value: T_co) -> Rule[T_co]:
         case "marimaskfile":
             if isinstance(value, str):
                 return MariMaskFileRule(value)
+            raise ValueError(f"Bad value: {value} in rule {key_}")
+        case "mariwbvan":
+            if isinstance(value, int):
+                return MariWBVANRule(value)
             raise ValueError(f"Bad value: {value} in rule {key_}")
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
