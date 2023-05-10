@@ -1,13 +1,15 @@
 """
 Module containing the factory function for each rule
 """
+from typing import Any
+
 from rundetection.rules.common_rules import EnabledRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
-from rundetection.rules.rule import T_co, Rule, MissingRuleError
+from rundetection.rules.rule import MissingRuleError, T, Rule
 
 
-def rule_factory(key_: str, value: T_co) -> Rule[T_co]:
+def rule_factory(key_: str, value: T) -> Rule[Any]:
     """
     Given the rule key, and rule value, return the rule implementation
     :param key_: The key of the rule
