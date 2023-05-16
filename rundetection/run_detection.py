@@ -3,10 +3,13 @@ Run detection module holds the RunDetector main class
 """
 import logging
 import re
+import signal
 import sys
 import time
 from pathlib import Path
-from queue import SimpleQueue
+from queue import SimpleQueue, Empty
+from types import FrameType
+from typing import Optional
 
 from rundetection.ingest import ingest
 from rundetection.notifications import Notifier, Notification
@@ -33,6 +36,23 @@ class RunDetector:
         self._message_queue: SimpleQueue[Message] = SimpleQueue()
         self._queue_listener: QueueListener = QueueListener(self._message_queue)
         self._notifier: Notifier = Notifier()
+        signal.signal(signal.SIGTERM, self.shutdown)
+        signal.signal(signal.SIGINT, self.shutdown)
+
+    def restart_listener(self) -> None:
+        logger.info("Stopping the queue listener and waiting 30 seconds...")
+        self._queue_listener.stop()
+        time.sleep(30)
+        logger.info("Starting queue listener")
+        self._queue_listener.run()
+
+    def shutdown_listener(self) -> None:
+        logger.info("Stopping listener")
+        self._queue_listener.stop()
+
+    def shutdown(self, _: int, __: Optional[FrameType]) -> None:
+        logger.info("Shutting down run detection...")
+        self.shutdown_listener()
 
     def run(self) -> None:
         """

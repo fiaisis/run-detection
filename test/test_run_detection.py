@@ -162,5 +162,37 @@ def test__map_path_raises_for_bad_path(detector) -> None:
         detector._map_path(input_path)
 
 
+@patch("rundetection.run_detection.time.sleep")
+def test_restart_listener(mock_sleep, detector) -> None:
+    """
+    Test restart listener attempts to restart
+    :return: None
+    """
+    detector.restart_listener()
+
+    detector._queue_listener.stop.assert_called_once()
+    mock_sleep.assert_called_once_with(30)
+    detector._queue_listener.run.assert_called_once()
+
+
+def test_shutdown_listener(detector):
+    """
+    Test listener shutdown is called
+    :return: None
+    """
+    detector.shutdown_listener()
+    detector._queue_listener.stop.assert_called_once()
+
+
+def test_shutdown(detector):
+    """
+    Test shutdown calls are made when detector is shutdown
+    :param detector: detector fixture
+    :return: None
+    """
+    detector.shutdown(1, None)
+    detector._queue_listener.stop.assert_called_once()
+
+
 if __name__ == "__main__":
     unittest.main()
