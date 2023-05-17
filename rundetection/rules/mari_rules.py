@@ -50,3 +50,13 @@ class MariMaskFileRule(Rule[str]):
 
     def verify(self, run: DetectedRun) -> None:
         run.additional_values["mask_file_link"] = self._value
+
+
+class MariWBVANRule(Rule[int]):
+    """
+    Inserts the cycles wbvan number into the script. This value is manually calculated by the MARI instrument scientist
+    once per cycle.
+    """
+
+    def verify(self, run: DetectedRun) -> None:
+        run.additional_values["wbvan"] = self._value

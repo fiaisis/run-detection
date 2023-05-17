@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 
 from rundetection.ingest import DetectedRun
-from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule
+from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
 
 
 @pytest.fixture
@@ -103,3 +103,15 @@ def test_mari_mask_rule(detected_run):
     rule.verify(detected_run)
 
     assert detected_run.additional_values["mask_file_link"] == "some link"
+
+
+def test_mari_wbvan_rule(detected_run):
+    """
+    Test that the wbvan number is set via the specification
+    :param detected_run: DetectedRun fixture
+    :return: None
+    """
+    rule = MariWBVANRule(1234567)
+    rule.verify(detected_run)
+
+    assert detected_run.additional_values["wbvan"] == 1234567
