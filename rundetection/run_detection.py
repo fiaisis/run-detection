@@ -58,11 +58,19 @@ class RunDetector:
         """
         Starts the run detector
         """
-        logging.info("Starting RunDetector")
+        logger.info("Starting RunDetector")
         self._queue_listener.run()
         while True:
-            self._process_message(self._message_queue.get())
-            time.sleep(0.1)
+            try:
+                self._process_message(self._message_queue.get(timeout=10))
+                time.sleep(0.1)
+            except Empty:
+                if self._queue_listener.stopping:
+                    logger.info("No messages processing, breaking main loop...")
+                    break
+                if not self._queue_listener.is_connected():
+                    logger.warning("Queue listener failed silently")
+                    self.restart_listener()
 
     @staticmethod
     def _map_path(path_str: str) -> Path:

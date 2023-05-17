@@ -105,7 +105,7 @@ def test__process_message_exception_logged(_: Mock, caplog: LogCaptureFixture, d
     detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
 
 
-@patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError)
+@patch("rundetection.run_detection.time.sleep", side_effects=[None, InterruptedError])
 def test_run(_: Mock, detector: RunDetector) -> None:
     """
     Test that run is processing messages and queue listener is started
