@@ -109,6 +109,7 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         :return: None
         """
         logger.info("Starting queue listener")
+        self.stopping = False
         self._connect_and_subscribe()
 
     def acknowledge(self, message: Message) -> None:
