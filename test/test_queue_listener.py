@@ -36,27 +36,41 @@ def test_on_message_creates_message_and_puts_to_queue(listener: QueueListener) -
     assert listener._message_queue.get() == Message(value="body text", id="1")
 
 
-def test_will_attempt_reconnect_on_disconnect(listener: QueueListener) -> None:
+@patch("rundetection.queue_listener.QueueListener._create_connection")
+def test_will_attempt_reconnect_on_disconnect(mock_create_connection, listener: QueueListener) -> None:
     """
     Tests that reconnection is attempted on disconnect
     :param listener: Queue Listener Fixture
     :return: None
     """
-    listener._connection = Mock()
     listener.on_disconnected()
-    assert_connect_and_subscribe(listener)
+    mock_create_connection.return_value.connect.assert_called_once()
+    mock_create_connection.return_value.set_listener.assert_called_once()
+    mock_create_connection.return_value.subscribe.assert_called_once()
+
+
+@patch("rundetection.queue_listener.QueueListener._create_connection")
+def test_connect_aborts_when_stopping(mock_create_connection, listener) -> None:
+    """Test that connect and subscriber aborts when listener is stopping"""
+    listener.stopping = True
+    listener._connect_and_subscribe()
+    mock_create_connection.assert_not_called()
 
 
 @patch("rundetection.queue_listener.time")
-def test_will_wait_30_seconds_on_failure_to_reconnect(mock_time: Mock, listener: QueueListener) -> None:
+@patch("rundetection.queue_listener.QueueListener._create_connection")
+def test_will_wait_30_seconds_on_failure_to_reconnect(
+    mock_create_connection, mock_time: Mock, listener: QueueListener
+) -> None:
     """
     Tests will attempt to reconnect after 30 seconds on connection failure
+    :param mock_create_connection: create connection mock
     :param mock_time: patched time mock
     :param listener: QueueListener fixture
     :return: None
     """
-    listener._connection = Mock()
-    listener._connection.connect.side_effect = [ConnectFailedException, None]
+
+    mock_create_connection.return_value.connect.side_effect = [ConnectFailedException, None]
     listener.on_disconnected()
     mock_time.sleep.assert_called_once_with(30)
 
@@ -73,15 +87,15 @@ def test_acknowledge_sends_acknowledgment(listener: QueueListener) -> None:
     listener._connection.ack.assert_called_once_with(message.id, listener._subscription_id)
 
 
-def test_run_connects_queue_listener(listener: QueueListener) -> None:
+@patch("rundetection.queue_listener.QueueListener._create_connection")
+def test_run_connects_queue_listener(mock_create_connection, listener: QueueListener) -> None:
     """
     Tests the queue listener will attempt to connect on run
     :param listener: QueueListener fixture
     :return: None
     """
-    listener._connection = Mock()
     listener.run()
-    assert_connect_and_subscribe(listener)
+    assert_connect_and_subscribe(mock_create_connection.return_value, listener)
 
 
 @patch("rundetection.queue_listener.Connection")
@@ -93,9 +107,10 @@ def test_connection_default_with_no_environment_vars_is_setup_with_localhost(con
 
     message_queue: SimpleQueue[Message] = SimpleQueue()
     listener = QueueListener(message_queue)
+    listener._connect_and_subscribe()
 
     assert listener._connection == connection.return_value
-    connection.assert_called_once_with([("localhost", 61613)])
+    connection.assert_called_once_with([("localhost", 61613)], heartbeats=(30000, 30000))
 
 
 @patch("rundetection.queue_listener.Connection")
@@ -107,9 +122,9 @@ def test_connection_ip_is_setup_with_environment_variables(connection: Mock) -> 
 
     message_queue: SimpleQueue[Message] = SimpleQueue()
     listener = QueueListener(message_queue)
-
+    listener._connect_and_subscribe()
     assert listener._connection == connection.return_value
-    connection.assert_called_once_with([("192.168.0.1", 61613)])
+    connection.assert_called_once_with([("192.168.0.1", 61613)], heartbeats=(30000, 30000))
 
 
 def test_connection_username_and_password_defaults_are_set() -> None:
@@ -124,10 +139,6 @@ def test_connection_username_and_password_defaults_are_set() -> None:
 
     assert listener._user == "admin"
     assert listener._password == "admin"
-
-    listener._connection = Mock()
-    listener.run()
-    assert_connect_and_subscribe(listener, username="admin", password="admin")
 
 
 def test_connection_username_and_password_can_be_set_by_environment_variable() -> None:
@@ -144,27 +155,27 @@ def test_connection_username_and_password_can_be_set_by_environment_variable() -
     assert listener._user == "great_username"
     assert listener._password == "great_password"
 
-    listener._connection = Mock()
-    listener.run()
-    assert_connect_and_subscribe(listener, username="great_username", password="great_password")
-
     os.environ.pop("ACTIVEMQ_USER", None)
     os.environ.pop("ACTIVEMQ_PASS", None)
 
 
-def assert_connect_and_subscribe(listener: QueueListener, username: str = "admin", password: str = "admin") -> None:
+def assert_connect_and_subscribe(
+    connection: Mock, listener: QueueListener, username: str = "admin", password: str = "admin"
+) -> None:
     """
     Assert the given queue listener attempted to connect
     :return: None
     """
-    listener._connection.connect.assert_called_once_with(username=username, passcode=password)
-    listener._connection.set_listener.assert_called_once_with(listener=listener, name="run-detection-listener")
-    listener._connection.subscribe.assert_called_once_with(
+    connection.connect.assert_called_once_with(username=username, passcode=password, wait=True)
+    connection.set_listener.assert_called_once_with(listener=listener, name="run-detection-listener")
+    connection.subscribe.assert_called_once_with(
         destination="Interactive-Reduction", id=listener._subscription_id, ack="client"
     )
 
 
-def test_connect_and_subscribe_with_queue_var() -> None:
+@patch("time.sleep")
+@patch("rundetection.queue_listener.QueueListener._create_connection")
+def test_connect_and_subscribe_with_queue_var(mock_create_connection, _) -> None:
     """
     Assert the given queue listener attempted to connect
     :return: None
@@ -172,16 +183,37 @@ def test_connect_and_subscribe_with_queue_var() -> None:
     os.environ["ACTIVEMQ_QUEUE"] = "fancy_queue"
     message_queue: SimpleQueue[Message] = SimpleQueue()
     listener = QueueListener(message_queue)
-
-    listener._connection = Mock()
+    mock_connection = Mock()
+    mock_create_connection.return_value = mock_connection
     listener.run()
 
-    listener._connection.connect.assert_called_once_with(username="admin", passcode="admin")
-    listener._connection.set_listener.assert_called_once_with(listener=listener, name="run-detection-listener")
-    listener._connection.subscribe.assert_called_once_with(
+    mock_connection.connect.assert_called_once_with(username="admin", passcode="admin", wait=True)
+    mock_connection.set_listener.assert_called_once_with(listener=listener, name="run-detection-listener")
+    mock_connection.subscribe.assert_called_once_with(
         destination="fancy_queue", id=listener._subscription_id, ack="client"
     )
     os.environ.pop("ACTIVEMQ_QUEUE", None)
+
+
+def test_is_connected(listener) -> None:
+    """Test that is_connected returns connection status"""
+    listener._connection = Mock()
+    listener.is_connected()
+    listener._connection.is_connected.assert_called_once()
+
+
+@patch("rundetection.queue_listener.QueueListener._create_connection")
+def test_stop(mock_create_connection, listener) -> None:
+    """
+    Test stop sets stopping to true and calls disconnect
+    :param listener:
+    :return:
+    """
+    listener.run()
+    listener.stop()
+
+    assert listener.stopping
+    mock_create_connection.return_value.disconnect.assert_called_once()
 
 
 if __name__ == "__main__":

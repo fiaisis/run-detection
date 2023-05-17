@@ -5,6 +5,7 @@ Tests for run detection module
 
 import unittest
 from pathlib import Path
+from queue import Empty
 from unittest.mock import patch, Mock
 
 import pytest
@@ -126,6 +127,62 @@ def test_run(_: Mock, detector: RunDetector) -> None:
         detector._queue_listener.run.assert_called_once()
 
 
+@patch("rundetection.run_detection.time.sleep")
+def test_run_leaves_main_loop_if_stopping(_: Mock, detector: RunDetector) -> None:
+    """
+    Test that run will exit if stopping
+    :param _: time.sleep patched mock
+    :param detector: RunDetector Fixture
+    :return: None
+    """
+
+    # If this test enters an infinite loop, it is failing as the loop has not broken
+    detector._queue_listener = Mock()
+    detector._queue_listener.stopping = True
+    detector.restart_listener = Mock()
+    detector._process_message = Mock()  # type: ignore
+    detector._process_message.side_effect = Empty
+    detector._message_queue = Mock()
+    mock_message = Mock()
+    detector._message_queue.get.return_value = mock_message
+
+    detector.run()
+
+    detector._message_queue.get.assert_called_once()
+    detector._process_message.assert_called_once_with(mock_message)
+    detector._queue_listener.run.assert_called_once()
+    detector.restart_listener.assert_not_called()
+
+
+@patch("rundetection.run_detection.time.sleep", side_effect=[None])
+def test_run_will_restart_listener_if_not_connected(_: Mock, detector: RunDetector) -> None:
+    """
+    Test that run will exit if stopping
+    :param _: time.sleep patched mock
+    :param detector: RunDetector Fixture
+    :return: None
+    """
+
+    # If this test enters an infinite loop, it is failing as the loop has not broken
+    detector._queue_listener = Mock()
+    detector.restart_listener = Mock()
+    detector._process_message = Mock()  # type: ignore
+    detector._process_message.side_effect = Empty
+    detector._message_queue = Mock()
+    mock_message = Mock()
+    detector._message_queue.get.return_value = mock_message
+    detector.restart_listener.side_effect = InterruptedError
+    detector._queue_listener.is_connected.return_value = False
+    detector._queue_listener.stopping = False
+    try:
+        detector.run()
+    except InterruptedError:
+        detector._message_queue.get.assert_called_once()
+        detector._process_message.assert_called_once_with(mock_message)
+        detector._queue_listener.run.assert_called_once()
+        detector.restart_listener.assert_called_once()
+
+
 def test__map_path(detector) -> None:
     """
     Test that the given path is mapped to use the expected /archive
@@ -160,6 +217,38 @@ def test__map_path_raises_for_bad_path(detector) -> None:
     input_path = "foo"
     with pytest.raises(ValueError):
         detector._map_path(input_path)
+
+
+@patch("rundetection.run_detection.time.sleep")
+def test_restart_listener(mock_sleep, detector) -> None:
+    """
+    Test restart listener attempts to restart
+    :return: None
+    """
+    detector.restart_listener()
+
+    detector._queue_listener.stop.assert_called_once()
+    mock_sleep.assert_called_once_with(30)
+    detector._queue_listener.run.assert_called_once()
+
+
+def test_shutdown_listener(detector):
+    """
+    Test listener shutdown is called
+    :return: None
+    """
+    detector.shutdown_listener()
+    detector._queue_listener.stop.assert_called_once()
+
+
+def test_shutdown(detector):
+    """
+    Test shutdown calls are made when detector is shutdown
+    :param detector: detector fixture
+    :return: None
+    """
+    detector.shutdown(1, None)
+    detector._queue_listener.stop.assert_called_once()
 
 
 if __name__ == "__main__":

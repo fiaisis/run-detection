@@ -26,6 +26,7 @@ class Message:
     processed: bool = False
 
 
+# pylint: disable=too-many-instance-attributes
 class QueueListener(ConnectionListener):  # type: ignore # No Library stub
     """
     QueueListener wraps stomp.py ConnectionListener. Handles Connection and disconnection from ActiveMQ,
@@ -38,9 +39,12 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         self._user: str = os.environ.get("ACTIVEMQ_USER", "admin")
         self._password: str = os.environ.get("ACTIVEMQ_PASS", "admin")
         self._queue: str = os.environ.get("ACTIVEMQ_QUEUE", "Interactive-Reduction")
-        self._connection: Connection = Connection([(self._ip, 61613)])
         self._subscription_id = str(uuid.uuid4())
+        self.stopping: bool = False
         super().__init__()
+
+    def _create_connection(self) -> Connection:
+        return Connection([(self._ip, 61613)], heartbeats=(30000, 30000))
 
     def on_message(self, frame: Frame) -> None:
         """
@@ -55,9 +59,17 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         """
         Called on disconnection from message broker. Will attempt to reconnect.
         """
+        logger.info("Queue listener disconnected")
+        if not self.stopping:
+            logger.warning("Disconnection was unexpected, attempting reconnect...")
+            self._connect_and_subscribe()
 
-        logger.warning("Disconnected, attempting reconnect...")
-        self._connect_and_subscribe()
+    def is_connected(self) -> bool:
+        """
+        Determine the connection status of the listener
+        :return: bool Connection status
+        """
+        return self._connection.is_connected()  # type: ignore
 
     def on_error(self, frame: Frame) -> None:
         """
@@ -65,17 +77,27 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         """
         logger.warning("Error recieved from message broker: %s", frame.body)
 
+    def stop(self) -> None:
+        """
+        Stop the queue listener
+        :return: None
+        """
+        self.stopping = True
+        self._connection.disconnect()
+
     def _connect_and_subscribe(self) -> None:
+        if self.stopping:
+            logger.info("Listener is stopping, aborting reconnection...")
+            return
         try:
             logger.info("Attempting connection")
-            self._connection.connect(username=self._user, passcode=self._password)
+            # pylint: disable=attribute-defined-outside-init
+            self._connection = self._create_connection()
+            # pylint: enable=attribute-defined-outside-init
+            self._connection.connect(username=self._user, passcode=self._password, wait=True)
             self._connection.set_listener(listener=self, name="run-detection-listener")
-            self._connection.subscribe(
-                destination=self._queue,
-                id=self._subscription_id,
-                ack="client",
-            )
-        except ConnectFailedException:
+            self._connection.subscribe(destination=self._queue, id=self._subscription_id, ack="client")
+        except (ConnectFailedException, OSError):
             logger.warning("Failed to reconnect, attempting again in 30 seconds")
             time.sleep(30)
             self._connect_and_subscribe()
@@ -87,6 +109,7 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
         :return: None
         """
         logger.info("Starting queue listener")
+        self.stopping = False
         self._connect_and_subscribe()
 
     def acknowledge(self, message: Message) -> None:
