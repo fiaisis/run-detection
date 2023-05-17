@@ -154,7 +154,7 @@ def test_run_leaves_main_loop_if_stopping(_: Mock, detector: RunDetector) -> Non
     detector.restart_listener.assert_not_called()
 
 
-@patch("rundetection.run_detection.time.sleep", side_effect=[None, InterruptedError])
+@patch("rundetection.run_detection.time.sleep", side_effect=[None])
 def test_run_will_restart_listener_if_not_connected(_: Mock, detector: RunDetector) -> None:
     """
     Test that run will exit if stopping
@@ -165,13 +165,15 @@ def test_run_will_restart_listener_if_not_connected(_: Mock, detector: RunDetect
 
     # If this test enters an infinite loop, it is failing as the loop has not broken
     detector._queue_listener = Mock()
-    detector._queue_listener.stopping = True
     detector.restart_listener = Mock()
     detector._process_message = Mock()  # type: ignore
     detector._process_message.side_effect = Empty
     detector._message_queue = Mock()
     mock_message = Mock()
     detector._message_queue.get.return_value = mock_message
+    detector.restart_listener.side_effect = InterruptedError
+    detector._queue_listener.is_connected.return_value = False
+    detector._queue_listener.stopping = False
     try:
         detector.run()
     except InterruptedError:
