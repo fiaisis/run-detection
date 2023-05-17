@@ -202,5 +202,19 @@ def test_is_connected(listener) -> None:
     listener._connection.is_connected.assert_called_once()
 
 
+@patch("rundetection.queue_listener.QueueListener._create_connection")
+def test_stop(mock_create_connection, listener) -> None:
+    """
+    Test stop sets stopping to true and calls disconnect
+    :param listener:
+    :return:
+    """
+    listener.run()
+    listener.stop()
+
+    assert listener.stopping
+    mock_create_connection.return_value.disconnect.assert_called_once()
+
+
 if __name__ == "__main__":
     unittest.main()
