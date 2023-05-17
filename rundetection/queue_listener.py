@@ -26,6 +26,7 @@ class Message:
     processed: bool = False
 
 
+# pylint: disable=too-many-instance-attributes
 class QueueListener(ConnectionListener):  # type: ignore # No Library stub
     """
     QueueListener wraps stomp.py ConnectionListener. Handles Connection and disconnection from ActiveMQ,
@@ -90,7 +91,9 @@ class QueueListener(ConnectionListener):  # type: ignore # No Library stub
             return
         try:
             logger.info("Attempting connection")
+            # pylint: disable=attribute-defined-outside-init
             self._connection = self._create_connection()
+            # pylint: enable=attribute-defined-outside-init
             self._connection.connect(username=self._user, passcode=self._password, wait=True)
             self._connection.set_listener(listener=self, name="run-detection-listener")
             self._connection.subscribe(destination=self._queue, id=self._subscription_id, ack="client")
