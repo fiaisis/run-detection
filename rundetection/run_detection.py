@@ -3,10 +3,13 @@ Run detection module holds the RunDetector main class
 """
 import logging
 import re
+import signal
 import sys
 import time
 from pathlib import Path
-from queue import SimpleQueue
+from queue import SimpleQueue, Empty
+from types import FrameType
+from typing import Optional
 
 from rundetection.ingest import ingest
 from rundetection.notifications import Notifier, Notification
@@ -33,16 +36,52 @@ class RunDetector:
         self._message_queue: SimpleQueue[Message] = SimpleQueue()
         self._queue_listener: QueueListener = QueueListener(self._message_queue)
         self._notifier: Notifier = Notifier()
+        signal.signal(signal.SIGTERM, self.shutdown)
+        signal.signal(signal.SIGINT, self.shutdown)
+
+    def restart_listener(self) -> None:
+        """Stop the queue listener, wait 30 seconds, then restart the listener"""
+        logger.info("Stopping the queue listener and waiting 30 seconds...")
+        self._queue_listener.stop()
+        time.sleep(30)
+        logger.info("Starting queue listener")
+        self._queue_listener.run()
+
+    def shutdown_listener(self) -> None:
+        """
+        Stop the queue listener
+        :return: None
+        """
+        logger.info("Stopping listener")
+        self._queue_listener.stop()
+
+    def shutdown(self, _: int, __: Optional[FrameType]) -> None:
+        """
+        Shutdown the queue listener, TODO shutdown the notifier. Automatically called when sigterm or sigint happens
+        :param _: Thrown away
+        :param __: Thrown away
+        :return: None
+        """
+        logger.info("Shutting down run detection...")
+        self.shutdown_listener()
 
     def run(self) -> None:
         """
         Starts the run detector
         """
-        logging.info("Starting RunDetector")
+        logger.info("Starting RunDetector")
         self._queue_listener.run()
         while True:
-            self._process_message(self._message_queue.get())
-            time.sleep(0.1)
+            try:
+                self._process_message(self._message_queue.get(timeout=10))
+                time.sleep(0.1)
+            except Empty:
+                if self._queue_listener.stopping:
+                    logger.info("No messages processing, breaking main loop...")
+                    break
+                if not self._queue_listener.is_connected():
+                    logger.warning("Queue listener failed silently")
+                    self.restart_listener()
 
     @staticmethod
     def _map_path(path_str: str) -> Path:
