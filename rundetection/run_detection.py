@@ -40,6 +40,7 @@ class RunDetector:
         signal.signal(signal.SIGINT, self.shutdown)
 
     def restart_listener(self) -> None:
+        """Stop the queue listener, wait 30 seconds, then restart the listener"""
         logger.info("Stopping the queue listener and waiting 30 seconds...")
         self._queue_listener.stop()
         time.sleep(30)
@@ -47,10 +48,20 @@ class RunDetector:
         self._queue_listener.run()
 
     def shutdown_listener(self) -> None:
+        """
+        Stop the queue listener
+        :return: None
+        """
         logger.info("Stopping listener")
         self._queue_listener.stop()
 
     def shutdown(self, _: int, __: Optional[FrameType]) -> None:
+        """
+        Shutdown the queue listener, TODO shutdown the notifier. Automatically called when sigterm or sigint happens
+        :param _: Thrown away
+        :param __: Thrown away
+        :return: None
+        """
         logger.info("Shutting down run detection...")
         self.shutdown_listener()
 

@@ -5,6 +5,7 @@ Tests for run detection module
 
 import unittest
 from pathlib import Path
+from queue import Empty
 from unittest.mock import patch, Mock
 
 import pytest
@@ -105,7 +106,7 @@ def test__process_message_exception_logged(_: Mock, caplog: LogCaptureFixture, d
     detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
 
 
-@patch("rundetection.run_detection.time.sleep", side_effects=[None, InterruptedError])
+@patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError)
 def test_run(_: Mock, detector: RunDetector) -> None:
     """
     Test that run is processing messages and queue listener is started
@@ -124,6 +125,60 @@ def test_run(_: Mock, detector: RunDetector) -> None:
         detector._message_queue.get.assert_called_once()
         detector._process_message.assert_called_once_with(mock_message)
         detector._queue_listener.run.assert_called_once()
+
+
+@patch("rundetection.run_detection.time.sleep")
+def test_run_leaves_main_loop_if_stopping(_: Mock, detector: RunDetector) -> None:
+    """
+    Test that run will exit if stopping
+    :param _: time.sleep patched mock
+    :param detector: RunDetector Fixture
+    :return: None
+    """
+
+    # If this test enters an infinite loop, it is failing as the loop has not broken
+    detector._queue_listener = Mock()
+    detector._queue_listener.stopping = True
+    detector.restart_listener = Mock()
+    detector._process_message = Mock()  # type: ignore
+    detector._process_message.side_effect = Empty
+    detector._message_queue = Mock()
+    mock_message = Mock()
+    detector._message_queue.get.return_value = mock_message
+
+    detector.run()
+
+    detector._message_queue.get.assert_called_once()
+    detector._process_message.assert_called_once_with(mock_message)
+    detector._queue_listener.run.assert_called_once()
+    detector.restart_listener.assert_not_called()
+
+
+@patch("rundetection.run_detection.time.sleep", side_effect=[None, InterruptedError])
+def test_run_will_restart_listener_if_not_connected(_: Mock, detector: RunDetector) -> None:
+    """
+    Test that run will exit if stopping
+    :param _: time.sleep patched mock
+    :param detector: RunDetector Fixture
+    :return: None
+    """
+
+    # If this test enters an infinite loop, it is failing as the loop has not broken
+    detector._queue_listener = Mock()
+    detector._queue_listener.stopping = True
+    detector.restart_listener = Mock()
+    detector._process_message = Mock()  # type: ignore
+    detector._process_message.side_effect = Empty
+    detector._message_queue = Mock()
+    mock_message = Mock()
+    detector._message_queue.get.return_value = mock_message
+    try:
+        detector.run()
+    except InterruptedError:
+        detector._message_queue.get.assert_called_once()
+        detector._process_message.assert_called_once_with(mock_message)
+        detector._queue_listener.run.assert_called_once()
+        detector.restart_listener.assert_called_once()
 
 
 def test__map_path(detector) -> None:
