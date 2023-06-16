@@ -1,6 +1,7 @@
 """
 Tests for run detection module
 """
+import logging
 import unittest
 from pathlib import Path
 from queue import SimpleQueue
@@ -15,6 +16,7 @@ from rundetection.run_detection import (
     process_messages,
     process_notifications,
     start_run_detection,
+    verify_archive_access,
 )
 
 
@@ -141,6 +143,24 @@ async def test_start_run_detection(
         mock_memphis.consumer.return_value.fetch.return_value, mock_queue.return_value
     )
     mock_proc_notifications.assert_called_with(mock_memphis.producer.return_value, mock_queue.return_value)
+
+
+@patch("rundetection.run_detection.Path")
+def test_verify_archive_access_accessible(mock_path, caplog):
+    mock_path.return_value.exists.return_value = True
+    with caplog.at_level(logging.INFO):
+        verify_archive_access()
+
+        assert "The archive has been mounted correctly, and can be accessed." in caplog.messages
+
+
+@patch("rundetection.run_detection.Path")
+def test_verify_archive_access_not_accessible(mock_path, caplog):
+    mock_path.return_value.exists.return_value = False
+    with caplog.at_level(logging.INFO):
+        verify_archive_access()
+
+        assert "The archive has not been mounted correctly, and cannot be accessed." in caplog.text
 
 
 if __name__ == "__main__":
