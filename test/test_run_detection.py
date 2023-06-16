@@ -37,8 +37,8 @@ async def test_create_and_get_memphis(mock_memphis):
 @patch("rundetection.run_detection.ingest")
 @patch("rundetection.run_detection.InstrumentSpecification")
 def test_process_message(
-        mock_instrument_spec,
-        mock_ingest,
+    mock_instrument_spec,
+    mock_ingest,
 ):
     notification_queue = SimpleQueue()
     mock_additional_run = MagicMock(spec=DetectedRun)
@@ -127,7 +127,7 @@ async def test_process_notifications(mock_byte):
 @patch("rundetection.run_detection.asyncio.sleep", side_effect=InterruptedError)
 @patch("rundetection.run_detection.SimpleQueue")
 async def test_start_run_detection(
-        mock_queue, mock_sleep, mock_proc_notifications, mock_proc_messages, mock_get_memphis
+    mock_queue, mock_sleep, mock_proc_notifications, mock_proc_messages, mock_get_memphis
 ):
     mock_memphis = Mock()
     mock_memphis.consumer = AsyncMock()
