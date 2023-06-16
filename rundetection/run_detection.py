@@ -4,8 +4,10 @@ import os
 import sys
 from pathlib import Path
 from queue import SimpleQueue
+from typing import List, Optional
 
 from memphis import Memphis
+from memphis.message import Message
 
 from rundetection.ingest import ingest, DetectedRun
 from rundetection.specifications import InstrumentSpecification
@@ -58,6 +60,29 @@ def process_message(message: str, notification_queue: SimpleQueue[DetectedRun]) 
         logger.info("Specification not met, skipping run: %s", run)
 
 
+async def process_messages(messages: List[Message], notification_queue: SimpleQueue[DetectedRun]) -> None:
+    if messages:
+        for message in messages:
+            message_value = message.get_data().decode("utf-8")
+            try:
+                process_message(message_value, notification_queue)
+            except Exception:
+                logger.exception("problem proscessing message")
+            finally:
+                await message.ack()
+
+
+async def process_notifications(producer: any, notification_queue: SimpleQueue[DetectedRun]) -> None:
+    """
+    Produce messages until the notification queue is empty
+    :param producer: The producer
+    :param notification_queue: The notification queue
+    :return: None
+    """
+    while not notification_queue.empty():
+        await producer.produce(bytearray(notification_queue.get().to_json_string(), "utf-8"))
+
+
 async def start_run_detection() -> None:
     """
     Main Coroutine starts the producer and consumer in a loop
@@ -74,19 +99,9 @@ async def start_run_detection() -> None:
     logger.info("Starting loop...")
     try:
         while True:
-            recieved = await consumer.fetch()
-            if recieved:
-                for message in recieved:
-                    message_value = message.get_data().decode("utf-8")
-                    try:
-                        process_message(message_value, notification_queue)
-                    except Exception:
-                        logger.exception("problem proscessing message")
-                    finally:
-                        await message.ack()
-
-            while not notification_queue.empty():
-                await producer.produce(bytearray(notification_queue.get().to_json_string(), "utf-8"))
+            recieved: Optional[List[Message]] = await consumer.fetch()
+            await process_messages(recieved, notification_queue)
+            await process_notifications(producer, notification_queue)
             await asyncio.sleep(0.1)
 
     except Exception:
