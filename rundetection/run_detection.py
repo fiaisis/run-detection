@@ -80,7 +80,9 @@ async def process_notifications(producer: any, notification_queue: SimpleQueue[D
     :return: None
     """
     while not notification_queue.empty():
-        await producer.produce(bytearray(notification_queue.get().to_json_string(), "utf-8"))
+        detected_run = notification_queue.get()
+        logger.info("Sending notification for run: %s", detected_run.run_number)
+        await producer.produce(bytearray(detected_run.to_json_string(), "utf-8"))
 
 
 async def start_run_detection() -> None:
