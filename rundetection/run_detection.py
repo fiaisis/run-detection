@@ -1,19 +1,13 @@
-"""
-Run detection module holds the RunDetector main class
-"""
+import asyncio
 import logging
-import re
-import signal
+import os
 import sys
-import time
 from pathlib import Path
-from queue import SimpleQueue, Empty
-from types import FrameType
-from typing import Optional
+from queue import SimpleQueue
 
-from rundetection.ingest import ingest
-from rundetection.notifications import Notifier, Notification
-from rundetection.queue_listener import Message, QueueListener
+from memphis import Memphis
+
+from rundetection.ingest import ingest, DetectedRun
 from rundetection.specifications import InstrumentSpecification
 
 file_handler = logging.FileHandler(filename="run-detection.log")
@@ -26,119 +20,86 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class RunDetector:
+async def create_and_get_memphis() -> Memphis:
     """
-    Run Detector class orchestrates the complete run detection process, from consuming messages from icat
-    pre-queue, to notifying downstream
+    Create and return the connected Memphis Object
+    :return: Memphis instance
     """
-
-    def __init__(self) -> None:
-        self._message_queue: SimpleQueue[Message] = SimpleQueue()
-        self._queue_listener: QueueListener = QueueListener(self._message_queue)
-        self._notifier: Notifier = Notifier()
-        signal.signal(signal.SIGTERM, self.shutdown)
-        signal.signal(signal.SIGINT, self.shutdown)
-
-    def restart_listener(self) -> None:
-        """Stop the queue listener, wait 30 seconds, then restart the listener"""
-        logger.info("Stopping the queue listener and waiting 30 seconds...")
-        self._queue_listener.stop()
-        time.sleep(30)
-        logger.info("Starting queue listener")
-        self._queue_listener.run()
-
-    def shutdown_listener(self) -> None:
-        """
-        Stop the queue listener
-        :return: None
-        """
-        logger.info("Stopping listener")
-        self._queue_listener.stop()
-
-    def shutdown(self, _: int, __: Optional[FrameType]) -> None:
-        """
-        Shutdown the queue listener, TODO shutdown the notifier. Automatically called when sigterm or sigint happens
-        :param _: Thrown away
-        :param __: Thrown away
-        :return: None
-        """
-        logger.info("Shutting down run detection...")
-        self.shutdown_listener()
-
-    def run(self) -> None:
-        """
-        Starts the run detector
-        """
-        logger.info("Starting RunDetector")
-        self._queue_listener.run()
-        while True:
-            try:
-                self._process_message(self._message_queue.get(timeout=10))
-                time.sleep(0.1)
-            except Empty:
-                if self._queue_listener.stopping:
-                    logger.info("No messages processing, breaking main loop...")
-                    break
-                if not self._queue_listener.is_connected():
-                    logger.warning("Queue listener failed silently")
-                    self.restart_listener()
-
-    @staticmethod
-    def _map_path(path_str: str) -> Path:
-        """
-        The paths recieved from pre-icat queue are windows formatted and assume the archive is at \\isis. This maps
-        them to the expected location of /archive
-        :param path_str: The path string to map
-        :return: The mapped path object
-        """
-        match = re.search(r"cycle_(\d{2})_(\d+)\\(NDX\w+)\\([a-zA-Z]+\d+\.nxs)", path_str)
-        if match is None:
-            raise ValueError(f"Path was not in expected format: {path_str}")
-        year, cycle, ndx_name, filename = match.groups()
-
-        # Creating the new path format
-        converted_path = f"/archive/{ndx_name}/Instrument/data/cycle_{year}_{cycle}/{filename}"
-        return Path(converted_path)
-
-    def _process_message(self, message: Message) -> None:
-        logger.info("Processing message: %s", message)
-        try:
-            data_path = self._map_path(message.value)
-            run = ingest(data_path)
-            specification = InstrumentSpecification(run.instrument)
-            specification.verify(run)
-            if run.will_reduce:
-                logger.info("Specification met for run: %s", run)
-                notification = Notification(run.to_json_string())
-                self._notifier.notify(notification)
-                for additional_run in run.additional_runs:
-                    self._notifier.notify(Notification(additional_run.to_json_string()))
-
-            else:
-                logger.info("Specificaiton not met, skipping run: %s", run)
-        # pylint: disable = broad-except
-        except Exception:
-            logger.exception("Problem processing message: %s", message.value)
-        finally:
-            message.processed = True
-            self._queue_listener.acknowledge(message)
+    logger.info("Creating memphis object...")
+    memphis = Memphis()
+    logger.info("Connecting...")
+    host = os.environ.get("MEMPHIS_HOST", "localhost")
+    user = os.environ.get("MEMPHIS_USER", "root")
+    password = os.environ.get("MEMPHIS_PASS", "memphis")
+    await memphis.connect(host=host, username=user, password=password)
+    logger.info("Connected to memphis")
+    return memphis
 
 
-def main(archive_path: str = "/archive") -> None:
+def process_message(message: str, notification_queue: SimpleQueue[DetectedRun]) -> None:
     """
-    run-detection entrypoint.
-    :arg archive_path: Added purely for testing purposes, but should also be potentially useful.
+    Process the incoming message. If the message should result in an upstream notification, it will put the message on
+    the given notification queue
+    :param message: The message to process
+    :param notification_queue: The notification queue to update
     :return: None
     """
-    # Check that the archive can be accessed
-    if Path(archive_path, "NDXALF").exists():
-        logger.info("The archive has been mounted correctly, and can be accessed.")
+    logger.info("Proccessing message: %s", message)
+    data_path = Path(message)
+    run = ingest(data_path)
+    specification = InstrumentSpecification(run.instrument)
+    specification.verify(run)
+    if run.will_reduce:
+        logger.info("specification met for run: %s", run)
+        notification_queue.put(run)
+        for additional_run in run.additional_runs:
+            notification_queue.put(additional_run)
     else:
-        logger.error("The archive has not been mounted correctly, and cannot be accessed.")
+        logger.info("Specification not met, skipping run: %s", run)
 
-    logger.info("Starting run detection")
-    run_detector = RunDetector()
-    run_detector.run()
+
+async def start_run_detection() -> None:
+    """
+    Main Coroutine starts the producer and consumer in a loop
+    :return: None
+    """
+
+    logger.info("Starting Run Detection")
+    memphis = await create_and_get_memphis()
+    logger.info("Creating consumer")
+    consumer = await memphis.consumer(station_name="watched-files", consumer_name="rundetection")
+    logger.info("Creating producer")
+    producer = await memphis.producer(station_name="scheduled-jobs", producer_name="rundetection")
+    notification_queue: SimpleQueue[DetectedRun] = SimpleQueue()
+    logger.info("Starting loop...")
+    try:
+        while True:
+            recieved = await consumer.fetch()
+            if recieved:
+                for message in recieved:
+                    message_value = message.get_data().decode("utf-8")
+                    try:
+                        process_message(message_value, notification_queue)
+                    except Exception:
+                        logger.exception("problem proscessing message")
+                    finally:
+                        await message.ack()
+
+            while not notification_queue.empty():
+                await producer.produce(bytearray(notification_queue.get().to_json_string(), "utf-8"))
+            await asyncio.sleep(0.1)
+
+    except Exception:
+        logger.exception("Uncaught error occurred in main loop. Restarting...")
+        await start_run_detection()
+
+
+def main() -> None:
+    """
+    Entry point for run detection
+    :return: None
+    """
+    asyncio.run(start_run_detection())
 
 
 if __name__ == "__main__":
