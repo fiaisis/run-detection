@@ -1,3 +1,6 @@
+"""
+Main module for run detection
+"""
 import asyncio
 import logging
 import os
