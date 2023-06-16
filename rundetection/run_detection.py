@@ -61,6 +61,13 @@ def process_message(message: str, notification_queue: SimpleQueue[DetectedRun]) 
 
 
 async def process_messages(messages: List[Message], notification_queue: SimpleQueue[DetectedRun]) -> None:
+    """
+    Given a list of messages and the notification queue, process each message, adding those which meet specifications to
+    the notification queue
+    :param messages: The list of messages
+    :param notification_queue: The notification queue
+    :return: None
+    """
     if messages:
         for message in messages:
             message_value = message.get_data().decode("utf-8")
@@ -69,6 +76,7 @@ async def process_messages(messages: List[Message], notification_queue: SimpleQu
             except Exception:
                 logger.exception("problem proscessing message")
             finally:
+                logger.info("acking message")
                 await message.ack()
 
 
@@ -107,7 +115,8 @@ async def start_run_detection() -> None:
             await asyncio.sleep(0.1)
 
     except Exception:
-        logger.exception("Uncaught error occurred in main loop. Restarting...")
+        logger.exception("Uncaught error occurred in main loop. Restarting in 30 seconds...")
+        await asyncio.sleep(30)
         await start_run_detection()
 
 
