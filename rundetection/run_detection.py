@@ -123,11 +123,20 @@ async def start_run_detection() -> None:
         await start_run_detection()
 
 
+def verify_archive_access() -> None:
+    """Log archive access"""
+    if Path("/archive", "NDXALF").exists():
+        logger.info("The archive has been mounted correctly, and can be accessed.")
+    else:
+        logger.error("The archive has not been mounted correctly, and cannot be accessed.")
+
+
 def main() -> None:
     """
     Entry point for run detection
     :return: None
     """
+    verify_archive_access()
     asyncio.run(start_run_detection())
 
 
