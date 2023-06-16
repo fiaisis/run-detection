@@ -3,10 +3,8 @@ name = "run-detection"
 readme = "README.md"
 version = "0.0.1"
 dependencies = [
-    "confluent-kafka==2.1.1",
-    "h5py==3.8.0",
-    "stomp.py==8.1.0"
-
+    "memphis-py==1.0.3",
+    "h5py==3.8.0"
 ]
 
 
