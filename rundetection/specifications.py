@@ -7,9 +7,8 @@ import logging
 from typing import Any, List
 
 from rundetection.ingest import DetectedRun
-from rundetection.rules.rule import Rule
 from rundetection.rules.factory import rule_factory
-
+from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)
 

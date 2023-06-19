@@ -7,7 +7,7 @@ import os
 import sys
 from pathlib import Path
 from queue import SimpleQueue
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from memphis import Memphis
 from memphis.message import Message
@@ -63,7 +63,7 @@ def process_message(message: str, notification_queue: SimpleQueue[DetectedRun]) 
         logger.info("Specification not met, skipping run: %s", run)
 
 
-async def process_messages(messages: List[Message], notification_queue: SimpleQueue[DetectedRun]) -> None:
+async def process_messages(messages: Optional[List[Message]], notification_queue: SimpleQueue[DetectedRun]) -> None:
     """
     Given a list of messages and the notification queue, process each message, adding those which meet specifications to
     the notification queue
@@ -83,7 +83,7 @@ async def process_messages(messages: List[Message], notification_queue: SimpleQu
                 await message.ack()
 
 
-async def process_notifications(producer: any, notification_queue: SimpleQueue[DetectedRun]) -> None:
+async def process_notifications(producer: Any, notification_queue: SimpleQueue[DetectedRun]) -> None:
     """
     Produce messages until the notification queue is empty
     :param producer: The producer
