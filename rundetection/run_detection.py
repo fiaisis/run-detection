@@ -116,7 +116,7 @@ async def start_run_detection() -> None:
             await process_messages(recieved, notification_queue)
             await process_notifications(producer, notification_queue)
             await asyncio.sleep(0.1)
-    # pylint: disable = (broad-except)
+    # pylint: disable = broad-except
     except Exception:
         logger.exception("Uncaught error occurred in main loop. Restarting in 30 seconds...")
         await asyncio.sleep(30)
