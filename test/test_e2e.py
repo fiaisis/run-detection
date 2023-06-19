@@ -28,7 +28,7 @@ def get_memphis_token() -> str:
     )
     headers = {"Content-Type": "application/json"}
 
-    response = requests.request("POST", url, headers=headers, data=payload)
+    response = requests.request("POST", url, headers=headers, data=payload, timeout=60)
 
     return response.json()["jwt"]
 
@@ -46,7 +46,7 @@ def produce_file(file: str, jwt: str):
 
     headers = {"Authorization": f"Bearer {jwt}", "Content-Type": "application/json"}
 
-    requests.request("POST", url, headers=headers, data=payload)
+    requests.request("POST", url, headers=headers, data=payload, timeout=60)
 
 
 @pytest.mark.asyncio
@@ -89,7 +89,8 @@ async def test_e2e():
             "remove_bkg": False,
             "sum_runs": False,
             "runno": 25581,
-            "mask_file_link": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml",
+            "mask_file_link": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/"
+                              "964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml",
             "wbvan": 28580,
         },
     }
