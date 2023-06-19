@@ -9,8 +9,8 @@ from pathlib import Path
 from queue import SimpleQueue
 from typing import List, Optional, Any
 
-from memphis import Memphis
-from memphis.message import Message
+from memphis import Memphis  # type: ignore
+from memphis.message import Message  # type: ignore
 
 from rundetection.ingest import ingest, DetectedRun
 from rundetection.specifications import InstrumentSpecification
