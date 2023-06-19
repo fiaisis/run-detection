@@ -26,6 +26,11 @@ from rundetection.run_detection import (
 @pytest.mark.asyncio
 @patch("rundetection.run_detection.Memphis")
 async def test_create_and_get_memphis(mock_memphis):
+    """
+    Test that the memphis object is given the correct parameters and returned
+    :param mock_memphis: Mock memphis class
+    :return: None
+    """
     expected_memphis = AsyncMock()
     mock_memphis.return_value = expected_memphis
 
@@ -39,9 +44,15 @@ async def test_create_and_get_memphis(mock_memphis):
 @patch("rundetection.run_detection.ingest")
 @patch("rundetection.run_detection.InstrumentSpecification")
 def test_process_message(
-    mock_instrument_spec,
-    mock_ingest,
+        mock_instrument_spec,
+        mock_ingest,
 ):
+    """
+    Test that process message loads the correct spec and calls ingest
+    :param mock_instrument_spec: Mock Specification class
+    :param mock_ingest: Mock ingest function
+    :return: None
+    """
     notification_queue = SimpleQueue()
     mock_additional_run = MagicMock(spec=DetectedRun)
     mock_run = DetectedRun(
@@ -61,6 +72,12 @@ def test_process_message(
 @patch("rundetection.run_detection.ingest")
 @patch("rundetection.run_detection.InstrumentSpecification")
 def test_process_message_no_notification(mock_instrument_spec, mock_ingest):
+    """
+    Test process message does not update notification queue if spec fails to verify
+    :param mock_instrument_spec: Mock Spec class
+    :param mock_ingest: Mock ingest function
+    :return: None
+    """
     notification_queue = SimpleQueue()
     mock_additional_run = MagicMock(spec=DetectedRun)
     mock_run = DetectedRun(
@@ -80,6 +97,11 @@ def test_process_message_no_notification(mock_instrument_spec, mock_ingest):
 @pytest.mark.asyncio
 @patch("rundetection.run_detection.process_message")
 async def test_process_messages(mock_process):
+    """
+    Test each message is processed and acked
+    :param mock_process: Mock process messages function
+    :return: None
+    """
     mock_message = Mock()
     mock_message.ack = AsyncMock()
     mock_message.get_data.return_value.decode.return_value = "some path"
@@ -95,6 +117,11 @@ async def test_process_messages(mock_process):
 @pytest.mark.asyncio
 @patch("rundetection.run_detection.process_message")
 async def test_process_messages_raises_still_acks(mock_process):
+    """
+    Test messages are still acked after exception in processing
+    :param mock_process: Mock Process messages function
+    :return: None
+    """
     mock_message = Mock()
     mock_message.ack = AsyncMock()
     mock_message.get_data.return_value.decode.return_value = "some path"
@@ -111,6 +138,11 @@ async def test_process_messages_raises_still_acks(mock_process):
 @pytest.mark.asyncio
 @patch("rundetection.run_detection.bytearray")
 async def test_process_notifications(mock_byte):
+    """
+    Tests messages in the notification queue are produced by the producer
+    :param mock_byte: Mock bytearray class
+    :return: None
+    """
     producer = Mock()
     producer.produce = AsyncMock()
     notification_queue = SimpleQueue()
@@ -129,8 +161,17 @@ async def test_process_notifications(mock_byte):
 @patch("rundetection.run_detection.asyncio.sleep", side_effect=InterruptedError)
 @patch("rundetection.run_detection.SimpleQueue")
 async def test_start_run_detection(
-    mock_queue, mock_sleep, mock_proc_notifications, mock_proc_messages, mock_get_memphis
+        mock_queue, _, mock_proc_notifications, mock_proc_messages, mock_get_memphis
 ):
+    """
+    Mock run detection start up
+    :param mock_queue: Mock notification queue
+    :param _: Mock sleep
+    :param mock_proc_notifications: mock process notification function
+    :param mock_proc_messages: Mock process messages function
+    :param mock_get_memphis: Mock memphis factory
+    :return:  None
+    """
     mock_memphis = Mock()
     mock_memphis.consumer = AsyncMock()
     mock_memphis.producer = AsyncMock()
@@ -147,6 +188,12 @@ async def test_start_run_detection(
 
 @patch("rundetection.run_detection.Path")
 def test_verify_archive_access_accessible(mock_path, caplog):
+    """
+    Test logging when archive is accessible
+    :param mock_path: mock Path class
+    :param caplog: log capture fixture
+    :return: None
+    """
     mock_path.return_value.exists.return_value = True
     with caplog.at_level(logging.INFO):
         verify_archive_access()
@@ -156,6 +203,12 @@ def test_verify_archive_access_accessible(mock_path, caplog):
 
 @patch("rundetection.run_detection.Path")
 def test_verify_archive_access_not_accessible(mock_path, caplog):
+    """
+    Test logging when archive not accessible
+    :param mock_path: Mock path class
+    :param caplog: Log capture fixture
+    :return: None
+    """
     mock_path.return_value.exists.return_value = False
     with caplog.at_level(logging.INFO):
         verify_archive_access()
