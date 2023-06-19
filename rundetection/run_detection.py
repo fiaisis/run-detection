@@ -76,6 +76,7 @@ async def process_messages(messages: Optional[List[Message]], notification_queue
             message_value = message.get_data().decode("utf-8")
             try:
                 process_message(message_value, notification_queue)
+            # pylint: disable = broad-except
             except Exception:
                 logger.exception("problem proscessing message")
             finally:
