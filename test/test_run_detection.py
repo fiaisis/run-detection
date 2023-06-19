@@ -44,8 +44,8 @@ async def test_create_and_get_memphis(mock_memphis):
 @patch("rundetection.run_detection.ingest")
 @patch("rundetection.run_detection.InstrumentSpecification")
 def test_process_message(
-        mock_instrument_spec,
-        mock_ingest,
+    mock_instrument_spec,
+    mock_ingest,
 ):
     """
     Test that process message loads the correct spec and calls ingest
@@ -160,9 +160,7 @@ async def test_process_notifications(mock_byte):
 @patch("rundetection.run_detection.process_notifications")
 @patch("rundetection.run_detection.asyncio.sleep", side_effect=InterruptedError)
 @patch("rundetection.run_detection.SimpleQueue")
-async def test_start_run_detection(
-        mock_queue, _, mock_proc_notifications, mock_proc_messages, mock_get_memphis
-):
+async def test_start_run_detection(mock_queue, _, mock_proc_notifications, mock_proc_messages, mock_get_memphis):
     """
     Mock run detection start up
     :param mock_queue: Mock notification queue
