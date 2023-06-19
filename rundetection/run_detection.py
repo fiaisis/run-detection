@@ -106,9 +106,11 @@ async def start_run_detection() -> None:
     logger.info("Starting Run Detection")
     memphis = await create_and_get_memphis()
     logger.info("Creating consumer")
-    consumer = await memphis.consumer(station_name="watched-files", consumer_name="rundetection")
+    ingress_station = os.environ.get("MEMPHIS_INGRESS_NAME", "watched-files")
+    consumer = await memphis.consumer(station_name=ingress_station, consumer_name="rundetection")
     logger.info("Creating producer")
-    producer = await memphis.producer(station_name="scheduled-jobs", producer_name="rundetection")
+    egress_station = os.environ.get("MEMPHIS_EGRESS_NAME", "scheduled-jobs")
+    producer = await memphis.producer(station_name=egress_station, producer_name="rundetection")
     notification_queue: SimpleQueue[DetectedRun] = SimpleQueue()
     logger.info("Starting loop...")
     try:
