@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from rundetection.ingest import DetectedRun
+from rundetection.ingest import JobRequest
 from rundetection.rules.inter_rules import InterStitchRule
 
 
@@ -16,7 +16,7 @@ def test_verify(mock_get_siblings):
     :param mock_get_siblings: mocked function
     :return: (None)
     """
-    run = DetectedRun(
+    job_request = JobRequest(
         1,
         "inst",
         "D2O/air h-DODAB ML Proteolip Thu post 300mM NaCl  th=2.3",
@@ -28,7 +28,7 @@ def test_verify(mock_get_siblings):
         1,
         "users",
     )
-    related_run = DetectedRun(
+    related_job_request = JobRequest(
         1,
         "inst",
         "D2O/air h-DODAB ML Proteolip Thu post 300mM NaCl  th=2.4",
@@ -40,15 +40,15 @@ def test_verify(mock_get_siblings):
         1,
         "users",
     )
-    unrelated_run = DetectedRun(
+    unrelated_job_request = JobRequest(
         1, "inst", "ost 300mM NaCl  th=2.3", "sd", Path("/archive/foo"), "start time", "end time", 1, 1, "users"
     )
-    mock_get_siblings.return_value = [related_run, unrelated_run]
+    mock_get_siblings.return_value = [related_job_request, unrelated_job_request]
     rule = InterStitchRule(True)
 
-    rule.verify(run)
-    assert str(related_run.filepath) in run.additional_values["additional_files"]
-    assert str(unrelated_run.filepath) not in run.additional_values["additional_files"]
+    rule.verify(job_request)
+    assert str(related_job_request.filepath) in job_request.additional_values["additional_files"]
+    assert str(unrelated_job_request.filepath) not in job_request.additional_values["additional_files"]
 
 
 if __name__ == "__main__":

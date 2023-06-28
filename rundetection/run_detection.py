@@ -104,18 +104,18 @@ class RunDetector:
         logger.info("Processing message: %s", message)
         try:
             data_path = self._map_path(message.value)
-            run = ingest(data_path)
-            specification = InstrumentSpecification(run.instrument)
-            specification.verify(run)
-            if run.will_reduce:
-                logger.info("Specification met for run: %s", run)
-                notification = Notification(run.to_json_string())
+            job_request = ingest(data_path)
+            specification = InstrumentSpecification(job_request.instrument)
+            specification.verify(job_request)
+            if job_request.will_reduce:
+                logger.info("Specification met for job_request: %s", run)
+                notification = Notification(job_request.to_json_string())
                 self._notifier.notify(notification)
-                for additional_run in run.additional_runs:
-                    self._notifier.notify(Notification(additional_run.to_json_string()))
+                for additional_request in job_request.additional_requests:
+                    self._notifier.notify(Notification(additional_request.to_json_string()))
 
             else:
-                logger.info("Specificaiton not met, skipping run: %s", run)
+                logger.info("Specificaiton not met, skipping job_request: %s", run)
         # pylint: disable = broad-except
         except Exception:
             logger.exception("Problem processing message: %s", message.value)

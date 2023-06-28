@@ -4,7 +4,7 @@ Module containing the abstract base Rule class and MissingRuleError
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from rundetection.ingest import DetectedRun
+from rundetection.ingest import JobRequest
 
 T = TypeVar("T")
 
@@ -18,10 +18,10 @@ class Rule(Generic[T], ABC):
         self._value: T = value
 
     @abstractmethod
-    def verify(self, run: DetectedRun) -> None:
+    def verify(self, job_request: JobRequest) -> None:
         """
-        Given a DetectedRun determine if the rule is met for the file.
-        :param run: The Detected to check
+        Given a JobRequest determine if the rule is met for the file.
+        :param job_request: The job request to check
         :return: true if rule is met, else false
         """
 

@@ -1,6 +1,6 @@
 """
 Notifications module contains the Notification class and the Notifier class. Notifications to be consumed by a Notifier
-instance to send detected runs downstream.
+instance to send job requests downstream.
 """
 import logging
 import os

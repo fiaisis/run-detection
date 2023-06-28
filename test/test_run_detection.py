@@ -11,7 +11,7 @@ from unittest.mock import patch, Mock
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rundetection.ingest import DetectedRun
+from rundetection.ingest import JobRequest
 from rundetection.notifications import Notification
 from rundetection.queue_listener import Message
 from rundetection.run_detection import RunDetector
@@ -43,7 +43,7 @@ def test__process_message_specification_met(mock_ingest, _, detector):
     :param detector: RunDetector fixture
     :return: None
     """
-    run = DetectedRun(
+    job_request = JobRequest(
         run_number=123,
         instrument="mari",
         experiment_number="32131",
@@ -55,9 +55,9 @@ def test__process_message_specification_met(mock_ingest, _, detector):
         raw_frames=1,
         good_frames=1,
     )
-    mock_ingest.return_value = run
+    mock_ingest.return_value = job_request
     detector._process_message(MESSAGE)
-    detector._notifier.notify.assert_called_once_with(Notification(run.to_json_string()))
+    detector._notifier.notify.assert_called_once_with(Notification(job_request.to_json_string()))
     detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
 
 
@@ -73,7 +73,7 @@ def test__process_message_specification_not_met(mock_ingest, _, detector):
     :param detector: RunDetector fixture
     :return: None
     """
-    run = DetectedRun(
+    job_request = JobRequest(
         run_number=123,
         instrument="mari",
         experiment_number="32131",
@@ -85,7 +85,7 @@ def test__process_message_specification_not_met(mock_ingest, _, detector):
         raw_frames=0,
         good_frames=0,
     )
-    mock_ingest.return_value = run
+    mock_ingest.return_value = job_request
     detector._process_message(MESSAGE)
 
     detector._notifier.notify.assert_not_called()
@@ -124,7 +124,7 @@ def test_run(_: Mock, detector: RunDetector) -> None:
     except InterruptedError:  # Throw Interrupt to break loop, then check state
         detector._message_queue.get.assert_called_once()
         detector._process_message.assert_called_once_with(mock_message)
-        detector._queue_listener.run.assert_called_once()
+        detector._queue_listener.job_request.assert_called_once()
 
 
 @patch("rundetection.run_detection.time.sleep")
@@ -150,7 +150,7 @@ def test_run_leaves_main_loop_if_stopping(_: Mock, detector: RunDetector) -> Non
 
     detector._message_queue.get.assert_called_once()
     detector._process_message.assert_called_once_with(mock_message)
-    detector._queue_listener.run.assert_called_once()
+    detector._queue_listener.job_request.assert_called_once()
     detector.restart_listener.assert_not_called()
 
 
@@ -179,7 +179,7 @@ def test_run_will_restart_listener_if_not_connected(_: Mock, detector: RunDetect
     except InterruptedError:
         detector._message_queue.get.assert_called_once()
         detector._process_message.assert_called_once_with(mock_message)
-        detector._queue_listener.run.assert_called_once()
+        detector._queue_listener.job_request.assert_called_once()
         detector.restart_listener.assert_called_once()
 
 
@@ -229,7 +229,7 @@ def test_restart_listener(mock_sleep, detector) -> None:
 
     detector._queue_listener.stop.assert_called_once()
     mock_sleep.assert_called_once_with(30)
-    detector._queue_listener.run.assert_called_once()
+    detector._queue_listener.job_request.assert_called_once()
 
 
 def test_shutdown_listener(detector):

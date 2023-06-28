@@ -73,7 +73,7 @@ class MainTest(unittest.TestCase):
         """
         main()
 
-        run_detector.return_value.run.assert_called_once_with()
+        run_detector.return_value.job_request.assert_called_once_with()
 
 
 if __name__ == "__main__":
