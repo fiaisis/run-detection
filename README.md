@@ -166,7 +166,7 @@ Below is an example of adding a new rule. The example is unrealistic, but it sho
     class SkipTitlesIncludingRule(Rule[List[str]]):
   
       def verify(self, job_request: JobRequest) -> None:
-          run.will_reduce =  any(word in run.experiment_title for word in self._value)
+          job_request.will_reduce =  any(word in run.experiment_title for word in self._value)
     ```
 3. Update the `RuleFactory`:
     ```python
