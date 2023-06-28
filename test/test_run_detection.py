@@ -124,7 +124,7 @@ def test_run(_: Mock, detector: RunDetector) -> None:
     except InterruptedError:  # Throw Interrupt to break loop, then check state
         detector._message_queue.get.assert_called_once()
         detector._process_message.assert_called_once_with(mock_message)
-        detector._queue_listener.job_request.assert_called_once()
+        detector._queue_listener.run.assert_called_once()
 
 
 @patch("rundetection.run_detection.time.sleep")
@@ -150,7 +150,7 @@ def test_run_leaves_main_loop_if_stopping(_: Mock, detector: RunDetector) -> Non
 
     detector._message_queue.get.assert_called_once()
     detector._process_message.assert_called_once_with(mock_message)
-    detector._queue_listener.job_request.assert_called_once()
+    detector._queue_listener.run.assert_called_once()
     detector.restart_listener.assert_not_called()
 
 
@@ -179,7 +179,7 @@ def test_run_will_restart_listener_if_not_connected(_: Mock, detector: RunDetect
     except InterruptedError:
         detector._message_queue.get.assert_called_once()
         detector._process_message.assert_called_once_with(mock_message)
-        detector._queue_listener.job_request.assert_called_once()
+        detector._queue_listener.run.assert_called_once()
         detector.restart_listener.assert_called_once()
 
 
@@ -229,7 +229,7 @@ def test_restart_listener(mock_sleep, detector) -> None:
 
     detector._queue_listener.stop.assert_called_once()
     mock_sleep.assert_called_once_with(30)
-    detector._queue_listener.job_request.assert_called_once()
+    detector._queue_listener.run.assert_called_once()
 
 
 def test_shutdown_listener(detector):
