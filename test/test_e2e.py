@@ -71,8 +71,9 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         b'"users": "Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara", '
         b'"additional_values": {"ei": "\'auto\'", "sam_mass": 0.0, '
         b'"sam_rmm": 0.0, "monovan": 0, "remove_bkg": false, "sum_runs": false, "runno": 25581, '
-        b'"mask_file_link": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/'
-        b'964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml", "wbvan": 28580}}',
+        b'"mask_file_link": "https://raw.githubusercontent.com/mantidproject/scriptrepository/'
+        b'f5dd40e52e87e6e2c595cbfe337169e56ff67917/direct_inelastic/MARI/MaskFiles/mari_mask2023_2.xml",'
+        b' "wbvan": 28629}}',
     ]
     assert len(received) == 1
 
