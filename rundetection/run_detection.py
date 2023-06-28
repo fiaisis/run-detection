@@ -108,14 +108,14 @@ class RunDetector:
             specification = InstrumentSpecification(job_request.instrument)
             specification.verify(job_request)
             if job_request.will_reduce:
-                logger.info("Specification met for job_request: %s", run)
+                logger.info("Specification met for job_request: %s", job_request)
                 notification = Notification(job_request.to_json_string())
                 self._notifier.notify(notification)
                 for additional_request in job_request.additional_requests:
                     self._notifier.notify(Notification(additional_request.to_json_string()))
 
             else:
-                logger.info("Specificaiton not met, skipping job_request: %s", run)
+                logger.info("Specificaiton not met, skipping job_request: %s", job_request)
         # pylint: disable = broad-except
         except Exception:
             logger.exception("Problem processing message: %s", message.value)
