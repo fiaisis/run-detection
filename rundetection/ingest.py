@@ -143,7 +143,7 @@ def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     job_request.additional_values["sum_runs"] = False
     job_request.additional_values["runno"] = job_request.run_number
 
-    return run
+    return job_request
 
 
 def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobRequest]:
