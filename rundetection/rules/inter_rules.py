@@ -2,7 +2,7 @@
 Module for inter specific rules
 """
 
-from rundetection.ingest import DetectedRun, get_sibling_runs
+from rundetection.ingest import JobRequest, get_sibling_runs
 from rundetection.rules.rule import Rule
 
 
@@ -12,20 +12,20 @@ class InterStitchRule(Rule[bool]):
     """
 
     @staticmethod
-    def _get_run_group(run: DetectedRun) -> str:
+    def _get_run_group(job_request: JobRequest) -> str:
         """
-        Given a detected inter run, return the experiment string preceeding th=
-        :param run: The detected run
+        Given an inter job request, return the experiment string preceeding th=
+        :param job_request: The job request
         :return: The run group string
         """
-        index = run.experiment_title.rfind("th=")
-        return run.experiment_title[0:index]
+        index = job_request.experiment_title.rfind("th=")
+        return job_request.experiment_title[0:index]
 
-    def verify(self, run: DetectedRun) -> None:
-        sibling_runs = get_sibling_runs(run.filepath)
+    def verify(self, job_request: JobRequest) -> None:
+        sibling_runs = get_sibling_runs(job_request.filepath)
         additional_files = []
-        run_group = self._get_run_group(run)
+        run_group = self._get_run_group(job_request)
         for run_ in sibling_runs:
             if self._get_run_group(run_) == run_group:
                 additional_files.append(str(run_.filepath))
-        run.additional_values["additional_files"] = additional_files
+        job_request.additional_values["additional_files"] = additional_files

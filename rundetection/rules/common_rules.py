@@ -1,7 +1,7 @@
 """
 Module containing rule implementations for instrument shared rules
 """
-from rundetection.ingest import DetectedRun
+from rundetection.ingest import JobRequest
 from rundetection.rules.rule import Rule
 
 
@@ -11,5 +11,5 @@ class EnabledRule(Rule[bool]):
     it will be skipped
     """
 
-    def verify(self, run: DetectedRun) -> None:
-        run.will_reduce = self._value
+    def verify(self, job_request: JobRequest) -> None:
+        job_request.will_reduce = self._value

@@ -93,20 +93,20 @@ To add a custom extraction function, follow these steps:
 1.
 
 ```python
-def my_instrument_extract(run: DetectedRun, dataset: Any) -> DetectedRun
+def my_instrument_extract(job_request: JobRequest, dataset: Any) -> JobRequest
     """
-    Extracts additional metadata specific to my instrument from the given dataset and updates the DetectedRun
+    Extracts additional metadata specific to my instrument from the given dataset and updates the JobRequest
     instance. If the metadata does not exist, the default values will be set instead.
 
-    :param run: DetectedRun instance for which to extract additional metadata
+    :param job_request: JobRequest instance for which to extract additional metadata
     :param dataset: The dataset from which to extract additional MARI-specific metadata.
-    :return: DetectedRun instance with updated additional metadata
+    :return: JobRequest instance with updated additional metadata
     """
-    run.additional_values["some_key"] = dataset.get("some_key")
-    return run
+    job_request.additional_values["some_key"] = dataset.get("some_key")
+    return job_request
 ```
 
-Where the extraction function has the type `Callable[[DetectedRun, Any] DetectedRun]`
+Where the extraction function has the type `Callable[[JobRequest, Any] JobRequest]`
 While Any is listed, it is actually a h5py group, but the library does not have any type stubs.
 
 Next update the extraction factory function:
@@ -114,11 +114,11 @@ Next update the extraction factory function:
 2.
 
 ```python
-def get_extraction_function(instrument: str) -> Callable[[DetectedRun, Any], DetectedRun]:
+def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobRequest]:
     """
     Given an instrument name, return the additional metadata extraction function for the instrument
     :param instrument: str - instrument name
-    :return: Callable[[DetectedRun, Any], DetectedRun]: The additional metadata extraction function for the instrument
+    :return: Callable[[JobRequest, Any], JobRequest]: The additional metadata extraction function for the instrument
     """
     match instrument.lower():
         case "mari":
@@ -132,7 +132,7 @@ def get_extraction_function(instrument: str) -> Callable[[DetectedRun, Any], Det
 ```
 
 After making these two changes, when a run for your instrument is detected, the new extraction function will be
-automatically called, and the DetectedRun.additional_values will be updated accordingly.
+automatically called, and the JobRequest.additional_values will be updated accordingly.
 
 ## Adding to Instrument Specifications
 
@@ -165,8 +165,8 @@ Below is an example of adding a new rule. The example is unrealistic, but it sho
     ```python
     class SkipTitlesIncludingRule(Rule[List[str]]):
   
-      def verify(self, run: DetectedRun) -> None:
-          run.will_reduce =  any(word in run.experiment_title for word in self._value)
+      def verify(self, job_request: JobRequest) -> None:
+          job_request.will_reduce =  any(word in run.experiment_title for word in self._value)
     ```
 3. Update the `RuleFactory`:
     ```python
