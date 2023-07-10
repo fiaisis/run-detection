@@ -11,7 +11,7 @@ from unittest.mock import patch, Mock
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rundetection.ingest import DetectedRun
+from rundetection.ingest import JobRequest
 from rundetection.notifications import Notification
 from rundetection.queue_listener import Message
 from rundetection.run_detection import RunDetector
@@ -43,7 +43,7 @@ def test__process_message_specification_met(mock_ingest, _, detector):
     :param detector: RunDetector fixture
     :return: None
     """
-    run = DetectedRun(
+    job_request = JobRequest(
         run_number=123,
         instrument="mari",
         experiment_number="32131",
@@ -55,9 +55,9 @@ def test__process_message_specification_met(mock_ingest, _, detector):
         raw_frames=1,
         good_frames=1,
     )
-    mock_ingest.return_value = run
+    mock_ingest.return_value = job_request
     detector._process_message(MESSAGE)
-    detector._notifier.notify.assert_called_once_with(Notification(run.to_json_string()))
+    detector._notifier.notify.assert_called_once_with(Notification(job_request.to_json_string()))
     detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
 
 
@@ -73,7 +73,7 @@ def test__process_message_specification_not_met(mock_ingest, _, detector):
     :param detector: RunDetector fixture
     :return: None
     """
-    run = DetectedRun(
+    job_request = JobRequest(
         run_number=123,
         instrument="mari",
         experiment_number="32131",
@@ -85,7 +85,7 @@ def test__process_message_specification_not_met(mock_ingest, _, detector):
         raw_frames=0,
         good_frames=0,
     )
-    mock_ingest.return_value = run
+    mock_ingest.return_value = job_request
     detector._process_message(MESSAGE)
 
     detector._notifier.notify.assert_not_called()
