@@ -9,7 +9,7 @@ from unittest.mock import patch, AsyncMock, Mock, MagicMock
 
 import pytest
 
-from rundetection.ingest import DetectedRun
+from rundetection.ingest import JobRequest
 from rundetection.run_detection import (
     create_and_get_memphis,
     process_message,
@@ -54,19 +54,19 @@ def test_process_message(
     :return: None
     """
     notification_queue = SimpleQueue()
-    mock_additional_run = MagicMock(spec=DetectedRun)
-    mock_run = DetectedRun(
-        1, "inst", "title", "num", Path("."), "start", "end", 1, 1, "users", additional_runs=[mock_additional_run]
+    mock_additional_request = MagicMock(spec=JobRequest)
+    mock_request = JobRequest(
+        1, "inst", "title", "num", Path("."), "start", "end", 1, 1, "users", additional_runs=[mock_additional_request]
     )
-    mock_run.additional_runs = [mock_additional_run]
-    mock_ingest.return_value = mock_run
+    mock_request.additional_requests = [mock_additional_request]
+    mock_ingest.return_value = mock_request
     mock_spec = Mock()
     mock_instrument_spec.return_value = mock_spec
 
     process_message("some/path/nexus.nxs", notification_queue)
 
-    assert notification_queue.get() == mock_run
-    assert notification_queue.get() == mock_additional_run
+    assert notification_queue.get() == mock_request
+    assert notification_queue.get() == mock_additional_request
 
 
 @patch("rundetection.run_detection.ingest")
@@ -79,13 +79,13 @@ def test_process_message_no_notification(mock_instrument_spec, mock_ingest):
     :return: None
     """
     notification_queue = SimpleQueue()
-    mock_additional_run = MagicMock(spec=DetectedRun)
-    mock_run = DetectedRun(
-        1, "inst", "title", "num", Path("."), "start", "end", 1, 1, "users", additional_runs=[mock_additional_run]
+    mock_additional_request = MagicMock(spec=JobRequest)
+    mock_request = JobRequest(
+        1, "inst", "title", "num", Path("."), "start", "end", 1, 1, "users", additional_runs=[mock_additional_request]
     )
-    mock_run.will_reduce = False
-    mock_run.additional_runs = [mock_additional_run]
-    mock_ingest.return_value = mock_run
+    mock_request.will_reduce = False
+    mock_request.additional_runs = [mock_additional_request]
+    mock_ingest.return_value = mock_request
     mock_spec = Mock()
     mock_instrument_spec.return_value = mock_spec
 

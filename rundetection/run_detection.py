@@ -12,7 +12,7 @@ from typing import List, Optional, Any
 from memphis import Memphis  # type: ignore
 from memphis.message import Message  # type: ignore
 
-from rundetection.ingest import ingest, DetectedRun
+from rundetection.ingest import ingest, JobRequest
 from rundetection.specifications import InstrumentSpecification
 
 file_handler = logging.FileHandler(filename="run-detection.log")
@@ -41,7 +41,7 @@ async def create_and_get_memphis() -> Memphis:
     return memphis
 
 
-def process_message(message: str, notification_queue: SimpleQueue[DetectedRun]) -> None:
+def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -> None:
     """
     Process the incoming message. If the message should result in an upstream notification, it will put the message on
     the given notification queue
@@ -57,13 +57,13 @@ def process_message(message: str, notification_queue: SimpleQueue[DetectedRun]) 
     if run.will_reduce:
         logger.info("specification met for run: %s", run)
         notification_queue.put(run)
-        for additional_run in run.additional_runs:
-            notification_queue.put(additional_run)
+        for request in run.additional_requests:
+            notification_queue.put(request)
     else:
         logger.info("Specification not met, skipping run: %s", run)
 
 
-async def process_messages(messages: Optional[List[Message]], notification_queue: SimpleQueue[DetectedRun]) -> None:
+async def process_messages(messages: Optional[List[Message]], notification_queue: SimpleQueue[JobRequest]) -> None:
     """
     Given a list of messages and the notification queue, process each message, adding those which meet specifications to
     the notification queue
@@ -84,7 +84,7 @@ async def process_messages(messages: Optional[List[Message]], notification_queue
                 await message.ack()
 
 
-async def process_notifications(producer: Any, notification_queue: SimpleQueue[DetectedRun]) -> None:
+async def process_notifications(producer: Any, notification_queue: SimpleQueue[JobRequest]) -> None:
     """
     Produce messages until the notification queue is empty
     :param producer: The producer
@@ -111,7 +111,7 @@ async def start_run_detection() -> None:
     logger.info("Creating producer")
     egress_station = os.environ.get("MEMPHIS_EGRESS_NAME", "scheduled-jobs")
     producer = await memphis.producer(station_name=egress_station, producer_name="rundetection")
-    notification_queue: SimpleQueue[DetectedRun] = SimpleQueue()
+    notification_queue: SimpleQueue[JobRequest] = SimpleQueue()
     logger.info("Starting loop...")
     try:
         while True:

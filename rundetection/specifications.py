@@ -6,7 +6,7 @@ import json
 import logging
 from typing import Any, List
 
-from rundetection.ingest import DetectedRun
+from rundetection.ingest import JobRequest
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.rule import Rule
 
@@ -38,18 +38,18 @@ class InstrumentSpecification:
             logger.error("No specification for file: %s", self._instrument)
             raise
 
-    def verify(self, run: DetectedRun) -> None:
+    def verify(self, job_request: JobRequest) -> None:
         """
-        Verify that every rule for the DetectedRun is met, and that the specification contains at least one rule.
+        Verify that every rule for the JobRequest is met, and that the specification contains at least one rule.
         If the specification is empty verify will return false
-        :param run: A DetectedRun
+        :param job_request: A JobRequest
         :return: whether the specification is met
         """
         if len(self._rules) == 0:
-            run.will_reduce = False
+            job_request.will_reduce = False
         for rule in self._rules:
             logger.info("verifying rule: %s", rule)
-            rule.verify(run)
-            if run.will_reduce is False:
-                logger.info("Rule %s not met for run %s", rule, run)
+            rule.verify(job_request)
+            if job_request.will_reduce is False:
+                logger.info("Rule %s not met for run %s", rule, job_request)
                 break  # Stop processing as soon as one rule is not met.

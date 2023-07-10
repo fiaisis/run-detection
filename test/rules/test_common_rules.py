@@ -7,39 +7,39 @@ from pathlib import Path
 
 import pytest
 
-from rundetection.ingest import DetectedRun
+from rundetection.ingest import JobRequest
 from rundetection.rules.common_rules import EnabledRule
 
 
 @pytest.fixture
-def run():
+def job_request():
     """
-    DetectedRun Fixture
-    :return: DetectedRun
+    job_request Fixture
+    :return: JobRequest
     """
-    return DetectedRun(1, "larmor", "1", "1", Path("/archive/larmor/1/1.nxs"), "start time", "end time", 1, 1, "users")
+    return JobRequest(1, "larmor", "1", "1", Path("/archive/larmor/1/1.nxs"), "start time", "end time", 1, 1, "users")
 
 
-def test_enabled_rule_when_enabled(run) -> None:
+def test_enabled_rule_when_enabled(job_request) -> None:
     """
     Test verify method will return true when value is true
-    :param run: DetectedRun fixture
+    :param job_request: JobRequest fixture
     :return: None
     """
     rule = EnabledRule(True)
-    rule.verify(run)
-    assert run.will_reduce
+    rule.verify(job_request)
+    assert job_request.will_reduce
 
 
-def test_enabled_rule_when_not_enabled(run: DetectedRun) -> None:
+def test_enabled_rule_when_not_enabled(job_request) -> None:
     """
     Test verify method will return false when value is false
-    :param run: DetectedRun fixture
+    :param job_request: JobRequest fixture
     :return: None
     """
     rule = EnabledRule(False)
-    rule.verify(run)
-    assert run.will_reduce is False
+    rule.verify(job_request)
+    assert job_request.will_reduce is False
 
 
 if __name__ == "__main__":

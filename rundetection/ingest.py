@@ -1,4 +1,4 @@
-"""Ingest module holds the DetectedRun class and the ingest function used to build DetectedRuns from nexus files."""
+"""Ingest module holds the JobRequest class and the ingest function used to build JobRequests from nexus files."""
 from __future__ import annotations
 
 import dataclasses
@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 # splitting this class would be worse than this disable
 # pylint: disable = too-many-instance-attributes
 @dataclass
-class DetectedRun:
+class JobRequest:
     """
-    DetectedRun
+    JobRequest
     """
 
     run_number: int
@@ -33,7 +33,7 @@ class DetectedRun:
     users: str
     will_reduce: bool = True
     additional_values: Dict[str, Any] = dataclasses.field(default_factory=dict)
-    additional_runs: List[DetectedRun] = dataclasses.field(default_factory=list)
+    additional_requests: List[JobRequest] = dataclasses.field(default_factory=list)
 
     def to_json_string(self) -> str:
         """
@@ -43,15 +43,15 @@ class DetectedRun:
         dict_ = dataclasses.asdict(self)
         dict_["filepath"] = str(dict_["filepath"])
         del dict_["will_reduce"]
-        del dict_["additional_runs"]
+        del dict_["additional_requests"]
         return json.dumps(dict_)
 
 
-def ingest(path: Path) -> DetectedRun:
+def ingest(path: Path) -> JobRequest:
     """
-    Given the path of a nexus file, Create and return a DetectedRun
+    Given the path of a nexus file, Create and return a JobRequest
     :param path: The path of the nexus file
-    :return: The DetectedRun built from the given nexus file
+    :return: The JobRequest built from the given nexus file
     """
     logger.info("Ingesting file: %s", path)
     if path.suffix != ".nxs":
@@ -60,7 +60,7 @@ def ingest(path: Path) -> DetectedRun:
         file = File(path)
         key = list(file.keys())[0]
         dataset = file[key]
-        detection_result = DetectedRun(
+        detection_result = JobRequest(
             run_number=int(dataset.get("run_number")[0]),  # cast to int as i32 is not json serializable
             instrument=dataset.get("beamline")[0].decode("utf-8"),
             experiment_title=dataset.get("title")[0].decode("utf-8"),
@@ -83,32 +83,34 @@ def ingest(path: Path) -> DetectedRun:
         raise
 
 
-def skip_extract(run: DetectedRun, _: Any) -> DetectedRun:
+def skip_extract(job_request: JobRequest, _: Any) -> JobRequest:
     """
-    Skips the extraction of additional metadata for a given DetectedRun instance and dataset, when the extraction of
+    Skips the extraction of additional metadata for a given JobRequest instance and dataset, when the extraction of
     additional metadata is not required or not applicable for a specific instrument or dataset.
 
-    :param run: DetectedRun instance for which the additional metadata extraction should be skipped
+    :param job_request: JobRequest instance for which the additional metadata extraction should be skipped
     :param _: The dataset from which the additional metadata extraction is to be skipped
-    :return: DetectedRun instance without updating additional metadata
+    :return: JobRequest instance without updating additional metadata
 
     """
-    logger.info("No additional extraction needed for run: %s %s", run.instrument, run.run_number)
-    return run
+    logger.info(
+        "No additional extraction needed for job_request: %s %s", job_request.instrument, job_request.run_number
+    )
+    return job_request
 
 
-def mari_extract(run: DetectedRun, dataset: Any) -> DetectedRun:
+def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     """
-    Extracts additional metadata specific to the MARI instrument from the given dataset and updates the DetectedRun
+    Extracts additional metadata specific to the MARI instrument from the given dataset and updates the JobRequest
     instance. If the metadata does not exist, the default values will be set instead.
 
-    :param run: DetectedRun instance for which to extract additional metadata
+    :param job_request: JobRequest instance for which to extract additional metadata
     :param dataset: The dataset from which to extract additional MARI-specific metadata. (The type is a h5py group)
-    :return: DetectedRun instance with updated additional metadata
+    :return: JobRequest instance with updated additional metadata
 
     This function extracts MARI-specific metadata including incident energy (ei), sample mass (sam_mass),
     sample relative molecular mass (sam_rmm), monovanadium run number (monovan), and background removal flag
-    (remove_bkg). The extracted metadata is stored in the additional_values attribute of the DetectedRun instance.
+    (remove_bkg). The extracted metadata is stored in the additional_values attribute of the JobRequest instance.
     """
 
     ei = dataset.get("ei")
@@ -133,22 +135,22 @@ def mari_extract(run: DetectedRun, dataset: Any) -> DetectedRun:
     else:
         remove_bkg = False
 
-    run.additional_values["ei"] = ei
-    run.additional_values["sam_mass"] = sam_mass
-    run.additional_values["sam_rmm"] = sam_rmm
-    run.additional_values["monovan"] = run.run_number if (sam_rmm != 0 and sam_mass != 0) else 0
-    run.additional_values["remove_bkg"] = remove_bkg
-    run.additional_values["sum_runs"] = False
-    run.additional_values["runno"] = run.run_number
+    job_request.additional_values["ei"] = ei
+    job_request.additional_values["sam_mass"] = sam_mass
+    job_request.additional_values["sam_rmm"] = sam_rmm
+    job_request.additional_values["monovan"] = job_request.run_number if (sam_rmm != 0 and sam_mass != 0) else 0
+    job_request.additional_values["remove_bkg"] = remove_bkg
+    job_request.additional_values["sum_runs"] = False
+    job_request.additional_values["runno"] = job_request.run_number
 
-    return run
+    return job_request
 
 
-def get_extraction_function(instrument: str) -> Callable[[DetectedRun, Any], DetectedRun]:
+def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobRequest]:
     """
     Given an instrument name, return the additional metadata extraction function for the instrument
     :param instrument: str - instrument name
-    :return: Callable[[DetectedRun, Any], DetectedRun]: The additional metadata extraction function for the instrument
+    :return: Callable[[JobRequest, Any], JobRequest]: The additional metadata extraction function for the instrument
     """
     match instrument.lower():
         case "mari":
@@ -166,11 +168,11 @@ def get_sibling_nexus_files(nexus_path: Path) -> List[Path]:
     return [Path(file) for file in nexus_path.parents[0].glob("*.nxs") if Path(file) != nexus_path]
 
 
-def get_sibling_runs(nexus_path: Path) -> List[DetectedRun]:
+def get_sibling_runs(nexus_path: Path) -> List[JobRequest]:
     """
     Given the path of a nexus file, return a list of ingested sibling nexus files in the same directory
     :param nexus_path: The nexus file for which directory to search
-    :return: List of DetectedRun Objects
+    :return: List of JobRequest Objects
     """
     return [ingest(file) for file in get_sibling_nexus_files(nexus_path)]
 
