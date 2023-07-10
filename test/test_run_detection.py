@@ -56,7 +56,17 @@ def test_process_message(
     notification_queue = SimpleQueue()
     mock_additional_request = MagicMock(spec=JobRequest)
     mock_request = JobRequest(
-        1, "inst", "title", "num", Path("."), "start", "end", 1, 1, "users", additional_runs=[mock_additional_request]
+        1,
+        "inst",
+        "title",
+        "num",
+        Path("."),
+        "start",
+        "end",
+        1,
+        1,
+        "users",
+        additional_requests=[mock_additional_request],
     )
     mock_request.additional_requests = [mock_additional_request]
     mock_ingest.return_value = mock_request
@@ -81,7 +91,17 @@ def test_process_message_no_notification(mock_instrument_spec, mock_ingest):
     notification_queue = SimpleQueue()
     mock_additional_request = MagicMock(spec=JobRequest)
     mock_request = JobRequest(
-        1, "inst", "title", "num", Path("."), "start", "end", 1, 1, "users", additional_runs=[mock_additional_request]
+        1,
+        "inst",
+        "title",
+        "num",
+        Path("."),
+        "start",
+        "end",
+        1,
+        1,
+        "users",
+        additional_requests=[mock_additional_request],
     )
     mock_request.will_reduce = False
     mock_request.additional_runs = [mock_additional_request]
