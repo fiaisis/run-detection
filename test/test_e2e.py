@@ -49,6 +49,16 @@ def produce_file(file: str, jwt: str):
     requests.request("POST", url, headers=headers, data=payload, timeout=60)
 
 
+async def produce_message(message: str) -> None:
+    """
+    Post a message to memphis
+    :param message: the message to send
+    :return: None
+    """
+    memphis = await create_and_get_memphis()
+    memphis.produce(station_name="watched-files")
+
+
 @pytest.mark.asyncio
 async def test_e2e():
     """
@@ -91,7 +101,7 @@ async def test_e2e():
             "runno": 25581,
             "mask_file_link": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/"
             "964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml",
-            "wbvan": 28629,
+            "wbvan": 28580,
         },
     }
     try:
