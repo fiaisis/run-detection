@@ -91,7 +91,7 @@ async def test_e2e():
             "runno": 25581,
             "mask_file_link": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/"
             "964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml",
-            "wbvan": 28580,
+            "wbvan": 28629,
         },
     }
     try:
