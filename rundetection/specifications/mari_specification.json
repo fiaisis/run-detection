@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "maristitch": false,
+  "maristitch": true,
   "marimaskfile": "https://raw.githubusercontent.com/mantidproject/scriptrepository/f5dd40e52e87e6e2c595cbfe337169e56ff67917/direct_inelastic/MARI/MaskFiles/mari_mask2023_2.xml",
   "mariwbvan": 28629
 }
