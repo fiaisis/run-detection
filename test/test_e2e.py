@@ -66,8 +66,9 @@ async def test_e2e():
             "remove_bkg": False,
             "sum_runs": False,
             "runno": 25581,
-            "mask_file_link": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/"
-                              "964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml",
+            "mask_file_link": "https://raw.githubusercontent.com/mantidproject/scriptrepository/"
+            "f5dd40e52e87e6e2c595cbfe337169e56ff67917/direct_inelastic/MARI/MaskFiles/"
+            "mari_mask2023_2.xml",
             "wbvan": 28629,
         },
     }
