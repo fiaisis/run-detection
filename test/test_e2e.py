@@ -17,7 +17,12 @@ async def produce_message(message: str) -> None:
     :return: None
     """
     memphis = await create_and_get_memphis()
-    await memphis.produce(station_name="watched-files", producer_name="e2e-submission-producer", message=message)
+    await memphis.produce(
+        station_name="watched-files",
+        producer_name="e2e-submission-producer",
+        message=message,
+        generate_random_suffix=True,
+    )
 
 
 @pytest.mark.asyncio
@@ -62,7 +67,7 @@ async def test_e2e():
             "sum_runs": False,
             "runno": 25581,
             "mask_file_link": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/"
-                              "964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml",
+            "964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml",
             "wbvan": 28580,
         },
     }
