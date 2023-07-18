@@ -6,47 +6,8 @@ import asyncio
 import json
 
 import pytest
-import requests
 
 from rundetection.run_detection import create_and_get_memphis
-
-
-def get_memphis_token() -> str:
-    """
-    Authenticate with memphis rest gateway
-    :return: str - session JWT
-    """
-    url = "http://localhost:4444/auth/authenticate"
-
-    payload = json.dumps(
-        {
-            "username": "root",
-            "password": "memphis",
-            "token_expiry_in_minutes": 15,
-            "refresh_token_expiry_in_minutes": 15,
-        }
-    )
-    headers = {"Content-Type": "application/json"}
-
-    response = requests.request("POST", url, headers=headers, data=payload, timeout=60)
-
-    return response.json()["jwt"]
-
-
-def produce_file(file: str, jwt: str):
-    """
-    Post the filepath to the ingress station, authenticating with the given jwt
-    :param file: The file path to send
-    :param jwt: The jwt to authenticate with
-    :return: None
-    """
-    url = "http://localhost:4444/stations/watched-files/produce/single"
-
-    payload = file
-
-    headers = {"Authorization": f"Bearer {jwt}", "Content-Type": "application/json"}
-
-    requests.request("POST", url, headers=headers, data=payload, timeout=60)
 
 
 async def produce_message(message: str) -> None:
@@ -56,7 +17,7 @@ async def produce_message(message: str) -> None:
     :return: None
     """
     memphis = await create_and_get_memphis()
-    memphis.produce(station_name="watched-files")
+    await memphis.produce(station_name="watched-files", producer_name="e2e-submission-producer", message=message)
 
 
 @pytest.mark.asyncio
@@ -67,15 +28,16 @@ async def test_e2e():
     :return: None
     """
 
-    jwt = get_memphis_token()
     # Produce file that should reduce
-    produce_file("/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs", jwt)
+    await produce_message("/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs")
 
     # Produce file that should not reduce
-    produce_file("/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs", jwt)
+    await produce_message("/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs")
 
     # Produce file that does not exist
-    produce_file("/archive/foo/bar/baz.nxs", jwt)
+    await produce_message("/archive/foo/bar/baz.nxs")
+
+    await asyncio.sleep(3)
 
     memphis = await create_and_get_memphis()
     recieved = await memphis.fetch_messages("scheduled-jobs", "e2e-consumer")
@@ -100,7 +62,7 @@ async def test_e2e():
             "sum_runs": False,
             "runno": 25581,
             "mask_file_link": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/"
-            "964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml",
+                              "964733aec28b00b13f32fb61afa363a74dd62130/mari/mari_mask2023_1.xml",
             "wbvan": 28580,
         },
     }
