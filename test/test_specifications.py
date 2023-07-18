@@ -2,7 +2,6 @@
 Specification unit test module
 """
 from pathlib import Path
-
 # pylint: disable=protected-access, redefined-outer-name
 from unittest.mock import Mock, patch
 
@@ -101,7 +100,7 @@ def test_specification_rule_loading() -> None:
     assert isinstance(mari_specification._rules[0], EnabledRule)
     assert mari_specification._rules[0]._value
     assert isinstance(mari_specification._rules[1], MariStitchRule)
-    assert mari_specification._rules[1]._value is False
+    assert mari_specification._rules[1]._value
 
     assert isinstance(chronus_specification._rules[0], EnabledRule)
     assert chronus_specification._rules[0]._value is False
