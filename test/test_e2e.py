@@ -2,7 +2,6 @@
 End-to-end tests
 """
 import json
-
 # pylint: disable=redefined-outer-name, no-name-in-module
 import unittest
 from typing import Any
@@ -46,7 +45,7 @@ def get_specification_value(instrument: str, key: str) -> Any:
     :param key: The key for the rule
     :return: The rule value
     """
-    with open(f"rundetection/specifications/{instrument.lower()}_specification.json", "r") as fle:
+    with open(f"rundetection/specifications/{instrument.lower()}_specification.json", "r", encoding="utf-8") as fle:
         spec = json.load(fle)
         return spec[key]
 
@@ -89,7 +88,7 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         b'"users": "Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara", '
         b'"additional_values": {"ei": "\'auto\'", "sam_mass": 0.0, '
         b'"sam_rmm": 0.0, "monovan": 0, "remove_bkg": false, "sum_runs": false, "runno": 25581, '
-        b'"mask_file_link": "' + expected_mask.encode() + b'", ' + b' "wbvan": ' + expected_wbvan + b"}}",
+        b'"mask_file_link": "' + expected_mask.encode() + b'", ' + b' "wbvan": ' + str(expected_wbvan).encode() + b"}}",
     ]
     assert len(received) == 1
 
