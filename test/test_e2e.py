@@ -88,7 +88,7 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         b'"users": "Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara", '
         b'"additional_values": {"ei": "\'auto\'", "sam_mass": 0.0, '
         b'"sam_rmm": 0.0, "monovan": 0, "remove_bkg": false, "sum_runs": false, "runno": 25581, '
-        b'"mask_file_link": "' + expected_mask.encode() + b'", ' + b' "wbvan": ' + str(expected_wbvan).encode() + b"}}",
+        b'"mask_file_link": "' + expected_mask.encode() + b'", ' + b'"wbvan": ' + str(expected_wbvan).encode() + b"}}",
     ]
     assert len(received) == 1
 
