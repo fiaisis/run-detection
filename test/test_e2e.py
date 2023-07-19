@@ -1,8 +1,11 @@
 """
 End-to-end tests
 """
+import json
+
 # pylint: disable=redefined-outer-name, no-name-in-module
 import unittest
+from typing import Any
 
 import pytest
 from confluent_kafka import Consumer
@@ -36,6 +39,18 @@ def kafka_consumer() -> Consumer:
     return consumer
 
 
+def get_specification_value(instrument: str, key: str) -> Any:
+    """
+    Given an instrument and key, return the specification value
+    :param instrument: The instrument for which specificaiton to check
+    :param key: The key for the rule
+    :return: The rule value
+    """
+    with open(f"rundetection/specifications/{instrument.lower()}_specification.json", "r") as fle:
+        spec = json.load(fle)
+        return spec[key]
+
+
 def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> None:
     """
     Test message that is sent to activemq is processed and arrives at kafka instance
@@ -45,6 +60,9 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
     amq_connection.send("Interactive-Reduction", r"\\isis\inst$\Cycles$\cycle_20_01\NDXENGINX\ENGINX00241391.nxs")
     amq_connection.send("Interactive-Reduction", r"\\isis\inst$\Cycles$\cycle_19_03\NDXALF\ALF82301.nxs")
     amq_connection.send("Interactive-Reduction", r"\\isis\inst$\Cycles$\cycle_22_04\NDXMAR\MAR25581.nxs")
+
+    expected_wbvan = get_specification_value("mari", "mariwbvan")
+    expected_mask = get_specification_value("mari", "marimaskfile")
 
     received = []
     for _ in range(30):
@@ -71,9 +89,7 @@ def test_end_to_end(amq_connection: Connection, kafka_consumer: Consumer) -> Non
         b'"users": "Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara", '
         b'"additional_values": {"ei": "\'auto\'", "sam_mass": 0.0, '
         b'"sam_rmm": 0.0, "monovan": 0, "remove_bkg": false, "sum_runs": false, "runno": 25581, '
-        b'"mask_file_link": "https://raw.githubusercontent.com/mantidproject/scriptrepository/'
-        b'f5dd40e52e87e6e2c595cbfe337169e56ff67917/direct_inelastic/MARI/MaskFiles/mari_mask2023_2.xml",'
-        b' "wbvan": 28629}}',
+        b'"mask_file_link": "' + expected_mask + b'", ' + b' "wbvan": ' + expected_wbvan + b"}}",
     ]
     assert len(received) == 1
 
