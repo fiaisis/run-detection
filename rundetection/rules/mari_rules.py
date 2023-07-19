@@ -19,7 +19,7 @@ class MariStitchRule(Rule[bool]):
 
     @staticmethod
     def _get_previous_run_path(run_number: int, run_path: Path) -> Path:
-        return Path(run_path.parent, f"MARI{run_number - 1}.nxs")
+        return Path(run_path.parent, f"MAR{run_number - 1}.nxs")
 
     def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> List[int]:
         run_numbers = []
