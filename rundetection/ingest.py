@@ -69,7 +69,7 @@ def _load_h5py_dataset(path: Path) -> Any:
         key = list(file.keys())[0]
         return file[key]
     except FileNotFoundError:
-        logger.error("Nexus file could not be found")
+        logger.error("Nexus file could not be found: %s", path)
         raise
 
 
