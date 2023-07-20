@@ -2,7 +2,6 @@
 Test for mari rules
 """
 import json
-
 # pylint:disable = redefined-outer-name, protected-access
 from pathlib import Path
 from typing import Any
@@ -20,7 +19,7 @@ def get_specification_value(key: str) -> Any:
     :param key: The key for the rule
     :return: The rule value
     """
-    with open(f"rundetection/specifications/mari_specification.json", "r", encoding="utf-8") as fle:
+    with open("rundetection/specifications/mari_specification.json", "r", encoding="utf-8") as fle:
         spec = json.load(fle)
         return spec[key]
 
