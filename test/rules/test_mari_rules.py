@@ -1,14 +1,28 @@
 """
 Test for mari rules
 """
+import json
+
 # pylint:disable = redefined-outer-name, protected-access
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 
 from rundetection.ingest import JobRequest
 from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
+
+
+def get_specification_value(key: str) -> Any:
+    """
+    Given a key, return the specification value
+    :param key: The key for the rule
+    :return: The rule value
+    """
+    with open(f"rundetection/specifications/mari_specification.json", "r", encoding="utf-8") as fle:
+        spec = json.load(fle)
+        return spec[key]
 
 
 @pytest.fixture
@@ -91,6 +105,24 @@ def test_verify_with_single_run(_, __, mari_stitch_rule_true, job_request):
     """
     mari_stitch_rule_true.verify(job_request)
     assert not job_request.additional_requests
+
+
+@patch("rundetection.rules.mari_rules.MariStitchRule._get_runs_to_stitch", return_value=[1, 2, 3])
+def test_verify_multiple_runs(_, mari_stitch_rule_true, job_request):
+    """
+    Test additional requests are included with other rules applied
+    :param _: additional run fixture
+    :param mari_stitch_rule_true: rule fixture
+    :param job_request: job request fixture
+    :return: None
+    """
+    mari_stitch_rule_true.verify(job_request)
+
+    assert len(job_request.additional_requests) == 1
+    assert job_request.additional_requests[0].additional_values["mask_file_link"] == get_specification_value(
+        "marimaskfile"
+    )
+    assert job_request.additional_requests[0].additional_values["wbvan"] == get_specification_value("mariwbvan")
 
 
 def test_mari_mask_rule(job_request):
