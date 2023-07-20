@@ -19,7 +19,6 @@ class MariStitchRule(Rule[bool]):
     """
 
     def __init__(self, value: bool) -> None:
-
         super().__init__(value)
         self._spec_values = self._load_mari_spec()
 
