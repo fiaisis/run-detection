@@ -45,14 +45,14 @@ class MariStitchRule(Rule[bool]):
         """
         try:
             with open(
-                "rundetection/specifications/mari_specification.json",
-                "r",
-                encoding="utf-8",
+                    "rundetection/specifications/mari_specification.json",
+                    "r",
+                    encoding="utf-8",
             ) as spec_file:
                 return json.load(spec_file)
-        except FileNotFoundError:
+        except FileNotFoundError as exc:
             logger.warning("Mari Specification could not be reloaded")
-            raise RuntimeError("Mari specification is no longer available")
+            raise RuntimeError("Mari specification is no longer available") from exc
 
     def verify(self, job_request: JobRequest) -> None:
         if not self._value:  # if the stitch rule is set to false, skip
