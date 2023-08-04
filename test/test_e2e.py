@@ -1,15 +1,11 @@
 """
 End-to-end tests
 """
-import json
 # pylint: disable=redefined-outer-name, no-name-in-module
 
 import asyncio
 import json
-
-import unittest
 from typing import Any
-
 
 import pytest
 
@@ -29,6 +25,7 @@ async def produce_message(message: str) -> None:
         message=message,
         generate_random_suffix=True,
     )
+
 
 def get_specification_value(instrument: str, key: str) -> Any:
     """
@@ -52,7 +49,7 @@ async def test_e2e():
 
     expected_wbvan = get_specification_value("mari", "mariwbvan")
     expected_mask = get_specification_value("mari", "marimaskfile")
-    
+
     # Produce file that should reduce
     await produce_message("/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs")
 
@@ -87,7 +84,6 @@ async def test_e2e():
             "sum_runs": False,
             "runno": 25581,
             "mask_file_link": expected_mask,
-            "mari_mask2023_2.xml",
             "wbvan": expected_wbvan,
         },
     }
