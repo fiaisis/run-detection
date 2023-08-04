@@ -1,9 +1,15 @@
 """
 End-to-end tests
 """
+import json
 # pylint: disable=redefined-outer-name, no-name-in-module
+
 import asyncio
 import json
+
+import unittest
+from typing import Any
+
 
 import pytest
 
@@ -24,6 +30,17 @@ async def produce_message(message: str) -> None:
         generate_random_suffix=True,
     )
 
+def get_specification_value(instrument: str, key: str) -> Any:
+    """
+    Given an instrument and key, return the specification value
+    :param instrument: The instrument for which specificaiton to check
+    :param key: The key for the rule
+    :return: The rule value
+    """
+    with open(f"rundetection/specifications/{instrument.lower()}_specification.json", "r", encoding="utf-8") as fle:
+        spec = json.load(fle)
+        return spec[key]
+
 
 @pytest.mark.asyncio
 async def test_e2e():
@@ -33,6 +50,9 @@ async def test_e2e():
     :return: None
     """
 
+    expected_wbvan = get_specification_value("mari", "mariwbvan")
+    expected_mask = get_specification_value("mari", "marimaskfile")
+    
     # Produce file that should reduce
     await produce_message("/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs")
 
@@ -66,10 +86,9 @@ async def test_e2e():
             "remove_bkg": False,
             "sum_runs": False,
             "runno": 25581,
-            "mask_file_link": "https://raw.githubusercontent.com/mantidproject/scriptrepository/"
-            "f5dd40e52e87e6e2c595cbfe337169e56ff67917/direct_inelastic/MARI/MaskFiles/"
+            "mask_file_link": expected_mask,
             "mari_mask2023_2.xml",
-            "wbvan": 28629,
+            "wbvan": expected_wbvan,
         },
     }
     try:
