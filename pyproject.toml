@@ -3,7 +3,7 @@ name = "run-detection"
 readme = "README.md"
 version = "0.0.1"
 dependencies = [
-    "confluent-kafka==2.1.1",
+    "confluent-kafka==2.2.0",
     "h5py==3.9.0",
     "stomp.py==8.1.0"
 
