@@ -1,7 +1,7 @@
 """
 Run detection module holds the RunDetector main class
 """
-import logging 
+import logging
 import re
 import signal
 import sys
