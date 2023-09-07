@@ -12,12 +12,12 @@ jobs:
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
       - name: Set up python
-        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
         with:
           python-version: '3.10'
 
       - name: Set up cache for Python dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
@@ -30,7 +30,7 @@ jobs:
           python -m pip install .[test]
 
       - name: Run pytest
-        run: pytest . --ignore test/test_e2e.py --cov --cov-report=xml
+        run: pytest . --random-order --random-order-bucket=global --ignore test/test_e2e.py --cov --cov-report=xml
 
       - name: Upload coverage
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
@@ -41,7 +41,7 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       - name: Set up python
-        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
         with:
           python-version: '3.10'
       - name: Install dependencies
@@ -53,7 +53,7 @@ jobs:
           cd test
           docker-compose up -d
       - name: Run e2e test
-        run: pytest test/test_e2e.py
+        run: pytest --random-order --random-order-bucket=global test/test_e2e.py
 
       - name: View logs on fail
         if: failure()
