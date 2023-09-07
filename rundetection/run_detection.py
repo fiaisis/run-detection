@@ -110,7 +110,7 @@ async def start_run_detection() -> None:
     consumer = await memphis.consumer(station_name=ingress_station, consumer_group="rundetection", consumer_name="rundetection", generate_random_suffix=True)
     logger.info("Creating producer")
     egress_station = os.environ.get("MEMPHIS_EGRESS_NAME", "scheduled-jobs")
-    producer = await memphis.producer(station_name=egress_station, producer_name="rundetection")
+    producer = await memphis.producer(station_name=egress_station, producer_name="rundetection", generate_random_suffix=True)
     notification_queue: SimpleQueue[JobRequest] = SimpleQueue()
     logger.info("Starting loop...")
     try:
