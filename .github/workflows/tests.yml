@@ -60,6 +60,7 @@ jobs:
         run: |
           cd test
           docker-compose logs run-detection
-          docker-compose logs broker
-          docker-compose logs activemq
+          docker-compose logs memphis
+          docker-compose logs memphis-rest-gateway
+          docker-compose logs memphis-metadata
 
