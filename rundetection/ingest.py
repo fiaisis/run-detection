@@ -4,11 +4,14 @@ from __future__ import annotations
 import dataclasses
 import json
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Any, List, Callable
 
 from h5py import File  # type: ignore
+
+from rundetection.exceptions import IngestError
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +130,13 @@ def skip_extract(job_request: JobRequest, _: Any) -> JobRequest:
     return job_request
 
 
+def tosca_extract(job_request: JobRequest, _: Any) -> JobRequest:
+    """"""
+    logger.info("Adding additional")
+    job_request.additional_values["cycle_string"] = get_cycle_string_from_path(job_request.filepath)
+    return job_request
+
+
 def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     """
     Extracts additional metadata specific to the MARI instrument from the given dataset and updates the JobRequest
@@ -183,6 +193,8 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
     match instrument.lower():
         case "mari":
             return mari_extract
+        case "tosca":
+            return tosca_extract
         case _:
             return skip_extract
 
@@ -212,3 +224,17 @@ def get_run_title(nexus_path: Path) -> str:
     :return: str - The title of the files run
     """
     return ingest(nexus_path).experiment_title
+
+
+def get_cycle_string_from_path(nexus_path: Path) -> str:
+    """
+    Given the path of a nexus file, get the cycle string for that nexus file.
+    An example of a cycle string is cycle_19_2
+    :param nexus_path: The path of the nexus file
+    :return: The cycle string
+    """
+    pattern = r"cycle_(\d+)_(\d+)"
+    match = re.search(pattern, str(nexus_path))
+    if match:
+        return match.group(0)
+    raise IngestError(f"Unable to build a cycle string for nexus file: {nexus_path}")

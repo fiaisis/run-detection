@@ -11,6 +11,7 @@ from unittest.mock import Mock, patch
 import pytest
 from _pytest.logging import LogCaptureFixture
 
+from rundetection.exceptions import IngestError
 from rundetection.ingest import (
     ingest,
     JobRequest,
@@ -20,6 +21,7 @@ from rundetection.ingest import (
     get_extraction_function,
     get_run_title,
     mari_extract,
+    get_cycle_string_from_path,
 )
 
 # Allows test to be run via pycharm play button or from project root
@@ -331,6 +333,36 @@ def test_ingest_to_json_string_produces_no_decode_errors():
     """
     job_request = ingest(Path(TEST_DATA_PATH, "e2e_data/1510111/ENGINX00241391.nxs"))
     job_request.to_json_string()
+
+
+def test_get_cycle_string_from_path_valid():
+    """
+    Test get cycle string returns correct string
+    :return: None
+    """
+    path = Path("/some/path/to/cycle_2023_42/and/some/file")
+    result = get_cycle_string_from_path(path)
+    assert result == "cycle_2023_42"
+
+
+def test_get_cycle_string_from_path_valid_alternative():
+    """
+    Test get cycle string returns correct string for short year
+    :return: None
+    """
+    path = Path("/another/path/cycle_19_2/file")
+    result = get_cycle_string_from_path(path)
+    assert result == "cycle_19_2"
+
+
+def test_get_cycle_string_from_path_invalid():
+    """
+    Test get cycle string raises when year missing
+    :return: None
+    """
+    path = Path("/no/cycle/string/here")
+    with pytest.raises(IngestError):
+        get_cycle_string_from_path(path)
 
 
 if __name__ == "__main__":
