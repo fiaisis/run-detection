@@ -131,7 +131,12 @@ def skip_extract(job_request: JobRequest, _: Any) -> JobRequest:
 
 
 def tosca_extract(job_request: JobRequest, _: Any) -> JobRequest:
-    """"""
+    """
+    Add the cycle_string to the job request
+    :param job_request: The job request
+    :param _:
+    :return: The updated job request
+    """
     logger.info("Adding additional")
     job_request.additional_values["cycle_string"] = get_cycle_string_from_path(job_request.filepath)
     return job_request
