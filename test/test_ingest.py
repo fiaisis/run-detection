@@ -22,6 +22,7 @@ from rundetection.ingest import (
     get_run_title,
     mari_extract,
     get_cycle_string_from_path,
+    tosca_extract,
 )
 
 # Allows test to be run via pycharm play button or from project root
@@ -324,6 +325,20 @@ def test_mari_extract_remove_bkg_true(job_request):
     assert result.additional_values["sam_rmm"] == 100.0
     assert result.additional_values["monovan"] == 12345
     assert result.additional_values["remove_bkg"] is True
+
+
+@patch("rundetection.ingest.get_cycle_string_from_path", return_value="some string")
+def test_tosca_extract(_: Mock, job_request):
+    """Test Tosca Extract adds_cycle_string"""
+    tosca_extract(job_request, None)
+    assert job_request.additional_values["cycle_string"] == "some string"
+
+
+def test_get_cycle_from_string_empty_path():
+    """Test if the function raises an IngestError for an empty path"""
+    path = Path("")
+    with pytest.raises(IngestError):
+        get_cycle_string_from_path(path)
 
 
 def test_ingest_to_json_string_produces_no_decode_errors():
