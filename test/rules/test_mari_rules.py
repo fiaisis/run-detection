@@ -2,7 +2,6 @@
 Test for mari rules
 """
 import json
-
 # pylint:disable = redefined-outer-name, protected-access
 from pathlib import Path
 from typing import Any
@@ -63,22 +62,6 @@ def mari_stitch_rule_false():
     :return: MariStitchRule
     """
     return MariStitchRule(value=False)
-
-
-def test_get_previous_run_path():
-    """
-    Test previous path is obtained
-    :return: None
-    """
-    run_path = Path("/archive/MAR100.nxs")
-    run_number = 100
-
-    mari_stitch_rule = MariStitchRule(value=True)
-
-    assert mari_stitch_rule._get_previous_run_path(run_number, run_path) == Path("/archive/MAR99.nxs")
-
-    run_path = Path("/archive/MARI100.nxs")
-    assert mari_stitch_rule._get_previous_run_path(run_number, run_path) == Path("/archive/MAR99.nxs")
 
 
 def test_verify_with_stitch_rule_false(mari_stitch_rule_false, job_request):

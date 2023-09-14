@@ -23,17 +23,14 @@ class MariStitchRule(Rule[bool]):
         self._spec_values = self._load_mari_spec()
 
     @staticmethod
-    def _get_previous_run_path(run_number: int, run_path: Path) -> Path:
-        return Path(run_path.parent, f"MAR{run_number - 1}.nxs")
-
-    def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> List[int]:
+    def _get_runs_to_stitch(run_path: Path, run_number: int, run_title: str) -> List[int]:
         run_numbers = []
         while run_path.exists():
             if get_run_title(run_path) != run_title:
                 break
             run_numbers.append(run_number)
             run_number -= 1
-            run_path = self._get_previous_run_path(run_number, run_path)
+            run_path = Path(run_path.parent, f"MAR{run_number}.nxs")
         return run_numbers
 
     @staticmethod
