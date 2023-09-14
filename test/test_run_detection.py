@@ -1,254 +1,237 @@
 """
 Tests for run detection module
 """
-# pylint: disable=protected-access, redefined-outer-name
-
+import logging
 import unittest
 from pathlib import Path
-from queue import Empty
-from unittest.mock import patch, Mock
+from queue import SimpleQueue
+from unittest.mock import patch, AsyncMock, Mock, MagicMock
 
 import pytest
-from _pytest.logging import LogCaptureFixture
 
 from rundetection.ingest import JobRequest
-from rundetection.notifications import Notification
-from rundetection.queue_listener import Message
-from rundetection.run_detection import RunDetector
-
-MESSAGE = Message(id="id", value=r"\\isis\inst$\Cycles$\cycle_22_04\NDXGEM\GEM12345.nxs")
-
-
-@pytest.fixture
-def detector() -> RunDetector:
-    """
-    Sets up and returns a run detector
-    :return: RunDetector
-    """
-
-    detector_ = RunDetector()
-    detector_._queue_listener = Mock()
-    detector_._message_queue = Mock()
-    detector_._notifier = Mock()
-    return detector_
-
-
-@patch("rundetection.run_detection.InstrumentSpecification")
-@patch("rundetection.run_detection.ingest")
-def test__process_message_specification_met(mock_ingest, _, detector):
-    """
-    Test process message and specification is met
-    :param mock_ingest: mock ingest function
-    :param _: mock specification
-    :param detector: RunDetector fixture
-    :return: None
-    """
-    job_request = JobRequest(
-        run_number=123,
-        instrument="mari",
-        experiment_number="32131",
-        experiment_title="title",
-        filepath=Path("/archive/mari/32131/123.nxs"),
-        run_start="start time",
-        run_end="end time",
-        users="Keiran",
-        raw_frames=1,
-        good_frames=1,
-    )
-    mock_ingest.return_value = job_request
-    detector._process_message(MESSAGE)
-    detector._notifier.notify.assert_called_once_with(Notification(job_request.to_json_string()))
-    detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
-
-
-@patch(
-    "rundetection.run_detection.InstrumentSpecification.verify", side_effect=lambda x: x.setattr("will_reduce", False)
+from rundetection.run_detection import (
+    create_and_get_memphis,
+    process_message,
+    process_messages,
+    process_notifications,
+    start_run_detection,
+    verify_archive_access,
 )
+
+
+# pylint: disable=protected-access, redefined-outer-name
+
+
+@pytest.mark.asyncio
+@patch("rundetection.run_detection.Memphis")
+async def test_create_and_get_memphis(mock_memphis):
+    """
+    Test that the memphis object is given the correct parameters and returned
+    :param mock_memphis: Mock memphis class
+    :return: None
+    """
+    expected_memphis = AsyncMock()
+    mock_memphis.return_value = expected_memphis
+
+    actual_memphis = await create_and_get_memphis()
+
+    mock_memphis.assert_called_once()
+    assert expected_memphis == actual_memphis
+    expected_memphis.connect.assert_called_once_with(host="localhost", username="root", password="memphis")
+
+
 @patch("rundetection.run_detection.ingest")
-def test__process_message_specification_not_met(mock_ingest, _, detector):
+@patch("rundetection.run_detection.InstrumentSpecification")
+def test_process_message(
+    mock_instrument_spec,
+    mock_ingest,
+):
     """
-    Test message processed when specification is not met
+    Test that process message loads the correct spec and calls ingest
+    :param mock_instrument_spec: Mock Specification class
     :param mock_ingest: Mock ingest function
-    :param _: Throwaway mock specification
-    :param detector: RunDetector fixture
     :return: None
     """
-    job_request = JobRequest(
-        run_number=123,
-        instrument="mari",
-        experiment_number="32131",
-        experiment_title="title",
-        filepath=Path("/archive/mari/32131/123.nxs"),
-        run_start="start time",
-        run_end="end time",
-        users="bill, ben",
-        raw_frames=0,
-        good_frames=0,
+    notification_queue = SimpleQueue()
+    mock_additional_request = MagicMock(spec=JobRequest)
+    mock_request = JobRequest(
+        1,
+        "inst",
+        "title",
+        "num",
+        Path("."),
+        "start",
+        "end",
+        1,
+        1,
+        "users",
+        additional_requests=[mock_additional_request],
     )
-    mock_ingest.return_value = job_request
-    detector._process_message(MESSAGE)
+    mock_request.additional_requests = [mock_additional_request]
+    mock_ingest.return_value = mock_request
+    mock_spec = Mock()
+    mock_instrument_spec.return_value = mock_spec
 
-    detector._notifier.notify.assert_not_called()
-    detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
+    process_message("some/path/nexus.nxs", notification_queue)
+
+    assert notification_queue.get() == mock_request
+    assert notification_queue.get() == mock_additional_request
 
 
-@patch("rundetection.run_detection.ingest", side_effect=FileNotFoundError)
-def test__process_message_exception_logged(_: Mock, caplog: LogCaptureFixture, detector: RunDetector):
+@patch("rundetection.run_detection.ingest")
+@patch("rundetection.run_detection.InstrumentSpecification")
+def test_process_message_no_notification(mock_instrument_spec, mock_ingest):
     """
-    Test that any exception raise by the RunDetector is caught and logged and the message is still acknowledged
-    :param _: Throwaway ingest mock
-    :param caplog: LogCaptureFixture
-    :param detector: RunDetector Fixture
+    Test process message does not update notification queue if spec fails to verify
+    :param mock_instrument_spec: Mock Spec class
+    :param mock_ingest: Mock ingest function
     :return: None
     """
-    detector._process_message(MESSAGE)
-    assert r"Problem processing message: \\isis\inst$\Cycles$\cycle_22_04\NDXGEM\GEM12345.nxs" in caplog.text
-    detector._queue_listener.acknowledge.assert_called_once_with(MESSAGE)
+    notification_queue = SimpleQueue()
+    mock_additional_request = MagicMock(spec=JobRequest)
+    mock_request = JobRequest(
+        1,
+        "inst",
+        "title",
+        "num",
+        Path("."),
+        "start",
+        "end",
+        1,
+        1,
+        "users",
+        additional_requests=[mock_additional_request],
+    )
+    mock_request.will_reduce = False
+    mock_request.additional_runs = [mock_additional_request]
+    mock_ingest.return_value = mock_request
+    mock_spec = Mock()
+    mock_instrument_spec.return_value = mock_spec
+
+    process_message("some/path/nexus.nxs", notification_queue)
+
+    assert notification_queue.empty()
 
 
-@patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError)
-def test_run(_: Mock, detector: RunDetector) -> None:
+@pytest.mark.asyncio
+@patch("rundetection.run_detection.process_message")
+async def test_process_messages(mock_process):
     """
-    Test that run is processing messages and queue listener is started
-    :param _: time.sleep patched mock
-    :param detector: RunDetector Fixture
+    Test each message is processed and acked
+    :param mock_process: Mock process messages function
     :return: None
     """
-    detector._queue_listener = Mock()
-    detector._process_message = Mock()  # type: ignore
-    detector._message_queue = Mock()
     mock_message = Mock()
-    detector._message_queue.get.return_value = mock_message
-    try:
-        detector.run()
-    except InterruptedError:  # Throw Interrupt to break loop, then check state
-        detector._message_queue.get.assert_called_once()
-        detector._process_message.assert_called_once_with(mock_message)
-        detector._queue_listener.run.assert_called_once()
+    mock_message.ack = AsyncMock()
+    mock_message.get_data.return_value.decode.return_value = "some path"
+    messages = [mock_message]
+    notification_queue = SimpleQueue()
+
+    await process_messages(messages, notification_queue)
+
+    mock_process.assert_called_once_with("some path", notification_queue)
+    mock_message.ack.assert_called_once()
 
 
-@patch("rundetection.run_detection.time.sleep")
-def test_run_leaves_main_loop_if_stopping(_: Mock, detector: RunDetector) -> None:
+@pytest.mark.asyncio
+@patch("rundetection.run_detection.process_message")
+async def test_process_messages_raises_still_acks(mock_process):
     """
-    Test that run will exit if stopping
-    :param _: time.sleep patched mock
-    :param detector: RunDetector Fixture
+    Test messages are still acked after exception in processing
+    :param mock_process: Mock Process messages function
     :return: None
     """
-
-    # If this test enters an infinite loop, it is failing as the loop has not broken
-    detector._queue_listener = Mock()
-    detector._queue_listener.stopping = True
-    detector.restart_listener = Mock()
-    detector._process_message = Mock()  # type: ignore
-    detector._process_message.side_effect = Empty
-    detector._message_queue = Mock()
     mock_message = Mock()
-    detector._message_queue.get.return_value = mock_message
+    mock_message.ack = AsyncMock()
+    mock_message.get_data.return_value.decode.return_value = "some path"
+    messages = [mock_message]
+    notification_queue = SimpleQueue()
+    mock_process.side_effect = RuntimeError
 
-    detector.run()
+    await process_messages(messages, notification_queue)
 
-    detector._message_queue.get.assert_called_once()
-    detector._process_message.assert_called_once_with(mock_message)
-    detector._queue_listener.run.assert_called_once()
-    detector.restart_listener.assert_not_called()
+    mock_process.assert_called_once_with("some path", notification_queue)
+    mock_message.ack.assert_called_once()
 
 
-@patch("rundetection.run_detection.time.sleep", side_effect=[None])
-def test_run_will_restart_listener_if_not_connected(_: Mock, detector: RunDetector) -> None:
+@pytest.mark.asyncio
+@patch("rundetection.run_detection.bytearray")
+async def test_process_notifications(mock_byte):
     """
-    Test that run will exit if stopping
-    :param _: time.sleep patched mock
-    :param detector: RunDetector Fixture
+    Tests messages in the notification queue are produced by the producer
+    :param mock_byte: Mock bytearray class
     :return: None
     """
+    producer = Mock()
+    producer.produce = AsyncMock()
+    notification_queue = SimpleQueue()
+    run = Mock()
+    notification_queue.put(run)
 
-    # If this test enters an infinite loop, it is failing as the loop has not broken
-    detector._queue_listener = Mock()
-    detector.restart_listener = Mock()
-    detector._process_message = Mock()  # type: ignore
-    detector._process_message.side_effect = Empty
-    detector._message_queue = Mock()
-    mock_message = Mock()
-    detector._message_queue.get.return_value = mock_message
-    detector.restart_listener.side_effect = InterruptedError
-    detector._queue_listener.is_connected.return_value = False
-    detector._queue_listener.stopping = False
-    try:
-        detector.run()
-    except InterruptedError:
-        detector._message_queue.get.assert_called_once()
-        detector._process_message.assert_called_once_with(mock_message)
-        detector._queue_listener.run.assert_called_once()
-        detector.restart_listener.assert_called_once()
+    await process_notifications(producer, notification_queue)
+    mock_byte.assert_called_once_with(run.to_json_string.return_value, "utf-8")
+    producer.produce.assert_called_once_with(mock_byte.return_value)
 
 
-def test__map_path(detector) -> None:
+@pytest.mark.asyncio
+@patch("rundetection.run_detection.create_and_get_memphis")
+@patch("rundetection.run_detection.process_messages")
+@patch("rundetection.run_detection.process_notifications")
+@patch("rundetection.run_detection.asyncio.sleep", side_effect=InterruptedError)
+@patch("rundetection.run_detection.SimpleQueue")
+async def test_start_run_detection(mock_queue, _, mock_proc_notifications, mock_proc_messages, mock_get_memphis):
     """
-    Test that the given path is mapped to use the expected /archive
-    :param detector: The run detector fixture
+    Mock run detection start up
+    :param mock_queue: Mock notification queue
+    :param _: Mock sleep
+    :param mock_proc_notifications: mock process notification function
+    :param mock_proc_messages: Mock process messages function
+    :param mock_get_memphis: Mock memphis factory
+    :return:  None
+    """
+    mock_memphis = Mock()
+    mock_memphis.consumer = AsyncMock()
+    mock_memphis.producer = AsyncMock()
+    mock_get_memphis.return_value = mock_memphis
+
+    with pytest.raises(InterruptedError):
+        await start_run_detection()
+
+    mock_proc_messages.assert_called_with(
+        mock_memphis.consumer.return_value.fetch.return_value, mock_queue.return_value
+    )
+    mock_proc_notifications.assert_called_with(mock_memphis.producer.return_value, mock_queue.return_value)
+
+
+@patch("rundetection.run_detection.Path")
+def test_verify_archive_access_accessible(mock_path, caplog):
+    """
+    Test logging when archive is accessible
+    :param mock_path: mock Path class
+    :param caplog: log capture fixture
     :return: None
     """
+    mock_path.return_value.exists.return_value = True
+    with caplog.at_level(logging.INFO):
+        verify_archive_access()
 
-    input_path = r"\\isis\inst$\Cycles$\cycle_22_04\NDXGEM\GEM12345.nxs"
-    expected_output = Path("/archive/NDXGEM/Instrument/data/cycle_22_04/GEM12345.nxs")
-    result = detector._map_path(input_path)
-    assert result == expected_output
+        assert "The archive has been mounted correctly, and can be accessed." in caplog.messages
 
 
-def test__map_path_short_name_used(detector) -> None:
+@patch("rundetection.run_detection.Path")
+def test_verify_archive_access_not_accessible(mock_path, caplog):
     """
-    Test that the given path is mapped correctly using a short name
-    :param detector:
-    :return:
-    """
-    input_path = r"\\isis\inst$\Cycles$\cycle_23_01\NDXMARI\MAR28573.nxs"
-    expected_output = Path("/archive/NDXMARI/Instrument/data/cycle_23_01/MAR28573.nxs")
-    result = detector._map_path(input_path)
-    assert result == expected_output
-
-
-def test__map_path_raises_for_bad_path(detector) -> None:
-    """
-    Test that value error if bad path is given
-    :param detector: run detector fixture
+    Test logging when archive not accessible
+    :param mock_path: Mock path class
+    :param caplog: Log capture fixture
     :return: None
     """
-    input_path = "foo"
-    with pytest.raises(ValueError):
-        detector._map_path(input_path)
+    mock_path.return_value.exists.return_value = False
+    with caplog.at_level(logging.INFO):
+        verify_archive_access()
 
-
-@patch("rundetection.run_detection.time.sleep")
-def test_restart_listener(mock_sleep, detector) -> None:
-    """
-    Test restart listener attempts to restart
-    :return: None
-    """
-    detector.restart_listener()
-
-    detector._queue_listener.stop.assert_called_once()
-    mock_sleep.assert_called_once_with(30)
-    detector._queue_listener.run.assert_called_once()
-
-
-def test_shutdown_listener(detector):
-    """
-    Test listener shutdown is called
-    :return: None
-    """
-    detector.shutdown_listener()
-    detector._queue_listener.stop.assert_called_once()
-
-
-def test_shutdown(detector):
-    """
-    Test shutdown calls are made when detector is shutdown
-    :param detector: detector fixture
-    :return: None
-    """
-    detector.shutdown(1, None)
-    detector._queue_listener.stop.assert_called_once()
+        assert "The archive has not been mounted correctly, and cannot be accessed." in caplog.text
 
 
 if __name__ == "__main__":

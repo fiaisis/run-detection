@@ -1,19 +1,18 @@
 """
-Run detection module holds the RunDetector main class
+Main module for run detection
 """
+import asyncio
 import logging
-import re
-import signal
+import os
 import sys
-import time
 from pathlib import Path
-from queue import SimpleQueue, Empty
-from types import FrameType
-from typing import Optional
+from queue import SimpleQueue
+from typing import List, Optional, Any
 
-from rundetection.ingest import ingest
-from rundetection.notifications import Notifier, Notification
-from rundetection.queue_listener import Message, QueueListener
+from memphis import Memphis  # type: ignore
+from memphis.message import Message  # type: ignore
+
+from rundetection.ingest import ingest, JobRequest
 from rundetection.specifications import InstrumentSpecification
 
 file_handler = logging.FileHandler(filename="run-detection.log")
@@ -26,119 +25,129 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class RunDetector:
+async def create_and_get_memphis() -> Memphis:
     """
-    Run Detector class orchestrates the complete run detection process, from consuming messages from icat
-    pre-queue, to notifying downstream
+    Create and return the connected Memphis Object
+    :return: Memphis instance
     """
-
-    def __init__(self) -> None:
-        self._message_queue: SimpleQueue[Message] = SimpleQueue()
-        self._queue_listener: QueueListener = QueueListener(self._message_queue)
-        self._notifier: Notifier = Notifier()
-        signal.signal(signal.SIGTERM, self.shutdown)
-        signal.signal(signal.SIGINT, self.shutdown)
-
-    def restart_listener(self) -> None:
-        """Stop the queue listener, wait 30 seconds, then restart the listener"""
-        logger.info("Stopping the queue listener and waiting 30 seconds...")
-        self._queue_listener.stop()
-        time.sleep(30)
-        logger.info("Starting queue listener")
-        self._queue_listener.run()
-
-    def shutdown_listener(self) -> None:
-        """
-        Stop the queue listener
-        :return: None
-        """
-        logger.info("Stopping listener")
-        self._queue_listener.stop()
-
-    def shutdown(self, _: int, __: Optional[FrameType]) -> None:
-        """
-        Shutdown the queue listener, TODO shutdown the notifier. Automatically called when sigterm or sigint happens
-        :param _: Thrown away
-        :param __: Thrown away
-        :return: None
-        """
-        logger.info("Shutting down run detection...")
-        self.shutdown_listener()
-
-    def run(self) -> None:
-        """
-        Starts the run detector
-        """
-        logger.info("Starting RunDetector")
-        self._queue_listener.run()
-        while True:
-            try:
-                self._process_message(self._message_queue.get(timeout=10))
-                time.sleep(0.1)
-            except Empty:
-                if self._queue_listener.stopping:
-                    logger.info("No messages processing, breaking main loop...")
-                    break
-                if not self._queue_listener.is_connected():
-                    logger.warning("Queue listener failed silently")
-                    self.restart_listener()
-
-    @staticmethod
-    def _map_path(path_str: str) -> Path:
-        """
-        The paths recieved from pre-icat queue are windows formatted and assume the archive is at \\isis. This maps
-        them to the expected location of /archive
-        :param path_str: The path string to map
-        :return: The mapped path object
-        """
-        match = re.search(r"cycle_(\d{2})_(\d+)\\(NDX\w+)\\([a-zA-Z]+\d+\.nxs)", path_str)
-        if match is None:
-            raise ValueError(f"Path was not in expected format: {path_str}")
-        year, cycle, ndx_name, filename = match.groups()
-
-        # Creating the new path format
-        converted_path = f"/archive/{ndx_name}/Instrument/data/cycle_{year}_{cycle}/{filename}"
-        return Path(converted_path)
-
-    def _process_message(self, message: Message) -> None:
-        logger.info("Processing message: %s", message)
-        try:
-            data_path = self._map_path(message.value)
-            job_request = ingest(data_path)
-            specification = InstrumentSpecification(job_request.instrument)
-            specification.verify(job_request)
-            if job_request.will_reduce:
-                logger.info("Specification met for job_request: %s", job_request)
-                notification = Notification(job_request.to_json_string())
-                self._notifier.notify(notification)
-                for additional_request in job_request.additional_requests:
-                    self._notifier.notify(Notification(additional_request.to_json_string()))
-
-            else:
-                logger.info("Specificaiton not met, skipping job_request: %s", job_request)
-        # pylint: disable = broad-except
-        except Exception:
-            logger.exception("Problem processing message: %s", message.value)
-        finally:
-            message.processed = True
-            self._queue_listener.acknowledge(message)
+    logger.info("Creating memphis object...")
+    memphis = Memphis()
+    logger.info("Connecting...")
+    host = os.environ.get("MEMPHIS_HOST", "localhost")
+    user = os.environ.get("MEMPHIS_USER", "root")
+    password = os.environ.get("MEMPHIS_PASS", "memphis")
+    await memphis.connect(host=host, username=user, password=password)
+    logger.info("Connected to memphis")
+    return memphis
 
 
-def main(archive_path: str = "/archive") -> None:
+def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -> None:
     """
-    run-detection entrypoint.
-    :arg archive_path: Added purely for testing purposes, but should also be potentially useful.
+    Process the incoming message. If the message should result in an upstream notification, it will put the message on
+    the given notification queue
+    :param message: The message to process
+    :param notification_queue: The notification queue to update
     :return: None
     """
-    # Check that the archive can be accessed
-    if Path(archive_path, "NDXALF").exists():
+    logger.info("Proccessing message: %s", message)
+    data_path = Path(message)
+    run = ingest(data_path)
+    specification = InstrumentSpecification(run.instrument)
+    specification.verify(run)
+    if run.will_reduce:
+        logger.info("specification met for run: %s", run)
+        notification_queue.put(run)
+        for request in run.additional_requests:
+            notification_queue.put(request)
+    else:
+        logger.info("Specification not met, skipping run: %s", run)
+
+
+async def process_messages(messages: Optional[List[Message]], notification_queue: SimpleQueue[JobRequest]) -> None:
+    """
+    Given a list of messages and the notification queue, process each message, adding those which meet specifications to
+    the notification queue
+    :param messages: The list of messages
+    :param notification_queue: The notification queue
+    :return: None
+    """
+    if messages:
+        for message in messages:
+            message_value = message.get_data().decode("utf-8")
+            try:
+                process_message(message_value, notification_queue)
+            # pylint: disable = broad-except
+            except Exception:
+                logger.exception("problem proscessing message")
+            finally:
+                logger.info("acking message")
+                await message.ack()
+
+
+async def process_notifications(producer: Any, notification_queue: SimpleQueue[JobRequest]) -> None:
+    """
+    Produce messages until the notification queue is empty
+    :param producer: The producer
+    :param notification_queue: The notification queue
+    :return: None
+    """
+    while not notification_queue.empty():
+        detected_run = notification_queue.get()
+        logger.info("Sending notification for run: %s", detected_run.run_number)
+        await producer.produce(bytearray(detected_run.to_json_string(), "utf-8"))
+
+
+async def start_run_detection() -> None:
+    """
+    Main Coroutine starts the producer and consumer in a loop
+    :return: None
+    """
+
+    logger.info("Starting Run Detection")
+    memphis = await create_and_get_memphis()
+    logger.info("Creating consumer")
+    ingress_station = os.environ.get("MEMPHIS_INGRESS_NAME", "watched-files")
+    consumer = await memphis.consumer(
+        station_name=ingress_station,
+        consumer_group="rundetection",
+        consumer_name="rundetection",
+        generate_random_suffix=True,
+    )
+    logger.info("Creating producer")
+    egress_station = os.environ.get("MEMPHIS_EGRESS_NAME", "scheduled-jobs")
+    producer = await memphis.producer(
+        station_name=egress_station, producer_name="rundetection", generate_random_suffix=True
+    )
+    notification_queue: SimpleQueue[JobRequest] = SimpleQueue()
+    logger.info("Starting loop...")
+    try:
+        while True:
+            recieved: Optional[List[Message]] = await consumer.fetch()
+            await process_messages(recieved, notification_queue)
+            await process_notifications(producer, notification_queue)
+            await asyncio.sleep(0.1)
+    # pylint: disable = broad-except
+    except Exception:
+        logger.exception("Uncaught error occurred in main loop. Restarting in 30 seconds...")
+        await asyncio.sleep(30)
+        await start_run_detection()
+
+
+def verify_archive_access() -> None:
+    """Log archive access"""
+    if Path("/archive", "NDXALF").exists():
         logger.info("The archive has been mounted correctly, and can be accessed.")
     else:
         logger.error("The archive has not been mounted correctly, and cannot be accessed.")
 
-    logger.info("Starting run detection")
-    run_detector = RunDetector()
-    run_detector.run()
+
+def main() -> None:
+    """
+    Entry point for run detection
+    :return: None
+    """
+    verify_archive_access()
+    asyncio.run(start_run_detection())
 
 
 if __name__ == "__main__":

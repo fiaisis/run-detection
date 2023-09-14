@@ -21,11 +21,23 @@ To install when developing:
 To demo and test.
 The easiest way to test the whole run detection currently:
 
-- `docker run -p 61613:61613 -p 61616:61616 -p 8161:8161 rmohr/activemq`
-- Login to the webgui at http://localhost:8161
-- Create a new queue called "Interactive-Reduction"
-- Send messages via the webgui to that queue
-- Verify they are printed.
+- Start the docker-compose setup in the test directory
+- `sudo docker compose up -d`
+- Visit the memphis gui
+- Submit messages to the ingress station, verify run-detection logs, check the egress station
+
+## Configuration
+
+Run detection has 5 environment variables it will check
+
+1. `MEMPHIS_HOST` - host name of the memphis server
+2. `MEMPHIS_USER` - Username of the application user run detection should use when connecting to memphis
+3. `MEMPHIS_PASS` - Password of the above user
+4. `MEMPHIS_INGRESS_NAME` - station name that run detection will consume from
+5. `MEMPHIS_EGRESS_NAME` - Station name that run detection will produce to
+
+If these are not provided, run detection will choose default station names, "watched-files", "scheduled-jobs".
+localhost will be used as the default host, and the default memphis root credentials will be used.
 
 ## How to container
 
