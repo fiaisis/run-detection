@@ -244,6 +244,8 @@ def test_get_extraction_function():
     assert skip_extract_func.__name__ == "skip_extract"
     mari_extract_func = get_extraction_function("mari")
     assert mari_extract_func.__name__ == "mari_extract"
+    tosca_extract_func = get_extraction_function("tosca")
+    assert tosca_extract_func.__name__ == "tosca_extract"
 
 
 def test_mari_extract_single_ei(job_request):
