@@ -17,7 +17,7 @@ class ToscaStitchRule(Rule[bool]):
 
     @staticmethod
     def _is_title_similar(title: str, other_title: str) -> bool:
-        return title[:-4] == other_title[:-4]
+        return title.replace(" ", "")[:-4] == other_title.replace(" ", "")[:-4]
 
     def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> List[int]:
         run_numbers = []
@@ -35,7 +35,6 @@ class ToscaStitchRule(Rule[bool]):
             return
 
         job_request.additional_values["input_runs"] = [job_request.run_number]
-
         run_numbers = self._get_runs_to_stitch(
             job_request.filepath, job_request.run_number, job_request.experiment_title
         )
