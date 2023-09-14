@@ -7,6 +7,8 @@ from rundetection.ingest import JobRequest
 from rundetection.rules.tosca_rules import ToscaStitchRule
 
 
+# pylint:disable = redefined-outer-name, protected-access
+
 @pytest.fixture()
 def job_request():
     """job_request fixture"""
