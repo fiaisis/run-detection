@@ -1,10 +1,6 @@
 """
 End-to-end tests
 """
-
-import json
-
-
 # pylint: disable=redefined-outer-name, no-name-in-module
 
 import asyncio
