@@ -1,10 +1,10 @@
 ---
 on:
   push:
-    branches:
+    branches-ignore:
       - main
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   black:
