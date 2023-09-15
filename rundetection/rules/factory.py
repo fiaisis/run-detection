@@ -7,6 +7,7 @@ from rundetection.rules.common_rules import EnabledRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
 from rundetection.rules.rule import MissingRuleError, T, Rule
+from rundetection.rules.tosca_rules import ToscaStitchRule
 
 
 def rule_factory(key_: str, value: T) -> Rule[Any]:
@@ -25,6 +26,10 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:
         case "interstitch":
             if isinstance(value, bool):
                 return InterStitchRule(value)
+            raise ValueError(f"Bad value: {value} in rule {key_}")
+        case "toscastitch":
+            if isinstance(value, bool):
+                return ToscaStitchRule(value)
             raise ValueError(f"Bad value: {value} in rule {key_}")
         case "maristitch":
             if isinstance(value, bool):
