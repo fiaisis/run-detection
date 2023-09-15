@@ -18,10 +18,10 @@ class ToscaStitchRule(Rule[bool]):
     @staticmethod
     def _is_title_similar(title: str, other_title: str) -> bool:
         """
-
-        :param title:
-        :param other_title:
-        :return:
+        Compare one run title to another to check for similarity
+        :param title:the first run title
+        :param other_title:the second run title
+        :return: (bool) True if similar False otherwise
         """
         if title[:-5] == other_title[:-5]:
             return True
