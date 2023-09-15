@@ -30,13 +30,22 @@ def job_request():
     )
 
 
-def test_is_title_similar():
+@pytest.mark.parametrize(
+    "title_one,title_two,expected",
+    [
+        ("some long run run-1", "some long run run 2", True),
+        ("some other run run-1", "different run completely", False),
+        ("Olive oil sample 90pcEVOO8/10pcSTD1 run 2", "Olive oil sample 90pcEVOO8/10pcSTD1 run 1", True),
+        ("Peanut oil sample 90pcEVOO8/10pcSTD1 run 2", "Olive oil sample 90pcEVOO8/10pcSTD1 run 2", False),
+        ("FOX-7+DMSO-d6", "FOX-7+DMSO-d6 run 2", True),
+    ],
+)
+def test_is_title_similar(title_one, title_two, expected):
     """
     Test similar titles will be correctly identified
     :return: None
     """
-    assert ToscaStitchRule._is_title_similar("some long run run-1", "some long run run 2")
-    assert not ToscaStitchRule._is_title_similar("some other run run-1", "different run completely")
+    assert ToscaStitchRule._is_title_similar(title_one, title_two) is expected
 
 
 @patch("rundetection.rules.tosca_rules.ToscaStitchRule._get_runs_to_stitch")

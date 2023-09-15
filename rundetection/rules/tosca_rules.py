@@ -17,7 +17,17 @@ class ToscaStitchRule(Rule[bool]):
 
     @staticmethod
     def _is_title_similar(title: str, other_title: str) -> bool:
-        return title[:-4] == other_title[:-4]
+        """
+
+        :param title:
+        :param other_title:
+        :return:
+        """
+        if title[:-5] == other_title[:-5]:
+            return True
+        if title[0:7] == other_title[0:7] and ("run" in other_title or "run" in title):
+            return True
+        return False
 
     def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> List[int]:
         run_numbers = []
