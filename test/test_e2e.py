@@ -52,6 +52,10 @@ async def test_e2e():
     # Produce file that should reduce
     await produce_message("/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs", memphis)
 
+    # Produce MARI runs that should stitch
+    await produce_message("/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27030.nxs", memphis)
+    await produce_message("/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27031.nxs", memphis)
+
     # Produce file that should not reduce
     await produce_message("/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs", memphis)
 
@@ -135,6 +139,77 @@ async def test_e2e():
         },
     ]
 
+    expected_mari_stitch_individual_1 = {
+        "run_number": 27031,
+        "instrument": "MARI",
+        "experiment_title": "(Bi1-xYx)2O3 ; x=0.20 - Ei=130meV 400Hz Gd single - jaws=45x45 - T=900K",
+        "experiment_number": "1920321",
+        "filepath": "/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27031.nxs",
+        "run_start": "2020-02-24T06:56:13",
+        "run_end": "2020-02-24T07:51:56",
+        "raw_frames": 167036,
+        "good_frames": 133622,
+        "users": "Goel,Le,Mittal",
+        "additional_values": {
+            "ei": "'auto'",
+            "sam_mass": 0.0,
+            "sam_rmm": 0.0,
+            "monovan": 0,
+            "remove_bkg": False,
+            "sum_runs": False,
+            "runno": 27031,
+            "mask_file_link": expected_mask,
+            "wbvan": expected_wbvan,
+        },
+    }
+    expected_mari_stitch_individual_2 = {
+        "run_number": 27030,
+        "instrument": "MARI",
+        "experiment_title": "(Bi1-xYx)2O3 ; x=0.20 - Ei=130meV 400Hz Gd single - jaws=45x45 - T=900K",
+        "experiment_number": "1920321",
+        "filepath": "/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27030.nxs",
+        "run_start": "2020-02-24T06:00:15",
+        "run_end": "2020-02-24T06:55:53",
+        "raw_frames": 166838,
+        "good_frames": 133470,
+        "users": "Goel,Le,Mittal",
+        "additional_values": {
+            "ei": "'auto'",
+            "sam_mass": 0.0,
+            "sam_rmm": 0.0,
+            "monovan": 0,
+            "remove_bkg": False,
+            "sum_runs": False,
+            "runno": 27030,
+            "mask_file_link": expected_mask,
+            "wbvan": expected_wbvan,
+        },
+    }
+
+    expected_mari_stitch_request = {
+        "run_number": 27031,
+        "instrument": "MARI",
+        "experiment_title": "(Bi1-xYx)2O3 ; x=0.20 - Ei=130meV 400Hz Gd single - jaws=45x45 - T=900K",
+        "experiment_number": "1920321",
+        "filepath": "/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27031.nxs",
+        "run_start": "2020-02-24T06:56:13",
+        "run_end": "2020-02-24T07:51:56",
+        "raw_frames": 167036,
+        "good_frames": 133622,
+        "users": "Goel,Le,Mittal",
+        "additional_values": {
+            "ei": "'auto'",
+            "sam_mass": 0.0,
+            "sam_rmm": 0.0,
+            "monovan": 0,
+            "remove_bkg": False,
+            "sum_runs": True,
+            "runno": [27031, 27030],
+            "mask_file_link": expected_mask,
+            "wbvan": expected_wbvan,
+        },
+    }
+
     expected_mari_request = {
         "run_number": 25581,
         "instrument": "MARI",
@@ -162,9 +237,12 @@ async def test_e2e():
         await asyncio.sleep(3)
         recieved_messages = [json.loads(message.get_data().decode("utf-8")) for message in recieved]
         assert expected_mari_request in recieved_messages
+        assert expected_mari_stitch_request in recieved_messages
+        assert expected_mari_stitch_individual_1 in recieved_messages
+        assert expected_mari_stitch_individual_2 in recieved_messages
         for request in expected_tosca_requests:
             assert request in recieved_messages
-        assert len(recieved_messages) == 6
+        assert len(recieved_messages) == 9
     finally:
         for message in recieved:
             await message.ack()
