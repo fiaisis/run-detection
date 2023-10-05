@@ -33,4 +33,4 @@ jobs:
         with:
           file: ./container/rundetection.D
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/run-detection:${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/rundetection:${{ github.sha }}
