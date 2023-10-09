@@ -26,14 +26,14 @@ def producer_channel() -> BlockingChannel:
 def consumer_channel() -> BlockingChannel:
     connection = BlockingConnection()
     channel = connection.channel()
-    channel.exchange_declare("job_requests", exchange_type="direct")
-    channel.queue_declare("job_requests")
-    channel.queue_bind("job_requests", "job_requests", routing_key="")
+    channel.exchange_declare("scheduled-jobs", exchange_type="direct")
+    channel.queue_declare("scheduled-jobs")
+    channel.queue_bind("scheduled-jobs", "scheduled-jobs", routing_key="")
     return channel
 
 
 def produce_message(message: str, channel: BlockingChannel) -> None:
-    channel.basic_publish("detected-runs", "", body=message.encode())
+    channel.basic_publish("watched-files", "", body=message.encode())
 
 
 def get_specification_value(instrument: str, key: str) -> Any:
@@ -246,7 +246,7 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     while count < 50:
         count += 1
         time.sleep(0.5)
-        for mf, props, body in consumer_channel.consume("job_requests", inactivity_timeout=30):
+        for mf, props, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=30):
             consumer_channel.basic_ack(mf.delivery_tag)
             recieved_messages.append(body)
             break

@@ -19,5 +19,9 @@ services:
     depends_on:
       rabbit-mq:
         condition: service_healthy
+    environment:
+      QUEUE_HOST: "rabbit-mq"
+      INGRESS_QUEUE_NAME: "watched-files"
+      EGRESS_QUEUE_NAME: "scheduled-jobs"
     volumes:
       - ../test/test_data/e2e_data:/archive
