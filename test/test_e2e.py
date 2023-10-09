@@ -13,12 +13,22 @@ from pika.adapters.blocking_connection import BlockingChannel
 
 
 @pytest.fixture
-def channel() -> BlockingChannel:
+def producer_channel() -> BlockingChannel:
     connection = BlockingConnection()
     channel = connection.channel()
     channel.exchange_declare("detected-runs", exchange_type="direct")
     channel.queue_declare("detected-runs")
     channel.queue_bind("detected-runs", "detected-runs", routing_key="")
+    return channel
+
+
+@pytest.fixture
+def consumer_channel() -> BlockingChannel:
+    connection = BlockingConnection()
+    channel = connection.channel()
+    channel.exchange_declare("job_requests", exchange_type="direct")
+    channel.queue_declare("job_requests")
+    channel.queue_bind("job_requests", "job_requests", routing_key="")
     return channel
 
 
@@ -39,7 +49,7 @@ def get_specification_value(instrument: str, key: str) -> Any:
 
 
 @pytest.mark.asyncio
-async def test_e2e(channel: BlockingChannel):
+async def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     """
     Produce 3 files to the ingress station, one that should reduce, one that shouldn't and one that doesnt exist. Verify
     that the scheduled job metadata is sent to the egress station only
@@ -50,22 +60,22 @@ async def test_e2e(channel: BlockingChannel):
     expected_mask = get_specification_value("mari", "marimaskfile")
 
     # Produce file that should reduce
-    produce_message("/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs", channel)
+    produce_message("/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs", producer_channel)
 
     # Produce MARI runs that should stitch
-    produce_message("/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27030.nxs", channel)
-    produce_message("/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27031.nxs", channel)
+    produce_message("/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27030.nxs", producer_channel)
+    produce_message("/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27031.nxs", producer_channel)
 
     # Produce file that should not reduce
-    produce_message("/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs", channel)
+    produce_message("/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs", producer_channel)
 
     # Produce file that does not exist
-    produce_message("/archive/foo/bar/baz.nxs", channel)
+    produce_message("/archive/foo/bar/baz.nxs", producer_channel)
 
     # Produce 3 TOSCA runs that should result in 5 reductions
-    produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25234.nxs", channel)
-    produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25235.nxs", channel)
-    produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25236.nxs", channel)
+    produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25234.nxs", producer_channel)
+    produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25235.nxs", producer_channel)
+    produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25236.nxs", producer_channel)
 
     time.sleep(10)
 
@@ -232,7 +242,12 @@ async def test_e2e(channel: BlockingChannel):
         },
     }
 
-    recieved_messages = [json.loads(body) for _, __, body in channel.consume("detected-runs")]
+    recieved_messages = []
+    for mf, props, body in consumer_channel.consume("job-requests"):
+        recieved_messages.append(body)
+        consumer_channel.basic_ack(mf.delivery_tag)
+        if mf.delivery_tag == 9:
+            break
     assert expected_mari_request in recieved_messages
     assert expected_mari_stitch_request in recieved_messages
     assert expected_mari_stitch_individual_1 in recieved_messages
