@@ -247,10 +247,7 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
         count += 1
         time.sleep(0.5)
         for mf, props, body in consumer_channel.consume("job_requests", inactivity_timeout=30):
-            try:
-                consumer_channel.basic_ack(mf.delivery_tag)
-            except AttributeError:
-                break
+            consumer_channel.basic_ack(mf.delivery_tag)
             recieved_messages.append(body)
             break
 
