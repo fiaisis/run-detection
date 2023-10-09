@@ -16,7 +16,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 def producer_channel() -> BlockingChannel:
     connection = BlockingConnection()
     channel = connection.channel()
-    channel.exchange_declare("detected-runs", exchange_type="direct")
+    channel.exchange_declare("detected-runs", exchange_type="direct", durable=True)
     channel.queue_declare("detected-runs")
     channel.queue_bind("detected-runs", "detected-runs", routing_key="")
     return channel
@@ -26,7 +26,7 @@ def producer_channel() -> BlockingChannel:
 def consumer_channel() -> BlockingChannel:
     connection = BlockingConnection()
     channel = connection.channel()
-    channel.exchange_declare("scheduled-jobs", exchange_type="direct")
+    channel.exchange_declare("scheduled-jobs", exchange_type="direct", durable=True)
     channel.queue_declare("scheduled-jobs")
     channel.queue_bind("scheduled-jobs", "scheduled-jobs", routing_key="")
     return channel
