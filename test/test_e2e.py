@@ -244,6 +244,9 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     recieved_messages = []
 
     for mf, props, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=30):
+        if mf is None:
+            break
+
         consumer_channel.basic_ack(mf.delivery_tag)
         recieved_messages.append(body)
 
