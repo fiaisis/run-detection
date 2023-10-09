@@ -244,9 +244,9 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     recieved_messages = []
 
     for mf, props, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=30):
-        consumer_channel.basic_ack(mf.delivery_tag)
-
-        recieved_messages.append(body)
+        if mf is not None:
+            consumer_channel.basic_ack(mf.delivery_tag)
+            recieved_messages.append(body)
 
     assert expected_mari_request in recieved_messages
     assert expected_mari_stitch_request in recieved_messages
