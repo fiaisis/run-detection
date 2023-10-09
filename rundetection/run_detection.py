@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from queue import SimpleQueue
 
-from pika import BlockingConnection, ConnectionParameters
+from pika import BlockingConnection, ConnectionParameters, PlainCredentials
 from pika.adapters.blocking_connection import BlockingChannel
 
 from rundetection.ingest import ingest, JobRequest
@@ -28,7 +28,12 @@ EGRESS_QUEUE_NAME = os.environ.get("EGRESS_QUEUE_NAME", "scheduled-jobs")
 
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
-    connection_parameters = ConnectionParameters(os.environ.get("QUEUE_HOST", "localhost"), 5672)
+    credentials = PlainCredentials(
+        username=os.environ.get("QUEUE_USER", "GUEST"), password=os.environ.get("QUEUE_PASSWORD", "guest")
+    )
+    connection_parameters = ConnectionParameters(
+        os.environ.get("QUEUE_HOST", "localhost"), 5672, credentials=credentials
+    )
     connection = BlockingConnection(connection_parameters)
     channel = connection.channel()
     channel.exchange_declare(exchange_name, exchange_type="direct", durable=True)
