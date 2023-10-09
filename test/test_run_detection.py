@@ -11,7 +11,6 @@ import pytest
 
 from rundetection.ingest import JobRequest
 from rundetection.run_detection import (
-    create_and_get_memphis,
     process_message,
     process_messages,
     process_notifications,
@@ -21,24 +20,6 @@ from rundetection.run_detection import (
 
 
 # pylint: disable=protected-access, redefined-outer-name
-
-
-@pytest.mark.asyncio
-@patch("rundetection.run_detection.Memphis")
-async def test_create_and_get_memphis(mock_memphis):
-    """
-    Test that the memphis object is given the correct parameters and returned
-    :param mock_memphis: Mock memphis class
-    :return: None
-    """
-    expected_memphis = AsyncMock()
-    mock_memphis.return_value = expected_memphis
-
-    actual_memphis = await create_and_get_memphis()
-
-    mock_memphis.assert_called_once()
-    assert expected_memphis == actual_memphis
-    expected_memphis.connect.assert_called_once_with(host="localhost", username="root", password="memphis")
 
 
 @patch("rundetection.run_detection.ingest")
