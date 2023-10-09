@@ -48,8 +48,7 @@ def get_specification_value(instrument: str, key: str) -> Any:
         return spec[key]
 
 
-@pytest.mark.asyncio
-async def test_e2e(producer_channel: BlockingChannel, consumer_channel):
+def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     """
     Produce 3 files to the ingress station, one that should reduce, one that shouldn't and one that doesnt exist. Verify
     that the scheduled job metadata is sent to the egress station only
@@ -247,7 +246,7 @@ async def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     while count < 50:
         count += 1
         time.sleep(0.5)
-        for mf, props, body in consumer_channel.consume("job_requests"):
+        for mf, props, body in consumer_channel.consume("job_requests", inactivity_timeout=30):
             recieved_messages.append(body)
             consumer_channel.basic_ack(mf.delivery_tag)
             break
