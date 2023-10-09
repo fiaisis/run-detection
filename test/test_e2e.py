@@ -242,17 +242,11 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     }
 
     recieved_messages = []
-    count = 0
-    while count < 50:
-        count += 1
-        time.sleep(0.5)
-        for mf, props, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=30):
-            try:
-                consumer_channel.basic_ack(mf.delivery_tag)
-            except AttributeError:
-                break
-            recieved_messages.append(body)
-            break
+
+    for mf, props, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=30):
+        consumer_channel.basic_ack(mf.delivery_tag)
+
+        recieved_messages.append(body)
 
     assert expected_mari_request in recieved_messages
     assert expected_mari_stitch_request in recieved_messages
