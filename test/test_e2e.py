@@ -43,7 +43,7 @@ def get_specification_value(instrument: str, key: str) -> Any:
     :param key: The key for the rule
     :return: The rule value
     """
-    with open(f"../rundetection/specifications/{instrument.lower()}_specification.json", "r", encoding="utf-8") as fle:
+    with open(f"rundetection/specifications/{instrument.lower()}_specification.json", "r", encoding="utf-8") as fle:
         spec = json.load(fle)
         return spec[key]
 
