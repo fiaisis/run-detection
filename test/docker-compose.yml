@@ -6,6 +6,11 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
 
   run-detection:
     build:
@@ -13,6 +18,6 @@ services:
       dockerfile: container/rundetection.D
     depends_on:
       rabbit-mq:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ../test/test_data/e2e_data:/archive
