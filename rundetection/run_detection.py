@@ -70,6 +70,9 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
             logger.warning("Problem processing message: %s", mf.body.decode)
         finally:
             channel.basic_ack(mf.delivery_tag)
+            time.sleep(0.1)
+            break
+    channel.cancel()
 
 
 def process_notifications(channel: BlockingChannel, notification_queue: SimpleQueue[JobRequest]) -> None:
