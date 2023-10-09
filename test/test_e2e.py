@@ -243,11 +243,14 @@ async def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     }
 
     recieved_messages = []
-    for mf, props, body in consumer_channel.consume("job_requests"):
-        recieved_messages.append(body)
-        consumer_channel.basic_ack(mf.delivery_tag)
-        if mf.delivery_tag == 9:
+    count = 0
+    while count < 50:
+        time.sleep(0.5)
+        for mf, props, body in consumer_channel.consume("job_requests"):
+            recieved_messages.append(body)
+            consumer_channel.basic_ack(mf.delivery_tag)
             break
+
     assert expected_mari_request in recieved_messages
     assert expected_mari_stitch_request in recieved_messages
     assert expected_mari_stitch_individual_1 in recieved_messages
