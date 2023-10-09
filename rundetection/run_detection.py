@@ -1,15 +1,12 @@
 """
 Main module for run detection
 """
-import asyncio
 import logging
 import sys
 import time
 from pathlib import Path
 from queue import SimpleQueue
 
-from memphis import Memphis  # type: ignore
-from memphis.message import Message  # type: ignore
 from pika import BlockingConnection, ConnectionParameters
 from pika.adapters.blocking_connection import BlockingChannel
 
@@ -130,7 +127,7 @@ def main() -> None:
     :return: None
     """
     verify_archive_access()
-    asyncio.run(start_run_detection())
+    start_run_detection()
 
 
 if __name__ == "__main__":
