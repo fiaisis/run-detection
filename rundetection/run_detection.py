@@ -55,7 +55,7 @@ def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -
         logger.info("Specification not met, skipping run: %s", run)
 
 
-async def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[JobRequest]) -> None:
+def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[JobRequest]) -> None:
     """
     Given a list of messages and the notification queue, process each message, adding those which meet specifications to
     the notification queue
