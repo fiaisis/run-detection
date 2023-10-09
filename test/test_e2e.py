@@ -43,7 +43,7 @@ def get_specification_value(instrument: str, key: str) -> Any:
     :param key: The key for the rule
     :return: The rule value
     """
-    with open(f"rundetection/specifications/{instrument.lower()}_specification.json", "r", encoding="utf-8") as fle:
+    with open(f"../rundetection/specifications/{instrument.lower()}_specification.json", "r", encoding="utf-8") as fle:
         spec = json.load(fle)
         return spec[key]
 
@@ -247,8 +247,11 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
         count += 1
         time.sleep(0.5)
         for mf, props, body in consumer_channel.consume("job_requests", inactivity_timeout=30):
+            try:
+                consumer_channel.basic_ack(mf.delivery_tag)
+            except AttributeError:
+                break
             recieved_messages.append(body)
-            consumer_channel.basic_ack(mf.delivery_tag)
             break
 
     assert expected_mari_request in recieved_messages
