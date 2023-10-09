@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
-    connection_parameters = ConnectionParameters("rabbit-mq", 5672)
+    connection_parameters = ConnectionParameters("localhost", 5672)
     connection = BlockingConnection(connection_parameters)
     channel = connection.channel()
     channel.exchange_declare(exchange_name, exchange_type="direct")
@@ -63,11 +63,11 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
     :param notification_queue: The notification queue
     :return: None
     """
-    for mf, _, __ in channel.consume("detected-runs"):
+    for mf, _, body in channel.consume("detected-runs"):
         try:
-            process_message(mf.body.decode(), notification_queue)
+            process_message(body.decode(), notification_queue)
         except Exception:
-            logger.warning("Problem processing message: %s", mf.body.decode)
+            logger.warning("Problem processing message: %s", body)
         finally:
             channel.basic_ack(mf.delivery_tag)
         break
