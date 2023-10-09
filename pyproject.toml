@@ -3,7 +3,7 @@ name = "run-detection"
 readme = "README.md"
 version = "0.0.1"
 dependencies = [
-    "memphis-py==1.1.3",
+    "pika==1.3.2",
     "h5py==3.9.0"
 ]
 
