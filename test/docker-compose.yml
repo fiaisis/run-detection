@@ -6,7 +6,6 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    network_mode: host
 
   run-detection:
     build:
@@ -15,6 +14,5 @@ services:
     depends_on:
       rabbit-mq:
         condition: service_healthy
-    network_mode: host
     volumes:
       - ../test/test_data/e2e_data:/archive
