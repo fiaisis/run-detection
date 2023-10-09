@@ -2,6 +2,7 @@
 Main module for run detection
 """
 import logging
+import os
 import sys
 import time
 from pathlib import Path
@@ -22,12 +23,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+INGRESS_QUEUE_NAME = os.environ.get("INGRESS_QUEUE_NAME", "watched-files")
+EGRESS_QUEUE_NAME = os.environ.get("EGRESS_QUEUE_NAME", "scheduled-jobs")
+
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
-    connection_parameters = ConnectionParameters("rabbit-mq", 5672)
+    connection_parameters = ConnectionParameters(os.environ.get("QUEUE_HOST", "localhost"), 5672)
     connection = BlockingConnection(connection_parameters)
     channel = connection.channel()
-    channel.exchange_declare(exchange_name, exchange_type="direct")
+    channel.exchange_declare(exchange_name, exchange_type="direct", durable=True)
     channel.queue_declare(queue_name)
     channel.queue_bind(queue_name, exchange_name, routing_key="")
     return channel
@@ -63,7 +67,7 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
     :param notification_queue: The notification queue
     :return: None
     """
-    for mf, _, body in channel.consume("detected-runs"):
+    for mf, _, body in channel.consume(INGRESS_QUEUE_NAME):
         try:
             process_message(body.decode(), notification_queue)
         except Exception:
@@ -83,7 +87,7 @@ def process_notifications(channel: BlockingChannel, notification_queue: SimpleQu
     while not notification_queue.empty():
         detected_run = notification_queue.get()
         logger.info("Sending notification for run: %s", detected_run.run_number)
-        channel.basic_publish("job_requests", "", detected_run.to_json_string().encode())
+        channel.basic_publish(EGRESS_QUEUE_NAME, "", detected_run.to_json_string().encode())
 
 
 def start_run_detection() -> None:
@@ -94,10 +98,10 @@ def start_run_detection() -> None:
 
     logger.info("Starting Run Detection")
     logger.info("Creating consumer")
-    consumer_channel = get_channel("detected-runs", "detected-runs")
+    consumer_channel = get_channel(INGRESS_QUEUE_NAME, INGRESS_QUEUE_NAME)
 
     logger.info("Creating producer")
-    producer_channel = get_channel("job_requests", "job_requests")
+    producer_channel = get_channel(EGRESS_QUEUE_NAME, EGRESS_QUEUE_NAME)
 
     notification_queue: SimpleQueue[JobRequest] = SimpleQueue()
     logger.info("Starting loop...")
