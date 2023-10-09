@@ -245,6 +245,7 @@ async def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     recieved_messages = []
     count = 0
     while count < 50:
+        count += 1
         time.sleep(0.5)
         for mf, props, body in consumer_channel.consume("job_requests"):
             recieved_messages.append(body)
