@@ -37,7 +37,7 @@ def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
     connection = BlockingConnection(connection_parameters)
     channel = connection.channel()
     channel.exchange_declare(exchange_name, exchange_type="direct", durable=True)
-    channel.queue_declare(queue_name)
+    channel.queue_declare(queue_name, durable=True)
     channel.queue_bind(queue_name, exchange_name, routing_key="")
     return channel
 
