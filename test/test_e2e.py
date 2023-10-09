@@ -232,7 +232,7 @@ async def test_e2e(channel: BlockingChannel):
         },
     }
 
-    recieved_messages = [json.loads(message) for message, _, __ in channel.consume("detected-runs")]
+    recieved_messages = [json.loads(body) for _, __, body in channel.consume("detected-runs")]
     assert expected_mari_request in recieved_messages
     assert expected_mari_stitch_request in recieved_messages
     assert expected_mari_stitch_individual_1 in recieved_messages
