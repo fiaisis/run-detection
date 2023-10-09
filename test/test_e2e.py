@@ -243,7 +243,7 @@ async def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     }
 
     recieved_messages = []
-    for mf, props, body in consumer_channel.consume("job-requests"):
+    for mf, props, body in consumer_channel.consume("job_requests"):
         recieved_messages.append(body)
         consumer_channel.basic_ack(mf.delivery_tag)
         if mf.delivery_tag == 9:
