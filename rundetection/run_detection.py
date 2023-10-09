@@ -10,7 +10,7 @@ from queue import SimpleQueue
 
 from memphis import Memphis  # type: ignore
 from memphis.message import Message  # type: ignore
-from pika import BlockingConnection
+from pika import BlockingConnection, ConnectionParameters
 from pika.adapters.blocking_connection import BlockingChannel
 
 from rundetection.ingest import ingest, JobRequest
@@ -27,7 +27,8 @@ logger = logging.getLogger(__name__)
 
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
-    connection = BlockingConnection()
+    connection_parameters = ConnectionParameters("rabbit-mq")
+    connection = BlockingConnection(connection_parameters)
     channel = connection.channel()
     channel.exchange_declare(exchange_name, exchange_type="direct")
     channel.queue_declare(queue_name)
