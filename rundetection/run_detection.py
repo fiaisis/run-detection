@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
-    connection_parameters = ConnectionParameters("localhost", 5672)
+    connection_parameters = ConnectionParameters("rabbit-mq", 5672)
     connection = BlockingConnection(connection_parameters)
     channel = connection.channel()
     channel.exchange_declare(exchange_name, exchange_type="direct")
