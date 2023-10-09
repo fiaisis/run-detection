@@ -250,6 +250,7 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
         consumer_channel.basic_ack(mf.delivery_tag)
         recieved_messages.append(body)
 
+    assert " " == recieved_messages
     assert expected_mari_request in recieved_messages
     assert expected_mari_stitch_request in recieved_messages
     assert expected_mari_stitch_individual_1 in recieved_messages
