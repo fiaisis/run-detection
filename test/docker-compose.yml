@@ -8,9 +8,12 @@ services:
       - "15672:15672"
     healthcheck:
       test: rabbitmq-diagnostics -q ping
-      interval: 30s
+      interval: 5s
       timeout: 30s
       retries: 3
+    environment:
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
 
   run-detection:
     build:
