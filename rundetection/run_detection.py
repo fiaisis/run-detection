@@ -5,8 +5,10 @@ import logging
 import os
 import sys
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from queue import SimpleQueue
+from typing import Generator, Any
 
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials
 from pika.adapters.blocking_connection import BlockingChannel
@@ -41,6 +43,18 @@ def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
     channel.queue_declare(queue_name, durable=True, arguments={"x-queue-type": "quorum"})
     channel.queue_bind(queue_name, exchange_name, routing_key="")
     return channel
+
+
+@contextmanager
+def producer() -> Generator[BlockingChannel | BlockingChannel, Any, None]:
+    """
+    Return a context managed pika producer channel
+    :return: BlockingChannel
+    """
+    channel = get_channel("scheduled-jobs", "scheduled-jobs")
+    yield channel
+    channel.close()
+    channel.connection.close()
 
 
 def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -> None:
@@ -93,7 +107,9 @@ def process_notifications(channel: BlockingChannel, notification_queue: SimpleQu
     while not notification_queue.empty():
         detected_run = notification_queue.get()
         logger.info("Sending notification for run: %s", detected_run.run_number)
-        channel.basic_publish(EGRESS_QUEUE_NAME, "", detected_run.to_json_string().encode())
+
+        with producer() as channel:
+            channel.basic_publish(EGRESS_QUEUE_NAME, "", detected_run.to_json_string().encode())
 
 
 def start_run_detection() -> None:
