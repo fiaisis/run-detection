@@ -16,9 +16,9 @@ from pika.adapters.blocking_connection import BlockingChannel
 def producer_channel() -> BlockingChannel:
     connection = BlockingConnection()
     channel = connection.channel()
-    channel.exchange_declare("detected-runs", exchange_type="direct", durable=True)
-    channel.queue_declare("detected-runs")
-    channel.queue_bind("detected-runs", "detected-runs", routing_key="")
+    channel.exchange_declare("watched-files", exchange_type="direct", durable=True)
+    channel.queue_declare("watched-files", durable=True, arguments={"x-queue-type": "quorum"})
+    channel.queue_bind("watched-files", "watched-files", routing_key="")
     return channel
 
 
@@ -27,7 +27,7 @@ def consumer_channel() -> BlockingChannel:
     connection = BlockingConnection()
     channel = connection.channel()
     channel.exchange_declare("scheduled-jobs", exchange_type="direct", durable=True)
-    channel.queue_declare("scheduled-jobs")
+    channel.queue_declare("scheduled-jobs", durable=True, arguments={"x-queue-type": "quorum"})
     channel.queue_bind("scheduled-jobs", "scheduled-jobs", routing_key="")
     return channel
 
@@ -75,8 +75,6 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25234.nxs", producer_channel)
     produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25235.nxs", producer_channel)
     produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25236.nxs", producer_channel)
-
-    time.sleep(10)
 
     expected_tosca_requests = [
         {
@@ -243,7 +241,7 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
 
     recieved_messages = []
 
-    for mf, props, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=30):
+    for mf, props, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=1):
         if mf is None:
             break
 
