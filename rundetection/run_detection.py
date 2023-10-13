@@ -1,6 +1,8 @@
 """
 Main module for run detection
 """
+from __future__ import annotations
+
 import logging
 import os
 import sys
@@ -52,7 +54,6 @@ def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
 
 
 @contextmanager
-# pylint: disable = unsupported-binary-operation
 def producer() -> Generator[BlockingChannel | BlockingChannel, Any, None]:
     """
     Return a context managed pika producer channel

@@ -1,7 +1,7 @@
 """
 End-to-end tests
 """
-# pylint: disable=redefined-outer-name, no-name-in-module
+from __future__ import annotations
 
 import json
 from typing import Any
@@ -11,8 +11,12 @@ from pika import BlockingConnection
 from pika.adapters.blocking_connection import BlockingChannel
 
 
+# pylint: disable=redefined-outer-name, no-name-in-module
+
+
 @pytest.fixture
 def producer_channel() -> BlockingChannel:
+    """Producer channel fixture"""
     connection = BlockingConnection()
     channel = connection.channel()
     channel.exchange_declare("watched-files", exchange_type="direct", durable=True)
@@ -23,6 +27,7 @@ def producer_channel() -> BlockingChannel:
 
 @pytest.fixture
 def consumer_channel() -> BlockingChannel:
+    """Consumer channel fixture"""
     connection = BlockingConnection()
     channel = connection.channel()
     channel.exchange_declare("scheduled-jobs", exchange_type="direct", durable=True)
@@ -32,6 +37,12 @@ def consumer_channel() -> BlockingChannel:
 
 
 def produce_message(message: str, channel: BlockingChannel) -> None:
+    """
+    Given a message and a channel, produce the message to the queue on that channel
+    :param message: The message to produce
+    :param channel: The channel to produce to
+    :return: None
+    """
     channel.basic_publish("watched-files", "", body=message.encode())
 
 
@@ -42,7 +53,7 @@ def get_specification_value(instrument: str, key: str) -> Any:
     :param key: The key for the rule
     :return: The rule value
     """
-    with open(f"rundetection/specifications/{instrument.lower()}_specification.json", "r", encoding="utf-8") as fle:
+    with open(f"../rundetection/specifications/{instrument.lower()}_specification.json", "r", encoding="utf-8") as fle:
         spec = json.load(fle)
         return spec[key]
 
@@ -240,7 +251,7 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
 
     recieved_messages = []
 
-    for mf, props, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=1):
+    for mf, _, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=1):
         if mf is None:
             break
 

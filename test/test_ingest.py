@@ -1,7 +1,7 @@
 """
 Ingest and metadata tests
 """
-# pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name,duplicate-code
 import logging
 import unittest
 from pathlib import Path
