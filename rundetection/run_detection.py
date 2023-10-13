@@ -51,10 +51,13 @@ def producer() -> Generator[BlockingChannel | BlockingChannel, Any, None]:
     Return a context managed pika producer channel
     :return: BlockingChannel
     """
+    logger.info("Creating producer...")
     channel = get_channel("scheduled-jobs", "scheduled-jobs")
     yield channel
+    logger.info("Closing producer channel and connection...")
     channel.close()
     channel.connection.close()
+    logger.info("Producer closed.")
 
 
 def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -> None:
@@ -87,29 +90,33 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
     :param notification_queue: The notification queue
     :return: None
     """
-    for mf, _, body in channel.consume(INGRESS_QUEUE_NAME):
+    logger.info("Listening for messages")
+    for method_frame, _, body in channel.consume(INGRESS_QUEUE_NAME):
         try:
             process_message(body.decode(), notification_queue)
-        except Exception:
-            logger.warning("Problem processing message: %s", body)
+        except Exception as exc:
+            logger.exception("Problem processing message: %s", body, exc_info=exc)
         finally:
-            channel.basic_ack(mf.delivery_tag)
+            logger.info("Acking message %s", method_frame.delivery_tag)
+            channel.basic_ack(method_frame.delivery_tag)
+        logger.info("Pausing listener...")
         break
 
 
-def process_notifications(channel: BlockingChannel, notification_queue: SimpleQueue[JobRequest]) -> None:
+def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
     """
     Produce messages until the notification queue is empty
-    :param producer: The producer
     :param notification_queue: The notification queue
     :return: None
     """
+    logger.info("Checking notification queue...")
     while not notification_queue.empty():
         detected_run = notification_queue.get()
         logger.info("Sending notification for run: %s", detected_run.run_number)
 
         with producer() as channel:
             channel.basic_publish(EGRESS_QUEUE_NAME, "", detected_run.to_json_string().encode())
+    logger.info("Notification queue empty. Continuing...")
 
 
 def start_run_detection() -> None:
@@ -119,18 +126,15 @@ def start_run_detection() -> None:
     """
 
     logger.info("Starting Run Detection")
-    logger.info("Creating consumer")
+    logger.info("Creating consumer...")
     consumer_channel = get_channel(INGRESS_QUEUE_NAME, INGRESS_QUEUE_NAME)
-
-    logger.info("Creating producer")
-    producer_channel = get_channel(EGRESS_QUEUE_NAME, EGRESS_QUEUE_NAME)
-
+    logger.info("Consumer created")
     notification_queue: SimpleQueue[JobRequest] = SimpleQueue()
     logger.info("Starting loop...")
     try:
         while True:
             process_messages(consumer_channel, notification_queue)
-            process_notifications(producer_channel, notification_queue)
+            process_notifications(notification_queue)
             time.sleep(0.1)
 
     # pylint: disable = broad-except
