@@ -10,8 +10,8 @@ from pathlib import Path
 from queue import SimpleQueue
 from typing import Generator, Any
 
-from pika import BlockingConnection, ConnectionParameters, PlainCredentials
-from pika.adapters.blocking_connection import BlockingChannel
+from pika import BlockingConnection, ConnectionParameters, PlainCredentials  # type: ignore
+from pika.adapters.blocking_connection import BlockingChannel  # type: ignore
 
 from rundetection.ingest import ingest, JobRequest
 from rundetection.specifications import InstrumentSpecification
@@ -31,6 +31,12 @@ EGRESS_QUEUE_NAME = os.environ.get("EGRESS_QUEUE_NAME", "scheduled-jobs")
 
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
+    """
+    Given an exchange and queue name, return a blocking channel to the exchange and quque
+    :param exchange_name: The exchange name
+    :param queue_name: The queue name
+    :return: The Blocking Channel
+    """
     credentials = PlainCredentials(
         username=os.environ.get("QUEUE_USER", "guest"), password=os.environ.get("QUEUE_PASSWORD", "guest")
     )
@@ -46,6 +52,7 @@ def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
 
 
 @contextmanager
+# pylint: disable = unsupported-binary-operation
 def producer() -> Generator[BlockingChannel | BlockingChannel, Any, None]:
     """
     Return a context managed pika producer channel
@@ -94,6 +101,7 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
     for method_frame, _, body in channel.consume(INGRESS_QUEUE_NAME):
         try:
             process_message(body.decode(), notification_queue)
+        # pylint: disable = broad-exception-caught
         except Exception as exc:
             logger.exception("Problem processing message: %s", body, exc_info=exc)
         finally:
