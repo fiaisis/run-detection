@@ -4,7 +4,6 @@ End-to-end tests
 # pylint: disable=redefined-outer-name, no-name-in-module
 
 import json
-import time
 from typing import Any
 
 import pytest

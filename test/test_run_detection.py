@@ -5,7 +5,7 @@ import logging
 import unittest
 from pathlib import Path
 from queue import SimpleQueue
-from unittest.mock import patch, AsyncMock, Mock, MagicMock
+from unittest.mock import patch, Mock, MagicMock
 
 import pytest
 
@@ -16,6 +16,8 @@ from rundetection.run_detection import (
     process_notifications,
     start_run_detection,
     verify_archive_access,
+    get_channel,
+    producer,
 )
 
 
@@ -95,94 +97,104 @@ def test_process_message_no_notification(mock_instrument_spec, mock_ingest):
     assert notification_queue.empty()
 
 
-@pytest.mark.asyncio
 @patch("rundetection.run_detection.process_message")
-async def test_process_messages(mock_process):
+def test_process_messages(mock_process):
     """
     Test each message is processed and acked
     :param mock_process: Mock process messages function
     :return: None
     """
-    mock_message = Mock()
-    mock_message.ack = AsyncMock()
-    mock_message.get_data.return_value.decode.return_value = "some path"
-    messages = [mock_message]
-    notification_queue = SimpleQueue()
+    channel = MagicMock()
+    method_frame = MagicMock()
+    body = "message_body".encode()
+    channel.consume.return_value = [(method_frame, None, body)]
 
-    await process_messages(messages, notification_queue)
+    notification_queue = Mock()
 
-    mock_process.assert_called_once_with("some path", notification_queue)
-    mock_message.ack.assert_called_once()
+    process_messages(channel, notification_queue)
+
+    channel.consume.assert_called_once()
+    mock_process.assert_called_once_with(body.decode(), notification_queue)
+    channel.basic_ack.assert_called_once_with(method_frame.delivery_tag)
 
 
-@pytest.mark.asyncio
 @patch("rundetection.run_detection.process_message")
-async def test_process_messages_raises_still_acks(mock_process):
+def test_process_messages_raises_still_acks(mock_process):
     """
     Test messages are still acked after exception in processing
     :param mock_process: Mock Process messages function
     :return: None
     """
-    mock_message = Mock()
-    mock_message.ack = AsyncMock()
-    mock_message.get_data.return_value.decode.return_value = "some path"
-    messages = [mock_message]
+    channel = MagicMock()
+    method_frame = MagicMock()
+    body = "message_body".encode()
+    channel.consume.return_value = [(method_frame, None, body)]
     notification_queue = SimpleQueue()
     mock_process.side_effect = RuntimeError
 
-    await process_messages(messages, notification_queue)
+    process_messages(channel, notification_queue)
 
-    mock_process.assert_called_once_with("some path", notification_queue)
-    mock_message.ack.assert_called_once()
+    channel.consume.assert_called_once()
+    mock_process.assert_called_once_with(body.decode(), notification_queue)
+    channel.basic_ack.assert_called_once_with(method_frame.delivery_tag)
 
 
-@pytest.mark.asyncio
-@patch("rundetection.run_detection.bytearray")
-async def test_process_notifications(mock_byte):
+@patch("rundetection.run_detection.producer")
+def test_process_notifications(mock_producer):
     """
     Tests messages in the notification queue are produced by the producer
     :param mock_byte: Mock bytearray class
     :return: None
     """
-    producer = Mock()
-    producer.produce = AsyncMock()
+    detected_run_1 = MagicMock()
+    detected_run_1.run_number = "1"
+    detected_run_1.to_json_string.return_value = '{"run_number": "1"}'
+
+    detected_run_2 = MagicMock()
+    detected_run_2.run_number = "2"
+    detected_run_2.to_json_string.return_value = '{"run_number": "2"}'
+
     notification_queue = SimpleQueue()
-    run = Mock()
-    notification_queue.put(run)
+    notification_queue.put(detected_run_1)
+    notification_queue.put(detected_run_2)
 
-    await process_notifications(producer, notification_queue)
-    mock_byte.assert_called_once_with(run.to_json_string.return_value, "utf-8")
-    producer.produce.assert_called_once_with(mock_byte.return_value)
+    channel = MagicMock()
+    mock_producer.return_value.__enter__.return_value = channel
+
+    # Call function
+    process_notifications(notification_queue)
+
+    channel.basic_publish.assert_any_call("scheduled-jobs", "", '{"run_number": "1"}'.encode())
+    channel.basic_publish.assert_any_call("scheduled-jobs", "", '{"run_number": "2"}'.encode())
+
+    # Assert the queue is empty
+    assert notification_queue.empty()
 
 
-@pytest.mark.asyncio
-@patch("rundetection.run_detection.create_and_get_memphis")
+@patch("rundetection.run_detection.get_channel")
 @patch("rundetection.run_detection.process_messages")
 @patch("rundetection.run_detection.process_notifications")
-@patch("rundetection.run_detection.asyncio.sleep", side_effect=InterruptedError)
 @patch("rundetection.run_detection.SimpleQueue")
-async def test_start_run_detection(mock_queue, _, mock_proc_notifications, mock_proc_messages, mock_get_memphis):
+@patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError)
+def test_start_run_detection(_, mock_queue, mock_proc_notifications, mock_proc_messages, mock_get_channel):
     """
     Mock run detection start up
-    :param mock_queue: Mock notification queue
     :param _: Mock sleep
+    :param mock_queue: Mock notification queue
     :param mock_proc_notifications: mock process notification function
     :param mock_proc_messages: Mock process messages function
-    :param mock_get_memphis: Mock memphis factory
     :return:  None
     """
-    mock_memphis = Mock()
-    mock_memphis.consumer = AsyncMock()
-    mock_memphis.producer = AsyncMock()
-    mock_get_memphis.return_value = mock_memphis
+    mock_channel = Mock()
+    mock_get_channel.return_value = mock_channel
 
     with pytest.raises(InterruptedError):
-        await start_run_detection()
+        start_run_detection()
 
-    mock_proc_messages.assert_called_with(
-        mock_memphis.consumer.return_value.fetch.return_value, mock_queue.return_value
-    )
-    mock_proc_notifications.assert_called_with(mock_memphis.producer.return_value, mock_queue.return_value)
+    mock_get_channel.assert_called_once_with("watched-files", "watched-files")
+
+    mock_proc_messages.assert_called_with(mock_channel, mock_queue.return_value)
+    mock_proc_notifications.assert_called_with(mock_queue.return_value)
 
 
 @patch("rundetection.run_detection.Path")
@@ -213,6 +225,48 @@ def test_verify_archive_access_not_accessible(mock_path, caplog):
         verify_archive_access()
 
         assert "The archive has not been mounted correctly, and cannot be accessed." in caplog.text
+
+
+@patch("rundetection.run_detection.PlainCredentials")
+@patch("rundetection.run_detection.ConnectionParameters")
+@patch("rundetection.run_detection.BlockingConnection")
+def test_get_channel(mock_blocking_connection, mock_connection_parameters, mock_plain_credentials):
+    """Test channel is created and returned"""
+    mock_channel = MagicMock()
+    mock_blocking_connection.return_value.channel.return_value = mock_channel
+
+    exchange_name = "test_exchange"
+    queue_name = "test_queue"
+
+    # Call function
+    channel = get_channel(exchange_name, queue_name)
+
+    # Assert
+    mock_plain_credentials.assert_called_once_with(username="guest", password="guest")
+    mock_connection_parameters.assert_called_once_with(
+        "localhost", 5672, credentials=mock_plain_credentials.return_value
+    )
+    mock_blocking_connection.assert_called_once_with(mock_connection_parameters.return_value)
+
+    mock_channel.exchange_declare.assert_called_once_with(exchange_name, exchange_type="direct", durable=True)
+    mock_channel.queue_declare.assert_called_once_with(queue_name, durable=True, arguments={"x-queue-type": "quorum"})
+    mock_channel.queue_bind.assert_called_once_with(queue_name, exchange_name, routing_key="")
+
+    assert channel == mock_channel
+
+
+@patch("rundetection.run_detection.get_channel")  # Replace with actual module name
+def test_producer(mock_get_channel):
+    """Test the producer context manager"""
+    mock_channel = MagicMock()
+    mock_get_channel.return_value = mock_channel
+
+    with producer() as channel:
+        mock_get_channel.assert_called_once_with("scheduled-jobs", "scheduled-jobs")
+        assert channel == mock_channel
+
+    mock_channel.close.assert_called_once()
+    mock_channel.connection.close.assert_called_once()
 
 
 if __name__ == "__main__":
