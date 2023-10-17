@@ -4,7 +4,7 @@ name: Build and Push Docker Images
 on:
   push:
     branches:
-      - main
+      - '*'
 
 env:
   REGISTRY: ghcr.io
@@ -26,7 +26,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.WRITE_PACKAGE_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push run-detection Docker image
         uses: docker/build-push-action@v5
