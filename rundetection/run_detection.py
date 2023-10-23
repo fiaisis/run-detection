@@ -34,7 +34,7 @@ EGRESS_QUEUE_NAME = os.environ.get("EGRESS_QUEUE_NAME", "scheduled-jobs")
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
     """
-    Given an exchange and queue name, return a blocking channel to the exchange and quque
+    Given an exchange and queue name, return a blocking channel to the exchange and queue
     :param exchange_name: The exchange name
     :param queue_name: The queue name
     :return: The Blocking Channel
