@@ -110,6 +110,7 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
             channel.basic_ack(method_frame.delivery_tag)
         logger.info("Pausing listener...")
         break
+        # pylint: enable = broad-exception-caught
 
 
 def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
