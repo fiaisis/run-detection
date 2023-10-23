@@ -1,16 +1,19 @@
 """
 Main module for run detection
 """
-import asyncio
+from __future__ import annotations
+
 import logging
 import os
 import sys
+import time
+from contextlib import contextmanager
 from pathlib import Path
 from queue import SimpleQueue
-from typing import List, Optional, Any
+from typing import Generator, Any
 
-from memphis import Memphis  # type: ignore
-from memphis.message import Message  # type: ignore
+from pika import BlockingConnection, ConnectionParameters, PlainCredentials  # type: ignore
+from pika.adapters.blocking_connection import BlockingChannel  # type: ignore
 
 from rundetection.ingest import ingest, JobRequest
 from rundetection.specifications import InstrumentSpecification
@@ -23,22 +26,46 @@ logging.basicConfig(
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
+logging.getLogger("pika").setLevel(logging.WARNING)
+
+INGRESS_QUEUE_NAME = os.environ.get("INGRESS_QUEUE_NAME", "watched-files")
+EGRESS_QUEUE_NAME = os.environ.get("EGRESS_QUEUE_NAME", "scheduled-jobs")
 
 
-async def create_and_get_memphis() -> Memphis:
+def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
     """
-    Create and return the connected Memphis Object
-    :return: Memphis instance
+    Given an exchange and queue name, return a blocking channel to the exchange and queue
+    :param exchange_name: The exchange name
+    :param queue_name: The queue name
+    :return: The Blocking Channel
     """
-    logger.info("Creating memphis object...")
-    memphis = Memphis()
-    logger.info("Connecting...")
-    host = os.environ.get("MEMPHIS_HOST", "localhost")
-    user = os.environ.get("MEMPHIS_USER", "root")
-    password = os.environ.get("MEMPHIS_PASS", "memphis")
-    await memphis.connect(host=host, username=user, password=password)
-    logger.info("Connected to memphis")
-    return memphis
+    credentials = PlainCredentials(
+        username=os.environ.get("QUEUE_USER", "guest"), password=os.environ.get("QUEUE_PASSWORD", "guest")
+    )
+    connection_parameters = ConnectionParameters(
+        os.environ.get("QUEUE_HOST", "localhost"), 5672, credentials=credentials
+    )
+    connection = BlockingConnection(connection_parameters)
+    channel = connection.channel()
+    channel.exchange_declare(exchange_name, exchange_type="direct", durable=True)
+    channel.queue_declare(queue_name, durable=True, arguments={"x-queue-type": "quorum"})
+    channel.queue_bind(queue_name, exchange_name, routing_key="")
+    return channel
+
+
+@contextmanager
+def producer() -> Generator[BlockingChannel | BlockingChannel, Any, None]:
+    """
+    Return a context managed pika producer channel
+    :return: BlockingChannel
+    """
+    logger.info("Creating producer...")
+    channel = get_channel("scheduled-jobs", "scheduled-jobs")
+    yield channel
+    logger.info("Closing producer channel and connection...")
+    channel.close()
+    channel.connection.close()
+    logger.info("Producer closed.")
 
 
 def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -> None:
@@ -63,7 +90,7 @@ def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -
         logger.info("Specification not met, skipping run: %s", run)
 
 
-async def process_messages(messages: Optional[List[Message]], notification_queue: SimpleQueue[JobRequest]) -> None:
+def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[JobRequest]) -> None:
     """
     Given a list of messages and the notification queue, process each message, adding those which meet specifications to
     the notification queue
@@ -71,66 +98,60 @@ async def process_messages(messages: Optional[List[Message]], notification_queue
     :param notification_queue: The notification queue
     :return: None
     """
-    if messages:
-        for message in messages:
-            message_value = message.get_data().decode("utf-8")
-            try:
-                process_message(message_value, notification_queue)
-            # pylint: disable = broad-except
-            except Exception:
-                logger.exception("problem proscessing message")
-            finally:
-                logger.info("acking message")
-                await message.ack()
+    logger.info("Listening for messages")
+    for method_frame, _, body in channel.consume(INGRESS_QUEUE_NAME):
+        try:
+            process_message(body.decode(), notification_queue)
+        # pylint: disable = broad-exception-caught
+        except Exception as exc:
+            logger.exception("Problem processing message: %s", body, exc_info=exc)
+        finally:
+            logger.info("Acking message %s", method_frame.delivery_tag)
+            channel.basic_ack(method_frame.delivery_tag)
+        logger.info("Pausing listener...")
+        break
+        # pylint: enable = broad-exception-caught
 
 
-async def process_notifications(producer: Any, notification_queue: SimpleQueue[JobRequest]) -> None:
+def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
     """
     Produce messages until the notification queue is empty
-    :param producer: The producer
     :param notification_queue: The notification queue
     :return: None
     """
+    logger.info("Checking notification queue...")
     while not notification_queue.empty():
         detected_run = notification_queue.get()
         logger.info("Sending notification for run: %s", detected_run.run_number)
-        await producer.produce(bytearray(detected_run.to_json_string(), "utf-8"))
+
+        with producer() as channel:
+            channel.basic_publish(EGRESS_QUEUE_NAME, "", detected_run.to_json_string().encode())
+    logger.info("Notification queue empty. Continuing...")
 
 
-async def start_run_detection() -> None:
+def start_run_detection() -> None:
     """
     Main Coroutine starts the producer and consumer in a loop
     :return: None
     """
 
     logger.info("Starting Run Detection")
-    memphis = await create_and_get_memphis()
-    logger.info("Creating consumer")
-    ingress_station = os.environ.get("MEMPHIS_INGRESS_NAME", "watched-files")
-    consumer = await memphis.consumer(
-        station_name=ingress_station,
-        consumer_group="rundetection",
-        consumer_name="rundetection",
-        generate_random_suffix=True,
-    )
-    logger.info("Creating producer")
-    egress_station = os.environ.get("MEMPHIS_EGRESS_NAME", "scheduled-jobs")
-    producer = await memphis.producer(
-        station_name=egress_station, producer_name="rundetection", generate_random_suffix=True
-    )
+    logger.info("Creating consumer...")
+    consumer_channel = get_channel(INGRESS_QUEUE_NAME, INGRESS_QUEUE_NAME)
+    logger.info("Consumer created")
     notification_queue: SimpleQueue[JobRequest] = SimpleQueue()
     logger.info("Starting loop...")
     try:
         while True:
-            recieved: Optional[List[Message]] = await consumer.fetch()
-            await process_messages(recieved, notification_queue)
-            await process_notifications(producer, notification_queue)
-            await asyncio.sleep(0.1)
+            process_messages(consumer_channel, notification_queue)
+            process_notifications(notification_queue)
+            time.sleep(0.1)
+
     # pylint: disable = broad-except
     except Exception:
         logger.exception("Uncaught error occurred in main loop. Restarting in 30 seconds...")
-        await asyncio.sleep(30)
-        await start_run_detection()
+        time.sleep(30)
+        start_run_detection()
 
 
 def verify_archive_access() -> None:
@@ -147,7 +168,7 @@ def main() -> None:
     :return: None
     """
     verify_archive_access()
-    asyncio.run(start_run_detection())
+    start_run_detection()
 
 
 if __name__ == "__main__":

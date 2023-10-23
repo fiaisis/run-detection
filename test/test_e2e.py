@@ -1,29 +1,49 @@
 """
 End-to-end tests
 """
-# pylint: disable=redefined-outer-name, no-name-in-module
+from __future__ import annotations
 
-import asyncio
 import json
 from typing import Any
 
 import pytest
+from pika import BlockingConnection
+from pika.adapters.blocking_connection import BlockingChannel
 
-from rundetection.run_detection import create_and_get_memphis
+
+# pylint: disable=redefined-outer-name, no-name-in-module
 
 
-async def produce_message(message: str, memphis: Any) -> None:
+@pytest.fixture
+def producer_channel() -> BlockingChannel:
+    """Producer channel fixture"""
+    connection = BlockingConnection()
+    channel = connection.channel()
+    channel.exchange_declare("watched-files", exchange_type="direct", durable=True)
+    channel.queue_declare("watched-files", durable=True, arguments={"x-queue-type": "quorum"})
+    channel.queue_bind("watched-files", "watched-files", routing_key="")
+    return channel
+
+
+@pytest.fixture
+def consumer_channel() -> BlockingChannel:
+    """Consumer channel fixture"""
+    connection = BlockingConnection()
+    channel = connection.channel()
+    channel.exchange_declare("scheduled-jobs", exchange_type="direct", durable=True)
+    channel.queue_declare("scheduled-jobs", durable=True, arguments={"x-queue-type": "quorum"})
+    channel.queue_bind("scheduled-jobs", "scheduled-jobs", routing_key="")
+    return channel
+
+
+def produce_message(message: str, channel: BlockingChannel) -> None:
     """
-    Post a message to memphis
-    :param message: the message to send
+    Given a message and a channel, produce the message to the queue on that channel
+    :param message: The message to produce
+    :param channel: The channel to produce to
     :return: None
     """
-    await memphis.produce(
-        station_name="watched-files",
-        producer_name="e2e-submission-producer",
-        message=message,
-        generate_random_suffix=True,
-    )
+    channel.basic_publish("watched-files", "", body=message.encode())
 
 
 def get_specification_value(instrument: str, key: str) -> Any:
@@ -38,8 +58,7 @@ def get_specification_value(instrument: str, key: str) -> Any:
         return spec[key]
 
 
-@pytest.mark.asyncio
-async def test_e2e():
+def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     """
     Produce 3 files to the ingress station, one that should reduce, one that shouldn't and one that doesnt exist. Verify
     that the scheduled job metadata is sent to the egress station only
@@ -48,28 +67,24 @@ async def test_e2e():
 
     expected_wbvan = get_specification_value("mari", "mariwbvan")
     expected_mask = get_specification_value("mari", "marimaskfile")
-    memphis = await create_and_get_memphis()
+
     # Produce file that should reduce
-    await produce_message("/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs", memphis)
+    produce_message("/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs", producer_channel)
 
     # Produce MARI runs that should stitch
-    await produce_message("/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27030.nxs", memphis)
-    await produce_message("/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27031.nxs", memphis)
+    produce_message("/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27030.nxs", producer_channel)
+    produce_message("/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27031.nxs", producer_channel)
 
     # Produce file that should not reduce
-    await produce_message("/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs", memphis)
+    produce_message("/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs", producer_channel)
 
     # Produce file that does not exist
-    await produce_message("/archive/foo/bar/baz.nxs", memphis)
+    produce_message("/archive/foo/bar/baz.nxs", producer_channel)
 
     # Produce 3 TOSCA runs that should result in 5 reductions
-    await produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25234.nxs", memphis)
-    await produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25235.nxs", memphis)
-    await produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25236.nxs", memphis)
-
-    await asyncio.sleep(30)
-
-    recieved = await memphis.fetch_messages("scheduled-jobs", "e2e-consumer")
+    produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25234.nxs", producer_channel)
+    produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25235.nxs", producer_channel)
+    produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25236.nxs", producer_channel)
 
     expected_tosca_requests = [
         {
@@ -233,17 +248,20 @@ async def test_e2e():
             "wbvan": expected_wbvan,
         },
     }
-    try:
-        await asyncio.sleep(3)
-        recieved_messages = [json.loads(message.get_data().decode("utf-8")) for message in recieved]
-        assert expected_mari_request in recieved_messages
-        assert expected_mari_stitch_request in recieved_messages
-        assert expected_mari_stitch_individual_1 in recieved_messages
-        assert expected_mari_stitch_individual_2 in recieved_messages
-        for request in expected_tosca_requests:
-            assert request in recieved_messages
-        assert len(recieved_messages) == 9
-    finally:
-        for message in recieved:
-            await message.ack()
-        await memphis.close()
+
+    recieved_messages = []
+
+    for mf, _, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=1):
+        if mf is None:
+            break
+
+        consumer_channel.basic_ack(mf.delivery_tag)
+        recieved_messages.append(json.loads(body.decode()))
+
+    assert expected_mari_request in recieved_messages
+    assert expected_mari_stitch_request in recieved_messages
+    assert expected_mari_stitch_individual_1 in recieved_messages
+    assert expected_mari_stitch_individual_2 in recieved_messages
+    for request in expected_tosca_requests:
+        assert request in recieved_messages
+    assert len(recieved_messages) == 9

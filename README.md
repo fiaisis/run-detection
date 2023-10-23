@@ -23,21 +23,21 @@ The easiest way to test the whole run detection currently:
 
 - Start the docker-compose setup in the test directory
 - `sudo docker compose up -d`
-- Visit the memphis gui
+- Visit the rabbitmq web ui
 - Submit messages to the ingress station, verify run-detection logs, check the egress station
 
 ## Configuration
 
 Run detection has 5 environment variables it will check
 
-1. `MEMPHIS_HOST` - host name of the memphis server
-2. `MEMPHIS_USER` - Username of the application user run detection should use when connecting to memphis
-3. `MEMPHIS_PASS` - Password of the above user
-4. `MEMPHIS_INGRESS_NAME` - station name that run detection will consume from
-5. `MEMPHIS_EGRESS_NAME` - Station name that run detection will produce to
+1. `QUEUE_HOST` - host name of the queue server
+2. `QUEUE_USER` - Username of the application user run detection should use when connecting to queue
+3. `QUEUE_PASSWORD` - Password of the above user
+4. `INGRESS_QUEUE_NAME` - queue name that run detection will consume from
+5. `EGRESS_QUEUE_NAME` - queue name that run detection will produce to
 
 If these are not provided, run detection will choose default station names, "watched-files", "scheduled-jobs".
-localhost will be used as the default host, and the default memphis root credentials will be used.
+localhost will be used as the default host, and the default credentials, guest guest, will be used.
 
 ## How to container
 
