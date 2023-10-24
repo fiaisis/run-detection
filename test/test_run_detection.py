@@ -144,7 +144,7 @@ def test_process_messages_raises_still_acks(mock_process):
 
 
 @patch("rundetection.run_detection.process_message")
-def test_process_messages_does_not_ack_attribute_error(mock_process):
+def test_process_messages_does_not_ack_attribute_error(_):
     """
     Test messages are not acked after AttributeError in processing. As this should only occur when no message is
     consumed.
