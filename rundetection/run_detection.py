@@ -98,7 +98,6 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
     :param notification_queue: The notification queue
     :return: None
     """
-    logger.info("Listening for messages")
     for method_frame, _, body in channel.consume(INGRESS_QUEUE_NAME, inactivity_timeout=5):
         try:
             process_message(body.decode(), notification_queue)
@@ -106,12 +105,11 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
             channel.basic_ack(method_frame.delivery_tag)
         # pylint: disable = broad-exception-caught
         except AttributeError:
-            logger.info("Inactivity timer hit")
+            pass
         except Exception as exc:
             logger.exception("Problem processing message: %s", body, exc_info=exc)
             logger.info("Acking message %s", method_frame.delivery_tag)
             channel.basic_ack(method_frame.delivery_tag)
-        logger.info("Pausing listener...")
         break
         # pylint: enable = broad-exception-caught
 
