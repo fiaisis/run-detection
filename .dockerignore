@@ -1,0 +1,8 @@
+tools/
+test/
+.*/
+*.txt
+.coverage
+venv*/
+build/
+*egg-info
