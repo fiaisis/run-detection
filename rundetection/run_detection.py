@@ -137,7 +137,7 @@ def write_readiness_probe_file() -> None:
     Write the file with the timestamp for the readinessprobe
     :return: None
     """
-    with open("/tmp/heartbeat", "w") as file:
+    with open("/tmp/heartbeat", "w", encoding="utf-8") as file:
         file.write(time.strftime("%Y-%m-%d %H:%M:%S"))
 
 

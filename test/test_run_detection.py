@@ -302,7 +302,7 @@ def test_write_readiness_probe_file():
 
     assert os.path.exists("/tmp/heartbeat"), "Heartbeat file does not exist."
 
-    with open("/tmp/heartbeat", "r") as file:
+    with open("/tmp/heartbeat", "r", encoding="utf-8") as file:
         content = file.read()
 
         # Check if the content matches the timestamp format
