@@ -16,7 +16,7 @@ run-detection = "rundetection.run_detection:main"
 
 [project.optional-dependencies]
 formatting = [
-    "black==23.9.1"
+    "black==23.10.1"
 ]
 
 test = [
