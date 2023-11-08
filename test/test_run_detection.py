@@ -2,6 +2,9 @@
 Tests for run detection module
 """
 import logging
+import os
+import re
+import time
 import unittest
 from pathlib import Path
 from queue import SimpleQueue
@@ -18,6 +21,7 @@ from rundetection.run_detection import (
     verify_archive_access,
     get_channel,
     producer,
+    write_readiness_probe_file,
 )
 
 
@@ -137,6 +141,25 @@ def test_process_messages_raises_still_acks(mock_process):
     channel.consume.assert_called_once()
     mock_process.assert_called_once_with(body.decode(), notification_queue)
     channel.basic_ack.assert_called_once_with(method_frame.delivery_tag)
+
+
+@patch("rundetection.run_detection.process_message")
+def test_process_messages_does_not_ack_attribute_error(_):
+    """
+    Test messages are not acked after AttributeError in processing. As this should only occur when no message is
+    consumed.
+    :param mock_process: Mock Process messages function
+    :return: None
+    """
+    channel = MagicMock()
+    channel.consume.return_value = [(None, None, None)]
+
+    notification_queue = Mock()
+
+    process_messages(channel, notification_queue)
+
+    channel.consume.assert_called_once()
+    channel.basic_ack.assert_not_called()
 
 
 @patch("rundetection.run_detection.producer")
@@ -267,6 +290,30 @@ def test_producer(mock_get_channel):
 
     mock_channel.close.assert_called_once()
     mock_channel.connection.close.assert_called_once()
+
+
+def test_write_readiness_probe_file():
+    """
+    Test the write_readiness_probe
+    :return: None
+    """
+    # Call the function to create the file
+    write_readiness_probe_file()
+
+    assert os.path.exists("/tmp/heartbeat"), "Heartbeat file does not exist."
+
+    with open("/tmp/heartbeat", "r", encoding="utf-8") as file:
+        content = file.read()
+
+        # Check if the content matches the timestamp format
+        timestamp_format = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}")
+        assert timestamp_format.match(content), f"Unexpected content format: {content}"
+
+        # Assert a reasonable time difference
+        timestamp = time.strptime(content, "%Y-%m-%d %H:%M:%S")
+        current_time = time.localtime()
+        time_difference = time.mktime(current_time) - time.mktime(timestamp)
+        assert abs(time_difference) < 5, f"The timestamp difference is too large: {time_difference} seconds."
 
 
 if __name__ == "__main__":

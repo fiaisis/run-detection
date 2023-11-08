@@ -98,17 +98,18 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
     :param notification_queue: The notification queue
     :return: None
     """
-    logger.info("Listening for messages")
-    for method_frame, _, body in channel.consume(INGRESS_QUEUE_NAME):
+    for method_frame, _, body in channel.consume(INGRESS_QUEUE_NAME, inactivity_timeout=5):
         try:
             process_message(body.decode(), notification_queue)
-        # pylint: disable = broad-exception-caught
-        except Exception as exc:
-            logger.exception("Problem processing message: %s", body, exc_info=exc)
-        finally:
             logger.info("Acking message %s", method_frame.delivery_tag)
             channel.basic_ack(method_frame.delivery_tag)
-        logger.info("Pausing listener...")
+        # pylint: disable = broad-exception-caught
+        except AttributeError:
+            pass
+        except Exception as exc:
+            logger.exception("Problem processing message: %s", body, exc_info=exc)
+            logger.info("Acking message %s", method_frame.delivery_tag)
+            channel.basic_ack(method_frame.delivery_tag)
         break
         # pylint: enable = broad-exception-caught
 
@@ -129,6 +130,15 @@ def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
     logger.info("Notification queue empty. Continuing...")
 
 
+def write_readiness_probe_file() -> None:
+    """
+    Write the file with the timestamp for the readinessprobe
+    :return: None
+    """
+    with open("/tmp/heartbeat", "w", encoding="utf-8") as file:
+        file.write(time.strftime("%Y-%m-%d %H:%M:%S"))
+
+
 def start_run_detection() -> None:
     """
     Main Coroutine starts the producer and consumer in a loop
@@ -145,6 +155,7 @@ def start_run_detection() -> None:
         while True:
             process_messages(consumer_channel, notification_queue)
             process_notifications(notification_queue)
+            write_readiness_probe_file()
             time.sleep(0.1)
 
     # pylint: disable = broad-except
