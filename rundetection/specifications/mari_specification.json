@@ -1,6 +1,6 @@
 {
   "enabled": true,
   "maristitch": true,
-  "marimaskfile": "https://raw.githubusercontent.com/mantidproject/scriptrepository/f5dd40e52e87e6e2c595cbfe337169e56ff67917/direct_inelastic/MARI/MaskFiles/mari_mask2023_2.xml",
-  "mariwbvan": 28629
+  "marimaskfile": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/fb8f1bb2b2430211c20a3cd8d4e2566ce24b755e/mari/mari_mask2023_4.xml",
+  "mariwbvan": 29111
 }
