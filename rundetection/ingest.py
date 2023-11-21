@@ -142,6 +142,26 @@ def tosca_extract(job_request: JobRequest, _: Any) -> JobRequest:
     return job_request
 
 
+def osiris_extract(job_request: JobRequest, _: Any) -> JobRequest:
+    """
+    Get the analyser and temperature from an OSIRIS log file
+    :param job_request:
+    :param _:
+    :return:
+    """
+    pass
+
+
+def iris_extract(job_request: JobRequest, _: Any) -> JobRequest:
+    """
+    Get the analyser and temperature from an IRIS log file
+    :param job_request:
+    :param _:
+    :return:
+    """
+    pass
+
+
 def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     """
     Extracts additional metadata specific to the MARI instrument from the given dataset and updates the JobRequest
@@ -200,6 +220,10 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
             return mari_extract
         case "tosca":
             return tosca_extract
+        case "osiris":
+            return osiris_extract
+        case "iris":
+            return iris_extract
         case _:
             return skip_extract
 

@@ -12,6 +12,7 @@ from rundetection.rules.common_rules import EnabledRule
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
+from rundetection.rules.osiris_rules import OsirisStitchRule, OsirisPanadiumRule
 from rundetection.rules.rule import MissingRuleError, Rule
 from rundetection.rules.tosca_rules import ToscaStitchRule
 
@@ -41,6 +42,8 @@ def test_rule_factory_returns_correct_rule(_: Mock) -> None:
     assert_correct_rule("maristitch", True, MariStitchRule)
     assert_correct_rule("marimaskfile", "foo", MariMaskFileRule)
     assert_correct_rule("mariwbvan", 12345, MariWBVANRule)
+    assert_correct_rule("osirisstitch", True, OsirisStitchRule)
+    assert_correct_rule("osirispanadium", 12345, OsirisPanadiumRule)
 
 
 def test_raises_exception_for_missing_rule_class() -> None:
