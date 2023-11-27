@@ -2,7 +2,7 @@
 Module for inter specific rules
 """
 
-from rundetection.ingest import JobRequest, get_sibling_runs
+from rundetection.ingestion.ingest import JobRequest, get_sibling_runs
 from rundetection.rules.rule import Rule
 
 

@@ -2,14 +2,13 @@
 Specification unit test module
 """
 from pathlib import Path
-
 # pylint: disable=protected-access, redefined-outer-name
 from unittest.mock import Mock, patch
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rundetection.ingest import JobRequest
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import EnabledRule
 from rundetection.rules.mari_rules import MariStitchRule
 from rundetection.specifications import InstrumentSpecification

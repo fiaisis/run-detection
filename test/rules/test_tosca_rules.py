@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from rundetection.ingest import JobRequest
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.tosca_rules import ToscaStitchRule
 
 

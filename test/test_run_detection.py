@@ -12,7 +12,7 @@ from unittest.mock import patch, Mock, MagicMock
 
 import pytest
 
-from rundetection.ingest import JobRequest
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.run_detection import (
     process_message,
     process_messages,

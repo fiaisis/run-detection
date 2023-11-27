@@ -7,7 +7,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import List, Any
 
-from rundetection.ingest import JobRequest, get_run_title
+from rundetection.ingestion.ingest import JobRequest, get_run_title
 from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)

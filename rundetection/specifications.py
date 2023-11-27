@@ -6,7 +6,7 @@ import json
 import logging
 from typing import Any, List
 
-from rundetection.ingest import JobRequest
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.rule import Rule
 

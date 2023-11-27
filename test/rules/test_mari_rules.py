@@ -2,7 +2,6 @@
 Test for mari rules
 """
 import json
-
 # pylint:disable = redefined-outer-name, protected-access
 from pathlib import Path
 from typing import Any
@@ -10,7 +9,7 @@ from unittest.mock import patch
 
 import pytest
 
-from rundetection.ingest import JobRequest
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
 
 
