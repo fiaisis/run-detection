@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from rundetection.ingest import JobRequest
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.osiris_rules import OsirisPanadiumRule
 
 
