@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Any, Callable
 
-from rundetection.exceptions import IngestError
+from rundetection.exceptions import IngestError, ReductionMetadataError
 from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ def tosca_extract(job_request: JobRequest, _: Any) -> JobRequest:
     :param _:
     :return: The updated job request
     """
-    logger.info("Adding additional")
+    logger.info("Performing additional tosca extraction")
     job_request.additional_values["cycle_string"] = get_cycle_string_from_path(job_request.filepath)
     return job_request
 
@@ -47,7 +47,23 @@ def osiris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     :param dataset: The nexus file dataset
     :return: The updated job request
     """
-    pass
+    freq_6 = dataset.get("selog").get("freq6").get("value_log").get("value")[0]
+    freq_10 = dataset.get("selog").get("freq10").get("value_log").get("value")[0]
+    if freq_6 != freq_10:
+        raise ReductionMetadataError("Frequency 6 and 10 do not match. Osiris reduction is not possible")
+    job_request.additional_values["freq6"] = freq_6
+    job_request.additional_values["freq10"] = freq_10
+
+    tcb_detector_min = min(dataset.get("instrument").get("dae").get("time_channels_1").get("time_of_flight"))
+    tcb_detector_max = max(dataset.get("instrument").get("dae").get("time_channels_1").get("time_of_flight"))
+    tcb_monitor_min = min(dataset.get("instrument").get("dae").get("time_channels_2").get("time_of_flight"))
+    tcb_monitor_max = max(dataset.get("instrument").get("dae").get("time_channels_2").get("time_of_flight"))
+    job_request.additional_values["tcb_detector_min"] = tcb_detector_min
+    job_request.additional_values["tcb_detector_max"] = tcb_detector_max
+    job_request.additional_values["tcb_monitor_min"] = tcb_monitor_min
+    job_request.additional_values["tcb_monitor_max"] = tcb_monitor_max
+
+    return job_request
 
 
 def iris_extract(job_request: JobRequest, _: Any) -> JobRequest:

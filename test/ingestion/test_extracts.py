@@ -6,13 +6,14 @@ from unittest.mock import Mock, patch
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rundetection.exceptions import IngestError
+from rundetection.exceptions import IngestError, ReductionMetadataError
 from rundetection.ingestion.extracts import (
     skip_extract,
     get_extraction_function,
     mari_extract,
     tosca_extract,
     get_cycle_string_from_path,
+    osiris_extract,
 )
 from rundetection.job_requests import JobRequest
 
@@ -149,6 +150,41 @@ def test_tosca_extract(_: Mock, job_request):
     """Test Tosca Extract adds_cycle_string"""
     tosca_extract(job_request, None)
     assert job_request.additional_values["cycle_string"] == "some string"
+
+
+def test_osiris_extract(job_request):
+    """Test Osiris extract"""
+    dataset = {
+        "selog": {"freq6": {"value_log": {"value": (6,)}}, "freq10": {"value_log": {"value": (6,)}}},
+        "instrument": {
+            "dae": {
+                "time_channels_1": {"time_of_flight": (10.0, 100.0)},
+                "time_channels_2": {"time_of_flight": (12.1, 121.0)},
+            }
+        },
+    }
+    osiris_extract(job_request, dataset)
+    assert job_request.additional_values["freq10"] == 6
+    assert job_request.additional_values["freq6"] == 6
+    assert job_request.additional_values["tcb_detector_min"] == 10.0
+    assert job_request.additional_values["tcb_detector_max"] == 100.0
+    assert job_request.additional_values["tcb_monitor_min"] == 12.1
+    assert job_request.additional_values["tcb_monitor_max"] == 121.0
+
+
+def test_osiris_extract_raises_on_bad_frequencies(job_request):
+    """Test correct exception raised when freq6 and freq10 do not match"""
+    dataset = {
+        "selog": {"freq6": {"value_log": {"value": (6,)}}, "freq10": {"value_log": {"value": (11,)}}},
+        "instrument": {
+            "dae": {
+                "time_channels_1": {"time_of_flight": (10.0, 100.0)},
+                "time_channels_2": {"time_of_flight": (12.1, 121.0)},
+            }
+        },
+    }
+    with pytest.raises(ReductionMetadataError):
+        osiris_extract(job_request, dataset)
 
 
 def test_get_cycle_string_from_path_valid():
