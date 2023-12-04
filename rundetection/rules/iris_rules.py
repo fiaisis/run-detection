@@ -1,7 +1,7 @@
 """
 Rules for Iris
 """
-from rundetection.ingest import JobRequest
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.rule import Rule
 
 
