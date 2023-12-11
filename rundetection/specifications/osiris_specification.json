@@ -1,3 +1,6 @@
 {
-  "enabled": false
+  "enabled": false,
+  "osirisstitch": true,
+  "osirispanadium": 12345,
+  "osirisanalyser": true
 }
