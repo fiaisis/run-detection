@@ -18,6 +18,9 @@ from rundetection.ingestion.extracts import (
 from rundetection.job_requests import JobRequest
 
 
+# pylint: disable = redefined-outer-name
+
+
 @pytest.fixture()
 def job_request():
     """job_request fixture"""

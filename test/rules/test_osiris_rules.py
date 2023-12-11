@@ -9,6 +9,7 @@ from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.osiris_rules import OsirisPanadiumRule, OsirisReductionModeRule, OsirisStitchRule
 
 
+# pylint: disable = redefined-outer-name
 @pytest.fixture
 def job_request():
     """
