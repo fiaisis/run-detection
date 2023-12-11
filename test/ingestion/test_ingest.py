@@ -21,7 +21,7 @@ from rundetection.ingestion.ingest import (
 )
 
 # Allows test to be run via pycharm play button or from project root
-TEST_DATA_PATH = Path("../test_data") if Path("../test_data").exists() else Path("test", "../test_data")
+TEST_DATA_PATH = Path("../test_data") if Path("../test_data").exists() else Path("test", "test_data")
 
 
 @pytest.mark.parametrize(
