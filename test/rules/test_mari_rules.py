@@ -2,7 +2,6 @@
 Test for mari rules
 """
 import json
-
 # pylint:disable = redefined-outer-name, protected-access
 from pathlib import Path
 from typing import Any
@@ -76,7 +75,7 @@ def test_verify_with_stitch_rule_false(mari_stitch_rule_false, job_request):
     assert not job_request.additional_requests
 
 
-@patch("rundetection.ingest.get_run_title", return_value="Test experiment")
+@patch("rundetection.ingestion.ingest.get_run_title", return_value="Test experiment")
 @patch("pathlib.Path.exists", return_value=False)
 def test_verify_with_single_run(_, __, mari_stitch_rule_true, job_request):
     """
