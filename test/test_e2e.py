@@ -93,7 +93,7 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     produce_message("/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108539.nxs", producer_channel)
 
     # 98933 for diffraction
-    produce_message("/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSI98933.nxs", producer_channel)
+    produce_message("/archive/NDXOSIRIS/Instrument/data/cycle_12_2/OSI98933.nxs", producer_channel)
 
     expected_tosca_requests = [
         {
