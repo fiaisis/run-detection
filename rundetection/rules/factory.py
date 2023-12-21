@@ -6,8 +6,12 @@ from typing import Any
 from rundetection.rules.common_rules import EnabledRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
-from rundetection.rules.osiris_rules import OsirisPanadiumRule, OsirisStitchRule, OsirisAnalyserRule, \
-    OsirisReductionModeRule
+from rundetection.rules.osiris_rules import (
+    OsirisPanadiumRule,
+    OsirisStitchRule,
+    OsirisAnalyserRule,
+    OsirisReductionModeRule,
+)
 from rundetection.rules.rule import MissingRuleError, T, Rule
 from rundetection.rules.tosca_rules import ToscaStitchRule
 
