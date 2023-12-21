@@ -27,7 +27,7 @@ class OsirisReductionModeRule(Rule[bool]):
         # handle diff
 
 
-class OSirisAnalyserRule(Rule[bool]):
+class OsirisAnalyserRule(Rule[bool]):
     """
     Determines the analyser
     """
