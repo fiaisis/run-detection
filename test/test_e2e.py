@@ -273,4 +273,4 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     assert expected_mari_stitch_individual_2 in recieved_messages
     for request in expected_tosca_requests:
         assert request in recieved_messages
-    assert len(recieved_messages) == 9
+    assert len(recieved_messages) == 13
