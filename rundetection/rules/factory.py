@@ -46,7 +46,7 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:
                 return OsirisStitchRule(value)
         case "osirisanalyser":
             if isinstance(value, bool):
-                return OsirisAnalyserRule(vale)
+                return OsirisAnalyserRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 
