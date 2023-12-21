@@ -2,5 +2,6 @@
   "enabled": true,
   "osirisstitch": true,
   "osirispanadium": 12345,
-  "osirisanalyser": true
+  "osirisanalyser": true,
+  "osirisreductionmode": true
 }

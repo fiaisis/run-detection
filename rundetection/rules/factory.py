@@ -6,7 +6,8 @@ from typing import Any
 from rundetection.rules.common_rules import EnabledRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
-from rundetection.rules.osiris_rules import OsirisPanadiumRule, OsirisStitchRule, OsirisAnalyserRule
+from rundetection.rules.osiris_rules import OsirisPanadiumRule, OsirisStitchRule, OsirisAnalyserRule, \
+    OsirisReductionModeRule
 from rundetection.rules.rule import MissingRuleError, T, Rule
 from rundetection.rules.tosca_rules import ToscaStitchRule
 
@@ -47,6 +48,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:
         case "osirisanalyser":
             if isinstance(value, bool):
                 return OsirisAnalyserRule(value)
+        case "osirisreductionmode":
+            if isinstance(value, bool):
+                return OsirisReductionModeRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 
