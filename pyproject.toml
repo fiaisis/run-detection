@@ -27,7 +27,7 @@ test = [
 ]
 
 code-inspection = [
-    "pylint==3.0.2",
+    "pylint==3.0.3",
     "mypy==1.8.0",
     "run-detection[test]"
 ]
