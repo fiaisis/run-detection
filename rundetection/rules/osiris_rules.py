@@ -14,17 +14,20 @@ logger = logging.getLogger(__name__)
 
 class OsirisReductionModeRule(Rule[bool]):
     """
-    Determines the type of reduction to produce
+    Determines the type of reduction to produce (spectroscopy or diffraction)
     """
 
     def verify(self, job_request: JobRequest) -> None:
         if job_request.additional_values["freq10"] == 50 or job_request.additional_values["freq10"] == 16:
             job_request.additional_values["mode"] = "spectroscopy"
             return
+
+        # handle diff
+        job_request.additional_values[""]
+
         # Diffraction runs cannot be summed, check for sum_runs and remove them if included
         job_request.additional_values["sum_runs"] = False
         job_request.additional_requests = []
-        # handle diff
 
 
 class OsirisAnalyserRule(Rule[bool]):
@@ -44,12 +47,20 @@ class OsirisAnalyserRule(Rule[bool]):
         (20500.0, 40500.0, 16700.0, 36700.0): 4,
     }
 
-    def _determine_analyser_from_tcb_values(
-        self, tcb_detector_min, tcb_detector_max, tcb_monitor_min, tcb_monitor_max
-    ) -> int:
-        return self.REDUCED_ANALYSER_TIME_CHANNEL_MAP[
-            (float(tcb_detector_min), float(tcb_detector_max), float(tcb_monitor_min), float(tcb_monitor_max))
-        ]
+    @staticmethod
+    def _is_x_within_5_percent_of_y(x: int | float, y: int | float):
+        return y * 0.95 <= x <= y * 1.05
+
+    def _determine_analyser_from_tcb_values(self, tcb_detector_min, tcb_detector_max, tcb_monitor_min, tcb_monitor_max):
+        for key in self.REDUCED_ANALYSER_TIME_CHANNEL_MAP.keys():
+            if (
+                self._is_x_within_5_percent_of_y(tcb_detector_min, key[0])
+                and self._is_x_within_5_percent_of_y(tcb_detector_max, key[1])
+                and self._is_x_within_5_percent_of_y(tcb_monitor_min, key[2])
+                and self._is_x_within_5_percent_of_y(tcb_monitor_max, key[3])
+            ):
+                return self.REDUCED_ANALYSER_TIME_CHANNEL_MAP[key]
+        raise Exception("Oh dear")
 
     def verify(self, job_request: JobRequest) -> None:
         # We already know freq10 and 6 are the same from extraction. If it's less than 50 we assume its analyser 2
