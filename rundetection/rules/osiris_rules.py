@@ -18,16 +18,29 @@ class OsirisReductionModeRule(Rule[bool]):
     """
 
     def verify(self, job_request: JobRequest) -> None:
-        if job_request.additional_values["freq10"] == 50 or job_request.additional_values["freq10"] == 16:
-            job_request.additional_values["mode"] = "spectroscopy"
+        if job_request.additional_values["freq10"] == 25:
+            job_request.additional_values["mode"] = "diffraction"
+            # Diffraction runs cannot be summed, check for sum_runs and remove them if included
+            job_request.additional_values["sum_runs"] = False
+            job_request.additional_requests = []
             return
 
-        # handle diff
-        job_request.additional_values["mode"] = "diffraction"
+        job_request.additional_values["mode"] = "spectroscopy"
+        # Create an additional diffraction run? Though this should maybe be called a reflection diffspec run?
 
-        # Diffraction runs cannot be summed, check for sum_runs and remove them if included
-        job_request.additional_values["sum_runs"] = False
-        job_request.additional_requests = []
+        additional_run = deepcopy(job_request)
+        additional_run.additional_values["mode"] = "diffraction"
+        job_request.additional_requests.append(additional_run)
+
+        # if job_request.additional_values["freq10"] == 50 or job_request.additional_values["freq10"] == 16:
+        #     job_request.additional_values["mode"] = "spectroscopy"
+        #     return
+
+        # # handle diff
+        # job_request.additional_values["mode"] = "diffraction"
+        #
+        # job_request.additional_values["sum_runs"] = False
+        # job_request.additional_requests = []
 
 
 class OsirisAnalyserRule(Rule[bool]):
