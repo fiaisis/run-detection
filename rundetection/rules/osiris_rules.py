@@ -23,7 +23,7 @@ class OsirisReductionModeRule(Rule[bool]):
             return
 
         # handle diff
-        job_request.additional_values[""]
+        job_request.additional_values["mode"] = "diffraction"
 
         # Diffraction runs cannot be summed, check for sum_runs and remove them if included
         job_request.additional_values["sum_runs"] = False
