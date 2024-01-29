@@ -1,6 +1,7 @@
 """
 Module containing rule implementations for instrument shared rules
 """
+
 from rundetection.ingest import JobRequest
 from rundetection.rules.rule import Rule
 

@@ -1,6 +1,7 @@
 """
 Test for mari rules
 """
+
 import json
 
 # pylint:disable = redefined-outer-name, protected-access

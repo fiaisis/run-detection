@@ -1,6 +1,7 @@
 """
 Main module for run detection
 """
+
 from __future__ import annotations
 
 import logging

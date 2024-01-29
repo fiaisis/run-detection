@@ -1,6 +1,7 @@
 """
 unit tests for tosca rules
 """
+
 from pathlib import Path
 from unittest.mock import Mock, patch
 

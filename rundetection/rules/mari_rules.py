@@ -1,6 +1,7 @@
 """
 Mari Rules
 """
+
 import json
 import logging
 from copy import deepcopy

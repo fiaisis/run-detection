@@ -1,6 +1,7 @@
 """
 Module containing the factory function for each rule
 """
+
 from typing import Any
 
 from rundetection.rules.common_rules import EnabledRule
