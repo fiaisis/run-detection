@@ -14,12 +14,12 @@ from rundetection.rules.rule import Rule
 logger = logging.getLogger(__name__)
 
 
-def is_x_within_5_percent_of_y(x: int | float, y: int | float):
+def is_y_within_5_percent_of_x(x: int | float, y: int | float):
     """
-    Given 2 numbers, x and y, return True if x is within 5% of y
+    Given 2 numbers, x and y, return True if y is within 5% of x
     :param x: x number
     :param y: y number
-    :return: True if x is within 5% of y
+    :return: True if y is within 5% of x
     """
 
     return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)
