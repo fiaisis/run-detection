@@ -158,7 +158,12 @@ def test_tosca_extract(_: Mock, job_request):
 def test_osiris_extract(job_request):
     """Test Osiris extract"""
     dataset = {
-        "selog": {"freq6": {"value_log": {"value": (6,)}}, "freq10": {"value_log": {"value": (6,)}}},
+        "selog": {
+            "phase6": {"value": (1221.0,)},
+            "phase10": {"value": (1221.0,)},
+            "freq6": {"value_log": {"value": (6,)}},
+            "freq10": {"value_log": {"value": (6,)}},
+        },
         "instrument": {
             "dae": {
                 "time_channels_1": {"time_of_flight": (10.0, 100.0)},
@@ -173,6 +178,8 @@ def test_osiris_extract(job_request):
     assert job_request.additional_values["tcb_detector_max"] == 100.0
     assert job_request.additional_values["tcb_monitor_min"] == 12.1
     assert job_request.additional_values["tcb_monitor_max"] == 121.0
+    assert job_request.additional_values["phase6"] == 1221.0
+    assert job_request.additional_values["phase10"] == 1221.0
 
 
 def test_osiris_extract_raises_on_bad_frequencies(job_request):
