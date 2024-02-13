@@ -1,6 +1,8 @@
 """
 Rules for Osiris
 """
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
 from pathlib import Path
@@ -10,6 +12,17 @@ from rundetection.ingestion.ingest import JobRequest, get_run_title
 from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)
+
+
+def is_x_within_5_percent_of_y(x: int | float, y: int | float):
+    """
+    Given 2 numbers, x and y, return True if x is within 5% of y
+    :param x: x number
+    :param y: y number
+    :return: True if x is within 5% of y
+    """
+
+    return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)
 
 
 class OsirisReductionModeRule(Rule[bool]):

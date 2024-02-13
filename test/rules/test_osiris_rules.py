@@ -6,7 +6,12 @@ from pathlib import Path
 import pytest
 
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.osiris_rules import OsirisPanadiumRule, OsirisReductionModeRule, OsirisStitchRule
+from rundetection.rules.osiris_rules import (
+    OsirisPanadiumRule,
+    OsirisReductionModeRule,
+    OsirisStitchRule,
+    is_x_within_5_percent_of_y,
+)
 
 
 # pylint: disable = redefined-outer-name
@@ -30,6 +35,34 @@ def job_request():
         instrument="osiris",
         experiment_number="",
     )
+
+
+def test_is_x_within_5percent_of_y():
+    """
+    Test is_x_within_5_percent_of_y for multiple cases
+    """
+    assert is_x_within_5_percent_of_y(95, 100) is True
+    assert is_x_within_5_percent_of_y(105, 100) is True
+    assert is_x_within_5_percent_of_y(100, 100) is True
+    assert is_x_within_5_percent_of_y(47.5, 50) is True
+    assert is_x_within_5_percent_of_y(52.5, 50) is True
+
+    assert is_x_within_5_percent_of_y(94.9, 100) is False
+    assert is_x_within_5_percent_of_y(105.1, 100) is False
+    assert is_x_within_5_percent_of_y(47.49, 50) is False
+    assert is_x_within_5_percent_of_y(52.51, 50) is False
+
+    assert is_x_within_5_percent_of_y(-95, -100) is True
+    assert is_x_within_5_percent_of_y(-105, -100) is True
+    assert is_x_within_5_percent_of_y(-94.9, -100) is False
+    assert is_x_within_5_percent_of_y(-105.1, -100) is False
+
+    assert is_x_within_5_percent_of_y(95, -100) is False
+    assert is_x_within_5_percent_of_y(-105, 100) is False
+
+    assert is_x_within_5_percent_of_y(0, 0) is True
+    assert is_x_within_5_percent_of_y(0, 1) is False
+    assert is_x_within_5_percent_of_y(1, 0) is False
 
 
 def test_osiris_panadium_rule(job_request):
