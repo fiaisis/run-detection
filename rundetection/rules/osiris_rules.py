@@ -6,8 +6,9 @@ from __future__ import annotations
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import List
+from typing import List, Tuple, Literal
 
+from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest, get_run_title
 from rundetection.rules.rule import Rule
 
@@ -30,30 +31,88 @@ class OsirisReductionModeRule(Rule[bool]):
     Determines the type of reduction to produce (spectroscopy or diffraction)
     """
 
+    # The spec phase tuples are (<phase6>, <phase10>) for the next 2 arrays Based on the PDFs.
+    SPECTROSCOPY_PHASES: List[Tuple[int, int]] = [
+        (8573, 14250),
+        (6052, 11250),
+        (7500, 12500),
+        (9738, 16166),
+        (8964, 15211),
+        (1500, 2805),
+        (6569, 10861),
+        (8207, 13502),
+        (3717, 5675),
+        (3217, 4904),
+    ]
+
+    DIFFRACTION_PHASES: List[Tuple[int, int]] = [
+        (1011, 1566),
+        (4599, 7715),
+        (7590, 12859),
+        (10407, 17715),
+        (13015, 22800),
+        (16100, 27973),
+        (19480, 33251),
+        (22571, 38130),
+        (26062, 3609),
+        (28953, 8228),
+        (32144, 13367),
+    ]
+
+    def _is_spec_phase(self, phase10: float, phase6: float) -> bool:
+        for phases in self.SPECTROSCOPY_PHASES:
+            if is_y_within_5_percent_of_x(phase6, phases[0]) and is_y_within_5_percent_of_x(phase10, phases[1]):
+                return True
+        return False
+
+    def _is_diff_phase(self, phase10: float, phase6: float) -> bool:
+        for phases in self.DIFFRACTION_PHASES:
+            if is_y_within_5_percent_of_x(phase6, phases[0]) and is_y_within_5_percent_of_x(phase10, phases[1]):
+                return True
+        return False
+
+    def _determine_mode(
+        self, phase10: float, phase6: float, freq: int, detector_tcb_min: float, detector_tcb_max: float
+    ) -> Literal["diffraction"] | Literal["spectroscopy"]:
+        if freq != 25:
+            return "spectroscopy"
+        is_diff_phases = self._is_diff_phase(phase10, phase6)
+        is_spec_phases = self._is_spec_phase(phase10, phase6)
+        if is_diff_phases and is_spec_phases:
+            # The phases match both a diffraction run and a spectroscopy run, we now check the detector
+            # time channel boundaries to determine if is a spectroscopy run. The values are based on the PDF
+            if (
+                is_y_within_5_percent_of_x(detector_tcb_min, 40200)
+                and is_y_within_5_percent_of_x(detector_tcb_max, 80200)
+            ) or (
+                is_y_within_5_percent_of_x(detector_tcb_min, 57300)
+                and is_y_within_5_percent_of_x(detector_tcb_max, 97300)
+            ):
+                return "spectroscopy"
+            return "diffraction"
+
+        if not is_diff_phases and not is_spec_phases:
+            raise RuleViolationError("Phases match neither diffraction nor spectroscopic.")
+
+        return "diffraction" if is_diff_phases else "spectroscopy"
+
     def verify(self, job_request: JobRequest) -> None:
-        if job_request.additional_values["freq10"] == 25:
-            job_request.additional_values["mode"] = "diffraction"
+        if not self._value:
+            return
+        mode = self._determine_mode(
+            job_request.additional_values["phase10"],
+            job_request.additional_values["phase6"],
+            job_request.additional_values["freq10"],
+            job_request.additional_values["tcb_detector_min"],
+            job_request.additional_values["tcb_detector_max"],
+        )
+
+        if mode == "diffraction":
             # Diffraction runs cannot be summed, check for sum_runs and remove them if included
             job_request.additional_values["sum_runs"] = False
             job_request.additional_requests = []
-            return
 
-        job_request.additional_values["mode"] = "spectroscopy"
-        # Create an additional diffraction run? Though this should maybe be called a reflection diffspec run?
-
-        additional_run = deepcopy(job_request)
-        additional_run.additional_values["mode"] = "diffraction"
-        job_request.additional_requests.append(additional_run)
-
-        # if job_request.additional_values["freq10"] == 50 or job_request.additional_values["freq10"] == 16:
-        #     job_request.additional_values["mode"] = "spectroscopy"
-        #     return
-
-        # # handle diff
-        # job_request.additional_values["mode"] = "diffraction"
-        #
-        # job_request.additional_values["sum_runs"] = False
-        # job_request.additional_requests = []
+        job_request.additional_values["mode"] = mode
 
 
 class OsirisAnalyserRule(Rule[bool]):
@@ -73,23 +132,25 @@ class OsirisAnalyserRule(Rule[bool]):
         (20500.0, 40500.0, 16700.0, 36700.0): 4,
     }
 
-    @staticmethod
-    def _is_x_within_5_percent_of_y(x: int | float, y: int | float):
-        return y * 0.95 <= x <= y * 1.05
-
     def _determine_analyser_from_tcb_values(self, tcb_detector_min, tcb_detector_max, tcb_monitor_min, tcb_monitor_max):
         for key in self.REDUCED_ANALYSER_TIME_CHANNEL_MAP.keys():
             if (
-                self._is_x_within_5_percent_of_y(tcb_detector_min, key[0])
-                and self._is_x_within_5_percent_of_y(tcb_detector_max, key[1])
-                and self._is_x_within_5_percent_of_y(tcb_monitor_min, key[2])
-                and self._is_x_within_5_percent_of_y(tcb_monitor_max, key[3])
+                is_y_within_5_percent_of_x(tcb_detector_min, key[0])
+                and is_y_within_5_percent_of_x(tcb_detector_max, key[1])
+                and is_y_within_5_percent_of_x(tcb_monitor_min, key[2])
+                and is_y_within_5_percent_of_x(tcb_monitor_max, key[3])
             ):
                 return self.REDUCED_ANALYSER_TIME_CHANNEL_MAP[key]
-        raise Exception("Oh dear")
+        raise RuleViolationError("Analyser cannot be determined")  # change this
 
     def verify(self, job_request: JobRequest) -> None:
+        if not self._value:
+            return
+
         # We already know freq10 and 6 are the same from extraction. If it's less than 50 we assume its analyser 2
+
+        # Handle that this might be a non analyser run, aka diffraction? So catch the rule violation and test for mode then ignore or reraise
+
         if job_request.additional_values["freq10"] < 50:
             job_request.additional_values["analyser"] = 2
             return

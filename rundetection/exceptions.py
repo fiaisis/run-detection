@@ -13,3 +13,9 @@ class ReductionMetadataError(IngestError):
     """
     When metadata is incomplete or out out the expected form such that a reduction is not possible
     """
+
+
+class RuleViolationError(Exception):
+    """
+    When a rule violation happens making reduction impossible
+    """

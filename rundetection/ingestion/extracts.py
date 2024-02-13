@@ -54,6 +54,9 @@ def osiris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     job_request.additional_values["freq6"] = freq_6
     job_request.additional_values["freq10"] = freq_10
 
+    job_request.additional_values["phase6"] = float(dataset.get("selog").get("phase6").get("value")[0])
+    job_request.additional_values["phase10"] = float(dataset.get("selog").get("phase10").get("value")[0])
+
     tcb_detector_min = float(min(dataset.get("instrument").get("dae").get("time_channels_1").get("time_of_flight")))
     tcb_detector_max = float(max(dataset.get("instrument").get("dae").get("time_channels_1").get("time_of_flight")))
     tcb_monitor_min = float(min(dataset.get("instrument").get("dae").get("time_channels_2").get("time_of_flight")))
