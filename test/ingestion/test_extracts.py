@@ -54,17 +54,24 @@ def test_skip_extract(caplog: LogCaptureFixture):
         assert job_request_ == job_request
 
 
-def test_get_extraction_function():
+@pytest.mark.parametrize(
+    "input_value,expected_function_name",
+    [
+        ("foo", "skip_extract"),
+        ("mari", "mari_extract"),
+        ("tosca", "tosca_extract"),
+        ("osiris", "osiris_extract"),
+    ],
+)
+def test_get_extraction_function(input_value, expected_function_name):
     """
-    Test correct function returned from factory function
+    Test that the correct function is returned from the factory function
+    :param input_value: The input value to the factory function
+    :param expected_function_name: The expected name of the function returned
     :return: None
     """
-    skip_extract_func = get_extraction_function("LET")
-    assert skip_extract_func.__name__ == "skip_extract"
-    mari_extract_func = get_extraction_function("mari")
-    assert mari_extract_func.__name__ == "mari_extract"
-    tosca_extract_func = get_extraction_function("tosca")
-    assert tosca_extract_func.__name__ == "tosca_extract"
+    extracted_func = get_extraction_function(input_value)
+    assert extracted_func.__name__ == expected_function_name
 
 
 def test_mari_extract_single_ei(job_request):
