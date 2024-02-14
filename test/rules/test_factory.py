@@ -4,7 +4,7 @@ Rule factory unit tests
 # pylint: disable=protected-access
 import unittest
 from typing import Type, Any
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -12,7 +12,12 @@ from rundetection.rules.common_rules import EnabledRule
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
-from rundetection.rules.osiris_rules import OsirisStitchRule, OsirisPanadiumRule
+from rundetection.rules.osiris_rules import (
+    OsirisStitchRule,
+    OsirisPanadiumRule,
+    OsirisReductionModeRule,
+    OsirisAnalyserRule,
+)
 from rundetection.rules.rule import MissingRuleError, Rule
 from rundetection.rules.tosca_rules import ToscaStitchRule
 
@@ -30,20 +35,31 @@ def assert_correct_rule(name: str, value: Any, rule_type: Type[Rule]):
     assert rule._value is value
 
 
+@pytest.mark.parametrize(
+    "rule_key,rule_value,expected_rule",
+    [
+        ("enabled", True, EnabledRule),
+        ("interstitch", True, InterStitchRule),
+        ("toscastitch", True, ToscaStitchRule),
+        ("maristitch", True, MariStitchRule),
+        ("marimaskfile", "foo", MariMaskFileRule),
+        ("mariwbvan", 12345, MariWBVANRule),
+        ("osirisstitch", True, OsirisStitchRule),
+        ("osirispanadium", 12345, OsirisPanadiumRule),
+        ("osirisreductionmode", True, OsirisReductionModeRule),
+        ("osirisanalyser", True, OsirisAnalyserRule),
+    ],
+)
 @patch("rundetection.rules.mari_rules.MariStitchRule._load_mari_spec")
-def test_rule_factory_returns_correct_rule(_: Mock) -> None:
+def test_rule_factory_returns_correct_rule(_, rule_key, rule_value, expected_rule):
     """
     Test that the rule factory will return the correct rule
+    :param rule_key: The key to identify the rule
+    :param rule_value: The value associated with the rule
+    :param expected_rule: The expected rule class
     :return: None
     """
-    assert_correct_rule("enabled", True, EnabledRule)
-    assert_correct_rule("interstitch", True, InterStitchRule)
-    assert_correct_rule("toscastitch", True, ToscaStitchRule)
-    assert_correct_rule("maristitch", True, MariStitchRule)
-    assert_correct_rule("marimaskfile", "foo", MariMaskFileRule)
-    assert_correct_rule("mariwbvan", 12345, MariWBVANRule)
-    assert_correct_rule("osirisstitch", True, OsirisStitchRule)
-    assert_correct_rule("osirispanadium", 12345, OsirisPanadiumRule)
+    assert_correct_rule(rule_key, rule_value, expected_rule)
 
 
 def test_raises_exception_for_missing_rule_class() -> None:
