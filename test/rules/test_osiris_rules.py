@@ -2,6 +2,7 @@
 Tests for osiris rules
 """
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -111,12 +112,44 @@ def test_diffraction_mode(osiris_mode_rule, job_request):
             "phase10": 17715,
             "phase6": 10407,
             "freq10": 25,
-            "tcb_detector_min": 0,  # Assuming these values don't match the spectroscopy condition
+            "tcb_detector_min": 0,
             "tcb_detector_max": 0,
         }
     )
     osiris_mode_rule.verify(job_request)
     assert job_request.additional_values["mode"] == "diffraction"
+
+
+@patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_spec_phase", return_value=True)
+@patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_diff_phase", return_value=True)
+def test_phase_conflict_resolves_with_tcb_values_to_diff(_, __, osiris_mode_rule, job_request):
+    job_request.additional_values.update(
+        {
+            "phase10": 0,
+            "phase6": 0,
+            "freq10": 25,
+            "tcb_detector_min": 0,
+            "tcb_detector_max": 0,
+        }
+    )
+    osiris_mode_rule.verify(job_request)
+    assert job_request.additional_values["mode"] == "diffraction"
+
+
+@patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_spec_phase", return_value=True)
+@patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_diff_phase", return_value=True)
+def test_phase_conflict_resolves_with_tcb_values_to_spec(_, __, osiris_mode_rule, job_request):
+    job_request.additional_values.update(
+        {
+            "phase10": 0,
+            "phase6": 0,
+            "freq10": 25,
+            "tcb_detector_min": 40200,
+            "tcb_detector_max": 80200,
+        }
+    )
+    osiris_mode_rule.verify(job_request)
+    assert job_request.additional_values["mode"] == "spectroscopy"
 
 
 def test_rule_violation_error(osiris_mode_rule, job_request):
