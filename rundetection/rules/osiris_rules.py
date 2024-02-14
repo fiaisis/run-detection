@@ -186,7 +186,7 @@ class OsirisStitchRule(Rule[bool]):
         """
         if title[:-5] == other_title[:-5]:
             return True
-        if title[0:7] == other_title[0:7]: #Tem and ("run" in other_title or "run" in title):
+        if title[0:7] == other_title[0:7]:  # Tem and ("run" in other_title or "run" in title):
             return True
         return False
 
