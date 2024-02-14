@@ -184,6 +184,8 @@ class OsirisStitchRule(Rule[bool]):
         :param other_title:the second run title
         :return: (bool) True if similar False otherwise
         """
+        if title == other_title:
+            return True
         if title[:-5] == other_title[:-5]:
             return True
         if title[0:7] == other_title[0:7]:  # Tem and ("run" in other_title or "run" in title):
