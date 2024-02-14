@@ -184,12 +184,14 @@ class OsirisStitchRule(Rule[bool]):
         :param other_title:the second run title
         :return: (bool) True if similar False otherwise
         """
+        logger.info("Comparing titles %s and %s", title, other_title)
         if title == other_title:
             return True
         if title[:-5] == other_title[:-5]:
             return True
         if title[0:7] == other_title[0:7]:  # Tem and ("run" in other_title or "run" in title):
             return True
+        logger.info("Titles not similar, continuing")
         return False
 
     def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> List[int]:
@@ -207,9 +209,11 @@ class OsirisStitchRule(Rule[bool]):
         if not self._value:  # if the stitch rule is set to false, skip
             return
 
+        logger.info("Checking stitch conditions for osiris run %s", job_request.filepath)
         try:
             if job_request.additional_values["mode"] == "diffraction":
                 job_request.additional_values["sum_runs"] = False
+                logger.info("Diffraction run cannot be summed. Continuing")
                 return
         except KeyError:
             pass
