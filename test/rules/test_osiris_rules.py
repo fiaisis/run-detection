@@ -250,6 +250,12 @@ def test_mode_rule_returns_when_on():
     rule.verify(object())
 
 
+def test_analyser_rule_returns_for_diffraction(job_request):
+    rule = OsirisAnalyserRule(True)
+    job_request.additional_values["mode"] = "diffraction"
+    rule.verify(job_request)
+
+
 @patch("rundetection.rules.osiris_rules.get_run_title")
 @patch("rundetection.rules.osiris_rules.Path.exists", return_value=True)
 def test_verify_should_stitch(_, mock_get_title: Mock, job_request: JobRequest) -> None:

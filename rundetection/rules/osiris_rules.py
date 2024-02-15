@@ -147,10 +147,10 @@ class OsirisAnalyserRule(Rule[bool]):
         if not self._value:
             return
 
+        if job_request.additional_values["mode"] == "diffraction":
+            return
+
         # We already know freq10 and 6 are the same from extraction. If it's less than 50 we assume its analyser 2
-
-        # Handle that this might be a non analyser run, aka diffraction? So catch the rule violation and test for mode then ignore or reraise
-
         if job_request.additional_values["freq10"] < 50:
             job_request.additional_values["analyser"] = 2
             return
