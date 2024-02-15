@@ -62,12 +62,14 @@ class OsirisReductionModeRule(Rule[bool]):
 
     def _is_spec_phase(self, phase10: float, phase6: float) -> bool:
         for phases in self.SPECTROSCOPY_PHASES:
+            # if the runs phase 6 and phase 10 are within 5% of the valid spec phases, return True
             if is_y_within_5_percent_of_x(phase6, phases[0]) and is_y_within_5_percent_of_x(phase10, phases[1]):
                 return True
         return False
 
     def _is_diff_phase(self, phase10: float, phase6: float) -> bool:
         for phases in self.DIFFRACTION_PHASES:
+            # if the runs phase 6 and phase 10 are within 5% of the valid spec phases, return True
             if is_y_within_5_percent_of_x(phase6, phases[0]) and is_y_within_5_percent_of_x(phase10, phases[1]):
                 return True
         return False
