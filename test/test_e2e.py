@@ -258,6 +258,113 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
         },
     }
 
+    expected_osiris_spec_request = {
+        "additional_values": {
+            "analyser": 2,
+            "freq10": 50.0,
+            "freq6": 50.0,
+            "input_runs": [108539],
+            "mode": "spectroscopy",
+            "panadium": 12345,
+            "phase10": 12500.0,
+            "phase6": 7700.0,
+            "tcb_detector_max": 65500.0,
+            "tcb_detector_min": 45500.0,
+            "tcb_monitor_max": 60700.0,
+            "tcb_monitor_min": 40700.0,
+        },
+        "experiment_number": "1410511",
+        "experiment_title": "H2O 002_off QENS Cyl",
+        "filepath": "/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108539.nxs",
+        "good_frames": 299820,
+        "instrument": "OSIRIS",
+        "raw_frames": 375754,
+        "run_end": "2014-05-18T07:01:38",
+        "run_number": 108539,
+        "run_start": "2014-05-18T04:55:46",
+        "users": "Dicko Dr I C",
+    }
+
+    expected_osiris_diff_request_108538 = {
+        "additional_values": {
+            "analyser": 2,
+            "freq10": 25.0,
+            "freq6": 25.0,
+            "mode": "diffraction",
+            "panadium": 12345,
+            "phase10": 12500.0,
+            "phase6": 7700.0,
+            "sum_runs": False,
+            "tcb_detector_max": 65500.0,
+            "tcb_detector_min": 45500.0,
+            "tcb_monitor_max": 60700.0,
+            "tcb_monitor_min": 40700.0,
+        },
+        "experiment_number": "1410511",
+        "experiment_title": "H2O 002_off QENS Cyl",
+        "filepath": "/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108538.nxs",
+        "good_frames": 299728,
+        "instrument": "OSIRIS",
+        "raw_frames": 374740,
+        "run_end": "2014-05-18T04:55:39",
+        "run_number": 108538,
+        "run_start": "2014-05-18T02:50:47",
+        "users": "Dicko Dr I C",
+    }
+
+    expected_osiris_diff_request_98933 = {
+        "additional_values": {
+            "analyser": 2,
+            "freq10": 25.0,
+            "freq6": 25.0,
+            "mode": "diffraction",
+            "panadium": 12345,
+            "phase10": 1569.0,
+            "phase6": 1014.0,
+            "sum_runs": False,
+            "tcb_detector_max": 51700.0,
+            "tcb_detector_min": 11700.0,
+            "tcb_monitor_max": 51700.0,
+            "tcb_monitor_min": 11700.0,
+        },
+        "experiment_number": "12345",
+        "experiment_title": "d1 12/2 Van Rod",
+        "filepath": "/archive/NDXOSIRIS/Instrument/data/cycle_12_2/OSI98933.nxs",
+        "good_frames": 28136,
+        "instrument": "OSIRIS",
+        "raw_frames": 35169,
+        "run_end": "2012-07-11T16:46:50",
+        "run_number": 98933,
+        "run_start": "2012-07-11T16:23:24",
+        "users": " ",
+    }
+    expected_osiris_sum_run = {
+        "additional_values": {
+            "analyser": 2,
+            "freq10": 50.0,
+            "freq6": 50.0,
+            "input_runs": [108539, 108538],
+            "mode": "spectroscopy",
+            "panadium": 12345,
+            "phase10": 12500.0,
+            "phase6": 7700.0,
+            "tcb_detector_max": 65500.0,
+            "tcb_detector_min": 45500.0,
+            "tcb_monitor_max": 60700.0,
+            "tcb_monitor_min": 40700.0,
+        },
+        "experiment_number": "1410511",
+        "experiment_title": "H2O 002_off QENS Cyl",
+        "filepath": "/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108539.nxs",
+        "good_frames": 299820,
+        "instrument": "OSIRIS",
+        "raw_frames": 375754,
+        "run_end": "2014-05-18T07:01:38",
+        "run_number": 108539,
+        "run_start": "2014-05-18T04:55:46",
+        "users": "Dicko Dr I C",
+    }
+
     recieved_messages = []
 
     for mf, _, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=1):
@@ -273,4 +380,10 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     assert expected_mari_stitch_individual_2 in recieved_messages
     for request in expected_tosca_requests:
         assert request in recieved_messages
+
+    assert expected_osiris_spec_request in recieved_messages
+    assert expected_osiris_sum_run in recieved_messages
+    assert expected_osiris_diff_request_98933 in recieved_messages
+    assert expected_osiris_diff_request_108538 in recieved_messages
+
     assert len(recieved_messages) == 13
