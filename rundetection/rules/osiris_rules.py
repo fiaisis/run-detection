@@ -197,13 +197,15 @@ class OsirisStitchRule(Rule[bool]):
     def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> List[int]:
         run_numbers = []
         while run_path.exists():
+            logger.info("run path exists %s", run_path)
             if not self._is_title_similar(get_run_title(run_path), run_title):
                 logger.info("titles not similar")
                 break
             logger.info("titles are similar appending run number %s", run_number)
             run_numbers.append(run_number)
             run_number -= 1
-            run_path = Path(run_path.parent, f"OSIRIS{run_number}.nxs")
+            run_path = Path(run_path.parent, f"OSIRIS{run_number:08d}.nxs")
+        logger.info("Run path %s does not exist", run_path)
         logger.info("Returning run numbers %s", run_numbers)
         return run_numbers
 
