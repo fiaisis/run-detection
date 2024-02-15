@@ -16,7 +16,7 @@ from rundetection.rules.rule import MissingRuleError, T, Rule
 from rundetection.rules.tosca_rules import ToscaStitchRule
 
 
-# pylint: disable = too-many-returns
+# pylint: disable = too-many-return-statements
 def rule_factory(key_: str, value: T) -> Rule[Any]:
     """
     Given the rule key, and rule value, return the rule implementation

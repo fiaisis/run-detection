@@ -133,15 +133,15 @@ class OsirisAnalyserRule(Rule[bool]):
     }
 
     def _determine_analyser_from_tcb_values(self, tcb_detector_min, tcb_detector_max, tcb_monitor_min, tcb_monitor_max):
-        for key in self.REDUCED_ANALYSER_TIME_CHANNEL_MAP.keys():
+        for bounds, analyser in self.REDUCED_ANALYSER_TIME_CHANNEL_MAP.items():
             if (
-                is_y_within_5_percent_of_x(tcb_detector_min, key[0])
-                and is_y_within_5_percent_of_x(tcb_detector_max, key[1])
-                and is_y_within_5_percent_of_x(tcb_monitor_min, key[2])
-                and is_y_within_5_percent_of_x(tcb_monitor_max, key[3])
+                is_y_within_5_percent_of_x(tcb_detector_min, bounds[0])
+                and is_y_within_5_percent_of_x(tcb_detector_max, bounds[1])
+                and is_y_within_5_percent_of_x(tcb_monitor_min, bounds[2])
+                and is_y_within_5_percent_of_x(tcb_monitor_max, bounds[3])
             ):
-                return self.REDUCED_ANALYSER_TIME_CHANNEL_MAP[key]
-        raise RuleViolationError("Analyser cannot be determined")  # change this
+                return analyser
+        raise RuleViolationError("Analyser cannot be determined")
 
     def verify(self, job_request: JobRequest) -> None:
         if not self._value:
@@ -189,7 +189,7 @@ class OsirisStitchRule(Rule[bool]):
             return True
         if title[:-5] == other_title[:-5]:
             return True
-        if title[0:7] == other_title[0:7]:  # Tem and ("run" in other_title or "run" in title):
+        if title[0:7] == other_title[0:7] and ("run" in other_title or "run" in title):
             return True
         logger.info("Titles not similar, continuing")
         return False

@@ -2,7 +2,7 @@
 Tests for osiris rules
 """
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
 
@@ -248,3 +248,13 @@ def test_mode_rule_returns_when_on():
     """Test rule always returns when rule is off"""
     rule = OsirisReductionModeRule(False)
     rule.verify(object())
+
+
+@patch("rundetection.rules.osiris_rules.get_run_title")
+@patch("rundetection.rules.osiris_rules.Path.exists", return_value=True)
+def test_verify_should_stitch(_, mock_get_title: Mock, job_request: JobRequest) -> None:
+    mock_get_title.side_effect = [job_request.experiment_title, "Test experiment  run 2", "different random title"]
+    rule = OsirisStitchRule(True)
+    rule.verify(job_request)
+
+    assert job_request.additional_requests[0].additional_values["input_runs"] == [100, 99]
