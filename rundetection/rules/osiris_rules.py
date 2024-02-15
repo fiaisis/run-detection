@@ -224,7 +224,7 @@ class OsirisStitchRule(Rule[bool]):
             job_request.filepath, job_request.run_number, job_request.experiment_title
         )
 
-        if len(run_numbers) > 1:
+        if len(run_numbers) > 0:
             additional_request = deepcopy(job_request)
             additional_request.additional_values["input_runs"] = run_numbers
             job_request.additional_requests.append(additional_request)
