@@ -58,6 +58,7 @@ def get_specification_value(instrument: str, key: str) -> Any:
         return spec[key]
 
 
+# pylint: disable=too-many-locals
 def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     """
     Produce 3 files to the ingress station, one that should reduce, one that shouldn't and one that doesnt exist. Verify

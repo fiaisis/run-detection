@@ -71,6 +71,7 @@ class OsirisReductionModeRule(Rule[bool]):
                 return True
         return False
 
+    # pylint: disable=too-many-arguments
     def _determine_mode(
         self, phase10: float, phase6: float, freq: int, detector_tcb_min: float, detector_tcb_max: float
     ) -> Literal["diffraction"] | Literal["spectroscopy"]:
@@ -96,6 +97,7 @@ class OsirisReductionModeRule(Rule[bool]):
 
         return "diffraction" if is_diff_phases else "spectroscopy"
 
+    # pylint: enable=too-many-arguments
     def verify(self, job_request: JobRequest) -> None:
         if not self._value:
             return
