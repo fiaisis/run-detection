@@ -202,7 +202,8 @@ def test_determine_analyser_invalid_values(analyser_rule):
         analyser_rule._determine_analyser_from_tcb_values(10000, 20000, 10000, 20000)
 
 
-def test_verify_freq_less_than_50(job_request, analyser_rule):
+def test_analyser_rule_verify_freq_less_than_50(job_request, analyser_rule):
+    job_request.additional_values["mode"] = "spectroscopy"
     job_request.additional_values["freq10"] = 49
     analyser_rule.verify(job_request)
     assert job_request.additional_values["analyser"] == 2
@@ -215,6 +216,7 @@ def test_verify_freq_greater_than_50_valid_tcb(job_request, analyser_rule):
         "tcb_detector_max": 71500,
         "tcb_monitor_min": 45900,
         "tcb_monitor_max": 65900,
+        "mode": "spectroscopy",
     }
     analyser_rule.verify(job_request)
     assert job_request.additional_values["analyser"] == 2
@@ -227,6 +229,7 @@ def test_verify_freq_greater_than_50_invalid_tcb(job_request, analyser_rule):
         "tcb_detector_max": 20000,
         "tcb_monitor_min": 10000,
         "tcb_monitor_max": 20000,
+        "mode": "spectroscopy",
     }
     with pytest.raises(RuleViolationError):
         analyser_rule.verify(job_request)
