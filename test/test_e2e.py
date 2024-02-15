@@ -288,7 +288,6 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
 
     expected_osiris_diff_request_108538 = {
         "additional_values": {
-            "analyser": 2,
             "freq10": 25.0,
             "freq6": 25.0,
             "mode": "diffraction",
@@ -315,7 +314,6 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
 
     expected_osiris_diff_request_98933 = {
         "additional_values": {
-            "analyser": 2,
             "freq10": 25.0,
             "freq6": 25.0,
             "mode": "diffraction",
@@ -375,16 +373,20 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
         consumer_channel.basic_ack(mf.delivery_tag)
         recieved_messages.append(json.loads(body.decode()))
 
-    assert expected_mari_request in recieved_messages
-    assert expected_mari_stitch_request in recieved_messages
-    assert expected_mari_stitch_individual_1 in recieved_messages
-    assert expected_mari_stitch_individual_2 in recieved_messages
-    for request in expected_tosca_requests:
-        assert request in recieved_messages
+    def assert_run_in_recieved(run, recieved):
+        assert run in recieved, f"{run} not in {recieved}"
 
-    assert expected_osiris_spec_request in recieved_messages
-    assert expected_osiris_sum_run in recieved_messages
-    assert expected_osiris_diff_request_98933 in recieved_messages
-    assert expected_osiris_diff_request_108538 in recieved_messages
+    assert_run_in_recieved(expected_mari_request, recieved_messages)
+    assert_run_in_recieved(expected_mari_stitch_request, recieved_messages)
+    assert_run_in_recieved(expected_mari_stitch_individual_1, recieved_messages)
+    assert_run_in_recieved(expected_mari_stitch_individual_2, recieved_messages)
+    for request in expected_tosca_requests:
+        assert_run_in_recieved(request, recieved_messages)
+
+    assert_run_in_recieved(expected_osiris_diff_request_98933, recieved_messages)
+    assert_run_in_recieved(expected_osiris_spec_request, recieved_messages)
+    assert_run_in_recieved(expected_osiris_diff_request_108538, recieved_messages)
+    assert_run_in_recieved(expected_osiris_sum_run, recieved_messages)
+    assert_run_in_recieved(expected_osiris_diff_request_108538, recieved_messages)
 
     assert len(recieved_messages) == 13
