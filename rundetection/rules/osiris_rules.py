@@ -200,9 +200,11 @@ class OsirisStitchRule(Rule[bool]):
             if not self._is_title_similar(get_run_title(run_path), run_title):
                 logger.info("titles not similar")
                 break
+            logger.info("titles are similar appending run number %s", run_number)
             run_numbers.append(run_number)
             run_number -= 1
             run_path = Path(run_path.parent, f"OSIRIS{run_number}.nxs")
+        logger.info("Returning run numbers %s", run_numbers)
         return run_numbers
 
     def verify(self, job_request: JobRequest) -> None:
@@ -224,7 +226,7 @@ class OsirisStitchRule(Rule[bool]):
             job_request.filepath, job_request.run_number, job_request.experiment_title
         )
 
-        if len(run_numbers) > 0:
+        if len(run_numbers) > 1:
             additional_request = deepcopy(job_request)
             additional_request.additional_values["input_runs"] = run_numbers
             job_request.additional_requests.append(additional_request)
