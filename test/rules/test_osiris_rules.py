@@ -17,7 +17,7 @@ from rundetection.rules.osiris_rules import (
 )
 
 
-# pylint: disable = redefined-outer-name
+# pylint: disable = redefined-outer-name, protected-access
 @pytest.fixture
 def job_request():
     """
@@ -43,29 +43,29 @@ def job_request():
 @pytest.mark.parametrize(
     "y, x, expected",
     [
-        (95, 100, True),
-        (105, 100, True),
+        (100, 95, True),
+        (100, 105, True),
         (100, 100, True),
-        (47.5, 50, True),
-        (52.5, 50, True),
-        (94.9, 100, False),
-        (105.1, 100, False),
-        (47.49, 50, False),
-        (52.51, 50, False),
-        (-95, -100, True),
-        (-105, -100, True),
-        (-94.9, -100, False),
-        (-105.1, -100, False),
-        (95, -100, False),
-        (-105, 100, False),
+        (50, 47.5, True),
+        (50, 52.5, True),
+        (100, 94.9, False),
+        (100, 105.1, False),
+        (50, 47.49, False),
+        (50, 52.51, False),
+        (-100, -95, True),
+        (-100, -105, True),
+        (-100, -94.9, False),
+        (-100, -105.1, False),
+        (-100, 95, False),
+        (100, -105, False),
         (0, 0, True),
         (0, 1, False),
         (1, 0, False),
     ],
 )
-def test_is_y_within_5_percent_of_x(y, x, expected):
+def test_is_y_within_5_percent_of_x(x, y, expected):
     """Simple test cases for is_y_within_5_percent_of_x"""
-    assert is_y_within_5_percent_of_x(y, x) is expected
+    assert is_y_within_5_percent_of_x(x, y) is expected
 
 
 def test_osiris_panadium_rule(job_request):
@@ -82,16 +82,18 @@ def test_osiris_panadium_rule(job_request):
 
 @pytest.fixture
 def osiris_mode_rule():
+    """Reduction mode rule fixture"""
     return OsirisReductionModeRule(True)
 
 
 @pytest.fixture
 def analyser_rule():
+    """Analyser rule fixture"""
     return OsirisAnalyserRule(True)
 
 
 def test_spectroscopy_mode(osiris_mode_rule, job_request):
-    # Example values that should classify as spectroscopy
+    "Test spec values result in spec"
     job_request.additional_values.update(
         {
             "phase10": 14250,
@@ -106,7 +108,7 @@ def test_spectroscopy_mode(osiris_mode_rule, job_request):
 
 
 def test_diffraction_mode(osiris_mode_rule, job_request):
-    # Example values that should classify as diffraction
+    """Test diffraction values result in diffraction"""
     job_request.additional_values.update(
         {
             "phase10": 17715,
@@ -123,6 +125,7 @@ def test_diffraction_mode(osiris_mode_rule, job_request):
 @patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_spec_phase", return_value=True)
 @patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_diff_phase", return_value=True)
 def test_phase_conflict_resolves_with_tcb_values_to_diff(_, __, osiris_mode_rule, job_request):
+    """Test phase conflict resolving with tcb values to diffraction mode"""
     job_request.additional_values.update(
         {
             "phase10": 0,
@@ -139,6 +142,7 @@ def test_phase_conflict_resolves_with_tcb_values_to_diff(_, __, osiris_mode_rule
 @patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_spec_phase", return_value=True)
 @patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_diff_phase", return_value=True)
 def test_phase_conflict_resolves_with_tcb_values_to_spec(_, __, osiris_mode_rule, job_request):
+    """Test phase conflict resolves with tcb values"""
     job_request.additional_values.update(
         {
             "phase10": 0,
@@ -153,7 +157,7 @@ def test_phase_conflict_resolves_with_tcb_values_to_spec(_, __, osiris_mode_rule
 
 
 def test_rule_violation_error(osiris_mode_rule, job_request):
-    # Set values that match neither diffraction nor spectroscopy
+    """Test rule violation raised when values match neither spec or diff"""
     job_request.additional_values.update(
         {
             "phase10": 0,
@@ -168,7 +172,7 @@ def test_rule_violation_error(osiris_mode_rule, job_request):
 
 
 def test_non_25_freq_defaults_to_spectroscopy(osiris_mode_rule, job_request):
-    # Freq other than 25 should default to spectroscopy regardless of other parameters
+    "Test non 25 frequency will result in spectroscopy"
     job_request.additional_values.update(
         {
             "phase10": 0,
@@ -192,17 +196,32 @@ def test_osiris_stitch_rule_will_do_nothing_if_diffraction_mode(job_request):
     assert job_request.additional_values["sum_runs"] is False
 
 
-def test_determine_analyser_valid_values(analyser_rule):
-    assert analyser_rule._determine_analyser_from_tcb_values(51500, 71500, 45900, 65900) == 2
-    assert analyser_rule._determine_analyser_from_tcb_values(22500, 42500, 19000.03, 39000) == 4
+# pylint: disable=too-many-arguments
+@pytest.mark.parametrize(
+    "high_limit, low_limit, actual_high, actual_low, expected_analyser",
+    [
+        (51500, 71500, 45900, 65900, 2),
+        (22500, 42500, 19000.03, 39000, 4),
+    ],
+)
+def test_determine_analyser_valid_values(
+    analyser_rule, high_limit, low_limit, actual_high, actual_low, expected_analyser
+):
+    """Test correct analysers are returned with valid TCB"""
+    assert (
+        analyser_rule._determine_analyser_from_tcb_values(high_limit, low_limit, actual_high, actual_low)
+        == expected_analyser
+    )
 
 
-def test_determine_analyser_invalid_values(analyser_rule):
+def test_determine_analyser_raises_when_invalid_values(analyser_rule):
+    """Test raises when invalid tcb given"""
     with pytest.raises(RuleViolationError):
         analyser_rule._determine_analyser_from_tcb_values(10000, 20000, 10000, 20000)
 
 
 def test_analyser_rule_verify_freq_less_than_50(job_request, analyser_rule):
+    """Test correct analyser returned"""
     job_request.additional_values["mode"] = "spectroscopy"
     job_request.additional_values["freq10"] = 49
     analyser_rule.verify(job_request)
@@ -210,6 +229,7 @@ def test_analyser_rule_verify_freq_less_than_50(job_request, analyser_rule):
 
 
 def test_verify_freq_greater_than_50_valid_tcb(job_request, analyser_rule):
+    """Test correct analyser returned"""
     job_request.additional_values = {
         "freq10": 55,
         "tcb_detector_min": 51500,
@@ -222,7 +242,8 @@ def test_verify_freq_greater_than_50_valid_tcb(job_request, analyser_rule):
     assert job_request.additional_values["analyser"] == 2
 
 
-def test_verify_freq_greater_than_50_invalid_tcb(job_request, analyser_rule):
+def test_analyser_verify_raises_when_freq_greater_than_50_invalid_tcb(job_request, analyser_rule):
+    """Test"""
     job_request.additional_values = {
         "freq10": 55,
         "tcb_detector_min": 10000,
@@ -254,6 +275,9 @@ def test_mode_rule_returns_when_on():
 
 
 def test_analyser_rule_returns_for_diffraction(job_request):
+    """
+    Test analyser immediate returns when diffraction
+    """
     rule = OsirisAnalyserRule(True)
     job_request.additional_values["mode"] = "diffraction"
     rule.verify(job_request)
@@ -262,6 +286,9 @@ def test_analyser_rule_returns_for_diffraction(job_request):
 @patch("rundetection.rules.osiris_rules.get_run_title")
 @patch("rundetection.rules.osiris_rules.Path.exists", return_value=True)
 def test_verify_should_stitch(_, mock_get_title: Mock, job_request: JobRequest) -> None:
+    """
+    Test verify stitches run
+    """
     mock_get_title.side_effect = [job_request.experiment_title, "Test experiment  run 2", "different random title"]
     rule = OsirisStitchRule(True)
     rule.verify(job_request)
