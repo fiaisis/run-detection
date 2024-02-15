@@ -9,13 +9,14 @@ from pathlib import Path
 from typing import List, Tuple, Literal
 
 from rundetection.exceptions import RuleViolationError
-from rundetection.ingestion.ingest import JobRequest, get_run_title
+from rundetection.ingestion.ingest import get_run_title
+from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)
 
 
-def is_y_within_5_percent_of_x(x: int | float, y: int | float):
+def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
     """
     Given 2 numbers, x and y, return True if y is within 5% of x
     :param x: x number
@@ -134,7 +135,9 @@ class OsirisAnalyserRule(Rule[bool]):
         (20500.0, 40500.0, 16700.0, 36700.0): 4,
     }
 
-    def _determine_analyser_from_tcb_values(self, tcb_detector_min, tcb_detector_max, tcb_monitor_min, tcb_monitor_max):
+    def _determine_analyser_from_tcb_values(
+        self, tcb_detector_min: float, tcb_detector_max: float, tcb_monitor_min: float, tcb_monitor_max: float
+    ) -> int:
         for bounds, analyser in self.REDUCED_ANALYSER_TIME_CHANNEL_MAP.items():
             if (
                 is_y_within_5_percent_of_x(tcb_detector_min, bounds[0])

@@ -4,7 +4,8 @@ from copy import deepcopy
 from pathlib import Path
 from typing import List
 
-from rundetection.ingestion.ingest import JobRequest, get_run_title
+from rundetection.ingestion.ingest import get_run_title
+from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)

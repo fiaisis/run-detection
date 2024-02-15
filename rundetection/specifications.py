@@ -7,7 +7,7 @@ import logging
 from typing import Any, List
 
 from rundetection.exceptions import RuleViolationError
-from rundetection.ingestion.ingest import JobRequest
+from rundetection.job_requests import JobRequest
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.rule import Rule
 
