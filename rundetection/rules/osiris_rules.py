@@ -32,7 +32,8 @@ class OsirisReductionModeRule(Rule[bool]):
     Determines the type of reduction to produce (spectroscopy or diffraction)
     """
 
-    # The spec phase tuples are (<phase6>, <phase10>) for the next 2 arrays Based on the PDFs.
+    # The spec phase tuples are (<phase6>, <phase10>) for the next 2 arrays Based on the PDF available here:
+    # https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf.
     SPECTROSCOPY_PHASES: List[Tuple[int, int]] = [
         (8573, 14250),
         (6052, 11250),
@@ -127,13 +128,14 @@ class OsirisAnalyserRule(Rule[bool]):
 
     # This map is based on the Appendix 1 - Quasi / inelastic settings pdf. It is reduced as the values for
     # frequency < 50 are removed as they default to analyser 2
+    # available here https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf
     REDUCED_ANALYSER_TIME_CHANNEL_MAP = {
         (51500.0, 71500.0, 45900.0, 65900.0): 2,
         (45500.0, 65500.0, 40400.0, 60400.0): 2,
         (58700.0, 78700.0, 52000.0, 72000.0): 2,
         (40500.0, 60500.0, 35300.0, 55300.0): 2,
         (48500.0, 68500.0, 43600.0, 63600.0): 2,
-        (22500.0, 42500.0, 19000.03, 39000.0): 4,
+        (22500.0, 42500.0, 19000.03, 39000.0): 4,  # The .03 is NOT a typo
         (20500.0, 40500.0, 16700.0, 36700.0): 4,
     }
 
