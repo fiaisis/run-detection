@@ -9,6 +9,10 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      python-packages:
+        patterns:
+          - "*"
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
@@ -16,6 +20,6 @@ updates:
     schedule:
       interval: "daily"
     groups:
-      python-packages:
+      action-packages:
         patterns:
           - "*"
