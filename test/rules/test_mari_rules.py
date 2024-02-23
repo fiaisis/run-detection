@@ -2,7 +2,6 @@
 Test for mari rules
 """
 import json
-
 # pylint:disable = redefined-outer-name, protected-access
 from pathlib import Path
 from typing import Any
@@ -37,7 +36,7 @@ def job_request():
         experiment_title="Test experiment",
         additional_values={},
         additional_requests=[],
-        raw_frames=0,
+        raw_frames=3,
         good_frames=0,
         users="",
         run_start="",
