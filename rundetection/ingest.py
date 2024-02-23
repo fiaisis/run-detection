@@ -1,4 +1,5 @@
 """Ingest module holds the JobRequest class and the ingest function used to build JobRequests from nexus files."""
+
 from __future__ import annotations
 
 import dataclasses

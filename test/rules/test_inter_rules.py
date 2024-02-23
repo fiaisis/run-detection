@@ -1,6 +1,7 @@
 """
 Tests for inter specific rules
 """
+
 import unittest
 from pathlib import Path
 from unittest.mock import patch

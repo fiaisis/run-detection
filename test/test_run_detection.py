@@ -1,6 +1,7 @@
 """
 Tests for run detection module
 """
+
 import logging
 import os
 import re
