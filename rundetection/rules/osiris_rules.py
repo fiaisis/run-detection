@@ -230,7 +230,7 @@ class OsirisStitchRule(Rule[bool]):
                 return
         except KeyError:
             pass
-
+        # pylint: disable = duplicate-code
         # stitch
         job_request.additional_values["input_runs"] = [job_request.run_number]
         run_numbers = self._get_runs_to_stitch(
@@ -241,3 +241,4 @@ class OsirisStitchRule(Rule[bool]):
             additional_request = deepcopy(job_request)
             additional_request.additional_values["input_runs"] = run_numbers
             job_request.additional_requests.append(additional_request)
+        # pylint: enable = duplicate-code
