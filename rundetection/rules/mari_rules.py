@@ -7,7 +7,8 @@ from copy import deepcopy
 from pathlib import Path
 from typing import List, Any
 
-from rundetection.ingest import JobRequest, get_run_title
+from rundetection.ingestion.ingest import get_run_title
+from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,7 @@ class MariStitchRule(Rule[bool]):
         run_numbers = self._get_runs_to_stitch(
             job_request.filepath, job_request.run_number, job_request.experiment_title
         )
+        # pylint: disable = duplicate-code
         if len(run_numbers) > 1:
             additional_request = deepcopy(job_request)
             additional_request.additional_values["runno"] = run_numbers
@@ -66,6 +68,7 @@ class MariStitchRule(Rule[bool]):
             additional_request.additional_values["mask_file_link"] = self._spec_values["marimaskfile"]
             additional_request.additional_values["wbvan"] = self._spec_values["mariwbvan"]
             job_request.additional_requests.append(additional_request)
+        # pylint: enable = duplicate-code
 
 
 class MariMaskFileRule(Rule[str]):

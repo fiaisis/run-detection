@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from rundetection.ingest import JobRequest
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.tosca_rules import ToscaStitchRule
 
 
@@ -22,7 +22,7 @@ def job_request():
         experiment_title="experiment title run 1",
         filepath=Path("./25581.nxs"),
         experiment_number="experiment number",
-        raw_frames=0,
+        raw_frames=2,
         good_frames=0,
         run_start="",
         run_end="",

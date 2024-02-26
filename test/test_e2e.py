@@ -58,6 +58,7 @@ def get_specification_value(instrument: str, key: str) -> Any:
         return spec[key]
 
 
+# pylint: disable=too-many-locals
 def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     """
     Produce 3 files to the ingress station, one that should reduce, one that shouldn't and one that doesnt exist. Verify
@@ -85,6 +86,15 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
     produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25234.nxs", producer_channel)
     produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25235.nxs", producer_channel)
     produce_message("/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25236.nxs", producer_channel)
+
+    # Produce Osiris runs
+    # OSIRIS_108538 is a spectroscopy
+    # OSIRIS_108539 Should sum from above
+    produce_message("/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108538.nxs", producer_channel)
+    produce_message("/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108539.nxs", producer_channel)
+
+    # 98933 for diffraction
+    produce_message("/archive/NDXOSIRIS/Instrument/data/cycle_12_2/OSI98933.nxs", producer_channel)
 
     expected_tosca_requests = [
         {
@@ -249,6 +259,111 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
         },
     }
 
+    expected_osiris_spec_request = {
+        "additional_values": {
+            "analyser": 2,
+            "freq10": 50.0,
+            "freq6": 50.0,
+            "input_runs": [108539],
+            "mode": "spectroscopy",
+            "panadium": 12345,
+            "phase10": 12500.0,
+            "phase6": 7700.0,
+            "tcb_detector_max": 65500.0,
+            "tcb_detector_min": 45500.0,
+            "tcb_monitor_max": 60700.0,
+            "tcb_monitor_min": 40700.0,
+        },
+        "experiment_number": "1410511",
+        "experiment_title": "H2O 002_off QENS Cyl",
+        "filepath": "/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108539.nxs",
+        "good_frames": 299820,
+        "instrument": "OSIRIS",
+        "raw_frames": 375754,
+        "run_end": "2014-05-18T07:01:38",
+        "run_number": 108539,
+        "run_start": "2014-05-18T04:55:46",
+        "users": "Dicko Dr I C",
+    }
+
+    expected_osiris_diff_request_108538 = {
+        "additional_values": {
+            "freq10": 25.0,
+            "freq6": 25.0,
+            "mode": "diffraction",
+            "panadium": 12345,
+            "phase10": 12500.0,
+            "phase6": 7700.0,
+            "sum_runs": False,
+            "tcb_detector_max": 65500.0,
+            "tcb_detector_min": 45500.0,
+            "tcb_monitor_max": 60700.0,
+            "tcb_monitor_min": 40700.0,
+        },
+        "experiment_number": "1410511",
+        "experiment_title": "H2O 002_off QENS Cyl",
+        "filepath": "/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108538.nxs",
+        "good_frames": 299728,
+        "instrument": "OSIRIS",
+        "raw_frames": 374740,
+        "run_end": "2014-05-18T04:55:39",
+        "run_number": 108538,
+        "run_start": "2014-05-18T02:50:47",
+        "users": "Dicko Dr I C",
+    }
+
+    expected_osiris_diff_request_98933 = {
+        "additional_values": {
+            "freq10": 25.0,
+            "freq6": 25.0,
+            "mode": "diffraction",
+            "panadium": 12345,
+            "phase10": 1569.0,
+            "phase6": 1014.0,
+            "sum_runs": False,
+            "tcb_detector_max": 51700.0,
+            "tcb_detector_min": 11700.0,
+            "tcb_monitor_max": 51700.0,
+            "tcb_monitor_min": 11700.0,
+        },
+        "experiment_number": "12345",
+        "experiment_title": "d1 12/2 Van Rod",
+        "filepath": "/archive/NDXOSIRIS/Instrument/data/cycle_12_2/OSI98933.nxs",
+        "good_frames": 28136,
+        "instrument": "OSIRIS",
+        "raw_frames": 35169,
+        "run_end": "2012-07-11T16:46:50",
+        "run_number": 98933,
+        "run_start": "2012-07-11T16:23:24",
+        "users": " ",
+    }
+    expected_osiris_sum_run = {
+        "additional_values": {
+            "analyser": 2,
+            "freq10": 50.0,
+            "freq6": 50.0,
+            "input_runs": [108539, 108538],
+            "mode": "spectroscopy",
+            "panadium": 12345,
+            "phase10": 12500.0,
+            "phase6": 7700.0,
+            "tcb_detector_max": 65500.0,
+            "tcb_detector_min": 45500.0,
+            "tcb_monitor_max": 60700.0,
+            "tcb_monitor_min": 40700.0,
+        },
+        "experiment_number": "1410511",
+        "experiment_title": "H2O 002_off QENS Cyl",
+        "filepath": "/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108539.nxs",
+        "good_frames": 299820,
+        "instrument": "OSIRIS",
+        "raw_frames": 375754,
+        "run_end": "2014-05-18T07:01:38",
+        "run_number": 108539,
+        "run_start": "2014-05-18T04:55:46",
+        "users": "Dicko Dr I C",
+    }
+
     recieved_messages = []
 
     for mf, _, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=1):
@@ -258,10 +373,20 @@ def test_e2e(producer_channel: BlockingChannel, consumer_channel):
         consumer_channel.basic_ack(mf.delivery_tag)
         recieved_messages.append(json.loads(body.decode()))
 
-    assert expected_mari_request in recieved_messages
-    assert expected_mari_stitch_request in recieved_messages
-    assert expected_mari_stitch_individual_1 in recieved_messages
-    assert expected_mari_stitch_individual_2 in recieved_messages
+    def assert_run_in_recieved(run, recieved):
+        assert run in recieved, f"{run} not in {recieved}"
+
+    assert_run_in_recieved(expected_mari_request, recieved_messages)
+    assert_run_in_recieved(expected_mari_stitch_request, recieved_messages)
+    assert_run_in_recieved(expected_mari_stitch_individual_1, recieved_messages)
+    assert_run_in_recieved(expected_mari_stitch_individual_2, recieved_messages)
     for request in expected_tosca_requests:
-        assert request in recieved_messages
-    assert len(recieved_messages) == 9
+        assert_run_in_recieved(request, recieved_messages)
+
+    assert_run_in_recieved(expected_osiris_diff_request_98933, recieved_messages)
+    assert_run_in_recieved(expected_osiris_spec_request, recieved_messages)
+    assert_run_in_recieved(expected_osiris_diff_request_108538, recieved_messages)
+    assert_run_in_recieved(expected_osiris_sum_run, recieved_messages)
+    assert_run_in_recieved(expected_osiris_diff_request_108538, recieved_messages)
+
+    assert len(recieved_messages) == 13

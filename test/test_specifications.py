@@ -9,7 +9,8 @@ from unittest.mock import Mock, patch
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rundetection.ingest import JobRequest
+from rundetection.exceptions import RuleViolationError
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import EnabledRule
 from rundetection.rules.mari_rules import MariStitchRule
 from rundetection.specifications import InstrumentSpecification
@@ -56,6 +57,20 @@ def test_run_will_not_be_reduced_when_a_rule_is_not_met(specification, job_reque
     """
     mock_rule = Mock()
     mock_rule.verify.side_effect = lambda r: setattr(r, "will_reduce", False)
+    specification._rules = [mock_rule]
+    specification.verify(job_request)
+    assert job_request.will_reduce is False
+
+
+def test_run_will_not_reduce_when_a_rule_violation_occurs(specification, job_request) -> None:
+    """
+    When a rule violation is raised, a job_request.will_reduce will be marked as false.
+    :param specification: spec fixture
+    :param job_request: job request fixture
+    :return: None
+    """
+    mock_rule = Mock()
+    mock_rule.verify.side_effect = RuleViolationError
     specification._rules = [mock_rule]
     specification.verify(job_request)
     assert job_request.will_reduce is False

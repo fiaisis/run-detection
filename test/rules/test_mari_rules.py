@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 import pytest
 
-from rundetection.ingest import JobRequest
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
 
 
@@ -37,7 +37,7 @@ def job_request():
         experiment_title="Test experiment",
         additional_values={},
         additional_requests=[],
-        raw_frames=0,
+        raw_frames=3,
         good_frames=0,
         users="",
         run_start="",
@@ -76,7 +76,7 @@ def test_verify_with_stitch_rule_false(mari_stitch_rule_false, job_request):
     assert not job_request.additional_requests
 
 
-@patch("rundetection.ingest.get_run_title", return_value="Test experiment")
+@patch("rundetection.ingestion.ingest.get_run_title", return_value="Test experiment")
 @patch("pathlib.Path.exists", return_value=False)
 def test_verify_with_single_run(_, __, mari_stitch_rule_true, job_request):
     """

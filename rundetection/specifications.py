@@ -6,7 +6,8 @@ import json
 import logging
 from typing import Any, List
 
-from rundetection.ingest import JobRequest
+from rundetection.exceptions import RuleViolationError
+from rundetection.job_requests import JobRequest
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.rule import Rule
 
@@ -49,7 +50,11 @@ class InstrumentSpecification:
             job_request.will_reduce = False
         for rule in self._rules:
             logger.info("verifying rule: %s", rule)
-            rule.verify(job_request)
+            try:
+                rule.verify(job_request)
+            except RuleViolationError:
+                job_request.will_reduce = False
+
             if job_request.will_reduce is False:
                 logger.info("Rule %s not met for run %s", rule, job_request)
                 break  # Stop processing as soon as one rule is not met.
