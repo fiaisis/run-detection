@@ -1,4 +1,5 @@
 """Module containing the additional extract functions."""
+
 from __future__ import annotations
 
 import logging

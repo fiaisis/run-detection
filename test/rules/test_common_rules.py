@@ -1,6 +1,7 @@
 """
 Unit tests for common rules
 """
+
 # pylint: disable=redefined-outer-name
 import unittest
 from pathlib import Path

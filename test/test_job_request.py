@@ -1,6 +1,7 @@
 """
 Tests for JobRequest class
 """
+
 from pathlib import Path
 
 from rundetection.job_requests import JobRequest

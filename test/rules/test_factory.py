@@ -1,6 +1,7 @@
 """
 Rule factory unit tests
 """
+
 # pylint: disable=protected-access
 import unittest
 from typing import Type, Any
