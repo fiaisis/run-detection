@@ -1,6 +1,7 @@
 """
 Main module for run detection
 """
+
 from __future__ import annotations
 
 import logging
@@ -15,7 +16,8 @@ from typing import Generator, Any
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials  # type: ignore
 from pika.adapters.blocking_connection import BlockingChannel  # type: ignore
 
-from rundetection.ingest import ingest, JobRequest
+from rundetection.ingestion.ingest import ingest
+from rundetection.job_requests import JobRequest
 from rundetection.specifications import InstrumentSpecification
 
 file_handler = logging.FileHandler(filename="run-detection.log")

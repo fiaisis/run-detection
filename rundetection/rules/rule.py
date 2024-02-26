@@ -1,10 +1,11 @@
 """
 Module containing the abstract base Rule class and MissingRuleError
 """
+
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from rundetection.ingest import JobRequest
+from rundetection.job_requests import JobRequest
 
 T = TypeVar("T")
 
