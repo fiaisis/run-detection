@@ -1,4 +1,5 @@
 """Module containing the job request model"""
+
 from __future__ import annotations
 
 import dataclasses

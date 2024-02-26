@@ -1,4 +1,5 @@
 """Test cases for the extracts module."""
+
 import logging
 from pathlib import Path
 from unittest.mock import Mock, patch
