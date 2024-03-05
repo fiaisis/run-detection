@@ -106,12 +106,12 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
             logger.info("Acking message %s", method_frame.delivery_tag)
             channel.basic_ack(method_frame.delivery_tag)
         # pylint: disable = broad-exception-caught
-        except AttributeError:
+        except AttributeError:  # If the message frame or body is missing attributes required e.g. the delivery tag
             pass
         except Exception as exc:
             logger.exception("Problem processing message: %s", body, exc_info=exc)
-            logger.info("Acking message %s", method_frame.delivery_tag)
-            channel.basic_ack(method_frame.delivery_tag)
+            logger.info("Nacking message %s", method_frame.delivery_tag)
+            channel.basic_nack(method_frame.delivery_tag)
         break
         # pylint: enable = broad-exception-caught
 
