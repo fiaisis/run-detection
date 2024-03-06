@@ -79,7 +79,13 @@ def consume_all_messages(consumer_channel: BlockingChannel) -> List[Dict[str, An
     return recieved_messages
 
 
-def assert_run_in_recieved(run, recieved):
+def assert_run_in_recieved(run: Any, recieved: List[Any]):
+    """
+    Assert the given run is in the recieved list of runs
+    :param run:
+    :param recieved:
+    :return:
+    """
     assert run in recieved, f"{run} not in {recieved}"
 
 
@@ -380,6 +386,8 @@ EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
     ],
 )
 def test_e2e(producer_channel, consumer_channel, messages, expected_requests):
+    """Test expected messages are consumed from the scheduled jobs queue
+    When the given messages are sent to the watched-files queue"""
     for message in messages:
         produce_message(message, producer_channel)
     if len(expected_requests) > 0:
@@ -387,4 +395,4 @@ def test_e2e(producer_channel, consumer_channel, messages, expected_requests):
         for request in expected_requests:
             assert_run_in_recieved(request, recieved_runs)
     else:
-        assert consume_all_messages(consumer_channel) == []
+        assert not consume_all_messages(consumer_channel)
