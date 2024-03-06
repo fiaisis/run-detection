@@ -15,7 +15,6 @@ from pika.connection import ConnectionParameters
 # pylint: disable=redefined-outer-name, no-name-in-module
 
 
-
 @pytest.fixture(autouse=True, scope="module")
 def producer_channel() -> BlockingChannel:
     """Producer channel fixture"""
