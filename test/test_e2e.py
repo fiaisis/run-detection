@@ -10,10 +10,9 @@ from typing import Any, Dict, List
 import pytest
 from pika import BlockingConnection
 from pika.adapters.blocking_connection import BlockingChannel
-from pika.connection import ConnectionParameters
+
 
 # pylint: disable=redefined-outer-name, no-name-in-module
-
 
 
 @pytest.fixture(autouse=True, scope="module")
