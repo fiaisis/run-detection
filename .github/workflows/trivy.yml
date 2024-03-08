@@ -12,7 +12,7 @@ jobs:
       - name: Run Trivy vulnerability scanner with rootfs command
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'rootfs'
+          scan-type: 'fs'
           ignore-unfixed: true
           format: 'table'
           output: 'table.txt'
