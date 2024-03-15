@@ -9,14 +9,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Run Trivy vulnerability scanner with rootfs command
+      - name: Build an image from Dockerfile
+        run: |
+          docker build -t run-detection:${{ github.sha }} .
+
+      - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
+          image-ref: 'run-detection:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
           ignore-unfixed: true
-          format: 'table'
-          output: 'table.txt'
-          severity: 'CRITICAL'
-      - name: Show Results
-        run: cat table.txt
-        if: always()
+
+      - name: Print results
+        run: cat trivy-results.sarif
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
