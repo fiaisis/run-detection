@@ -1,7 +1,7 @@
 name: Image Scan
-on: push
-#  schedule:
-#    - cron: "49 8 * * *"
+on:
+  schedule:
+    - cron: "49 8 * * *"
 
 env:
   REGISTRY: ghcr.io
@@ -9,7 +9,7 @@ env:
 
 jobs:
   build:
-    name: Build
+    name: Trivy image scan
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
