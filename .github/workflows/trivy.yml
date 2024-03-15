@@ -1,4 +1,4 @@
-name: build
+name: Image Scan
 on: push
 
 jobs:
@@ -9,22 +9,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build an image from Dockerfile
-        run: |
-          docker build -f container/rundetection.D -t run-detection:${{ github.sha }} .
+      - name: Build run-detection Docker image
+        uses: docker/build-push-action@v5
+        with:
+          file: ./container/rundetection.D
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/rundetection:${{ github.sha }}
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'run-detection:${{ github.sha }}'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-      #          ignore-unfixed: true
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/rundetection:${{ github.sha }}
+          format: sarif
+          output: trivy-results.sarif
+          ignore-unfixed: true
+          exit-code: 1
 
       - name: Print results
         run: cat trivy-results.sarif
+        if: failure()
 
-#      - name: Upload Trivy scan results to GitHub Security tab
-#        uses: github/codeql-action/upload-sarif@v2
-#        with:
-#          sarif_file: 'trivy-results.sarif'
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: failure()
+        with:
+          sarif_file: trivy-results.sarif
