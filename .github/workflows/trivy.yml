@@ -1,7 +1,11 @@
 name: Image Scan
-on:
-  schedule:
-    - cron: "49 8 * * *"
+on: push
+#  schedule:
+#    - cron: "49 8 * * *"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}
 
 jobs:
   build:
