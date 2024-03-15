@@ -1,5 +1,7 @@
 name: Image Scan
-on: push
+on:
+  schedule:
+    - cron: "49 8 * * *"
 
 jobs:
   build:
