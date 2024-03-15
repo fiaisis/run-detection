@@ -11,7 +11,7 @@ jobs:
 
       - name: Build an image from Dockerfile
         run: |
-          docker build -t run-detection:${{ github.sha }} .
+          docker build -f container/rundetection.D -t run-detection:${{ github.sha }} .
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
