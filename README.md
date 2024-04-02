@@ -42,18 +42,18 @@ localhost will be used as the default host, and the default credentials, guest g
 ## How to container
 
 - The containers are stored in
-  the [container registry for the organisation on github](https://github.com/orgs/fia/packages).
+  the [container registry for the organisation on github](https://github.com/orgs/fiaisis/packages).
 - Have docker installed to build the container
 - Construct the container by running:
 
 ```shell
-docker build . -f ./container/rundetection.D -t ghcr.io/fia/rundetection
+docker build . -f ./container/rundetection.D -t ghcr.io/fiaisis/rundetection
 ```
 
 - Run the container by running:
 
 ```shell
-docker run -it --rm --mount source=/archive,target=/archive --name rundetection ghcr.io/fia/rundetection
+docker run -it --rm --mount source=/archive,target=/archive --name rundetection ghcr.io/fiaisis/rundetection
 ```
 
 - To push containers you will need to setup the correct access for it, you can follow
@@ -61,7 +61,7 @@ docker run -it --rm --mount source=/archive,target=/archive --name rundetection 
 - Upload the container by running (should be handled by CI, but this can be done manually if needed):
 
 ```shell
-docker push ghcr.io/fia/rundetection -a
+docker push ghcr.io/fiaisis/rundetection -a
 ```
 
 - To pull containers you will also need the permissions set above in
@@ -69,7 +69,7 @@ docker push ghcr.io/fia/rundetection -a
 - Pull the container by running:
 
 ```shell
-docker pull ghcr.io/fia/rundetection:latest
+docker pull ghcr.io/fiaisis/rundetection:latest
 ```
 
 ## Running tests
