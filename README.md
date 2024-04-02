@@ -1,8 +1,8 @@
 # run-detection
 
-![License: GPL-3.0](https://img.shields.io/github/license/InteractiveReduction/run-detection)
-![Build: passing](https://img.shields.io/github/actions/workflow/status/interactivereduction/run-detection/tests.yml?branch=main)
-[![codecov](https://codecov.io/gh/interactivereduction/run-detection/branch/main/graph/badge.svg?token=9YZ619JJ0N)](https://codecov.io/gh/interactivereduction/run-detection)
+![License: GPL-3.0](https://img.shields.io/github/license/fiaisis/run-detection)
+![Build: passing](https://img.shields.io/github/actions/workflow/status/fiaisis/run-detection/tests.yml?branch=main)
+[![codecov](https://codecov.io/gh/fiaisis/run-detection/branch/main/graph/badge.svg?token=9YZ619JJ0N)](https://codecov.io/gh/fiaisis/run-detection)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
 
@@ -42,18 +42,18 @@ localhost will be used as the default host, and the default credentials, guest g
 ## How to container
 
 - The containers are stored in
-  the [container registry for the organisation on github](https://github.com/orgs/interactivereduction/packages).
+  the [container registry for the organisation on github](https://github.com/orgs/fiaisis/packages).
 - Have docker installed to build the container
 - Construct the container by running:
 
 ```shell
-docker build . -f ./container/rundetection.D -t ghcr.io/interactivereduction/rundetection
+docker build . -f ./container/rundetection.D -t ghcr.io/fiaisis/rundetection
 ```
 
 - Run the container by running:
 
 ```shell
-docker run -it --rm --mount source=/archive,target=/archive --name rundetection ghcr.io/interactivereduction/rundetection
+docker run -it --rm --mount source=/archive,target=/archive --name rundetection ghcr.io/fiaisis/rundetection
 ```
 
 - To push containers you will need to setup the correct access for it, you can follow
@@ -61,7 +61,7 @@ docker run -it --rm --mount source=/archive,target=/archive --name rundetection 
 - Upload the container by running (should be handled by CI, but this can be done manually if needed):
 
 ```shell
-docker push ghcr.io/interactivereduction/rundetection -a
+docker push ghcr.io/fiaisis/rundetection -a
 ```
 
 - To pull containers you will also need the permissions set above in
@@ -69,7 +69,7 @@ docker push ghcr.io/interactivereduction/rundetection -a
 - Pull the container by running:
 
 ```shell
-docker pull ghcr.io/interactivereduction/rundetection:latest
+docker pull ghcr.io/fiaisis/rundetection:latest
 ```
 
 ## Running tests
