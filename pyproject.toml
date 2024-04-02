@@ -9,7 +9,7 @@ dependencies = [
 
 
 [project.urls]
-"Repository" = "https://github.com/interactivereduction/run-detection"
+"Repository" = "https://github.com/fia/run-detection"
 
 [project.scripts]
 run-detection = "rundetection.run_detection:main"
