@@ -32,5 +32,5 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           file: ./container/rundetection.D
-          #          push: true
+          push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/rundetection:${{ github.sha }}
