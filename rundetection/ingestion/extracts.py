@@ -48,6 +48,8 @@ def osiris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     :param dataset: The nexus file dataset
     :return: The updated job request
     """
+    job_request.additional_values["cycle_string"] = get_cycle_string_from_path(job_request.filepath)
+
     freq_6 = float(dataset.get("selog").get("freq6").get("value_log").get("value")[0])
     freq_10 = float(dataset.get("selog").get("freq10").get("value_log").get("value")[0])
     if freq_6 != freq_10:

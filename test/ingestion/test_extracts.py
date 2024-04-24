@@ -163,6 +163,7 @@ def test_tosca_extract(_: Mock, job_request):
     assert job_request.additional_values["cycle_string"] == "some string"
 
 
+@patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string")
 def test_osiris_extract(job_request):
     """Test Osiris extract"""
     dataset = {
@@ -188,6 +189,7 @@ def test_osiris_extract(job_request):
     assert job_request.additional_values["tcb_monitor_max"] == 121.0
     assert job_request.additional_values["phase6"] == 1221.0
     assert job_request.additional_values["phase10"] == 1221.0
+    assert job_request.additional_values["cycle_string"] == "some string"
 
 
 def test_osiris_extract_raises_on_bad_frequencies(job_request):
