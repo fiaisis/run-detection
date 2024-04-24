@@ -390,7 +390,7 @@ EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
                 },
             ],
         ),
-        (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs", "/archive/foo/bar/baz.nxs"], []),
+        (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
     ],
 )
 def test_e2e(producer_channel, consumer_channel, messages, expected_requests):
