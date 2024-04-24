@@ -1,13 +1,14 @@
 """
 Unit tests for common rules
 """
+
 # pylint: disable=redefined-outer-name
 import unittest
 from pathlib import Path
 
 import pytest
 
-from rundetection.ingest import JobRequest
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import EnabledRule
 
 

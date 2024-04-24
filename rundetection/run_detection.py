@@ -1,6 +1,7 @@
 """
 Main module for run detection
 """
+
 from __future__ import annotations
 
 import logging
@@ -15,7 +16,8 @@ from typing import Generator, Any
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials  # type: ignore
 from pika.adapters.blocking_connection import BlockingChannel  # type: ignore
 
-from rundetection.ingest import ingest, JobRequest
+from rundetection.ingestion.ingest import ingest
+from rundetection.job_requests import JobRequest
 from rundetection.specifications import InstrumentSpecification
 
 file_handler = logging.FileHandler(filename="run-detection.log")
@@ -104,12 +106,12 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
             logger.info("Acking message %s", method_frame.delivery_tag)
             channel.basic_ack(method_frame.delivery_tag)
         # pylint: disable = broad-exception-caught
-        except AttributeError:
+        except AttributeError:  # If the message frame or body is missing attributes required e.g. the delivery tag
             pass
         except Exception as exc:
             logger.exception("Problem processing message: %s", body, exc_info=exc)
-            logger.info("Acking message %s", method_frame.delivery_tag)
-            channel.basic_ack(method_frame.delivery_tag)
+            logger.info("Nacking message %s", method_frame.delivery_tag)
+            channel.basic_nack(method_frame.delivery_tag)
         break
         # pylint: enable = broad-exception-caught
 

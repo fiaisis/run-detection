@@ -1,10 +1,12 @@
 """Rules for TOSCA"""
+
 import logging
 from copy import deepcopy
 from pathlib import Path
 from typing import List
 
-from rundetection.ingest import JobRequest, get_run_title
+from rundetection.ingestion.ingest import get_run_title
+from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)
@@ -44,6 +46,7 @@ class ToscaStitchRule(Rule[bool]):
         if not self._value:  # if the stitch rule is set to false, skip
             return
 
+        # pylint: disable = duplicate-code
         job_request.additional_values["input_runs"] = [job_request.run_number]
         run_numbers = self._get_runs_to_stitch(
             job_request.filepath, job_request.run_number, job_request.experiment_title
@@ -53,3 +56,4 @@ class ToscaStitchRule(Rule[bool]):
             additional_request = deepcopy(job_request)
             additional_request.additional_values["input_runs"] = run_numbers
             job_request.additional_requests.append(additional_request)
+        # pylint: enable = duplicate-code

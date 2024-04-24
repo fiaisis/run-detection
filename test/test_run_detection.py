@@ -1,6 +1,7 @@
 """
 Tests for run detection module
 """
+
 import logging
 import os
 import re
@@ -12,7 +13,7 @@ from unittest.mock import patch, Mock, MagicMock
 
 import pytest
 
-from rundetection.ingest import JobRequest
+from rundetection.ingestion.ingest import JobRequest
 from rundetection.run_detection import (
     process_message,
     process_messages,
@@ -140,7 +141,7 @@ def test_process_messages_raises_still_acks(mock_process):
 
     channel.consume.assert_called_once()
     mock_process.assert_called_once_with(body.decode(), notification_queue)
-    channel.basic_ack.assert_called_once_with(method_frame.delivery_tag)
+    channel.basic_nack.assert_called_once_with(method_frame.delivery_tag)
 
 
 @patch("rundetection.run_detection.process_message")
