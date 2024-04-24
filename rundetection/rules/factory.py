@@ -12,6 +12,7 @@ from rundetection.rules.osiris_rules import (
     OsirisStitchRule,
     OsirisAnalyserRule,
     OsirisReductionModeRule,
+    OsirisCalibrationRule,
 )
 from rundetection.rules.rule import MissingRuleError, T, Rule
 from rundetection.rules.tosca_rules import ToscaStitchRule
@@ -56,6 +57,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:
         case "osirisreductionmode":
             if isinstance(value, bool):
                 return OsirisReductionModeRule(value)
+        case "osiriscalibration":
+            if isinstance(value, str):
+                return OsirisCalibrationRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 
