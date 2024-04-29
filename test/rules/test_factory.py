@@ -18,6 +18,7 @@ from rundetection.rules.osiris_rules import (
     OsirisPanadiumRule,
     OsirisReductionModeRule,
     OsirisAnalyserRule,
+    OsirisCalibrationRule,
 )
 from rundetection.rules.rule import MissingRuleError, Rule
 from rundetection.rules.tosca_rules import ToscaStitchRule
@@ -49,6 +50,7 @@ def assert_correct_rule(name: str, value: Any, rule_type: Type[Rule]):
         ("osirispanadium", 12345, OsirisPanadiumRule),
         ("osirisreductionmode", True, OsirisReductionModeRule),
         ("osirisanalyser", True, OsirisAnalyserRule),
+        ("osiriscalibration", "foo", OsirisCalibrationRule),
     ],
 )
 @patch("rundetection.rules.mari_rules.MariStitchRule._load_mari_spec")

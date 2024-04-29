@@ -243,3 +243,12 @@ class OsirisStitchRule(Rule[bool]):
             additional_request.additional_values["input_runs"] = run_numbers
             job_request.additional_requests.append(additional_request)
         # pylint: enable = duplicate-code
+
+
+class OsirisCalibrationRule(Rule[str]):
+    """
+    Sets the calibration file path
+    """
+
+    def verify(self, job_request: JobRequest) -> None:
+        job_request.additional_values["calibration_file_path"] = self._value

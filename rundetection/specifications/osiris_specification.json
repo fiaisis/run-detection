@@ -1,5 +1,6 @@
 {
   "enabled": true,
+  "osiriscalibration": "/extras/osi92682_multi_graphite002_calib.nxs",
   "osirispanadium": 12345,
   "osirisreductionmode": true,
   "osirisanalyser": true,
