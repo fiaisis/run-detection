@@ -193,6 +193,35 @@ def test_osiris_extract(_, job_request):
 
 
 @patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string")
+def test_osiris_extract_non_matching_freqs_within_error_boundary(_, job_request):
+    """Test Osiris extract"""
+    dataset = {
+        "selog": {
+            "phase6": {"value": (1221.0,)},
+            "phase10": {"value": (1221.0,)},
+            "freq6": {"value_log": {"value": (6.0,)}},
+            "freq10": {"value_log": {"value": (5.999,)}},
+        },
+        "instrument": {
+            "dae": {
+                "time_channels_1": {"time_of_flight": (10.0, 100.0)},
+                "time_channels_2": {"time_of_flight": (12.1, 121.0)},
+            }
+        },
+    }
+    osiris_extract(job_request, dataset)
+    assert job_request.additional_values["freq10"] == 6
+    assert job_request.additional_values["freq6"] == 6
+    assert job_request.additional_values["tcb_detector_min"] == 10.0
+    assert job_request.additional_values["tcb_detector_max"] == 100.0
+    assert job_request.additional_values["tcb_monitor_min"] == 12.1
+    assert job_request.additional_values["tcb_monitor_max"] == 121.0
+    assert job_request.additional_values["phase6"] == 1221.0
+    assert job_request.additional_values["phase10"] == 1221.0
+    assert job_request.additional_values["cycle_string"] == "some string"
+
+
+@patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string")
 def test_osiris_extract_raises_on_bad_frequencies(job_request):
     """Test correct exception raised when freq6 and freq10 do not match"""
     dataset = {
