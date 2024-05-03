@@ -13,6 +13,7 @@ from unittest.mock import patch, Mock, MagicMock
 
 import pytest
 
+from rundetection.exceptions import ReductionMetadataError
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.run_detection import (
     process_message,
@@ -124,7 +125,7 @@ def test_process_messages(mock_process):
 
 
 @patch("rundetection.run_detection.process_message")
-def test_process_messages_raises_still_acks(mock_process):
+def test_process_messages_raises_exception_nacks(mock_process):
     """
     Test messages are still acked after exception in processing
     :param mock_process: Mock Process messages function
@@ -142,6 +143,27 @@ def test_process_messages_raises_still_acks(mock_process):
     channel.consume.assert_called_once()
     mock_process.assert_called_once_with(body.decode(), notification_queue)
     channel.basic_nack.assert_called_once_with(method_frame.delivery_tag)
+
+
+@patch("rundetection.run_detection.process_message")
+def test_process_messages_raises_metadataerror_still_acks(mock_process):
+    """
+    Test messages are still acked after exception in processing
+    :param mock_process: Mock Process messages function
+    :return: None
+    """
+    channel = MagicMock()
+    method_frame = MagicMock()
+    body = "message_body".encode()
+    channel.consume.return_value = [(method_frame, None, body)]
+    notification_queue = SimpleQueue()
+    mock_process.side_effect = ReductionMetadataError
+
+    process_messages(channel, notification_queue)
+
+    channel.consume.assert_called_once()
+    mock_process.assert_called_once_with(body.decode(), notification_queue)
+    channel.basic_ack.assert_called_once_with(method_frame.delivery_tag)
 
 
 @patch("rundetection.run_detection.process_message")

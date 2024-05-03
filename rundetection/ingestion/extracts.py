@@ -52,8 +52,18 @@ def osiris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
 
     freq_6 = float(dataset.get("selog").get("freq6").get("value_log").get("value")[0])
     freq_10 = float(dataset.get("selog").get("freq10").get("value_log").get("value")[0])
+
+    # Accounting for floating point errors
+    max_value = max(freq_6, freq_10)
+    difference = abs(freq_6 - freq_10)
+    if difference > max_value * 0.01:
+        raise ReductionMetadataError(
+            "Frequency 6 and 10 are not within 1% of each other. Osiris reduction is not possible"
+        )
     if freq_6 != freq_10:
-        raise ReductionMetadataError("Frequency 6 and 10 do not match. Osiris reduction is not possible")
+        freq_6 = round(freq_6)
+        freq_10 = round(freq_10)
+
     job_request.additional_values["freq6"] = freq_6
     job_request.additional_values["freq10"] = freq_10
 

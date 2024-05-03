@@ -16,6 +16,7 @@ from typing import Generator, Any
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials  # type: ignore
 from pika.adapters.blocking_connection import BlockingChannel  # type: ignore
 
+from rundetection.exceptions import ReductionMetadataError
 from rundetection.ingestion.ingest import ingest
 from rundetection.job_requests import JobRequest
 from rundetection.specifications import InstrumentSpecification
@@ -104,6 +105,9 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
         try:
             process_message(body.decode(), notification_queue)
             logger.info("Acking message %s", method_frame.delivery_tag)
+            channel.basic_ack(method_frame.delivery_tag)
+        except ReductionMetadataError as exc:
+            logger.exception("Problem with metadata, cannot reduce, skipping message", exc)
             channel.basic_ack(method_frame.delivery_tag)
         # pylint: disable = broad-exception-caught
         except AttributeError:  # If the message frame or body is missing attributes required e.g. the delivery tag
