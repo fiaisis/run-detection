@@ -34,3 +34,21 @@ jobs:
           file: ./container/rundetection.D
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/rundetection:${{ github.sha }}
+  
+      - name: Checkout the Gitops repository
+        uses: actions/checkout@v4
+        with:
+          repository: fiaisis/gitops
+          token: ${{ secrets.GITOPS_STAGING_EDIT_TOKEN }}
+  
+      - name: Edit the YAML rundetection file for staging
+        uses: mikefarah/yq@v4.43.1
+        with:
+          cmd: yq e -i '.spec.template.spec.containers[] |= select(.name == "rundetection").image = "ghcr.io/fiaisis/rundetection@${{ steps.docker_build.outputs.digest }}"' './components/rundetection/overlays/staging/rundetection.yml'
+  
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -am "Update run-detection to use ${{ steps.docker_build.outputs.digest }}"
+          git push
