@@ -29,6 +29,7 @@ jobs:
           password: ${{ secrets.WRITE_PACKAGE_TOKEN }}
 
       - name: Build and push run-detection Docker image
+        id: docker_build
         uses: docker/build-push-action@v5
         with:
           file: ./container/rundetection.D
