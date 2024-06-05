@@ -45,7 +45,7 @@ jobs:
       - name: Edit the YAML rundetection file for staging
         uses: mikefarah/yq@v4.43.1
         with:
-          cmd: yq e -i '.spec.template.spec.containers[] |= select(.name == "rundetection").image = "ghcr.io/fiaisis/rundetection@${{ steps.docker_build.outputs.digest }}"' './components/rundetection/overlays/staging/rundetection.yml'
+          cmd: yq e -i '.spec.template.spec.containers[] |= select(.name == "rundetection").image = "ghcr.io/fiaisis/rundetection@${{ steps.docker_build.outputs.digest }}"' './components/rundetection/envs/staging/rundetection.yml'
   
       - name: Commit and push changes
         run: |
