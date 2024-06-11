@@ -113,7 +113,8 @@ def test_run_will_not_be_reduced_for_a_no_rule_specification(specification, job_
     assert job_request.will_reduce is False
 
 
-def test_specification_rule_loading(job_request, _working_directory_fix) -> None:
+@pytest.mark.usefixtures("_working_directory_fix")
+def test_specification_rule_loading(job_request) -> None:
     """
     Test that the correct spec for each instrument is loaded.
     :param job_request: Run Fixture
