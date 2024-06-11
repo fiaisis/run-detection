@@ -39,7 +39,7 @@ class OsirisReductionModeRule(Rule[bool]):
 
     # The spec phase tuples are (<phase6>, <phase10>) for the next 2 arrays Based on the PDF available here:
     # https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf.
-    SPECTROSCOPY_PHASES: tuple[tuple[int, int]] = (
+    SPECTROSCOPY_PHASES: ClassVar[list[tuple[int, int]]] = (
         (8573, 14250),
         (6052, 11250),
         (7500, 12500),
@@ -52,7 +52,7 @@ class OsirisReductionModeRule(Rule[bool]):
         (3217, 4904),
     )
 
-    DIFFRACTION_PHASES: tuple[tuple[int, int]] = (
+    DIFFRACTION_PHASES: ClassVar[list[tuple[int, int]]] = (
         (1011, 1566),
         (4599, 7715),
         (7590, 12859),
@@ -134,7 +134,7 @@ class OsirisAnalyserRule(Rule[bool]):
     # This map is based on the Appendix 1 - Quasi / inelastic settings pdf. It is reduced as the values for
     # frequency < 50 are removed as they default to analyser 2
     # available here https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf
-    REDUCED_ANALYSER_TIME_CHANNEL_MAP: ClassVar[dict[tuple[int, int, int, int], int]] = {
+    REDUCED_ANALYSER_TIME_CHANNEL_MAP: ClassVar[dict[tuple[float, float, float, float], int]] = {
         (51500.0, 71500.0, 45900.0, 65900.0): 2,
         (45500.0, 65500.0, 40400.0, 60400.0): 2,
         (58700.0, 78700.0, 52000.0, 72000.0): 2,

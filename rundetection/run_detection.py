@@ -23,7 +23,7 @@ if typing.TYPE_CHECKING:
     from collections.abc import Generator
     from typing import Any
 
-    from pika.adapters.blocking_connection import BlockingChannel
+    from pika.adapters.blocking_connection import BlockingChannel  # type: ignore
 
     from rundetection.job_requests import JobRequest
 
