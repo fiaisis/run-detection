@@ -11,9 +11,6 @@ from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.tosca_rules import ToscaStitchRule
 
 
-# pylint:disable = redefined-outer-name, protected-access
-
-
 @pytest.fixture()
 def job_request():
     """job_request fixture"""
@@ -32,7 +29,7 @@ def job_request():
 
 
 @pytest.mark.parametrize(
-    "title_one,title_two,expected",
+    ("title_one", "title_two", "expected"),
     [
         ("some long run run-1", "some long run run 2", True),
         ("some other run run-1", "different run completely", False),
@@ -57,19 +54,20 @@ def test_stitch_rule_does_nothing_if_disabled(mock_get_runs: Mock, job_request):
     mock_get_runs.assert_not_called()
 
 
-@patch("rundetection.rules.tosca_rules.get_run_title")
-@patch("rundetection.rules.tosca_rules.Path.exists", return_value=True)
-def test_verify_should_stitch(_, mock_get_title: Mock, job_request):
+def test_verify_should_stitch(job_request):
     """
     Test the case where the previous run should stitch, but not the one prior
-    :param _:
-    :param mock_get_title: Mock get title
     :param job_request: job request fixture
     :return: None
     """
-    # mock returns, the original title, the previous title (match), the one before the previous (no match)
-    mock_get_title.side_effect = [job_request.experiment_title, "experiment title run 2", "different experiment"]
-    rule = ToscaStitchRule(True)
-    rule.verify(job_request)
+    with (
+        patch(
+            "rundetection.rules.tosca_rules.get_run_title",
+            side_effect=[job_request.experiment_title, "experiment title run 2", "different experiment"],
+        ),
+        patch("rundetection.rules.tosca_rules.Path.exists", return_value=True),
+    ):
+        rule = ToscaStitchRule(True)
+        rule.verify(job_request)
 
     assert job_request.additional_requests[0].additional_values["input_runs"] == [12345, 12344]

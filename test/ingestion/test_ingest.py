@@ -2,7 +2,6 @@
 Ingest and metadata tests
 """
 
-# pylint: disable=redefined-outer-name,duplicate-code
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -14,11 +13,11 @@ from _pytest.logging import LogCaptureFixture
 from rundetection.exceptions import IngestError
 from rundetection.ingestion.extracts import get_cycle_string_from_path
 from rundetection.ingestion.ingest import (
-    ingest,
     JobRequest,
+    get_run_title,
     get_sibling_nexus_files,
     get_sibling_runs,
-    get_run_title,
+    ingest,
 )
 
 # Allows test to be run via pycharm play button or from project root
@@ -114,7 +113,7 @@ def test_ingest_raises_exception_non_nexus_file() -> None:
     Test value error is raised when a non nexus file is given to be ingested
     :return: None
     """
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         ingest(Path("25581.log"))
 
 
@@ -174,7 +173,7 @@ def test_get_sibling_nexus_files():
 
 def test_get_cycle_from_string_empty_path():
     """Test if the function raises an IngestError for an empty path"""
-    path = Path("")
+    path = Path()
     with pytest.raises(IngestError):
         get_cycle_string_from_path(path)
 

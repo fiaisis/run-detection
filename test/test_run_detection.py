@@ -3,31 +3,27 @@ Tests for run detection module
 """
 
 import logging
-import os
 import re
 import time
 import unittest
 from pathlib import Path
 from queue import SimpleQueue
-from unittest.mock import patch, Mock, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
 from rundetection.exceptions import ReductionMetadataError
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.run_detection import (
+    get_channel,
     process_message,
     process_messages,
     process_notifications,
+    producer,
     start_run_detection,
     verify_archive_access,
-    get_channel,
-    producer,
     write_readiness_probe_file,
 )
-
-
-# pylint: disable=protected-access, redefined-outer-name
 
 
 @patch("rundetection.run_detection.ingest")
@@ -49,7 +45,7 @@ def test_process_message(
         "inst",
         "title",
         "num",
-        Path("."),
+        Path(),
         "start",
         "end",
         1,
@@ -84,7 +80,7 @@ def test_process_message_no_notification(mock_instrument_spec, mock_ingest):
         "inst",
         "title",
         "num",
-        Path("."),
+        Path(),
         "start",
         "end",
         1,
@@ -112,7 +108,7 @@ def test_process_messages(mock_process):
     """
     channel = MagicMock()
     method_frame = MagicMock()
-    body = "message_body".encode()
+    body = b"message_body"
     channel.consume.return_value = [(method_frame, None, body)]
 
     notification_queue = Mock()
@@ -133,7 +129,7 @@ def test_process_messages_raises_exception_nacks(mock_process):
     """
     channel = MagicMock()
     method_frame = MagicMock()
-    body = "message_body".encode()
+    body = b"message_body"
     channel.consume.return_value = [(method_frame, None, body)]
     notification_queue = SimpleQueue()
     mock_process.side_effect = RuntimeError
@@ -154,7 +150,7 @@ def test_process_messages_raises_metadataerror_still_acks(mock_process):
     """
     channel = MagicMock()
     method_frame = MagicMock()
-    body = "message_body".encode()
+    body = b"message_body"
     channel.consume.return_value = [(method_frame, None, body)]
     notification_queue = SimpleQueue()
     mock_process.side_effect = ReductionMetadataError
@@ -166,8 +162,7 @@ def test_process_messages_raises_metadataerror_still_acks(mock_process):
     channel.basic_ack.assert_called_once_with(method_frame.delivery_tag)
 
 
-@patch("rundetection.run_detection.process_message")
-def test_process_messages_does_not_ack_attribute_error(_):
+def test_process_messages_does_not_ack_attribute_error():
     """
     Test messages are not acked after AttributeError in processing. As this should only occur when no message is
     consumed.
@@ -179,7 +174,8 @@ def test_process_messages_does_not_ack_attribute_error(_):
 
     notification_queue = Mock()
 
-    process_messages(channel, notification_queue)
+    with patch("rundetection.run_detection.process_message"):
+        process_messages(channel, notification_queue)
 
     channel.consume.assert_called_once()
     channel.basic_ack.assert_not_called()
@@ -210,31 +206,28 @@ def test_process_notifications(mock_producer):
     # Call function
     process_notifications(notification_queue)
 
-    channel.basic_publish.assert_any_call("scheduled-jobs", "", '{"run_number": "1"}'.encode())
-    channel.basic_publish.assert_any_call("scheduled-jobs", "", '{"run_number": "2"}'.encode())
+    channel.basic_publish.assert_any_call("scheduled-jobs", "", b'{"run_number": "1"}')
+    channel.basic_publish.assert_any_call("scheduled-jobs", "", b'{"run_number": "2"}')
 
     # Assert the queue is empty
     assert notification_queue.empty()
 
 
-@patch("rundetection.run_detection.get_channel")
-@patch("rundetection.run_detection.process_messages")
-@patch("rundetection.run_detection.process_notifications")
-@patch("rundetection.run_detection.SimpleQueue")
-@patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError)
-def test_start_run_detection(_, mock_queue, mock_proc_notifications, mock_proc_messages, mock_get_channel):
+def test_start_run_detection():
     """
     Mock run detection start up
-    :param _: Mock sleep
-    :param mock_queue: Mock notification queue
-    :param mock_proc_notifications: mock process notification function
-    :param mock_proc_messages: Mock process messages function
     :return:  None
     """
     mock_channel = Mock()
-    mock_get_channel.return_value = mock_channel
 
-    with pytest.raises(InterruptedError):
+    with (
+        pytest.raises(InterruptedError),
+        patch("rundetection.run_detection.get_channel", return_value=mock_channel) as mock_get_channel,
+        patch("rundetection.run_detection.process_messages") as mock_proc_messages,
+        patch("rundetection.run_detection.process_notifications") as mock_proc_notifications,
+        patch("rundetection.run_detection.SimpleQueue") as mock_queue,
+        patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError),
+    ):
         start_run_detection()
 
     mock_get_channel.assert_called_once_with("watched-files", "watched-files")
@@ -288,7 +281,7 @@ def test_get_channel(mock_blocking_connection, mock_connection_parameters, mock_
     channel = get_channel(exchange_name, queue_name)
 
     # Assert
-    mock_plain_credentials.assert_called_once_with(username="guest", password="guest")
+    mock_plain_credentials.assert_called_once_with(username="guest", password="guest")  # noqa: S106
     mock_connection_parameters.assert_called_once_with(
         "localhost", 5672, credentials=mock_plain_credentials.return_value
     )
@@ -323,9 +316,10 @@ def test_write_readiness_probe_file():
     # Call the function to create the file
     write_readiness_probe_file()
 
-    assert os.path.exists("/tmp/heartbeat"), "Heartbeat file does not exist."
+    path = Path("/tmp/heartbeat")  # noqa: S108
+    assert path.exists(), "Heartbeat file does not exist."
 
-    with open("/tmp/heartbeat", "r", encoding="utf-8") as file:
+    with path.open(encoding="utf-8") as file:
         content = file.read()
 
         # Check if the content matches the timestamp format
@@ -336,7 +330,7 @@ def test_write_readiness_probe_file():
         timestamp = time.strptime(content, "%Y-%m-%d %H:%M:%S")
         current_time = time.localtime()
         time_difference = time.mktime(current_time) - time.mktime(timestamp)
-        assert abs(time_difference) < 5, f"The timestamp difference is too large: {time_difference} seconds."
+        assert abs(time_difference) < 5, f"The timestamp difference is too large: {time_difference} seconds."  # noqa: PLR2004
 
 
 if __name__ == "__main__":

@@ -8,18 +8,24 @@ import logging
 import os
 import sys
 import time
+import typing
 from contextlib import contextmanager
 from pathlib import Path
 from queue import SimpleQueue
-from typing import Generator, Any
 
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials  # type: ignore
-from pika.adapters.blocking_connection import BlockingChannel  # type: ignore
 
 from rundetection.exceptions import ReductionMetadataError
 from rundetection.ingestion.ingest import ingest
-from rundetection.job_requests import JobRequest
 from rundetection.specifications import InstrumentSpecification
+
+if typing.TYPE_CHECKING:
+    from collections.abc import Generator
+    from typing import Any
+
+    from pika.adapters.blocking_connection import BlockingChannel  # type: ignore
+
+    from rundetection.job_requests import JobRequest
 
 file_handler = logging.FileHandler(filename="run-detection.log")
 stdout_handler = logging.StreamHandler(stream=sys.stdout)
@@ -97,7 +103,7 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
     """
     Given a list of messages and the notification queue, process each message, adding those which meet specifications to
     the notification queue
-    :param messages: The list of messages
+    :param channel: The channel for consuming from
     :param notification_queue: The notification queue
     :return: None
     """
@@ -109,7 +115,6 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
         except ReductionMetadataError as exc:
             logger.exception("Problem with metadata, cannot reduce, skipping message", exc_info=exc)
             channel.basic_ack(method_frame.delivery_tag)
-        # pylint: disable = broad-exception-caught
         except AttributeError:  # If the message frame or body is missing attributes required e.g. the delivery tag
             pass
         except Exception as exc:
@@ -117,7 +122,6 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
             logger.info("Nacking message %s", method_frame.delivery_tag)
             channel.basic_nack(method_frame.delivery_tag)
         break
-        # pylint: enable = broad-exception-caught
 
 
 def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
@@ -141,7 +145,8 @@ def write_readiness_probe_file() -> None:
     Write the file with the timestamp for the readinessprobe
     :return: None
     """
-    with open("/tmp/heartbeat", "w", encoding="utf-8") as file:
+    path = Path("/tmp/heartbeat")  # noqa: S108
+    with path.open("w", encoding="utf-8") as file:
         file.write(time.strftime("%Y-%m-%d %H:%M:%S"))
 
 
@@ -163,8 +168,6 @@ def start_run_detection() -> None:
             process_notifications(notification_queue)
             write_readiness_probe_file()
             time.sleep(0.1)
-
-    # pylint: disable = broad-except
     except Exception:
         logger.exception("Uncaught error occurred in main loop. Restarting in 30 seconds...")
         time.sleep(30)

@@ -5,14 +5,18 @@ Rules for Osiris
 from __future__ import annotations
 
 import logging
+import typing
 from copy import deepcopy
 from pathlib import Path
-from typing import List, Tuple, Literal
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import get_run_title
-from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
+
+if typing.TYPE_CHECKING:
+    from typing import ClassVar, Literal
+
+    from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +39,7 @@ class OsirisReductionModeRule(Rule[bool]):
 
     # The spec phase tuples are (<phase6>, <phase10>) for the next 2 arrays Based on the PDF available here:
     # https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf.
-    SPECTROSCOPY_PHASES: List[Tuple[int, int]] = [
+    SPECTROSCOPY_PHASES: ClassVar[list[tuple[int, int]]] = [
         (8573, 14250),
         (6052, 11250),
         (7500, 12500),
@@ -48,7 +52,7 @@ class OsirisReductionModeRule(Rule[bool]):
         (3217, 4904),
     ]
 
-    DIFFRACTION_PHASES: List[Tuple[int, int]] = [
+    DIFFRACTION_PHASES: ClassVar[list[tuple[int, int]]] = [
         (1011, 1566),
         (4599, 7715),
         (7590, 12859),
@@ -76,11 +80,10 @@ class OsirisReductionModeRule(Rule[bool]):
                 return True
         return False
 
-    # pylint: disable=too-many-arguments
     def _determine_mode(
         self, phase10: float, phase6: float, freq: int, detector_tcb_min: float, detector_tcb_max: float
     ) -> Literal["diffraction"] | Literal["spectroscopy"]:
-        if freq != 25:
+        if freq != 25:  # noqa: PLR2004
             return "spectroscopy"
         is_diff_phases = self._is_diff_phase(phase10, phase6)
         is_spec_phases = self._is_spec_phase(phase10, phase6)
@@ -102,7 +105,6 @@ class OsirisReductionModeRule(Rule[bool]):
 
         return "diffraction" if is_diff_phases else "spectroscopy"
 
-    # pylint: enable=too-many-arguments
     def verify(self, job_request: JobRequest) -> None:
         if not self._value:
             return
@@ -130,7 +132,7 @@ class OsirisAnalyserRule(Rule[bool]):
     # This map is based on the Appendix 1 - Quasi / inelastic settings pdf. It is reduced as the values for
     # frequency < 50 are removed as they default to analyser 2
     # available here https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf
-    REDUCED_ANALYSER_TIME_CHANNEL_MAP = {
+    REDUCED_ANALYSER_TIME_CHANNEL_MAP: ClassVar[dict[tuple[float, float, float, float], int]] = {
         (51500.0, 71500.0, 45900.0, 65900.0): 2,
         (45500.0, 65500.0, 40400.0, 60400.0): 2,
         (58700.0, 78700.0, 52000.0, 72000.0): 2,
@@ -161,7 +163,7 @@ class OsirisAnalyserRule(Rule[bool]):
             return
 
         # We already know freq10 and 6 are the same from extraction. If it's less than 50 we assume its analyser 2
-        if job_request.additional_values["freq10"] < 50:
+        if job_request.additional_values["freq10"] < 50:  # noqa: PLR2004
             job_request.additional_values["analyser"] = 2
             return
         job_request.additional_values["analyser"] = self._determine_analyser_from_tcb_values(
@@ -204,7 +206,7 @@ class OsirisStitchRule(Rule[bool]):
         logger.info("Titles not similar, continuing")
         return False
 
-    def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> List[int]:
+    def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> list[int]:
         run_numbers = []
         while run_path.exists():
             logger.info("run path exists %s", run_path)
@@ -231,7 +233,6 @@ class OsirisStitchRule(Rule[bool]):
                 return
         except KeyError:
             pass
-        # pylint: disable = duplicate-code
         # stitch
         job_request.additional_values["input_runs"] = [job_request.run_number]
         run_numbers = self._get_runs_to_stitch(
@@ -242,7 +243,6 @@ class OsirisStitchRule(Rule[bool]):
             additional_request = deepcopy(job_request)
             additional_request.additional_values["input_runs"] = run_numbers
             job_request.additional_requests.append(additional_request)
-        # pylint: enable = duplicate-code
 
 
 class OsirisCalibrationRule(Rule[str]):

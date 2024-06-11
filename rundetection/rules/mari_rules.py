@@ -6,7 +6,7 @@ import json
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import List, Any
+from typing import Any
 
 from rundetection.ingestion.ingest import get_run_title
 from rundetection.job_requests import JobRequest
@@ -25,7 +25,7 @@ class MariStitchRule(Rule[bool]):
         self._spec_values = self._load_mari_spec()
 
     @staticmethod
-    def _get_runs_to_stitch(run_path: Path, run_number: int, run_title: str) -> List[int]:
+    def _get_runs_to_stitch(run_path: Path, run_number: int, run_title: str) -> list[int]:
         run_numbers = []
         while run_path.exists():
             if get_run_title(run_path) != run_title:
@@ -42,11 +42,8 @@ class MariStitchRule(Rule[bool]):
         :return: Mari spec as dict
         """
         try:
-            with open(
-                "rundetection/specifications/mari_specification.json",
-                "r",
-                encoding="utf-8",
-            ) as spec_file:
+            path = Path("rundetection/specifications/mari_specification.json")
+            with path.open(encoding="utf-8") as spec_file:
                 return json.load(spec_file)
         except FileNotFoundError as exc:
             logger.warning("Mari Specification could not be reloaded")
@@ -59,7 +56,6 @@ class MariStitchRule(Rule[bool]):
         run_numbers = self._get_runs_to_stitch(
             job_request.filepath, job_request.run_number, job_request.experiment_title
         )
-        # pylint: disable = duplicate-code
         if len(run_numbers) > 1:
             additional_request = deepcopy(job_request)
             additional_request.additional_values["runno"] = run_numbers
@@ -69,7 +65,6 @@ class MariStitchRule(Rule[bool]):
             additional_request.additional_values["mask_file_link"] = self._spec_values["marimaskfile"]
             additional_request.additional_values["wbvan"] = self._spec_values["mariwbvan"]
             job_request.additional_requests.append(additional_request)
-        # pylint: enable = duplicate-code
 
 
 class MariMaskFileRule(Rule[str]):

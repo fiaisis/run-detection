@@ -2,9 +2,8 @@
 Specification unit test module
 """
 
+import os
 from pathlib import Path
-
-# pylint: disable=protected-access, redefined-outer-name
 from unittest.mock import Mock, patch
 
 import pytest
@@ -17,7 +16,7 @@ from rundetection.rules.mari_rules import MariStitchRule
 from rundetection.specifications import InstrumentSpecification
 
 
-@pytest.fixture
+@pytest.fixture()
 def job_request():
     """
     JobRequest fixture
@@ -26,7 +25,7 @@ def job_request():
     return JobRequest(1, "larmor", "1", "1", Path("/archive/larmor/1/1,nxs"), "start time", "end time", 1, 1, "user")
 
 
-@pytest.fixture
+@pytest.fixture()
 @patch("rundetection.specifications.InstrumentSpecification._load_rules")
 def specification(_) -> InstrumentSpecification:
     """
@@ -34,6 +33,14 @@ def specification(_) -> InstrumentSpecification:
     :return: InstrumentSpecification
     """
     return InstrumentSpecification("foo")
+
+
+@pytest.fixture()
+def _working_directory_fix():
+    # Set dir to repo root for purposes of the test.
+    current_working_directory = Path.cwd()
+    if current_working_directory.name == "test":
+        os.chdir(current_working_directory / "..")
 
 
 def test_run_will_be_reduced_when_all_rules_are_ment(specification: InstrumentSpecification, job_request) -> None:
@@ -105,7 +112,8 @@ def test_run_will_not_be_reduced_for_a_no_rule_specification(specification, job_
     assert job_request.will_reduce is False
 
 
-def test_specification_rule_loading() -> None:
+@pytest.mark.usefixtures("_working_directory_fix")
+def test_specification_rule_loading(job_request) -> None:
     """
     Test that the correct spec for each instrument is loaded.
     :param job_request: Run Fixture

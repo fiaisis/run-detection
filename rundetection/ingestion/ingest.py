@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 from h5py import File  # type: ignore
 
@@ -33,7 +33,7 @@ def _load_h5py_dataset(path: Path) -> Any:
     try:
         logger.info("loading dataset for %s", path)
         file = File(path)
-        key = list(file.keys())[0]
+        key = next(iter(file.keys()))  # same as: list(file.keys())[0] without the cast cost
         return file[key]
     except FileNotFoundError:
         logger.error("Nexus file could not be found: %s", path)
@@ -78,7 +78,7 @@ def _build_initial_job_request(dataset: Any, path: Path) -> JobRequest:
     )
 
 
-def get_sibling_nexus_files(nexus_path: Path) -> List[Path]:
+def get_sibling_nexus_files(nexus_path: Path) -> list[Path]:
     """
     Given the path of a nexus file, return a list of any other nexus files in the same directory
     :param nexus_path: The nexus file for which directory to search
@@ -87,7 +87,7 @@ def get_sibling_nexus_files(nexus_path: Path) -> List[Path]:
     return [Path(file) for file in nexus_path.parents[0].glob("*.nxs") if Path(file) != nexus_path]
 
 
-def get_sibling_runs(nexus_path: Path) -> List[JobRequest]:
+def get_sibling_runs(nexus_path: Path) -> list[JobRequest]:
     """
     Given the path of a nexus file, return a list of ingested sibling nexus files in the same directory
     :param nexus_path: The nexus file for which directory to search

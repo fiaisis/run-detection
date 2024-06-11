@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import dataclasses
 import json
-from pathlib import Path
-from typing import Dict, Any, List
+import typing
+
+if typing.TYPE_CHECKING:
+    from pathlib import Path
+    from typing import Any
 
 
 # splitting this class would be worse than this disable
-# pylint: disable = too-many-instance-attributes
 @dataclasses.dataclass
 class JobRequest:
     """
@@ -27,8 +29,8 @@ class JobRequest:
     good_frames: int
     users: str
     will_reduce: bool = True
-    additional_values: Dict[str, Any] = dataclasses.field(default_factory=dict)
-    additional_requests: List[JobRequest] = dataclasses.field(default_factory=list)
+    additional_values: dict[str, Any] = dataclasses.field(default_factory=dict)
+    additional_requests: list[JobRequest] = dataclasses.field(default_factory=list)
 
     def to_json_string(self) -> str:
         """
