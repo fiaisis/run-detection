@@ -39,7 +39,7 @@ class OsirisReductionModeRule(Rule[bool]):
 
     # The spec phase tuples are (<phase6>, <phase10>) for the next 2 arrays Based on the PDF available here:
     # https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf.
-    SPECTROSCOPY_PHASES: ClassVar[list[tuple[int, int]]] = (
+    SPECTROSCOPY_PHASES: ClassVar[list[tuple[int, int]]] = [
         (8573, 14250),
         (6052, 11250),
         (7500, 12500),
@@ -50,9 +50,9 @@ class OsirisReductionModeRule(Rule[bool]):
         (8207, 13502),
         (3717, 5675),
         (3217, 4904),
-    )
+    ]
 
-    DIFFRACTION_PHASES: ClassVar[list[tuple[int, int]]] = (
+    DIFFRACTION_PHASES: ClassVar[list[tuple[int, int]]] = [
         (1011, 1566),
         (4599, 7715),
         (7590, 12859),
@@ -64,7 +64,7 @@ class OsirisReductionModeRule(Rule[bool]):
         (26062, 3609),
         (28953, 8228),
         (32144, 13367),
-    )
+    ]
 
     def _is_spec_phase(self, phase10: float, phase6: float) -> bool:
         for phases in self.SPECTROSCOPY_PHASES:
