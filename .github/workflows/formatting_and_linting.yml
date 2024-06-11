@@ -33,14 +33,22 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install .[formatting]
 
-      - name: Run black
+      - name: Run ruff formatting
         run: |
-          black --line-length 120 .
+          ruff format .
+
+      - name: Run ruff linting
+        run: |
+          ruff check --fix
 
       - name: Commit changes
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "black auto commit" || true
+          git commit -m "Formatting and linting commit" || true
           git push
+
+      - name: Run mypy
+        run: |
+          mypy --strict rundetection
