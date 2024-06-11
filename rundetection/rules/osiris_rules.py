@@ -80,7 +80,6 @@ class OsirisReductionModeRule(Rule[bool]):
                 return True
         return False
 
-    # pylint: disable=too-many-arguments
     def _determine_mode(
         self, phase10: float, phase6: float, freq: int, detector_tcb_min: float, detector_tcb_max: float
     ) -> Literal["diffraction"] | Literal["spectroscopy"]:
@@ -106,7 +105,6 @@ class OsirisReductionModeRule(Rule[bool]):
 
         return "diffraction" if is_diff_phases else "spectroscopy"
 
-    # pylint: enable=too-many-arguments
     def verify(self, job_request: JobRequest) -> None:
         if not self._value:
             return
@@ -235,7 +233,6 @@ class OsirisStitchRule(Rule[bool]):
                 return
         except KeyError:
             pass
-        # pylint: disable = duplicate-code
         # stitch
         job_request.additional_values["input_runs"] = [job_request.run_number]
         run_numbers = self._get_runs_to_stitch(
@@ -246,7 +243,6 @@ class OsirisStitchRule(Rule[bool]):
             additional_request = deepcopy(job_request)
             additional_request.additional_values["input_runs"] = run_numbers
             job_request.additional_requests.append(additional_request)
-        # pylint: enable = duplicate-code
 
 
 class OsirisCalibrationRule(Rule[str]):

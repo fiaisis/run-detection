@@ -4,8 +4,6 @@ Test for mari rules
 
 import json
 import os
-
-# pylint:disable = redefined-outer-name, protected-access
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch

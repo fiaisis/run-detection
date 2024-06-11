@@ -45,7 +45,6 @@ class ToscaStitchRule(Rule[bool]):
         if not self._value:  # if the stitch rule is set to false, skip
             return
 
-        # pylint: disable = duplicate-code
         job_request.additional_values["input_runs"] = [job_request.run_number]
         run_numbers = self._get_runs_to_stitch(
             job_request.filepath, job_request.run_number, job_request.experiment_title
@@ -55,4 +54,3 @@ class ToscaStitchRule(Rule[bool]):
             additional_request = deepcopy(job_request)
             additional_request.additional_values["input_runs"] = run_numbers
             job_request.additional_requests.append(additional_request)
-        # pylint: enable = duplicate-code

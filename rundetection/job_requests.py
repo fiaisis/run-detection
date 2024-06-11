@@ -12,7 +12,6 @@ if typing.TYPE_CHECKING:
 
 
 # splitting this class would be worse than this disable
-# pylint: disable = too-many-instance-attributes
 @dataclasses.dataclass
 class JobRequest:
     """
