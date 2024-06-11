@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  black:
+  ruff:
     permissions:
       contents: write  # for Git to git push
     runs-on: ubuntu-latest
