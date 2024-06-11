@@ -3,6 +3,7 @@ Test for mari rules
 """
 
 import json
+import os
 
 # pylint:disable = redefined-outer-name, protected-access
 from pathlib import Path
@@ -25,6 +26,14 @@ def get_specification_value(key: str) -> Any:
     with path.open(encoding="utf-8") as fle:
         spec = json.load(fle)
         return spec[key]
+
+
+@pytest.fixture(autouse=True)
+def _working_directory_fix():
+    # Set dir to repo root for purposes of the test.
+    current_working_directory = Path.cwd()
+    if current_working_directory.name == "rules":
+        os.chdir(current_working_directory / ".." / "..")
 
 
 @pytest.fixture()
@@ -67,6 +76,7 @@ def mari_stitch_rule_false():
     return MariStitchRule(value=False)
 
 
+@pytest.mark.usefixtures("_working_directory_fix")
 def test_verify_with_stitch_rule_false(mari_stitch_rule_false, job_request):
     """
     Test not added when none to stitch
@@ -78,11 +88,10 @@ def test_verify_with_stitch_rule_false(mari_stitch_rule_false, job_request):
     assert not job_request.additional_requests
 
 
+@pytest.mark.usefixtures("_working_directory_fix")
 def test_verify_with_single_run(mari_stitch_rule_true, job_request):
     """
     Test not added for single run
-    :param _: unused mock path
-    :param __: unused mock get title
     :param mari_stitch_rule_true: stitch rule fixture
     :param job_request: job request fixture
     :return: none
@@ -95,10 +104,10 @@ def test_verify_with_single_run(mari_stitch_rule_true, job_request):
     assert not job_request.additional_requests
 
 
+@pytest.mark.usefixtures("_working_directory_fix")
 def test_verify_multiple_runs(mari_stitch_rule_true, job_request):
     """
     Test additional requests are included with other rules applied
-    :param _: additional run fixture
     :param mari_stitch_rule_true: rule fixture
     :param job_request: job request fixture
     :return: None

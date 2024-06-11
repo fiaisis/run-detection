@@ -213,23 +213,20 @@ def test_process_notifications(mock_producer):
     assert notification_queue.empty()
 
 
-@patch("rundetection.run_detection.process_messages")
-@patch("rundetection.run_detection.process_notifications")
-@patch("rundetection.run_detection.SimpleQueue")
-@patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError)
-def test_start_run_detection(mock_queue, mock_proc_notifications, mock_proc_messages, mock_get_channel):
+def test_start_run_detection():
     """
     Mock run detection start up
-    :param _: Mock sleep
-    :param mock_queue: Mock notification queue
-    :param mock_proc_notifications: mock process notification function
-    :param mock_proc_messages: Mock process messages function
     :return:  None
     """
     mock_channel = Mock()
-    mock_get_channel.return_value = mock_channel
 
-    with pytest.raises(InterruptedError) and patch("rundetection.run_detection.get_channel"):
+    with (pytest.raises(InterruptedError),
+          patch("rundetection.run_detection.get_channel", return_value=mock_channel) as mock_get_channel,
+          patch("rundetection.run_detection.process_messages") as mock_proc_messages,
+          patch("rundetection.run_detection.process_notifications") as mock_proc_notifications,
+          patch("rundetection.run_detection.SimpleQueue") as mock_queue,
+          patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError),
+    ):
         start_run_detection()
 
     mock_get_channel.assert_called_once_with("watched-files", "watched-files")

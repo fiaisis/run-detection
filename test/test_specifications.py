@@ -1,7 +1,7 @@
 """
 Specification unit test module
 """
-
+import os
 from pathlib import Path
 
 # pylint: disable=protected-access, redefined-outer-name
@@ -34,6 +34,14 @@ def specification(_) -> InstrumentSpecification:
     :return: InstrumentSpecification
     """
     return InstrumentSpecification("foo")
+
+
+@pytest.fixture()
+def _working_directory_fix():
+    # Set dir to repo root for purposes of the test.
+    current_working_directory = Path.cwd()
+    if current_working_directory.name == "test":
+        os.chdir(current_working_directory / "..")
 
 
 def test_run_will_be_reduced_when_all_rules_are_ment(specification: InstrumentSpecification, job_request) -> None:
@@ -105,7 +113,7 @@ def test_run_will_not_be_reduced_for_a_no_rule_specification(specification, job_
     assert job_request.will_reduce is False
 
 
-def test_specification_rule_loading() -> None:
+def test_specification_rule_loading(job_request, _working_directory_fix) -> None:
     """
     Test that the correct spec for each instrument is loaded.
     :param job_request: Run Fixture
