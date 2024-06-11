@@ -4,12 +4,17 @@ Contains the InstrumentSpecification class, the abstract Rule Class and Rule Imp
 
 import json
 import logging
-from typing import Any, List
+import typing
+from pathlib import Path
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
 from rundetection.rules.factory import rule_factory
-from rundetection.rules.rule import Rule
+
+if typing.TYPE_CHECKING:
+    from typing import Any
+
+    from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)
 
@@ -23,16 +28,13 @@ class InstrumentSpecification:
     def __init__(self, instrument: str) -> None:
         logger.info("Loading instrument specification for: %s", instrument)
         self._instrument = instrument
-        self._rules: List[Rule[Any]] = []
+        self._rules: list[Rule[Any]] = []
         self._load_rules()
 
     def _load_rules(self) -> None:
         try:
-            with open(
-                f"rundetection/specifications/{self._instrument.lower()}_specification.json",
-                "r",
-                encoding="utf-8",
-            ) as spec_file:
+            path = Path(f"rundetection/specifications/{self._instrument.lower()}_specification.json")
+            with path.open(encoding="utf-8") as spec_file:
                 spec: dict[str, Any] = json.load(spec_file)
                 self._rules = [rule_factory(key, value) for key, value in spec.items()]
         except FileNotFoundError:

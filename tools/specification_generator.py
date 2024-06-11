@@ -75,7 +75,8 @@ def generate_specification(instrument: str, enabled: bool = True) -> None:
     default_rules = {
         "enabled": enabled,
     }
-    with open(Path(f"../rundetection/specifications/{instrument.lower()}_specification.json"), "w") as file:
+    path = Path(f"../rundetection/specifications/{instrument.lower()}_specification.json")
+    with path.open("w") as file:
         file.write(json.dumps(default_rules))
 
 

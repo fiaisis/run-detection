@@ -4,11 +4,16 @@ from __future__ import annotations
 
 import logging
 import re
-from pathlib import Path
-from typing import Any, Callable
+import typing
 
 from rundetection.exceptions import IngestError, ReductionMetadataError
-from rundetection.job_requests import JobRequest
+
+if typing.TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+    from typing import Any
+
+    from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
 
@@ -104,19 +109,9 @@ def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     else:
         ei = "'auto'"
 
-    if dataset.get("sam_mass") is not None:
-        sam_mass = float(dataset.get("sam_mass")[0])
-    else:
-        sam_mass = 0.0
-    if dataset.get("sam_rmm") is not None:
-        sam_rmm = float(dataset.get("sam_rmm")[0])
-    else:
-        sam_rmm = 0.0
-
-    if dataset.get("remove_bkg") is not None:
-        remove_bkg = bool(dataset.get("remove_bkg")[0])
-    else:
-        remove_bkg = False
+    sam_mass = float(dataset.get("sam_mass")[0]) if dataset.get("sam_mass") is not None else 0.0
+    sam_rmm = float(dataset.get("sam_rmm")[0]) if dataset.get("sam_rmm") is not None else 0.0
+    remove_bkg = bool(dataset.get("remove_bkg")[0]) if dataset.get("remove_bkg") is not None else False
 
     job_request.additional_values["ei"] = ei
     job_request.additional_values["sam_mass"] = sam_mass

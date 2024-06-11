@@ -24,9 +24,6 @@ class InterStitchRule(Rule[bool]):
 
     def verify(self, job_request: JobRequest) -> None:
         sibling_runs = get_sibling_runs(job_request.filepath)
-        additional_files = []
         run_group = self._get_run_group(job_request)
-        for run_ in sibling_runs:
-            if self._get_run_group(run_) == run_group:
-                additional_files.append(str(run_.filepath))
+        additional_files = [str(run_.filepath) for run_ in sibling_runs if self._get_run_group(run_) == run_group]
         job_request.additional_values["additional_files"] = additional_files

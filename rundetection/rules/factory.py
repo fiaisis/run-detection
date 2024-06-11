@@ -6,20 +6,19 @@ from typing import Any
 
 from rundetection.rules.common_rules import EnabledRule
 from rundetection.rules.inter_rules import InterStitchRule
-from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
+from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
-    OsirisPanadiumRule,
-    OsirisStitchRule,
     OsirisAnalyserRule,
-    OsirisReductionModeRule,
     OsirisCalibrationRule,
+    OsirisPanadiumRule,
+    OsirisReductionModeRule,
+    OsirisStitchRule,
 )
-from rundetection.rules.rule import MissingRuleError, T, Rule
+from rundetection.rules.rule import MissingRuleError, Rule, T
 from rundetection.rules.tosca_rules import ToscaStitchRule
 
 
-# pylint: disable = too-many-return-statements
-def rule_factory(key_: str, value: T) -> Rule[Any]:
+def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912
     """
     Given the rule key, and rule value, return the rule implementation
     :param key_: The key of the rule

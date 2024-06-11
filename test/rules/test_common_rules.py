@@ -12,7 +12,7 @@ from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import EnabledRule
 
 
-@pytest.fixture
+@pytest.fixture()
 def job_request():
     """
     job_request Fixture

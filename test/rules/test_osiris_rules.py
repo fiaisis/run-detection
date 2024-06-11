@@ -3,23 +3,22 @@ Tests for osiris rules
 """
 
 from pathlib import Path
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 import pytest
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.osiris_rules import (
+    OsirisAnalyserRule,
     OsirisPanadiumRule,
     OsirisReductionModeRule,
     OsirisStitchRule,
     is_y_within_5_percent_of_x,
-    OsirisAnalyserRule,
 )
 
 
-# pylint: disable = redefined-outer-name, protected-access
-@pytest.fixture
+@pytest.fixture()
 def job_request():
     """
     job request fixture
@@ -42,7 +41,7 @@ def job_request():
 
 
 @pytest.mark.parametrize(
-    "y, x, expected",
+    ("y", "x", "expected"),
     [
         (100, 95, True),
         (100, 105, True),
@@ -78,23 +77,23 @@ def test_osiris_panadium_rule(job_request):
     rule = OsirisPanadiumRule(12345)
     rule.verify(job_request)
 
-    assert job_request.additional_values["panadium"] == 12345
+    assert job_request.additional_values["panadium"] == 12345  # noqa: PLR2004
 
 
-@pytest.fixture
+@pytest.fixture()
 def osiris_mode_rule():
     """Reduction mode rule fixture"""
     return OsirisReductionModeRule(True)
 
 
-@pytest.fixture
+@pytest.fixture()
 def analyser_rule():
     """Analyser rule fixture"""
     return OsirisAnalyserRule(True)
 
 
 def test_spectroscopy_mode(osiris_mode_rule, job_request):
-    "Test spec values result in spec"
+    """Test spec values result in spec"""
     job_request.additional_values.update(
         {
             "phase10": 14250,
@@ -123,9 +122,7 @@ def test_diffraction_mode(osiris_mode_rule, job_request):
     assert job_request.additional_values["mode"] == "diffraction"
 
 
-@patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_spec_phase", return_value=True)
-@patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_diff_phase", return_value=True)
-def test_phase_conflict_resolves_with_tcb_values_to_diff(_, __, osiris_mode_rule, job_request):
+def test_phase_conflict_resolves_with_tcb_values_to_diff(osiris_mode_rule, job_request):
     """Test phase conflict resolving with tcb values to diffraction mode"""
     job_request.additional_values.update(
         {
@@ -136,13 +133,15 @@ def test_phase_conflict_resolves_with_tcb_values_to_diff(_, __, osiris_mode_rule
             "tcb_detector_max": 0,
         }
     )
-    osiris_mode_rule.verify(job_request)
+    with (
+        patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_spec_phase", return_value=True),
+        patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_diff_phase", return_value=True),
+    ):
+        osiris_mode_rule.verify(job_request)
     assert job_request.additional_values["mode"] == "diffraction"
 
 
-@patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_spec_phase", return_value=True)
-@patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_diff_phase", return_value=True)
-def test_phase_conflict_resolves_with_tcb_values_to_spec(_, __, osiris_mode_rule, job_request):
+def test_phase_conflict_resolves_with_tcb_values_to_spec(osiris_mode_rule, job_request):
     """Test phase conflict resolves with tcb values"""
     job_request.additional_values.update(
         {
@@ -153,7 +152,11 @@ def test_phase_conflict_resolves_with_tcb_values_to_spec(_, __, osiris_mode_rule
             "tcb_detector_max": 80200,
         }
     )
-    osiris_mode_rule.verify(job_request)
+    with (
+        patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_spec_phase", return_value=True),
+        patch("rundetection.rules.osiris_rules.OsirisReductionModeRule._is_diff_phase", return_value=True),
+    ):
+        osiris_mode_rule.verify(job_request)
     assert job_request.additional_values["mode"] == "spectroscopy"
 
 
@@ -197,9 +200,8 @@ def test_osiris_stitch_rule_will_do_nothing_if_diffraction_mode(job_request):
     assert job_request.additional_values["sum_runs"] is False
 
 
-# pylint: disable=too-many-arguments
 @pytest.mark.parametrize(
-    "high_limit, low_limit, actual_high, actual_low, expected_analyser",
+    ("high_limit", "low_limit", "actual_high", "actual_low", "expected_analyser"),
     [
         (51500, 71500, 45900, 65900, 2),
         (22500, 42500, 19000.03, 39000, 4),
@@ -226,7 +228,7 @@ def test_analyser_rule_verify_freq_less_than_50(job_request, analyser_rule):
     job_request.additional_values["mode"] = "spectroscopy"
     job_request.additional_values["freq10"] = 49
     analyser_rule.verify(job_request)
-    assert job_request.additional_values["analyser"] == 2
+    assert job_request.additional_values["analyser"] == 2  # noqa: PLR2004
 
 
 def test_verify_freq_greater_than_50_valid_tcb(job_request, analyser_rule):
@@ -240,7 +242,7 @@ def test_verify_freq_greater_than_50_valid_tcb(job_request, analyser_rule):
         "mode": "spectroscopy",
     }
     analyser_rule.verify(job_request)
-    assert job_request.additional_values["analyser"] == 2
+    assert job_request.additional_values["analyser"] == 2  # noqa: PLR2004
 
 
 def test_analyser_verify_raises_when_freq_greater_than_50_invalid_tcb(job_request, analyser_rule):
@@ -284,14 +286,18 @@ def test_analyser_rule_returns_for_diffraction(job_request):
     rule.verify(job_request)
 
 
-@patch("rundetection.rules.osiris_rules.get_run_title")
-@patch("rundetection.rules.osiris_rules.Path.exists", return_value=True)
-def test_verify_should_stitch(_, mock_get_title: Mock, job_request: JobRequest) -> None:
+def test_verify_should_stitch(job_request: JobRequest) -> None:
     """
     Test verify stitches run
     """
-    mock_get_title.side_effect = [job_request.experiment_title, "Test experiment  run 2", "different random title"]
-    rule = OsirisStitchRule(True)
-    rule.verify(job_request)
+    with (
+        patch(
+            "rundetection.rules.osiris_rules.get_run_title",
+            side_effect=[job_request.experiment_title, "Test experiment  run 2", "different random title"],
+        ),
+        patch("rundetection.rules.osiris_rules.Path.exists", return_value=True),
+    ):
+        rule = OsirisStitchRule(True)
+        rule.verify(job_request)
 
     assert job_request.additional_requests[0].additional_values["input_runs"] == [100, 99]

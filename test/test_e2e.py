@@ -5,14 +5,16 @@ End-to-end tests
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+import typing
+from pathlib import Path
 
 import pytest
 from pika import BlockingConnection
-from pika.adapters.blocking_connection import BlockingChannel
 
+if typing.TYPE_CHECKING:
+    from typing import Any
 
-# pylint: disable=redefined-outer-name, no-name-in-module
+    from pika.adapters.blocking_connection import BlockingChannel
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -38,7 +40,7 @@ def consumer_channel() -> BlockingChannel:
 
 
 @pytest.fixture(autouse=True)
-def purge_queues(producer_channel, consumer_channel):
+def _purge_queues(producer_channel, consumer_channel):
     """Purge queues on setup and teardown"""
     yield
     producer_channel.queue_purge(queue="watched-files")
@@ -58,16 +60,17 @@ def produce_message(message: str, channel: BlockingChannel) -> None:
 def get_specification_value(instrument: str, key: str) -> Any:
     """
     Given an instrument and key, return the specification value
-    :param instrument: The instrument for which specificaiton to check
+    :param instrument: The instrument for which specification to check
     :param key: The key for the rule
     :return: The rule value
     """
-    with open(f"rundetection/specifications/{instrument.lower()}_specification.json", "r", encoding="utf-8") as fle:
+    path = Path(f"rundetection/specifications/{instrument.lower()}_specification.json")
+    with path.open(encoding="utf-8") as fle:
         spec = json.load(fle)
         return spec[key]
 
 
-def consume_all_messages(consumer_channel: BlockingChannel) -> List[Dict[str, Any]]:
+def consume_all_messages(consumer_channel: BlockingChannel) -> list[dict[str, Any]]:
     """Consume all messages from the queue"""
     recieved_messages = []
     for mf, _, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=1):
@@ -79,7 +82,7 @@ def consume_all_messages(consumer_channel: BlockingChannel) -> List[Dict[str, An
     return recieved_messages
 
 
-def assert_run_in_recieved(run: Any, recieved: List[Any]):
+def assert_run_in_recieved(run: Any, recieved: list[Any]):
     """
     Assert the given run is in the recieved list of runs
     :param run:
@@ -94,7 +97,7 @@ EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
 
 
 @pytest.mark.parametrize(
-    "messages,expected_requests",
+    ("messages", "expected_requests"),
     [
         (
             [

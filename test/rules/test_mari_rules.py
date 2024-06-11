@@ -12,7 +12,7 @@ from unittest.mock import patch
 import pytest
 
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.mari_rules import MariStitchRule, MariMaskFileRule, MariWBVANRule
+from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 
 
 def get_specification_value(key: str) -> Any:
@@ -21,12 +21,13 @@ def get_specification_value(key: str) -> Any:
     :param key: The key for the rule
     :return: The rule value
     """
-    with open("rundetection/specifications/mari_specification.json", "r", encoding="utf-8") as fle:
+    path = Path("rundetection/specifications/mari_specification.json")
+    with path.open(encoding="utf-8") as fle:
         spec = json.load(fle)
         return spec[key]
 
 
-@pytest.fixture
+@pytest.fixture()
 def job_request():
     """
     job request fixture
@@ -48,7 +49,7 @@ def job_request():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def mari_stitch_rule_true():
     """
     stitch rule fixture for true
@@ -57,7 +58,7 @@ def mari_stitch_rule_true():
     return MariStitchRule(value=True)
 
 
-@pytest.fixture
+@pytest.fixture()
 def mari_stitch_rule_false():
     """
     Stitch rule fixture for false
@@ -77,9 +78,7 @@ def test_verify_with_stitch_rule_false(mari_stitch_rule_false, job_request):
     assert not job_request.additional_requests
 
 
-@patch("rundetection.ingestion.ingest.get_run_title", return_value="Test experiment")
-@patch("pathlib.Path.exists", return_value=False)
-def test_verify_with_single_run(_, __, mari_stitch_rule_true, job_request):
+def test_verify_with_single_run(mari_stitch_rule_true, job_request):
     """
     Test not added for single run
     :param _: unused mock path
@@ -88,12 +87,15 @@ def test_verify_with_single_run(_, __, mari_stitch_rule_true, job_request):
     :param job_request: job request fixture
     :return: none
     """
-    mari_stitch_rule_true.verify(job_request)
+    with (
+        patch("rundetection.ingestion.ingest.get_run_title", return_value="Test experiment"),
+        patch("pathlib.Path.exists", return_value=False),
+    ):
+        mari_stitch_rule_true.verify(job_request)
     assert not job_request.additional_requests
 
 
-@patch("rundetection.rules.mari_rules.MariStitchRule._get_runs_to_stitch", return_value=[1, 2, 3])
-def test_verify_multiple_runs(_, mari_stitch_rule_true, job_request):
+def test_verify_multiple_runs(mari_stitch_rule_true, job_request):
     """
     Test additional requests are included with other rules applied
     :param _: additional run fixture
@@ -101,7 +103,8 @@ def test_verify_multiple_runs(_, mari_stitch_rule_true, job_request):
     :param job_request: job request fixture
     :return: None
     """
-    mari_stitch_rule_true.verify(job_request)
+    with patch("rundetection.rules.mari_rules.MariStitchRule._get_runs_to_stitch", return_value=[1, 2, 3]):
+        mari_stitch_rule_true.verify(job_request)
 
     assert len(job_request.additional_requests) == 1
     assert job_request.additional_requests[0].additional_values["mask_file_link"] == get_specification_value(
@@ -131,4 +134,4 @@ def test_mari_wbvan_rule(job_request):
     rule = MariWBVANRule(1234567)
     rule.verify(job_request)
 
-    assert job_request.additional_values["wbvan"] == 1234567
+    assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004

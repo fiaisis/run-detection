@@ -9,17 +9,14 @@ from _pytest.logging import LogCaptureFixture
 
 from rundetection.exceptions import IngestError, ReductionMetadataError
 from rundetection.ingestion.extracts import (
-    skip_extract,
+    get_cycle_string_from_path,
     get_extraction_function,
     mari_extract,
-    tosca_extract,
-    get_cycle_string_from_path,
     osiris_extract,
+    skip_extract,
+    tosca_extract,
 )
 from rundetection.job_requests import JobRequest
-
-
-# pylint: disable = redefined-outer-name
 
 
 @pytest.fixture()
@@ -56,7 +53,7 @@ def test_skip_extract(caplog: LogCaptureFixture):
 
 
 @pytest.mark.parametrize(
-    "input_value,expected_function_name",
+    ("input_value", "expected_function_name"),
     [
         ("foo", "skip_extract"),
         ("mari", "mari_extract"),
@@ -84,10 +81,10 @@ def test_mari_extract_single_ei(job_request):
     dataset = {"ei": [10.0], "sam_mass": [5.0], "sam_rmm": [100.0]}
     result = mari_extract(job_request, dataset)
 
-    assert result.additional_values["ei"] == 10.0
-    assert result.additional_values["sam_mass"] == 5.0
-    assert result.additional_values["sam_rmm"] == 100.0
-    assert result.additional_values["monovan"] == 12345
+    assert result.additional_values["ei"] == 10.0  # noqa: PLR2004
+    assert result.additional_values["sam_mass"] == 5.0  # noqa: PLR2004
+    assert result.additional_values["sam_rmm"] == 100.0  # noqa: PLR2004
+    assert result.additional_values["monovan"] == 12345  # noqa: PLR2004
     assert result.additional_values["remove_bkg"] is False
 
 
@@ -101,9 +98,9 @@ def test_mari_extract_multiple_ei(job_request):
     result = mari_extract(job_request, dataset)
 
     assert result.additional_values["ei"] == [10.0, 20.0]
-    assert result.additional_values["sam_mass"] == 5.0
-    assert result.additional_values["sam_rmm"] == 100.0
-    assert result.additional_values["monovan"] == 12345
+    assert result.additional_values["sam_mass"] == 5.0  # noqa: PLR2004
+    assert result.additional_values["sam_rmm"] == 100.0  # noqa: PLR2004
+    assert result.additional_values["monovan"] == 12345  # noqa: PLR2004
     assert result.additional_values["remove_bkg"] is False
 
 
@@ -117,9 +114,9 @@ def test_mari_extract_no_ei(job_request):
     result = mari_extract(job_request, dataset)
 
     assert result.additional_values["ei"] == "'auto'"
-    assert result.additional_values["sam_mass"] == 5.0
-    assert result.additional_values["sam_rmm"] == 100.0
-    assert result.additional_values["monovan"] == 12345
+    assert result.additional_values["sam_mass"] == 5.0  # noqa: PLR2004
+    assert result.additional_values["sam_rmm"] == 100.0  # noqa: PLR2004
+    assert result.additional_values["monovan"] == 12345  # noqa: PLR2004
     assert result.additional_values["remove_bkg"] is False
 
 
@@ -132,7 +129,7 @@ def test_mari_extract_no_sam_mass_or_sam_rmm(job_request):
     dataset = {"ei": [10.0]}
     result = mari_extract(job_request, dataset)
 
-    assert result.additional_values["ei"] == 10.0
+    assert result.additional_values["ei"] == 10.0  # noqa: PLR2004
     assert result.additional_values["sam_mass"] == 0.0
     assert result.additional_values["sam_rmm"] == 0.0
     assert result.additional_values["monovan"] == 0
@@ -149,22 +146,21 @@ def test_mari_extract_remove_bkg_true(job_request):
     dataset = {"ei": [10.0], "sam_mass": [5.0], "sam_rmm": [100.0], "remove_bkg": [True]}
     result = mari_extract(job_request, dataset)
 
-    assert result.additional_values["ei"] == 10.0
-    assert result.additional_values["sam_mass"] == 5.0
-    assert result.additional_values["sam_rmm"] == 100.0
-    assert result.additional_values["monovan"] == 12345
+    assert result.additional_values["ei"] == 10.0  # noqa: PLR2004
+    assert result.additional_values["sam_mass"] == 5.0  # noqa: PLR2004
+    assert result.additional_values["sam_rmm"] == 100.0  # noqa: PLR2004
+    assert result.additional_values["monovan"] == 12345  # noqa: PLR2004
     assert result.additional_values["remove_bkg"] is True
 
 
-@patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string")
-def test_tosca_extract(_: Mock, job_request):
+def test_tosca_extract(job_request):
     """Test Tosca Extract adds_cycle_string"""
-    tosca_extract(job_request, None)
-    assert job_request.additional_values["cycle_string"] == "some string"
+    with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
+        tosca_extract(job_request, None)
+        assert job_request.additional_values["cycle_string"] == "some string"
 
 
-@patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string")
-def test_osiris_extract(_, job_request):
+def test_osiris_extract(job_request):
     """Test Osiris extract"""
     dataset = {
         "selog": {
@@ -180,20 +176,20 @@ def test_osiris_extract(_, job_request):
             }
         },
     }
-    osiris_extract(job_request, dataset)
-    assert job_request.additional_values["freq10"] == 6
-    assert job_request.additional_values["freq6"] == 6
-    assert job_request.additional_values["tcb_detector_min"] == 10.0
-    assert job_request.additional_values["tcb_detector_max"] == 100.0
-    assert job_request.additional_values["tcb_monitor_min"] == 12.1
-    assert job_request.additional_values["tcb_monitor_max"] == 121.0
-    assert job_request.additional_values["phase6"] == 1221.0
-    assert job_request.additional_values["phase10"] == 1221.0
+    with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
+        osiris_extract(job_request, dataset)
+    assert job_request.additional_values["freq10"] == 6  # noqa: PLR2004
+    assert job_request.additional_values["freq6"] == 6  # noqa: PLR2004
+    assert job_request.additional_values["tcb_detector_min"] == 10.0  # noqa: PLR2004
+    assert job_request.additional_values["tcb_detector_max"] == 100.0  # noqa: PLR2004
+    assert job_request.additional_values["tcb_monitor_min"] == 12.1  # noqa: PLR2004
+    assert job_request.additional_values["tcb_monitor_max"] == 121.0  # noqa: PLR2004
+    assert job_request.additional_values["phase6"] == 1221.0  # noqa: PLR2004
+    assert job_request.additional_values["phase10"] == 1221.0  # noqa: PLR2004
     assert job_request.additional_values["cycle_string"] == "some string"
 
 
-@patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string")
-def test_osiris_extract_non_matching_freqs_within_error_boundary(_, job_request):
+def test_osiris_extract_non_matching_freqs_within_error_boundary(job_request):
     """Test Osiris extract"""
     dataset = {
         "selog": {
@@ -209,19 +205,19 @@ def test_osiris_extract_non_matching_freqs_within_error_boundary(_, job_request)
             }
         },
     }
-    osiris_extract(job_request, dataset)
-    assert job_request.additional_values["freq10"] == 6
-    assert job_request.additional_values["freq6"] == 6
-    assert job_request.additional_values["tcb_detector_min"] == 10.0
-    assert job_request.additional_values["tcb_detector_max"] == 100.0
-    assert job_request.additional_values["tcb_monitor_min"] == 12.1
-    assert job_request.additional_values["tcb_monitor_max"] == 121.0
-    assert job_request.additional_values["phase6"] == 1221.0
-    assert job_request.additional_values["phase10"] == 1221.0
+    with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
+        osiris_extract(job_request, dataset)
+    assert job_request.additional_values["freq10"] == 6  # noqa: PLR2004
+    assert job_request.additional_values["freq6"] == 6  # noqa: PLR2004
+    assert job_request.additional_values["tcb_detector_min"] == 10.0  # noqa: PLR2004
+    assert job_request.additional_values["tcb_detector_max"] == 100.0  # noqa: PLR2004
+    assert job_request.additional_values["tcb_monitor_min"] == 12.1  # noqa: PLR2004
+    assert job_request.additional_values["tcb_monitor_max"] == 121.0  # noqa: PLR2004
+    assert job_request.additional_values["phase6"] == 1221.0  # noqa: PLR2004
+    assert job_request.additional_values["phase10"] == 1221.0  # noqa: PLR2004
     assert job_request.additional_values["cycle_string"] == "some string"
 
 
-@patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string")
 def test_osiris_extract_raises_on_bad_frequencies(job_request):
     """Test correct exception raised when freq6 and freq10 do not match"""
     dataset = {
@@ -233,7 +229,10 @@ def test_osiris_extract_raises_on_bad_frequencies(job_request):
             }
         },
     }
-    with pytest.raises(ReductionMetadataError):
+    with (
+        pytest.raises(ReductionMetadataError),
+        patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"),
+    ):
         osiris_extract(job_request, dataset)
 
 

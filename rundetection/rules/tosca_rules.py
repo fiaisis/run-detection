@@ -3,7 +3,6 @@
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import List
 
 from rundetection.ingestion.ingest import get_run_title
 from rundetection.job_requests import JobRequest
@@ -31,7 +30,7 @@ class ToscaStitchRule(Rule[bool]):
             return True
         return False
 
-    def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> List[int]:
+    def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> list[int]:
         run_numbers = []
         while run_path.exists():
             if not self._is_title_similar(get_run_title(run_path), run_title):

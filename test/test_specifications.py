@@ -17,7 +17,7 @@ from rundetection.rules.mari_rules import MariStitchRule
 from rundetection.specifications import InstrumentSpecification
 
 
-@pytest.fixture
+@pytest.fixture()
 def job_request():
     """
     JobRequest fixture
@@ -26,7 +26,7 @@ def job_request():
     return JobRequest(1, "larmor", "1", "1", Path("/archive/larmor/1/1,nxs"), "start time", "end time", 1, 1, "user")
 
 
-@pytest.fixture
+@pytest.fixture()
 @patch("rundetection.specifications.InstrumentSpecification._load_rules")
 def specification(_) -> InstrumentSpecification:
     """
