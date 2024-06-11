@@ -1,6 +1,7 @@
 """
 Specification unit test module
 """
+
 import os
 from pathlib import Path
 

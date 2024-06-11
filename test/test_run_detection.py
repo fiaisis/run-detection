@@ -220,12 +220,13 @@ def test_start_run_detection():
     """
     mock_channel = Mock()
 
-    with (pytest.raises(InterruptedError),
-          patch("rundetection.run_detection.get_channel", return_value=mock_channel) as mock_get_channel,
-          patch("rundetection.run_detection.process_messages") as mock_proc_messages,
-          patch("rundetection.run_detection.process_notifications") as mock_proc_notifications,
-          patch("rundetection.run_detection.SimpleQueue") as mock_queue,
-          patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError),
+    with (
+        pytest.raises(InterruptedError),
+        patch("rundetection.run_detection.get_channel", return_value=mock_channel) as mock_get_channel,
+        patch("rundetection.run_detection.process_messages") as mock_proc_messages,
+        patch("rundetection.run_detection.process_notifications") as mock_proc_notifications,
+        patch("rundetection.run_detection.SimpleQueue") as mock_queue,
+        patch("rundetection.run_detection.time.sleep", side_effect=InterruptedError),
     ):
         start_run_detection()
 
