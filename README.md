@@ -3,8 +3,8 @@
 ![License: GPL-3.0](https://img.shields.io/github/license/fiaisis/run-detection)
 ![Build: passing](https://img.shields.io/github/actions/workflow/status/fiaisis/run-detection/tests.yml?branch=main)
 [![codecov](https://codecov.io/gh/fiaisis/run-detection/branch/main/graph/badge.svg?token=9YZ619JJ0N)](https://codecov.io/gh/fiaisis/run-detection)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-30173d)](https://docs.astral.sh/ruff/)
+[![linting: ruff](https://img.shields.io/badge/linting-ruff-30173d)](https://docs.astral.sh/ruff/)
 
 ## Running and Testing
 
