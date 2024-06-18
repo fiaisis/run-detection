@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -30,7 +30,7 @@ jobs:
 
       - name: Build and push run-detection Docker image
         id: docker_build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           file: ./container/rundetection.D
           push: true
@@ -43,7 +43,7 @@ jobs:
           token: ${{ secrets.GITOPS_STAGING_EDIT_TOKEN }}
   
       - name: Edit the YAML rundetection file for staging
-        uses: mikefarah/yq@v4.44.1
+        uses: mikefarah/yq@v4.44.2
         with:
           cmd: yq e -i '.spec.template.spec.containers[] |= select(.name == "rundetection").image = "ghcr.io/fiaisis/rundetection@${{ steps.docker_build.outputs.digest }}"' './components/rundetection/envs/staging/rundetection.yml'
   
