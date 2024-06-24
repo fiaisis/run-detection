@@ -17,7 +17,7 @@ run-detection = "rundetection.run_detection:main"
 
 [project.optional-dependencies]
 formatting = [
-    "ruff==0.4.8",
+    "ruff==0.4.10",
     "mypy==1.10.0",
     "run-detection[test]"
 ]
