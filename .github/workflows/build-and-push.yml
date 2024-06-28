@@ -51,5 +51,5 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -am "Update run-detection to use ${{ steps.docker_build.outputs.digest }}"
+          git commit -am "[CD] Update run-detection with this commit ${{ github.event.head_commit.url}}"
           git push
