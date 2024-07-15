@@ -8,10 +8,11 @@ from rundetection.rules.common_rules import EnabledRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
-    OsirisAnalyserRule,
     OsirisCalibrationRule,
-    OsirisPanadiumRule,
+    OsirisDefaultGraniteAnalyser,
+    OsirisDefaultSpectroscopy,
     OsirisReductionModeRule,
+    OsirisReflectionCalibrationRule,
     OsirisStitchRule,
 )
 from rundetection.rules.rule import MissingRuleError, Rule, T
@@ -44,15 +45,18 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "mariwbvan":
             if isinstance(value, int):
                 return MariWBVANRule(value)
-        case "osirispanadium":
-            if isinstance(value, int):
-                return OsirisPanadiumRule(value)
         case "osirisstitch":
             if isinstance(value, bool):
                 return OsirisStitchRule(value)
-        case "osirisanalyser":
+        case "osiriscalibfilesandreflection":
+            if isinstance(value, dict):
+                return OsirisReflectionCalibrationRule(value)
+        case "osirisdefaultspectroscopy":
             if isinstance(value, bool):
-                return OsirisAnalyserRule(value)
+                return OsirisDefaultSpectroscopy(value)
+        case "osirisdefaultgraniteanalyser":
+            if isinstance(value, bool):
+                return OsirisDefaultGraniteAnalyser(value)
         case "osirisreductionmode":
             if isinstance(value, bool):
                 return OsirisReductionModeRule(value)
