@@ -199,12 +199,12 @@ def test_osiris_stitch_rule_will_do_nothing_if_diffraction_mode(job_request):
     ],
 )
 def test_determine_analyser_valid_values(
-        reflection_rule, high_limit, low_limit, actual_high, actual_low, expected_analyser
+    reflection_rule, high_limit, low_limit, actual_high, actual_low, expected_analyser
 ):
     """Test correct analysers are returned with valid TCB"""
     assert (
-            reflection_rule._determine_reflection_from_tcb_values(high_limit, low_limit, actual_high, actual_low)
-            == expected_analyser
+        reflection_rule._determine_reflection_from_tcb_values(high_limit, low_limit, actual_high, actual_low)
+        == expected_analyser
     )
 
 
