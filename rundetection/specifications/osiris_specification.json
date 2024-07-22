@@ -1,8 +1,8 @@
 {
   "enabled": true,
-  "osiriscalibration": "/extras/osi92682_multi_graphite002_calib.nxs",
-  "osirispanadium": 12345,
-  "osirisreductionmode": true,
-  "osirisanalyser": true,
+  "osiriscalibfilesandreflection": {"002": "00148587", "004": "00148587"},
+  "osirisreductionmode": false,
+  "osirisdefaultspectroscopy": true,
+  "osirisdefaultgraniteanalyser": true,
   "osirisstitch": true
 }

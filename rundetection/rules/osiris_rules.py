@@ -124,63 +124,69 @@ class OsirisReductionModeRule(Rule[bool]):
         job_request.additional_values["mode"] = mode
 
 
-class OsirisAnalyserRule(Rule[bool]):
+class OsirisDefaultSpectroscopy(Rule[bool]):
+    def verify(self, job_request: JobRequest) -> None:
+        if self._value is True:
+            job_request.additional_values["spectroscopy_reduction"] = "true"
+            job_request.additional_values["diffraction_reduction"] = "false"
+
+
+class OsirisDefaultGraniteAnalyser(Rule[bool]):
+    def verify(self, job_request: JobRequest) -> None:
+        if self._value is True:
+            job_request.additional_values["analyser"] = "graphite"
+
+
+class OsirisReflectionCalibrationRule(Rule[dict[str, str]]):
     """
-    Determines the analyser
+    Determine the reflection and set calibration run number based on the reflection
     """
 
     # This map is based on the Appendix 1 - Quasi / inelastic settings pdf. It is reduced as the values for
-    # frequency < 50 are removed as they default to analyser 2
+    # frequency < 50 are removed as they default to reflection 002
     # available here https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf
-    REDUCED_ANALYSER_TIME_CHANNEL_MAP: ClassVar[dict[tuple[float, float, float, float], int]] = {
-        (51500.0, 71500.0, 45900.0, 65900.0): 2,
-        (45500.0, 65500.0, 40400.0, 60400.0): 2,
-        (58700.0, 78700.0, 52000.0, 72000.0): 2,
-        (40500.0, 60500.0, 35300.0, 55300.0): 2,
-        (48500.0, 68500.0, 43600.0, 63600.0): 2,
-        (22500.0, 42500.0, 19000.03, 39000.0): 4,  # The .03 is NOT a typo
-        (20500.0, 40500.0, 16700.0, 36700.0): 4,
+    REDUCED_REFLECTION_TIME_CHANNEL_MAP: ClassVar[dict[tuple[float, float, float, float], str]] = {
+        (51500.0, 71500.0, 45900.0, 65900.0): "002",
+        (45500.0, 65500.0, 40400.0, 60400.0): "002",
+        (58700.0, 78700.0, 52000.0, 72000.0): "002",
+        (40500.0, 60500.0, 35300.0, 55300.0): "002",
+        (48500.0, 68500.0, 43600.0, 63600.0): "002",
+        (22500.0, 42500.0, 19000.03, 39000.0): "004",  # The .03 is NOT a typo
+        (20500.0, 40500.0, 16700.0, 36700.0): "004",
     }
 
-    def _determine_analyser_from_tcb_values(
+    def _determine_reflection_from_tcb_values(
         self, tcb_detector_min: float, tcb_detector_max: float, tcb_monitor_min: float, tcb_monitor_max: float
-    ) -> int:
-        for bounds, analyser in self.REDUCED_ANALYSER_TIME_CHANNEL_MAP.items():
+    ) -> str:
+        for bounds, reflection in self.REDUCED_REFLECTION_TIME_CHANNEL_MAP.items():
             if (
                 is_y_within_5_percent_of_x(tcb_detector_min, bounds[0])
                 and is_y_within_5_percent_of_x(tcb_detector_max, bounds[1])
                 and is_y_within_5_percent_of_x(tcb_monitor_min, bounds[2])
                 and is_y_within_5_percent_of_x(tcb_monitor_max, bounds[3])
             ):
-                return analyser
+                return reflection
         raise RuleViolationError("Analyser cannot be determined")
 
-    def verify(self, job_request: JobRequest) -> None:
-        if not self._value:
-            return
-
-        if job_request.additional_values["mode"] == "diffraction":
-            return
-
-        # We already know freq10 and 6 are the same from extraction. If it's less than 50 we assume its analyser 2
+    def _determine_reflection(self, job_request: JobRequest) -> str:
+        # Magic 50 number determined by knowing that no frequency below 50 uses 004,
+        # as per https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf
         if job_request.additional_values["freq10"] < 50:  # noqa: PLR2004
-            job_request.additional_values["analyser"] = 2
-            return
-        job_request.additional_values["analyser"] = self._determine_analyser_from_tcb_values(
+            return "002"
+        return self._determine_reflection_from_tcb_values(
             tcb_detector_min=job_request.additional_values["tcb_detector_min"],
             tcb_detector_max=job_request.additional_values["tcb_detector_max"],
             tcb_monitor_min=job_request.additional_values["tcb_monitor_min"],
             tcb_monitor_max=job_request.additional_values["tcb_monitor_max"],
         )
 
-
-class OsirisPanadiumRule(Rule[int]):
-    """
-    Inserts the cycles panadium number into the request. This value is manually calcuated once per cycle
-    """
-
     def verify(self, job_request: JobRequest) -> None:
-        job_request.additional_values["panadium"] = self._value
+        if not self._value:
+            return
+        reflection = self._determine_reflection(job_request)
+
+        job_request.additional_values["reflection"] = reflection
+        job_request.additional_values["calibration_run_number"] = self._value[reflection]
 
 
 class OsirisStitchRule(Rule[bool]):
@@ -243,12 +249,3 @@ class OsirisStitchRule(Rule[bool]):
             additional_request = deepcopy(job_request)
             additional_request.additional_values["input_runs"] = run_numbers
             job_request.additional_requests.append(additional_request)
-
-
-class OsirisCalibrationRule(Rule[str]):
-    """
-    Sets the calibration file path
-    """
-
-    def verify(self, job_request: JobRequest) -> None:
-        job_request.additional_values["calibration_file_path"] = self._value
