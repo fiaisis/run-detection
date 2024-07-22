@@ -108,9 +108,6 @@ class OsirisReductionModeRule(Rule[bool]):
     def verify(self, job_request: JobRequest) -> None:
         if not self._value:
             return
-        # Added this so we can turn the rule off
-        if self._value is False:
-            return
         mode = self._determine_mode(
             job_request.additional_values["phase10"],
             job_request.additional_values["phase6"],
