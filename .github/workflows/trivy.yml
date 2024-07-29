@@ -18,7 +18,7 @@ jobs:
       - name: Build run-detection Docker image
         uses: docker/build-push-action@v6
         with:
-          file: ./container/rundetection.D
+          file: ./container/Dockerfile
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/rundetection:${{ github.sha }}
 
       - name: Run Trivy vulnerability scanner

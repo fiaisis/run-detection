@@ -23,3 +23,12 @@ updates:
       action-packages:
         patterns:
           - "*"
+
+  - package-ecosystem: "docker"
+    directory: "/container"
+    schedule:
+      interval: "daily"
+    groups:
+      docker:
+        patterns:
+          - "*"
