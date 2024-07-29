@@ -47,7 +47,7 @@ localhost will be used as the default host, and the default credentials, guest g
 - Construct the container by running:
 
 ```shell
-docker build . -f ./container/rundetection.D -t ghcr.io/fiaisis/rundetection
+docker build . -f ./container/Dockerfile -t ghcr.io/fiaisis/rundetection
 ```
 
 - Run the container by running:

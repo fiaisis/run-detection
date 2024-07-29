@@ -32,21 +32,21 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v6
         with:
-          file: ./container/rundetection.D
+          file: ./container/Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/rundetection:${{ github.sha }}
-  
+
       - name: Checkout the Gitops repository
         uses: actions/checkout@v4
         with:
           repository: fiaisis/gitops
           token: ${{ secrets.GITOPS_STAGING_EDIT_TOKEN }}
-  
+
       - name: Edit the YAML rundetection file for staging
         uses: mikefarah/yq@v4.44.2
         with:
           cmd: yq e -i '.spec.template.spec.containers[] |= select(.name == "rundetection").image = "ghcr.io/fiaisis/rundetection@${{ steps.docker_build.outputs.digest }}"' './components/rundetection/envs/staging/rundetection.yml'
-  
+
       - name: Commit and push changes
         run: |
           git config --local user.email "action@github.com"

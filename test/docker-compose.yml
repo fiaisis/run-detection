@@ -18,7 +18,7 @@ services:
   run-detection:
     build:
       context: ../
-      dockerfile: container/rundetection.D
+      dockerfile: container/Dockerfile
     depends_on:
       rabbit-mq:
         condition: service_healthy
