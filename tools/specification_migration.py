@@ -1,7 +1,8 @@
 """
 This script moves the all json specifications from this repository to the database via PUT calls to the FIA_API
 
-It should be run from the root directory of this repository, and expects 1 command line arg the FIA_API_API_KEY
+It should be run from the root directory of this repository.
+It expects 2 command line args, the FIA_API_URL and the FIA_API_API_KEY
 """
 
 import json
@@ -10,9 +11,9 @@ from pathlib import Path
 
 import requests
 
-FIA_API_API_KEY = sys.argv[1]
+FIA_API_PATH = sys.argv[1]
+FIA_API_API_KEY = sys.argv[2]
 
-FIA_API_PATH: str = "http://localhost:8000"
 successful_update: int = 200
 auth_headers: json = {"Authorization": f"Bearer {FIA_API_API_KEY}", "accept": "application/json"}
 
