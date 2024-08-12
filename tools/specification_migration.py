@@ -11,7 +11,7 @@ from pathlib import Path
 
 import requests
 
-FIA_API_PATH = sys.argv[1]
+FIA_API_URL = sys.argv[1]
 FIA_API_API_KEY = sys.argv[2]
 
 successful_update: int = 200
@@ -28,8 +28,9 @@ for file_name in specifications_list:
         json_spec = json.load(specification)
 
         response = requests.put(
-            url=f"{FIA_API_PATH}/instrument/{instrument_name}/specification",
+            url=f"{FIA_API_URL}/instrument/{instrument_name}/specification",
             json=json_spec,
             headers=auth_headers,
             timeout=2000,
         )
+        print(f"PUT result, {instrument_name} - {response.status_code}")  # noqa: T201
