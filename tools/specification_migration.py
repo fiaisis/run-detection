@@ -15,9 +15,6 @@ FIA_API_API_KEY = sys.argv[1]
 FIA_API_PATH: str = "http://localhost:8000"
 successful_update: int = 200
 auth_headers: json = {"Authorization": f"Bearer {FIA_API_API_KEY}", "accept": "application/json"}
-# store names and cod
-failed_instruments: list[list[str, int]] = []
-
 
 # locate specifications
 specifications_path = Path("rundetection/specifications")
@@ -35,9 +32,3 @@ for file_name in specifications_list:
             headers=auth_headers,
             timeout=2000,
         )
-
-        if response.status_code != successful_update:
-            failed_instruments.append([instrument_name, response.status_code])
-        print(f"Updated {instrument_name} via PUT ", response.status_code, response.text)
-
-print("The following instruments failed to update", failed_instruments)
