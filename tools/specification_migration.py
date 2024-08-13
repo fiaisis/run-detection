@@ -12,6 +12,11 @@ from pathlib import Path
 import requests
 
 FIA_API_URL = sys.argv[1]
+"""
+The API key doesn't work when running in a bash terminal (due to the non
+alpha-numeric characters). So it needs to be temporarily added below when running,
+and removed after (DO NOT COMMIT the hardcoded FIA_API_API_KEY)
+"""
 FIA_API_API_KEY = sys.argv[2]
 
 successful_update: int = 200
