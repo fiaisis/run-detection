@@ -6,6 +6,7 @@ import json
 import logging
 import typing
 from pathlib import Path
+
 import requests
 
 from rundetection.exceptions import RuleViolationError
