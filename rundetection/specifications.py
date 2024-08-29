@@ -6,6 +6,7 @@ import json
 import logging
 import typing
 from pathlib import Path
+import requests
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
@@ -17,6 +18,10 @@ if typing.TYPE_CHECKING:
     from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)
+
+FIA_API_API_KEY = "shh"
+FIA_API_URL = "http://localhost:8000"
+headers: json = {"Authorization": f"Bearer {FIA_API_API_KEY}", "accept": "application/json"}
 
 
 class InstrumentSpecification:
@@ -32,6 +37,12 @@ class InstrumentSpecification:
         self._load_rules()
 
     def _load_rules(self) -> None:
+        # get specification via FIA_API
+        logger.debug(f"FIA_API_URL =********************* {FIA_API_URL},  {self._instrument}")
+        requests.get(
+            url=f"{FIA_API_URL}/instrument/{self._instrument.upper()}/specification", headers=headers, timeout=1000
+        )
+
         try:
             path = Path(f"rundetection/specifications/{self._instrument.lower()}_specification.json")
             with path.open(encoding="utf-8") as spec_file:
