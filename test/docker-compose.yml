@@ -1,9 +1,9 @@
 services:
   rabbit-mq:
-    image: "rabbitmq:3.12-management"
+    image: 'rabbitmq:3.12-management'
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - '5672:5672'
+      - '15672:15672'
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
@@ -21,8 +21,17 @@ services:
       rabbit-mq:
         condition: service_healthy
     environment:
-      QUEUE_HOST: "rabbit-mq"
-      INGRESS_QUEUE_NAME: "watched-files"
-      EGRESS_QUEUE_NAME: "scheduled-jobs"
+      QUEUE_HOST: 'rabbit-mq'
+      INGRESS_QUEUE_NAME: 'watched-files'
+      EGRESS_QUEUE_NAME: 'scheduled-jobs'
     volumes:
       - ../test/test_data/e2e_data:/archive
+
+  fia_api:
+    build:
+      context: ../FIA-API
+      dockerfile: container/fia_api.D
+    ports:
+      - '8000:80'
+    environment:
+      FIA_API_API_KEY: shh
