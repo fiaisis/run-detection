@@ -72,3 +72,4 @@ jobs:
           cd test
           docker compose logs run-detection
           docker compose logs rabbit-mq
+          docker compose logs fia-api
