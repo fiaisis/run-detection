@@ -56,7 +56,7 @@ jobs:
       - name: Checkout the fia-api repository
         uses: actions/checkout@v4
         with:
-          repository: fiaisis/fia-api
+          repository: fiaisis/FIA-API
           path: FIA-API
 
       - name: Run docker-compose
