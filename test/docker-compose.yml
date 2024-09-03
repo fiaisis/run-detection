@@ -20,6 +20,8 @@ services:
     depends_on:
       rabbit-mq:
         condition: service_healthy
+      db:
+        condition: service_healthy
       fia_api:
         condition: service_healthy
     environment:
@@ -31,33 +33,49 @@ services:
 
   fia_api:
     build:
-      context: ../FIA-API
+      context: ../../FIA-API
       dockerfile: container/fia_api.D
-    # depends_on:
-    #   db:
-    #     condition: service_healthy
+    container_name: fia_api
+    image: ghcr.io/fiaisis/fia-api
+    network_mode: host
     ports:
       - '8000:80'
-    # healthcheck:
-    #   test: curl --fail -X 'GET' 'http://localhost:8000/healthz' || exit 1
-    #   interval: 30s
-    #   timeout: 30s
-    #   retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail -X 'GET' 'http://localhost:8000/healthz' || exit 1
+      interval: 30s
+      timeout: 30s
+      retries: 3
     environment:
       FIA_API_API_KEY: shh
+    command: bash -c "
+      pip install .[all]
+      && pip install .[test]
+      && pwd
+      && ls -a
+      && python -m utils.db_generator
+      && uvicorn fia_api.fia_api:app --host 0.0.0.0 --port 80"
 
   db:
     image: postgres:latest
     restart: always
+    container_name: fiadb
     ports:
-      - 54321:54321 # this has an extra digit
+      - '5432:5432'
     user: postgres
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready']
-      interval: 10s
-      timeout: 5s
-      retries: 5
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: fia
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  bridge_net:
+    external: true
+    driver: bridge
