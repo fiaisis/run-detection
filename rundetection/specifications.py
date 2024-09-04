@@ -4,6 +4,7 @@ Contains the InstrumentSpecification class, the abstract Rule Class and Rule Imp
 
 import json
 import logging
+import os
 import typing
 from pathlib import Path
 
@@ -21,8 +22,8 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 FIA_API_API_KEY = "shh"
-FIA_API_URL = "http://localhost:8000"
-headers: json = {"Authorization": f"Bearer {FIA_API_API_KEY}", "accept": "application/json"}
+FIA_API_URL = os.getenv("FIA_API_URL", "http://localhost:8000")
+headers: dict = {"Authorization": f"Bearer {FIA_API_API_KEY}", "accept": "application/json"}
 
 
 class InstrumentSpecification:
@@ -38,8 +39,6 @@ class InstrumentSpecification:
         self._load_rules()
 
     def _load_rules(self) -> None:
-        # get specification via FIA_API
-        logger.debug(f"FIA_API_URL =********************* {FIA_API_URL},  {self._instrument}")
         requests.get(
             url=f"{FIA_API_URL}/instrument/{self._instrument.upper()}/specification", headers=headers, timeout=1000
         )
