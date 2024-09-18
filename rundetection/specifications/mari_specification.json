@@ -2,5 +2,5 @@
   "enabled": true,
   "maristitch": true,
   "marimaskfile": "https://raw.githubusercontent.com/pace-neutrons/InstrumentFiles/fb8f1bb2b2430211c20a3cd8d4e2566ce24b755e/mari/mari_mask2023_4.xml",
-  "mariwbvan": 29680
+  "mariwbvan": 29895
 }
