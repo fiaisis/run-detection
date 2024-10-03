@@ -4,11 +4,12 @@ Unit tests for common rules
 
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.common_rules import EnabledRule
+from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule, NotAScatterFileError
 
 
 @pytest.fixture()
@@ -40,6 +41,22 @@ def test_enabled_rule_when_not_enabled(job_request) -> None:
     rule = EnabledRule(False)
     rule.verify(job_request)
     assert job_request.will_reduce is False
+
+
+@pytest.mark.parametrize("end_of_title", ["_TRANS", "_SANS", "COOL", "_sans/trans"])
+def test_checkifscattersans_verify_raises_for_no_sans_trans(end_of_title) -> None:
+    job_request = mock.MagicMock()
+    job_request.experiment_title = "{fancy chemical}" + end_of_title
+    with pytest.raises(NotAScatterFileError):
+        CheckIfScatterSANS(True).verify(job_request)
+
+
+@pytest.mark.parametrize("to_raise", ["direct", "DIRECT", "empty", "EMPTY"])
+def test_checkifscattersans_verify_raises_for_direct_or_empty_in_title(to_raise) -> None:
+    job_request = mock.MagicMock()
+    job_request.experiment_title = "{fancy chemical " + to_raise + "}_SANS/TRANS"
+    with pytest.raises(NotAScatterFileError):
+        CheckIfScatterSANS(True).verify(job_request)
 
 
 if __name__ == "__main__":

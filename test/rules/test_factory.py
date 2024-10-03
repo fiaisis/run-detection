@@ -8,9 +8,10 @@ from unittest.mock import patch
 
 import pytest
 
-from rundetection.rules.common_rules import EnabledRule
+from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
+from rundetection.rules.loq_rules import LoqFindFiles, LoqUserFile
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraniteAnalyser,
@@ -50,6 +51,9 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("osirisdefaultspectroscopy", True, OsirisDefaultSpectroscopy),
         ("osirisdefaultgraniteanalyser", True, OsirisDefaultGraniteAnalyser),
         ("osirisreductionmode", True, OsirisReductionModeRule),
+        ("checkifscattersans", True, CheckIfScatterSANS),
+        ("loquserfile", "loquserfile.toml", LoqUserFile),
+        ("loqfindfiles", True, LoqFindFiles),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
