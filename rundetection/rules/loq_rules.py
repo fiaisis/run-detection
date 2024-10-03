@@ -15,7 +15,6 @@ import xmltodict
 from rundetection.rules.rule import Rule
 
 if typing.TYPE_CHECKING:
-
     from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
@@ -153,8 +152,10 @@ class LoqFindFiles(Rule[bool]):
         # Expecting 3 values
         if len(job_request.experiment_title.split("_")) < 3:  # noqa: PLR2004
             job_request.will_reduce = False
-            logger.error(f"Less than 3 sections to the experiment_title, probably missing Can Scatter title: "
-                         f"{job_request.experiment_title}")
+            logger.error(
+                f"Less than 3 sections to the experiment_title, probably missing Can Scatter title: "
+                f"{job_request.experiment_title}"
+            )
             return
         sample_title, can_title, ___ = job_request.experiment_title.split("_")
         sans_files = create_list_of_files(job_request)

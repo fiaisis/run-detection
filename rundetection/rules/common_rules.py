@@ -1,6 +1,7 @@
 """
 Module containing rule implementations for instrument shared rules
 """
+
 import logging
 
 from rundetection.job_requests import JobRequest
@@ -29,8 +30,14 @@ class CheckIfScatterSANS(Rule[bool]):
             job_request.will_reduce = False
             logger.error("Not a scatter run. Does not have _SANS/TRANS in the experiment title.")
         # If it has empty or direct in the title assume it is a direct run file instead of a normal scatter.
-        if ("empty" in job_request.experiment_title or "EMPTY" in job_request.experiment_title or
-                "direct" in job_request.experiment_title or "DIRECT" in job_request.experiment_title):
+        if (
+            "empty" in job_request.experiment_title
+            or "EMPTY" in job_request.experiment_title
+            or "direct" in job_request.experiment_title
+            or "DIRECT" in job_request.experiment_title
+        ):
             job_request.will_reduce = False
-            logger.error("If it is a scatter, contains empty or direct in the title and is assumed to be a scatter "
-                         "for an empty can run.")
+            logger.error(
+                "If it is a scatter, contains empty or direct in the title and is assumed to be a scatter "
+                "for an empty can run."
+            )
