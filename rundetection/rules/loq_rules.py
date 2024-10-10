@@ -136,7 +136,7 @@ def create_list_of_files(job_request: JobRequest) -> list[SansFileData]:
 
 
 def strip_excess_files(sans_files: list[SansFileData], scatter_run_number: int) -> list[SansFileData]:
-    new_list_of_files = []
+    new_list_of_files: list[SansFileData] = []
     for sans_file in sans_files:
         if int(sans_file.run_number) >= scatter_run_number:
             return new_list_of_files
