@@ -94,6 +94,7 @@ def assert_run_in_recieved(run: Any, recieved: list[Any]):
 
 EXPECTED_MARI_WBVAN = get_specification_value("mari", "mariwbvan")
 EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
+EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandreflection")
 
 
 @pytest.mark.parametrize(
@@ -303,7 +304,7 @@ EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
                         "tcb_monitor_min": 40700.0,
                         "tcb_monitor_max": 60700.0,
                         "reflection": "002",
-                        "calibration_run_number": "00148587",
+                        "calibration_run_number": EXPECTED_OSIRIS_MASK["002"],
                         "spectroscopy_reduction": "true",
                         "diffraction_reduction": "false",
                         "analyser": "graphite",
@@ -332,7 +333,7 @@ EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
                         "tcb_monitor_min": 40700.0,
                         "tcb_monitor_max": 60700.0,
                         "reflection": "002",
-                        "calibration_run_number": "00148587",
+                        "calibration_run_number": EXPECTED_OSIRIS_MASK["002"],
                         "spectroscopy_reduction": "true",
                         "diffraction_reduction": "false",
                         "analyser": "graphite",
@@ -361,7 +362,7 @@ EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
                         "tcb_monitor_min": 40700.0,
                         "tcb_monitor_max": 60700.0,
                         "reflection": "002",
-                        "calibration_run_number": "00148587",
+                        "calibration_run_number": EXPECTED_OSIRIS_MASK["002"],
                         "spectroscopy_reduction": "true",
                         "diffraction_reduction": "false",
                         "analyser": "graphite",
@@ -390,7 +391,7 @@ EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
                         "tcb_monitor_min": 11700.0,
                         "tcb_monitor_max": 51700.0,
                         "reflection": "002",
-                        "calibration_run_number": "00148587",
+                        "calibration_run_number": EXPECTED_OSIRIS_MASK["002"],
                         "spectroscopy_reduction": "true",
                         "diffraction_reduction": "false",
                         "analyser": "graphite",

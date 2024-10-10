@@ -130,14 +130,12 @@ def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
     :param notification_queue: The notification queue
     :return: None
     """
-    logger.info("Checking notification queue...")
     while not notification_queue.empty():
         detected_run = notification_queue.get()
         logger.info("Sending notification for run: %s", detected_run.run_number)
 
         with producer() as channel:
             channel.basic_publish(EGRESS_QUEUE_NAME, "", detected_run.to_json_string().encode())
-    logger.info("Notification queue empty. Continuing...")
 
 
 def write_readiness_probe_file() -> None:
