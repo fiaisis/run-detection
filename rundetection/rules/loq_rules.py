@@ -62,8 +62,7 @@ def _find_trans_file(sans_files: list[SansFileData], sample_title: str) -> SansF
 
 
 def _find_direct_file(sans_files: list[SansFileData]) -> SansFileData | None:
-    reversed_files = sans_files.copy()
-    reversed_files.reverse()
+    reversed_files = reversed(sans_files)
     for sans_file in reversed_files:
         if _is_sample_direct_file(sans_file=sans_file):
             return sans_file
