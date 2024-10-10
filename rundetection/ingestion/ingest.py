@@ -104,6 +104,4 @@ def get_run_title(nexus_path: Path) -> str:
     """
     # Instead of using Ingest here and reusing code, we won't bother with loading too much of the file every time and
     # JUST load the title instead of everything.
-    nexus_file = File(nexus_path)
-    raw_data_key = next(iter(nexus_file.keys()))  # same as: list(file.keys())[0] without the cast cost
-    return nexus_file[raw_data_key]["title"][0].decode("utf-8")
+    return ingest(nexus_path).experiment_title
