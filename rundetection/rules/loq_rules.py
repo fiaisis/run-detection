@@ -30,19 +30,7 @@ class SansFileData:
 def _extract_run_number_from_filename(filename: str) -> str:
     # Assume filename looks like so: LOQ00100002.nxs
     # Return everything between 1 and 2 including 1 and 2.
-    filename = filename.split(".")[0]  # Drop .nxs
-    filename = filename.strip("LOQ")  # Drop LOQ
-
-    # Drop first 0s
-    run_number = ""
-    first_non_zero_found = False
-    for char in filename:
-        if first_non_zero_found is False and char != "0":
-            run_number += char
-            first_non_zero_found = True
-        elif first_non_zero_found:
-            run_number += char
-    return run_number
+    return filename.split(".")[0]lstrip("LOQ").lstrip("0")
 
 
 def _extract_cycle_from_file_path(file_path: Path) -> str:
