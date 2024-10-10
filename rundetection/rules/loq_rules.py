@@ -55,7 +55,7 @@ def _is_sample_transmission_file(sans_file: SansFileData, sample_title: str) -> 
 
 
 def _is_sample_direct_file(sans_file: SansFileData) -> bool:
-    return "direct" in sans_file.title.lower() or "empty" in sans_file.title.lower() and sans_file.type == "TRANS"
+    return ("direct" in sans_file.title.lower() or "empty" in sans_file.title.lower()) and sans_file.type == "TRANS"
 
 
 def _is_can_scatter_file(sans_file: SansFileData, can_title: str) -> bool:
@@ -150,17 +150,18 @@ class LoqFindFiles(Rule[bool]):
 
     def verify(self, job_request: JobRequest) -> None:
         # Expecting 3 values
-        if len(job_request.experiment_title.split("_")) < 3:  # noqa: PLR2004
+        if len(job_request.experiment_title.split("_")) != 3:  # noqa: PLR2004
             job_request.will_reduce = False
             logger.error(
-                f"Less than 3 sections to the experiment_title, probably missing Can Scatter title: "
+                f"Less or more than 3 sections to the experiment_title, probably missing Can Scatter title: "
                 f"{job_request.experiment_title}"
             )
             return
         sample_title, can_title, ___ = job_request.experiment_title.split("_")
         sans_files = create_list_of_files(job_request)
         if sans_files == []:
-            logger.error("")
+            job_request.will_reduce = False
+            logger.error("No files found for this cycle excluding this run.")
             return
         sans_files = strip_excess_files(sans_files, scatter_run_number=job_request.run_number)
 
