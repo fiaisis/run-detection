@@ -84,7 +84,7 @@ def _find_can_trans_file(sans_files: list[SansFileData], can_title: str) -> Sans
 
 def find_path_for_run_number(cycle_path: str, run_number: int) -> Path | None:
     # 10 is just a magic number, but we needed an unrealistic value for the maximum
-    for padding in range(1, 11):
+    for padding in range(11):
         potential_path = Path(f"{cycle_path}/LOQ{str(run_number).zfill(padding)}.nxs")
         if potential_path.exists():
             return potential_path
