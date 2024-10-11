@@ -105,10 +105,8 @@ def create_list_of_files(job_request: JobRequest) -> list[SansFileData]:
     for run_info in cycle_run_info["NXroot"]["NXentry"]:
         title_contents = run_info["title"]["#text"].split("_")
         run_number = run_info["run_number"]["#text"]
-        if len(title_contents) == 2:  # noqa: PLR2004
-            _, file_type = title_contents
-        elif len(title_contents) == 3:  # noqa: PLR2004
-            _, __, file_type = title_contents
+        if len(title_contents) in {2, 3}:
+            file_type = title_contents[-1]
         else:
             job_request.will_reduce = False
             logger.error(f"Run {run_info} either doesn't contain a _ or is not an expected experiment title format.")
@@ -132,14 +130,15 @@ class LoqFindFiles(Rule[bool]):
 
     def verify(self, job_request: JobRequest) -> None:
         # Expecting 3 values
-        if len(job_request.experiment_title.split("_")) != 3:  # noqa: PLR2004
+        title_parts = job_request.experiment_title.split("_")
+        if len(title_parts) != 3:  # noqa: PLR2004
             job_request.will_reduce = False
             logger.error(
                 f"Less or more than 3 sections to the experiment_title, probably missing Can Scatter title: "
                 f"{job_request.experiment_title}"
             )
             return
-        sample_title, can_title, ___ = job_request.experiment_title.split("_")
+        sample_title, can_title, ___ = title_parts
         sans_files = create_list_of_files(job_request)
         if sans_files == []:
             job_request.will_reduce = False
