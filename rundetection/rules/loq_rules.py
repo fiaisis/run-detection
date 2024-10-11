@@ -83,16 +83,12 @@ def _find_can_trans_file(sans_files: list[SansFileData], can_title: str) -> Sans
 
 
 def find_path_for_run_number(cycle_path: str, run_number: int) -> Path | None:
-    zeros = ""
-    potential_path = Path(f"{cycle_path}/LOQ{zeros}{run_number}.nxs")
     # 10 is just a magic number, but we needed an unrealistic value for the maximum
-    while len(zeros) < 10 and not potential_path.exists():  # noqa: PLR2004
-        zeros += "0"
-        potential_path = Path(f"{cycle_path}/LOQ{zeros}{run_number}.nxs")
-    # 10 is just a magic number, but we needed an unrealistic value for the maximum
-    if len(zeros) == 10:  # noqa: PLR2004
-        return None
-    return potential_path
+    for padding in range(1, 11):
+        potential_path = Path(f"{cycle_path}/LOQ{str(run_number).zfill(padding)}.nxs")
+        if potential_path.exists():
+            return potential_path
+    return None
 
 
 def grab_cycle_instrument_index(cycle: str) -> str:
