@@ -11,6 +11,7 @@ from rundetection.exceptions import IngestError, ReductionMetadataError
 from rundetection.ingestion.extracts import (
     get_cycle_string_from_path,
     get_extraction_function,
+    loq_extract,
     mari_extract,
     osiris_extract,
     skip_extract,
@@ -59,6 +60,7 @@ def test_skip_extract(caplog: LogCaptureFixture):
         ("mari", "mari_extract"),
         ("tosca", "tosca_extract"),
         ("osiris", "osiris_extract"),
+        ("loq", "loq_extract"),
     ],
 )
 def test_get_extraction_function(input_value, expected_function_name):
@@ -234,6 +236,25 @@ def test_osiris_extract_raises_on_bad_frequencies(job_request):
         patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"),
     ):
         osiris_extract(job_request, dataset)
+
+
+def test_loq_extract(job_request):
+    dataset = {
+        "sample": {
+            "thickness": 1.0,
+            "shape": "Disc",
+            "height": 8.0,
+            "width": 8.0,
+        }
+    }
+    with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
+        loq_extract(job_request, dataset)
+
+    assert job_request.additional_values["cycle_string"] == "some string"
+    assert job_request.additional_values["sample_thickness"] == 1.0
+    assert job_request.additional_values["sample_geometry"] == "Disc"
+    assert job_request.additional_values["sample_height"] == 8.0  # noqa: PLR2004
+    assert job_request.additional_values["sample_width"] == 8.0  # noqa: PLR2004
 
 
 def test_get_cycle_string_from_path_valid():

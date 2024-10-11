@@ -4,8 +4,9 @@ Module containing the factory function for each rule
 
 from typing import Any
 
-from rundetection.rules.common_rules import EnabledRule
+from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule
 from rundetection.rules.inter_rules import InterStitchRule
+from rundetection.rules.loq_rules import LoqFindFiles, LoqUserFile
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraniteAnalyser,
@@ -59,6 +60,15 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "osirisreductionmode":
             if isinstance(value, bool):
                 return OsirisReductionModeRule(value)
+        case "checkifscattersans":
+            if isinstance(value, bool):
+                return CheckIfScatterSANS(value)
+        case "loqfindfiles":
+            if isinstance(value, bool):
+                return LoqFindFiles(value)
+        case "loquserfile":
+            if isinstance(value, str):
+                return LoqUserFile(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 

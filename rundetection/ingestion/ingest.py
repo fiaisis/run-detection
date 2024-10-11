@@ -102,4 +102,6 @@ def get_run_title(nexus_path: Path) -> str:
     :param nexus_path: Path - the nexus file path
     :return: str - The title of the files run
     """
+    # Instead of using Ingest here and reusing code, we won't bother with loading too much of the file every time and
+    # JUST load the title instead of everything.
     return ingest(nexus_path).experiment_title
