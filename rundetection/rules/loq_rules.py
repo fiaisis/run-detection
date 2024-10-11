@@ -32,11 +32,6 @@ def _extract_run_number_from_filename(filename: str) -> str:
     return filename.split(".")[0].lstrip("LOQ").lstrip("0")
 
 
-def _extract_cycle_from_file_path(file_path: Path) -> str:
-    # Assume path looks like so: /archive/NDXLOQ/Instrument/data/cycle_24_2/LOQ000001.nxs
-    return file_path.parts[-2]
-
-
 def _is_sample_transmission_file(sans_file: SansFileData, sample_title: str) -> bool:
     return sample_title in sans_file.title and sans_file.type == "TRANS"
 
@@ -98,7 +93,7 @@ def grab_cycle_instrument_index(cycle: str) -> str:
 
 
 def create_list_of_files(job_request: JobRequest) -> list[SansFileData]:
-    cycle = _extract_cycle_from_file_path(file_path=job_request.filepath)
+    cycle = job_request.additional_values["cycle_string"]
     xml = grab_cycle_instrument_index(cycle=cycle)
     cycle_run_info = xmltodict.parse(xml)
     list_of_files = []
@@ -125,9 +120,6 @@ def strip_excess_files(sans_files: list[SansFileData], scatter_run_number: int) 
 
 
 class LoqFindFiles(Rule[bool]):
-    def __init__(self, value: bool):
-        super().__init__(value)
-
     def verify(self, job_request: JobRequest) -> None:
         # Expecting 3 values
         title_parts = job_request.experiment_title.split("_")

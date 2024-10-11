@@ -34,6 +34,22 @@ def skip_extract(job_request: JobRequest, _: Any) -> JobRequest:
     return job_request
 
 
+def loq_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+    """
+    Get the sample details and the cycle strings
+    :param job_request: The job request
+    :param dataset: The nexus file dataset
+    :return: The updated job request
+    """
+    job_request.additional_values["cycle_string"] = get_cycle_string_from_path(job_request.filepath)
+    job_request.additional_values["sample_thickness"] = dataset.get("sample").get("thickness")
+    job_request.additional_values["sample_geometry"] = dataset.get("sample").get("shape")
+    job_request.additional_values["sample_height"] = dataset.get("sample").get("height")
+    job_request.additional_values["sample_width"] = dataset.get("sample").get("width")
+
+    return job_request
+
+
 def tosca_extract(job_request: JobRequest, _: Any) -> JobRequest:
     """
     Add the cycle_string to the job request
@@ -137,6 +153,8 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
             return tosca_extract
         case "osiris":
             return osiris_extract
+        case "loq":
+            return loq_extract
         case _:
             return skip_extract
 
