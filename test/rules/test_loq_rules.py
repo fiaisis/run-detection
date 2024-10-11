@@ -9,7 +9,6 @@ from rundetection.rules.loq_rules import (
     LoqFindFiles,
     LoqUserFile,
     SansFileData,
-    _extract_cycle_from_file_path,
     _extract_run_number_from_filename,
     _find_can_scatter_file,
     _find_can_trans_file,
@@ -40,17 +39,6 @@ SANS_FILES = [
 )
 def test_extract_run_number_from_filename(filename, result):
     assert _extract_run_number_from_filename(filename) == result
-
-
-@pytest.mark.parametrize(
-    ("filename", "result"),
-    [
-        (Path("/archive/NDXLOQ/Instrument/data/cycle_24_2/LOQ00100002.nxs"), "cycle_24_2"),
-        (Path("/archive/NDXLOQ/Instrument/data/cycle_21_4/LOQ.nxs"), "cycle_21_4"),
-    ],
-)
-def test_extract_cycle_from_file_path(filename, result):
-    assert _extract_cycle_from_file_path(filename) == result
 
 
 @pytest.mark.parametrize(
