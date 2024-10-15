@@ -100,12 +100,9 @@ def create_list_of_files(job_request: JobRequest) -> list[SansFileData]:
     for run_info in cycle_run_info["NXroot"]["NXentry"]:
         title_contents = run_info["title"]["#text"].split("_")
         run_number = run_info["run_number"]["#text"]
-        if len(title_contents) in {2, 3}:
-            file_type = title_contents[-1]
-        else:
-            job_request.will_reduce = False
-            logger.error(f"Run {run_info} either doesn't contain a _ or is not an expected experiment title format.")
-            return []
+        if len(title_contents) not in {2, 3}:
+            continue
+        file_type = title_contents[-1]
         list_of_files.append(SansFileData(title=run_info["title"]["#text"], type=file_type, run_number=run_number))
     return list_of_files
 
