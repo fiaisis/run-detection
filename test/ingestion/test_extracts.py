@@ -241,10 +241,10 @@ def test_osiris_extract_raises_on_bad_frequencies(job_request):
 def test_loq_extract(job_request):
     dataset = {
         "sample": {
-            "thickness": 1.0,
-            "shape": "Disc",
-            "height": 8.0,
-            "width": 8.0,
+            "thickness": [1.0],
+            "shape": ["b'Disc'"],
+            "height": [8.0],
+            "width": [8.0],
         }
     }
     with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):

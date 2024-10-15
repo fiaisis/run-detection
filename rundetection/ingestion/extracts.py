@@ -42,10 +42,10 @@ def loq_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     :return: The updated job request
     """
     job_request.additional_values["cycle_string"] = get_cycle_string_from_path(job_request.filepath)
-    job_request.additional_values["sample_thickness"] = dataset.get("sample").get("thickness")
-    job_request.additional_values["sample_geometry"] = dataset.get("sample").get("shape")
-    job_request.additional_values["sample_height"] = dataset.get("sample").get("height")
-    job_request.additional_values["sample_width"] = dataset.get("sample").get("width")
+    job_request.additional_values["sample_thickness"] = float(dataset.get("sample").get("thickness")[0])
+    job_request.additional_values["sample_geometry"] = str(dataset.get("sample").get("shape")[0]).lstrip("b").strip("'")
+    job_request.additional_values["sample_height"] = float(dataset.get("sample").get("height")[0])
+    job_request.additional_values["sample_width"] = float(dataset.get("sample").get("width")[0])
 
     return job_request
 
