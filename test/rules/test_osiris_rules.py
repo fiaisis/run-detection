@@ -228,9 +228,9 @@ def test_analyser_rule_verify_freq_less_than_50_but_close(job_request, reflectio
     job_request.additional_values["mode"] = "spectroscopy"
     job_request.additional_values["freq10"] = 49.981
     job_request.additional_values["tcb_detector_min"] = 20500.0
-    job_request.additional_values["tcb_detector_max"]= 40500.0
-    job_request.additional_values["tcb_monitor_min"]= 16700.0
-    job_request.additional_values["tcb_monitor_max"]= 36700.0
+    job_request.additional_values["tcb_detector_max"] = 40500.0
+    job_request.additional_values["tcb_monitor_min"] = 16700.0
+    job_request.additional_values["tcb_monitor_max"] = 36700.0
     reflection_rule.verify(job_request)
     assert job_request.additional_values["reflection"] == "004"
     assert job_request.additional_values["calibration_run_number"] == "00148587"
