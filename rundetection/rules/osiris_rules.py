@@ -171,7 +171,7 @@ class OsirisReflectionCalibrationRule(Rule[dict[str, str]]):
     def _determine_reflection(self, job_request: JobRequest) -> str:
         # Magic 50 number determined by knowing that no frequency below 50 uses 004,
         # as per https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf
-        if job_request.additional_values["freq10"] < 50:  # noqa: PLR2004
+        if round(job_request.additional_values["freq10"]) < 50:  # noqa: PLR2004
             return "002"
         return self._determine_reflection_from_tcb_values(
             tcb_detector_min=job_request.additional_values["tcb_detector_min"],
