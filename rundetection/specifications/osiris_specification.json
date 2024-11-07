@@ -4,5 +4,5 @@
   "osirisreductionmode": false,
   "osirisdefaultspectroscopy": true,
   "osirisdefaultgraniteanalyser": true,
-  "osirisstitch": true
+  "molspecstitch": true
 }

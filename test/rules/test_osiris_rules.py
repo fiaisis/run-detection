@@ -10,12 +10,12 @@ import pytest
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
+from rundetection.rules.common_rules import OsirisStitchRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraniteAnalyser,
     OsirisDefaultSpectroscopy,
     OsirisReductionModeRule,
     OsirisReflectionCalibrationRule,
-    OsirisStitchRule,
     is_y_within_5_percent_of_x,
 )
 from rundetection.rules.rule import Rule

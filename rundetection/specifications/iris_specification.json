@@ -1,3 +1,9 @@
 {
-  "enabled": false
+  "enabled": true,
+  "molspecstitch": true,
+  "irisreduction": true,
+  "iriscalibration": {
+    "graphite": {"002": "00149059", "004": "00149060"},
+    "mica": {"002": "00149059", "004": "00149060", "006": "00149060"}
+  }
 }
