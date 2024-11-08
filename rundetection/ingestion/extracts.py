@@ -176,6 +176,8 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
             return osiris_extract
         case "loq":
             return loq_extract
+        case "iris":
+            return iris_extract
         case _:
             return skip_extract
 

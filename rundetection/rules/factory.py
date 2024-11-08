@@ -4,7 +4,7 @@ Module containing the factory function for each rule
 
 from typing import Any
 
-from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule
+from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule, MolSpecStitchRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.loq_rules import LoqFindFiles, LoqUserFile

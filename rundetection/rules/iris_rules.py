@@ -1,5 +1,5 @@
 """
-Rules for Osiris
+Rules for Iris
 """
 
 from __future__ import annotations
@@ -71,20 +71,19 @@ class IrisReductionRule(Rule[bool]):
     """
     Determines the type of reduction to produce (spectroscopy or diffraction)
     """
-    def _tuple_match(self, x: tuple[int | float, int | float], y: tuple[int | float, int | float]) -> bool:
+    @staticmethod
+    def _tuple_match(x: tuple[int | float, int | float], y: tuple[int | float, int | float]) -> bool:
         return is_y_within_5_percent_of_x(x[0], y[0]) and is_y_within_5_percent_of_x(x[1], y[1])
 
     def verify(self, job_request: JobRequest) -> None:
         if not self._value:
             return
         if round(job_request.additional_values["freq10"]) < 50:  # noqa: PLR2004
-            # Known "guranteed" to be Graphite analyser and 002 reflection as frequency is not 50
+            # Known "guaranteed" to be Graphite analyser and 002 reflection as frequency is not 50
             # (or close enough to 50 for it to not matter)
             job_request.additional_values["reflection"] = "002"
-            job_request.additional_values["mode"] = "spectroscopy"
-
+            job_request.additional_values["spectroscopy_reduction"] = "true"
         reflection = None
-        mode = None
         analyser = None
         phases = (job_request.additional_values["phase6"], job_request.additional_values["phase10"])
         tcb_1 = (job_request.additional_values["tcb_detector_min"], job_request.additional_values["tcb_detector_max"])
@@ -94,11 +93,16 @@ class IrisReductionRule(Rule[bool]):
                     and self._tuple_match(tcb_1, spec_type["tcb_1"])
                     and self._tuple_match(tcb_2, spec_type["tcb_2"])):
                 reflection = spec_type["reflection"]
-                mode = spec_type["mode"]
                 analyser = spec_type["analyser"]
                 break
+        if reflection is None:
+            job_request.additional_values["spectroscopy_reduction"] = "false"
+            job_request.additional_values["diffraction_reduction"] = "true"
+            return
         job_request.additional_values["reflection"] = reflection
-        job_request.additional_values["mode"] = mode
+        job_request.additional_values["spectroscopy_reduction"] = "true"
+        job_request.additional_values["diffraction_reduction"] = "false"
+        job_request.additional_values["mode"] = "spectroscopy"
         job_request.additional_values["analyser"] = analyser
 
 

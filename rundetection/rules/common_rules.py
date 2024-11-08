@@ -70,7 +70,7 @@ class MolSpecStitchRule(Rule[bool]):
         logger.info("Titles not similar, continuing")
         return False
 
-    def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> list[int]:
+    def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str, instrument: str) -> list[int]:
         run_numbers = []
         while run_path.exists():
             logger.info("run path exists %s", run_path)
@@ -80,7 +80,7 @@ class MolSpecStitchRule(Rule[bool]):
             logger.info("titles are similar appending run number %s", run_number)
             run_numbers.append(run_number)
             run_number -= 1
-            run_path = Path(run_path.parent, f"OSIRIS{run_number:08d}.nxs")
+            run_path = Path(run_path.parent, f"{instrument}{run_number:08d}.nxs")
         logger.info("Run path %s does not exist", run_path)
         logger.info("Returning run numbers %s", run_numbers)
         return run_numbers
@@ -89,7 +89,7 @@ class MolSpecStitchRule(Rule[bool]):
         if not self._value:  # if the stitch rule is set to false, skip
             return
 
-        logger.info("Checking stitch conditions for osiris run %s", job_request.filepath)
+        logger.info("Checking stitch conditions for %s run %s", job_request.instrument, job_request.filepath)
         try:
             if job_request.additional_values["mode"] == "diffraction":
                 job_request.additional_values["sum_runs"] = False
@@ -97,10 +97,9 @@ class MolSpecStitchRule(Rule[bool]):
                 return
         except KeyError:
             pass
-        # stitch
         job_request.additional_values["input_runs"] = [job_request.run_number]
         run_numbers = self._get_runs_to_stitch(
-            job_request.filepath, job_request.run_number, job_request.experiment_title
+            job_request.filepath, job_request.run_number, job_request.experiment_title, job_request.instrument.upper()
         )
 
         if len(run_numbers) > 1:
