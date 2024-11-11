@@ -6,11 +6,13 @@ from __future__ import annotations
 import logging
 from copy import deepcopy
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from rundetection.ingestion.ingest import get_run_title
-from rundetection.job_requests import JobRequest
-from rundetection.rules.osiris_rules import logger
 from rundetection.rules.rule import Rule
+
+if TYPE_CHECKING:
+    from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
 
@@ -106,3 +108,14 @@ class MolSpecStitchRule(Rule[bool]):
             additional_request = deepcopy(job_request)
             additional_request.additional_values["input_runs"] = run_numbers
             job_request.additional_requests.append(additional_request)
+
+
+def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
+    """
+    Given 2 numbers, x and y, return True if y is within 5% of x
+    :param x: x number
+    :param y: y number
+    :return: True if y is within 5% of x
+    """
+
+    return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)

@@ -8,6 +8,7 @@ import logging
 import typing
 
 from rundetection.exceptions import RuleViolationError
+from rundetection.rules.common_rules import is_y_within_5_percent_of_x
 from rundetection.rules.rule import Rule
 
 if typing.TYPE_CHECKING:
@@ -16,17 +17,6 @@ if typing.TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
-
-
-def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
-    """
-    Given 2 numbers, x and y, return True if y is within 5% of x
-    :param x: x number
-    :param y: y number
-    :return: True if y is within 5% of x
-    """
-
-    return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)
 
 
 class OsirisReductionModeRule(Rule[bool]):
@@ -88,11 +78,11 @@ class OsirisReductionModeRule(Rule[bool]):
             # The phases match both a diffraction run and a spectroscopy run, we now check the detector
             # time channel boundaries to determine if is a spectroscopy run. The values are based on the PDF
             if (
-                is_y_within_5_percent_of_x(detector_tcb_min, 40200)
-                and is_y_within_5_percent_of_x(detector_tcb_max, 80200)
+                    is_y_within_5_percent_of_x(detector_tcb_min, 40200)
+                    and is_y_within_5_percent_of_x(detector_tcb_max, 80200)
             ) or (
-                is_y_within_5_percent_of_x(detector_tcb_min, 57300)
-                and is_y_within_5_percent_of_x(detector_tcb_max, 97300)
+                    is_y_within_5_percent_of_x(detector_tcb_min, 57300)
+                    and is_y_within_5_percent_of_x(detector_tcb_max, 97300)
             ):
                 return "spectroscopy"
             return "diffraction"

@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 import typing
 
+from rundetection.rules.common_rules import is_y_within_5_percent_of_x
 from rundetection.rules.rule import Rule
 
 if typing.TYPE_CHECKING:
@@ -14,17 +15,6 @@ if typing.TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
-
-
-def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
-    """
-    Given 2 numbers, x and y, return True if y is within 5% of x
-    :param x: x number
-    :param y: y number
-    :return: True if y is within 5% of x
-    """
-
-    return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)
 
 
 # The spec data for this list of dicts based on the PDF available here:
@@ -83,11 +73,28 @@ class IrisReductionRule(Rule[bool]):
             # (or close enough to 50 for it to not matter)
             job_request.additional_values["reflection"] = "002"
             job_request.additional_values["spectroscopy_reduction"] = "true"
+            job_request.additional_values["diffraction_reduction"] = "false"
+            job_request.additional_values["analyser"] = "graphite"
+            return
         reflection = None
         analyser = None
         phases = (job_request.additional_values["phase6"], job_request.additional_values["phase10"])
         tcb_1 = (job_request.additional_values["tcb_detector_min"], job_request.additional_values["tcb_detector_max"])
         tcb_2 = (job_request.additional_values["tcb_monitor_min"], job_request.additional_values["tcb_monitor_max"])
+
+        # Because MICA006 and Graphite002 have in some instance all the same values except for a difference of 2 in
+        # Phase6 (insignificant). We should check these phase values first. Basically check if MICA006 or allow to get
+        # into the main determining loop below.
+        if (self._tuple_match((8967, 14413), phases) and self._tuple_match((56000.0, 76000.0), tcb_1) and
+                self._tuple_match((52200.0, 72200.0), tcb_2) and phases[0] == 8969):  # noqa: PLR2004
+            job_request.additional_values["reflection"] = "006"
+            job_request.additional_values["spectroscopy_reduction"] = "true"
+            job_request.additional_values["diffraction_reduction"] = "false"
+            job_request.additional_values["mode"] = "spectroscopy"
+            job_request.additional_values["analyser"] = "mica"
+            return
+
+        # For everything else but MICA006 (and also these)
         for spec_type in SPECTROSCOPY_DATA:
             if (self._tuple_match(phases, spec_type["phases"])
                     and self._tuple_match(tcb_1, spec_type["tcb_1"])
@@ -106,7 +113,7 @@ class IrisReductionRule(Rule[bool]):
         job_request.additional_values["analyser"] = analyser
 
 
-class IrisCalibrationRule(Rule[dict[str, str]]):
+class IrisCalibrationRule(Rule[dict[str, dict[str, str]]]):
     """
     Set calibration run number based on the reflection, needs to be called after the IrisReductionRule so reflection and
     analyser are set in the job_request.additional_values
