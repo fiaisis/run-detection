@@ -95,6 +95,7 @@ def assert_run_in_recieved(run: Any, recieved: list[Any]):
 EXPECTED_MARI_WBVAN = get_specification_value("mari", "mariwbvan")
 EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
 EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandreflection")
+EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
 
 
 @pytest.mark.parametrize(
@@ -400,6 +401,38 @@ EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandref
                 },
             ],
         ),
+        (["/archive/NDXIRIS/Instrument/data/cycle_24_03/IRIS00103226.nxs"],
+         [
+             {
+                    "run_number": 103226,
+                    "instrument": "IRIS",
+                    "experiment_title": "Quiet Counts 24/2",
+                    "experiment_number": "123456",
+                    "filepath": "/archive/NDXIRIS/Instrument/data/cycle_24_03/IRIS00103226.nxs",
+                    "run_start": "2024-09-10T11:04:11",
+                    "run_end": "2024-09-10T17:04:18",
+                    "raw_frames": 1080339,
+                    "good_frames": 1080340,
+                    "users": "team",
+                    "additional_values": {
+                        "cycle_string": "cycle_24_03",
+                        "freq6": 50.0,
+                        "freq10": 50.0,
+                        "phase6": 8967,
+                        "phase10": 14413,
+                        "tcb_detector_min": 56000.0,
+                        "tcb_detector_max": 76000.0,
+                        "tcb_monitor_min": 52200.0,
+                        "tcb_monitor_max": 72200.0,
+                        "reflection": "002",
+                        "calibration_run_number": EXPECTED_IRIS_MASK["graphite"]["002"],
+                        "spectroscopy_reduction": "true",
+                        "diffraction_reduction": "false",
+                        "analyser": "graphite",
+                        "input_runs": [103226],
+                    },
+                },
+         ]),
         (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
     ],
 )
