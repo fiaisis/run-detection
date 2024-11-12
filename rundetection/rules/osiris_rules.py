@@ -78,11 +78,11 @@ class OsirisReductionModeRule(Rule[bool]):
             # The phases match both a diffraction run and a spectroscopy run, we now check the detector
             # time channel boundaries to determine if is a spectroscopy run. The values are based on the PDF
             if (
-                    is_y_within_5_percent_of_x(detector_tcb_min, 40200)
-                    and is_y_within_5_percent_of_x(detector_tcb_max, 80200)
+                is_y_within_5_percent_of_x(detector_tcb_min, 40200)
+                and is_y_within_5_percent_of_x(detector_tcb_max, 80200)
             ) or (
-                    is_y_within_5_percent_of_x(detector_tcb_min, 57300)
-                    and is_y_within_5_percent_of_x(detector_tcb_max, 97300)
+                is_y_within_5_percent_of_x(detector_tcb_min, 57300)
+                and is_y_within_5_percent_of_x(detector_tcb_max, 97300)
             ):
                 return "spectroscopy"
             return "diffraction"
@@ -174,5 +174,3 @@ class OsirisReflectionCalibrationRule(Rule[dict[str, str]]):
 
         job_request.additional_values["reflection"] = reflection
         job_request.additional_values["calibration_run_number"] = self._value[reflection]
-
-

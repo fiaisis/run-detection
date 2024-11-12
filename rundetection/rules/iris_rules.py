@@ -11,7 +11,6 @@ from rundetection.rules.common_rules import is_y_within_5_percent_of_x
 from rundetection.rules.rule import Rule
 
 if typing.TYPE_CHECKING:
-
     from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
@@ -41,6 +40,7 @@ class IrisReductionRule(Rule[bool]):
     """
     Determines the type of reduction to produce (spectroscopy or diffraction)
     """
+
     @staticmethod
     def _tuple_match(x: tuple[int | float, int | float], y: tuple[int | float, int | float]) -> bool:
         return is_y_within_5_percent_of_x(x[0], y[0]) and is_y_within_5_percent_of_x(x[1], y[1])
@@ -59,9 +59,11 @@ class IrisReductionRule(Rule[bool]):
         tcb_1 = (job_request.additional_values["tcb_detector_min"], job_request.additional_values["tcb_detector_max"])
         tcb_2 = (job_request.additional_values["tcb_monitor_min"], job_request.additional_values["tcb_monitor_max"])
         for spec_type in GRAPHITE_DATA:
-            if (self._tuple_match(phases, spec_type["phases"])
-                    and self._tuple_match(tcb_1, spec_type["tcb_1"])
-                    and self._tuple_match(tcb_2, spec_type["tcb_2"])):
+            if (
+                self._tuple_match(phases, spec_type["phases"])
+                and self._tuple_match(tcb_1, spec_type["tcb_1"])
+                and self._tuple_match(tcb_2, spec_type["tcb_2"])
+            ):
                 reflection = spec_type["reflection"]
                 break
         job_request.additional_values["reflection"] = reflection
@@ -73,6 +75,7 @@ class IrisCalibrationRule(Rule[dict[str, str]]):
     Set calibration run number based on the reflection, needs to be called after the IrisReductionRule so reflection and
     analyser are set in the job_request.additional_values
     """
+
     def verify(self, job_request: JobRequest) -> None:
         if not self._value:
             return

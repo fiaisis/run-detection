@@ -12,7 +12,7 @@ from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule, is_y_within_5_percent_of_x
 
 
-@pytest.fixture
+@pytest.fixture()
 def job_request():
     """
     job_request Fixture

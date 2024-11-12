@@ -1,6 +1,7 @@
 """
 Module containing rule implementations for instrument shared rules
 """
+
 from __future__ import annotations
 
 import logging
@@ -54,6 +55,7 @@ class MolSpecStitchRule(Rule[bool]):
     """
     Enables Tosca, Osiris, and Iris Run stitching
     """
+
     @staticmethod
     def _is_title_similar(title: str, other_title: str) -> bool:
         """

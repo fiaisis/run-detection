@@ -40,15 +40,18 @@ def iris_mode_rule():
     return IrisReductionRule(True)
 
 
-@pytest.mark.parametrize(("first_tuple", "second_tuple", "expected_result"),[
-    ((100, 100), (100, 100), True),  # Both equal
-    ((100, 95), (100, 100), True),  # second near 5%
-    ((95, 100), (100, 100), True),  # first near 5%
-    ((95, 105), (100, 100), True),  # Both near 5%
-    ((5, 10), (100, 100), False),
-])
+@pytest.mark.parametrize(
+    ("first_tuple", "second_tuple", "expected_result"),
+    [
+        ((100, 100), (100, 100), True),  # Both equal
+        ((100, 95), (100, 100), True),  # second near 5%
+        ((95, 100), (100, 100), True),  # first near 5%
+        ((95, 105), (100, 100), True),  # Both near 5%
+        ((5, 10), (100, 100), False),
+    ],
+)
 def test_iris_reduction_rule_tuple_match(first_tuple, second_tuple, expected_result, iris_mode_rule):
-    result =iris_mode_rule._tuple_match(first_tuple, second_tuple)
+    result = iris_mode_rule._tuple_match(first_tuple, second_tuple)
     assert result == expected_result
 
 
@@ -66,10 +69,13 @@ def test_iris_reduction_rule_verify_freq10_below_50(freq10, iris_mode_rule, job_
 
 # Test for mica and all 3 reflections
 # Test for graphite and all 2 reflections
-@pytest.mark.parametrize(("phases", "freq10", "tcb_1", "tcb_2", "results"),[
-    ((8967, 14413), 50, (56000.0, 76000.0), (52200.0, 72200.0), {"analyser": "graphite", "reflection": "002"}),
-    ((3653, 5959), 50, (24000.0, 44000.0), (22700.0, 42700.0), {"analyser": "graphite", "reflection": "004"}),
-])
+@pytest.mark.parametrize(
+    ("phases", "freq10", "tcb_1", "tcb_2", "results"),
+    [
+        ((8967, 14413), 50, (56000.0, 76000.0), (52200.0, 72200.0), {"analyser": "graphite", "reflection": "002"}),
+        ((3653, 5959), 50, (24000.0, 44000.0), (22700.0, 42700.0), {"analyser": "graphite", "reflection": "004"}),
+    ],
+)
 def test_iris_reduction_rule_verify(phases, freq10, tcb_1, tcb_2, results, job_request, iris_mode_rule):
     job_request.additional_values["phase6"], job_request.additional_values["phase10"] = phases
     job_request.additional_values["tcb_detector_min"], job_request.additional_values["tcb_detector_max"] = tcb_1
@@ -82,10 +88,13 @@ def test_iris_reduction_rule_verify(phases, freq10, tcb_1, tcb_2, results, job_r
     assert job_request.additional_values["reflection"] == results["reflection"]
 
 
-@pytest.mark.parametrize(("reflection", "analyser", "output"), [
-    ("002", "graphite", "00105275"),
-    ("004", "graphite", "00105276"),
-])
+@pytest.mark.parametrize(
+    ("reflection", "analyser", "output"),
+    [
+        ("002", "graphite", "00105275"),
+        ("004", "graphite", "00105276"),
+    ],
+)
 def test_iris_calibration_rule_verify(reflection, analyser, output, reflection_rule, job_request):
     job_request.additional_values["calibration_run_number"] = None
     job_request.additional_values["reflection"] = reflection

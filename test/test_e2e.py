@@ -401,9 +401,10 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
                 },
             ],
         ),
-        (["/archive/NDXIRIS/Instrument/data/cycle_24_03/IRIS00103226.nxs"],
-         [
-             {
+        (
+            ["/archive/NDXIRIS/Instrument/data/cycle_24_03/IRIS00103226.nxs"],
+            [
+                {
                     "run_number": 103226,
                     "instrument": "IRIS",
                     "experiment_title": "Quiet Counts 24/2",
@@ -430,7 +431,8 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
                         "input_runs": [103226],
                     },
                 },
-         ]),
+            ],
+        ),
         (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
     ],
 )

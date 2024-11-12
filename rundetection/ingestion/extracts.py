@@ -123,7 +123,6 @@ def iris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     return osiris_and_iris_extract(job_request, dataset)
 
 
-
 def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     """
     Extracts additional metadata specific to the MARI instrument from the given dataset and updates the JobRequest
