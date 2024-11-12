@@ -19,41 +19,21 @@ logger = logging.getLogger(__name__)
 
 # The spec data for this list of dicts based on the PDF available here:
 # https://www.isis.stfc.ac.uk/Pages/The%20IRIS%20User%20Guide%204.pdf.
-SPECTROSCOPY_DATA = [
-    {"phases": (8967, 14413), "reflection": "002", "tcb_1": (56000.0, 76000.0), "tcb_2": (52200.0, 72200.0),
-     "analyser": "graphite"},
-    {"phases": (7996, 12868), "reflection": "002", "tcb_1": (50000.0, 70000.0), "tcb_2": (46700.0, 66700.0),
-     "analyser": "graphite"},
-    {"phases": (7649, 12316), "reflection": "002", "tcb_1": (48000.0, 68000.0), "tcb_2": (44700.0, 64700.0),
-     "analyser": "graphite"},
-    {"phases": (7336, 11967), "reflection": "002", "tcb_1": (47000.0, 67000.0), "tcb_2": (43200.0, 63200.0),
-     "analyser": "graphite"},
-    {"phases": (5922, 9569), "reflection": "002", "tcb_1": (38000.0, 58000.0), "tcb_2": (35200.0, 55200.0),
-     "analyser": "graphite"},
-    {"phases": (7133, 11493), "reflection": "002", "tcb_1": (45000.0, 65000.0), "tcb_2": (41900.0, 61900.0),
-     "analyser": "graphite"},
-    {"phases": (1500, 2829), "reflection": "002", "tcb_1": (14000.0, 74000.0), "tcb_2": (16000.0, 76000.0),
-     "analyser": "graphite"},
-    {"phases": (2655, 5148), "reflection": "002", "tcb_1": (22000.0, 82000.0), "tcb_2": (21500.0, 81500.0),
-     "analyser": "graphite"},
-    {"phases": (3653, 5959), "reflection": "004", "tcb_1": (24000.0, 44000.0), "tcb_2": (22700.0, 42700.0),
-     "analyser": "graphite"},
-    {"phases": (2850, 4275), "reflection": "004", "tcb_1": (18000.0, 38000.0), "tcb_2": (17500.0, 37500.0),
-     "analyser": "graphite"},
-    {"phases": (7750, 12623), "reflection": "002", "tcb_1": (50000.0, 90000.0), "tcb_2": (46500.0, 86500.0),
-     "analyser": "graphite"},
-    {"phases": (5919, 9712), "reflection": "002", "tcb_1": (38500.0, 78500.0), "tcb_2": (36500.0, 76500.0),
-     "analyser": "graphite"},
-    {"phases": (4502, 7457), "reflection": "002", "tcb_1": (30000.0, 70000.0), "tcb_2": (28800.0, 68800.0),
-     "analyser": "graphite"},
-    {"phases": (3500, 5800), "reflection": "002", "tcb_1": (25000.0, 65000.0), "tcb_2": (23500.0, 63500.0),
-     "analyser": "graphite"},
-    {"phases": (9726, 7430), "reflection": "002", "tcb_1": (181000.0, 201000.0), "tcb_2": (52000.0, 72000.0),
-     "analyser": "mica"},
-    {"phases": (13949, 2339), "reflection": "004", "tcb_1": (86000.0, 106000.0), "tcb_2": (86000.0, 106000.0),
-     "analyser": "mica"},
-    {"phases": (8969, 14413), "reflection": "006", "tcb_1": (56000.0, 76000.0), "tcb_2": (52200.0, 72200.0),
-     "analyser": "mica"},
+GRAPHITE_DATA = [
+    {"phases": (8967, 14413), "reflection": "002", "tcb_1": (56000.0, 76000.0), "tcb_2": (52200.0, 72200.0)},
+    {"phases": (7996, 12868), "reflection": "002", "tcb_1": (50000.0, 70000.0), "tcb_2": (46700.0, 66700.0)},
+    {"phases": (7649, 12316), "reflection": "002", "tcb_1": (48000.0, 68000.0), "tcb_2": (44700.0, 64700.0)},
+    {"phases": (7336, 11967), "reflection": "002", "tcb_1": (47000.0, 67000.0), "tcb_2": (43200.0, 63200.0)},
+    {"phases": (5922, 9569), "reflection": "002", "tcb_1": (38000.0, 58000.0), "tcb_2": (35200.0, 55200.0)},
+    {"phases": (7133, 11493), "reflection": "002", "tcb_1": (45000.0, 65000.0), "tcb_2": (41900.0, 61900.0)},
+    {"phases": (1500, 2829), "reflection": "002", "tcb_1": (14000.0, 74000.0), "tcb_2": (16000.0, 76000.0)},
+    {"phases": (2655, 5148), "reflection": "002", "tcb_1": (22000.0, 82000.0), "tcb_2": (21500.0, 81500.0)},
+    {"phases": (7750, 12623), "reflection": "002", "tcb_1": (50000.0, 90000.0), "tcb_2": (46500.0, 86500.0)},
+    {"phases": (5919, 9712), "reflection": "002", "tcb_1": (38500.0, 78500.0), "tcb_2": (36500.0, 76500.0)},
+    {"phases": (4502, 7457), "reflection": "002", "tcb_1": (30000.0, 70000.0), "tcb_2": (28800.0, 68800.0)},
+    {"phases": (3500, 5800), "reflection": "002", "tcb_1": (25000.0, 65000.0), "tcb_2": (23500.0, 63500.0)},
+    {"phases": (3653, 5959), "reflection": "004", "tcb_1": (24000.0, 44000.0), "tcb_2": (22700.0, 42700.0)},
+    {"phases": (2850, 4275), "reflection": "004", "tcb_1": (18000.0, 38000.0), "tcb_2": (17500.0, 37500.0)},
 ]
 
 
@@ -72,48 +52,23 @@ class IrisReductionRule(Rule[bool]):
             # Known "guaranteed" to be Graphite analyser and 002 reflection as frequency is not 50
             # (or close enough to 50 for it to not matter)
             job_request.additional_values["reflection"] = "002"
-            job_request.additional_values["spectroscopy_reduction"] = "true"
-            job_request.additional_values["diffraction_reduction"] = "false"
             job_request.additional_values["analyser"] = "graphite"
             return
         reflection = None
-        analyser = None
         phases = (job_request.additional_values["phase6"], job_request.additional_values["phase10"])
         tcb_1 = (job_request.additional_values["tcb_detector_min"], job_request.additional_values["tcb_detector_max"])
         tcb_2 = (job_request.additional_values["tcb_monitor_min"], job_request.additional_values["tcb_monitor_max"])
-
-        # Because MICA006 and Graphite002 have in some instance all the same values except for a difference of 2 in
-        # Phase6 (insignificant). We should check these phase values first. Basically check if MICA006 or allow to get
-        # into the main determining loop below.
-        if (self._tuple_match((8967, 14413), phases) and self._tuple_match((56000.0, 76000.0), tcb_1) and
-                self._tuple_match((52200.0, 72200.0), tcb_2) and phases[0] == 8969):  # noqa: PLR2004
-            job_request.additional_values["reflection"] = "006"
-            job_request.additional_values["spectroscopy_reduction"] = "true"
-            job_request.additional_values["diffraction_reduction"] = "false"
-            job_request.additional_values["mode"] = "spectroscopy"
-            job_request.additional_values["analyser"] = "mica"
-            return
-
-        # For everything else but MICA006 (and also these)
-        for spec_type in SPECTROSCOPY_DATA:
+        for spec_type in GRAPHITE_DATA:
             if (self._tuple_match(phases, spec_type["phases"])
                     and self._tuple_match(tcb_1, spec_type["tcb_1"])
                     and self._tuple_match(tcb_2, spec_type["tcb_2"])):
                 reflection = spec_type["reflection"]
-                analyser = spec_type["analyser"]
                 break
-        if reflection is None:
-            job_request.additional_values["spectroscopy_reduction"] = "false"
-            job_request.additional_values["diffraction_reduction"] = "true"
-            return
         job_request.additional_values["reflection"] = reflection
-        job_request.additional_values["spectroscopy_reduction"] = "true"
-        job_request.additional_values["diffraction_reduction"] = "false"
-        job_request.additional_values["mode"] = "spectroscopy"
-        job_request.additional_values["analyser"] = analyser
+        job_request.additional_values["analyser"] = "graphite"
 
 
-class IrisCalibrationRule(Rule[dict[str, dict[str, str]]]):
+class IrisCalibrationRule(Rule[dict[str, str]]):
     """
     Set calibration run number based on the reflection, needs to be called after the IrisReductionRule so reflection and
     analyser are set in the job_request.additional_values
@@ -122,5 +77,4 @@ class IrisCalibrationRule(Rule[dict[str, dict[str, str]]]):
         if not self._value:
             return
         reflection = job_request.additional_values["reflection"]
-        analyser = job_request.additional_values["analyser"]
-        job_request.additional_values["calibration_run_number"] = self._value[analyser][reflection]
+        job_request.additional_values["calibration_run_number"] = self._value[reflection]

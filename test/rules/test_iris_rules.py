@@ -31,8 +31,7 @@ def job_request():
 @pytest.fixture()
 def reflection_rule():
     """Analyser rule fixture"""
-    return IrisCalibrationRule({"graphite": {"002": "00105275", "004": "00105276"},
-                                "mica": {"002": "00105277", "004": "00105278", "006": "00105279"}})
+    return IrisCalibrationRule({"002": "00105275", "004": "00105276"})
 
 
 @pytest.fixture()
@@ -68,21 +67,8 @@ def test_iris_reduction_rule_verify_freq10_below_50(freq10, iris_mode_rule, job_
 # Test for mica and all 3 reflections
 # Test for graphite and all 2 reflections
 @pytest.mark.parametrize(("phases", "freq10", "tcb_1", "tcb_2", "results"),[
-    ((8967, 14413), 50, (56000.0, 76000.0), (52200.0, 72200.0), {"analyser": "graphite", "reflection": "002",
-                                                                 "spectroscopy_reduction": "true",
-                                                                 "diffraction_reduction": "false"}),
-    ((3653, 5959), 50, (24000.0, 44000.0), (22700.0, 42700.0), {"analyser": "graphite", "reflection": "004",
-                                                                "spectroscopy_reduction": "true",
-                                                                "diffraction_reduction": "false"}),
-    ((9726, 7430), 50, (181000.0, 201000.0), (52000.0, 72000.0), {"analyser": "mica", "reflection": "002",
-                                                                  "spectroscopy_reduction": "true",
-                                                                  "diffraction_reduction": "false"}),
-    ((13949, 2339), 50, (86000.0, 106000.0), (86000.0, 106000.0), {"analyser": "mica", "reflection": "004",
-                                                                   "spectroscopy_reduction": "true",
-                                                                   "diffraction_reduction": "false"}),
-    ((8969, 14413), 50, (56000.0, 76000.0), (52200.0, 72200.0), {"analyser": "mica", "reflection": "006",
-                                                                 "spectroscopy_reduction": "true",
-                                                                 "diffraction_reduction": "false"})
+    ((8967, 14413), 50, (56000.0, 76000.0), (52200.0, 72200.0), {"analyser": "graphite", "reflection": "002"}),
+    ((3653, 5959), 50, (24000.0, 44000.0), (22700.0, 42700.0), {"analyser": "graphite", "reflection": "004"}),
 ])
 def test_iris_reduction_rule_verify(phases, freq10, tcb_1, tcb_2, results, job_request, iris_mode_rule):
     job_request.additional_values["phase6"], job_request.additional_values["phase10"] = phases
@@ -94,16 +80,11 @@ def test_iris_reduction_rule_verify(phases, freq10, tcb_1, tcb_2, results, job_r
 
     assert job_request.additional_values["analyser"] == results["analyser"]
     assert job_request.additional_values["reflection"] == results["reflection"]
-    assert job_request.additional_values["spectroscopy_reduction"] == results["spectroscopy_reduction"]
-    assert job_request.additional_values["diffraction_reduction"] == results["diffraction_reduction"]
 
 
 @pytest.mark.parametrize(("reflection", "analyser", "output"), [
     ("002", "graphite", "00105275"),
     ("004", "graphite", "00105276"),
-    ("006", "mica", "00105279"),
-    ("004", "mica", "00105278"),
-    ("002", "mica", "00105277")
 ])
 def test_iris_calibration_rule_verify(reflection, analyser, output, reflection_rule, job_request):
     job_request.additional_values["calibration_run_number"] = None
