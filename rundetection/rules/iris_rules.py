@@ -42,7 +42,7 @@ class IrisReductionRule(Rule[bool]):
     """
 
     @staticmethod
-    def _tuple_match(x: tuple[int | float, int | float], y: tuple[int | float, int | float]) -> bool:
+    def _tuple_match(x: tuple[typing.Any, typing.Any], y: tuple[typing.Any, typing.Any]) -> bool:
         return is_y_within_5_percent_of_x(x[0], y[0]) and is_y_within_5_percent_of_x(x[1], y[1])
 
     def verify(self, job_request: JobRequest) -> None:
