@@ -8,9 +8,10 @@ from unittest.mock import patch
 
 import pytest
 
-from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule
+from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule, MolSpecStitchRule
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
+from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.loq_rules import LoqFindFiles, LoqUserFile
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
@@ -18,10 +19,8 @@ from rundetection.rules.osiris_rules import (
     OsirisDefaultSpectroscopy,
     OsirisReductionModeRule,
     OsirisReflectionCalibrationRule,
-    OsirisStitchRule,
 )
 from rundetection.rules.rule import MissingRuleError, Rule
-from rundetection.rules.tosca_rules import ToscaStitchRule
 
 
 def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
@@ -42,11 +41,10 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
     [
         ("enabled", True, EnabledRule),
         ("interstitch", True, InterStitchRule),
-        ("toscastitch", True, ToscaStitchRule),
+        ("molspecstitch", True, MolSpecStitchRule),
         ("maristitch", True, MariStitchRule),
         ("marimaskfile", "foo", MariMaskFileRule),
         ("mariwbvan", 12345, MariWBVANRule),
-        ("osirisstitch", True, OsirisStitchRule),
         ("osiriscalibfilesandreflection", {"002": "00148587", "004": "00148587"}, OsirisReflectionCalibrationRule),
         ("osirisdefaultspectroscopy", True, OsirisDefaultSpectroscopy),
         ("osirisdefaultgraniteanalyser", True, OsirisDefaultGraniteAnalyser),
@@ -54,6 +52,8 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("checkifscattersans", True, CheckIfScatterSANS),
         ("loquserfile", "loquserfile.toml", LoqUserFile),
         ("loqfindfiles", True, LoqFindFiles),
+        ("irisreduction", True, IrisReductionRule),
+        ("iriscalibration", {"002": "00148587", "004": "00148587"}, IrisCalibrationRule),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
