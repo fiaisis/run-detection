@@ -42,7 +42,7 @@ class IrisReductionRule(Rule[bool]):
     """
 
     @staticmethod
-    def _tuple_match(x: tuple[typing.Any, typing.Any], y: tuple[typing.Any, typing.Any]) -> bool:
+    def _tuple_match(x: tuple[int | float, int | float], y: tuple[int | float, int | float]) -> bool:
         return is_y_within_5_percent_of_x(x[0], y[0]) and is_y_within_5_percent_of_x(x[1], y[1])
 
     def verify(self, job_request: JobRequest) -> None:
@@ -60,9 +60,9 @@ class IrisReductionRule(Rule[bool]):
         tcb_2 = (job_request.additional_values["tcb_monitor_min"], job_request.additional_values["tcb_monitor_max"])
         for spec_type in GRAPHITE_DATA:
             if (
-                self._tuple_match(phases, spec_type["phases"])
-                and self._tuple_match(tcb_1, spec_type["tcb_1"])
-                and self._tuple_match(tcb_2, spec_type["tcb_2"])
+                self._tuple_match(phases, spec_type["phases"])  # type: ignore
+                and self._tuple_match(tcb_1, spec_type["tcb_1"])  # type: ignore
+                and self._tuple_match(tcb_2, spec_type["tcb_2"])  # type: ignore
             ):
                 reflection = spec_type["reflection"]
                 break
