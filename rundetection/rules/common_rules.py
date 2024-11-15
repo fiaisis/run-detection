@@ -84,7 +84,11 @@ class MolSpecStitchRule(Rule[bool]):
             logger.info("titles are similar appending run number %s", run_number)
             run_numbers.append(run_number)
             run_number -= 1
-            run_path = Path(run_path.parent, f"{instrument}{run_number:08d}.nxs")
+            if instrument.upper() == "TOSCA":
+                next_run_number = f"TSC{run_number}.nxs"
+            else:
+                next_run_number = f"{instrument}{run_number:08d}.nxs"
+            run_path = Path(run_path.parent, next_run_number)
         logger.info("Run path %s does not exist", run_path)
         logger.info("Returning run numbers %s", run_numbers)
         return run_numbers
@@ -104,7 +108,7 @@ class MolSpecStitchRule(Rule[bool]):
                 pass
         job_request.additional_values["input_runs"] = [job_request.run_number]
         run_numbers = self._get_runs_to_stitch(
-            job_request.filepath, job_request.run_number, job_request.experiment_title, job_request.instrument.upper()
+            job_request.filepath, job_request.run_number - 1, job_request.experiment_title, job_request.instrument.upper()
         )
 
         if len(run_numbers) > 1:
