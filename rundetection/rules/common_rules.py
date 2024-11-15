@@ -94,13 +94,14 @@ class MolSpecStitchRule(Rule[bool]):
             return
 
         logger.info("Checking stitch conditions for %s run %s", job_request.instrument, job_request.filepath)
-        try:
-            if job_request.additional_values["mode"] == "diffraction":
-                job_request.additional_values["sum_runs"] = False
-                logger.info("Diffraction run cannot be summed. Continuing")
-                return
-        except KeyError:
-            pass
+        if job_request.instrument.upper() == "OSIRIS":
+            try:
+                if job_request.additional_values["mode"] == "diffraction":
+                    job_request.additional_values["sum_runs"] = False
+                    logger.info("Diffraction run cannot be summed. Continuing")
+                    return
+            except KeyError:
+                pass
         job_request.additional_values["input_runs"] = [job_request.run_number]
         run_numbers = self._get_runs_to_stitch(
             job_request.filepath, job_request.run_number, job_request.experiment_title, job_request.instrument.upper()
