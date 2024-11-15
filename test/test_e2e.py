@@ -416,7 +416,7 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
                     "good_frames": 1080340,
                     "users": "team",
                     "additional_values": {
-                        "cycle_string": "cycle_24_03",
+                        "cycle_string": "cycle_24_3",
                         "freq6": 50.0,
                         "freq10": 50.0,
                         "phase6": 8967,
@@ -443,7 +443,7 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
                     "good_frames": 1080340,
                     "users": "team",
                     "additional_values": {
-                        "cycle_string": "cycle_24_03",
+                        "cycle_string": "cycle_24_3",
                         "freq6": 50.0,
                         "freq10": 50.0,
                         "phase6": 8967,
