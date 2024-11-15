@@ -108,7 +108,10 @@ class MolSpecStitchRule(Rule[bool]):
                 pass
         job_request.additional_values["input_runs"] = [job_request.run_number]
         run_numbers = self._get_runs_to_stitch(
-            job_request.filepath, job_request.run_number - 1, job_request.experiment_title, job_request.instrument.upper()
+            job_request.filepath,
+            job_request.run_number - 1,
+            job_request.experiment_title,
+            job_request.instrument.upper(),
         )
 
         if len(run_numbers) > 1:
