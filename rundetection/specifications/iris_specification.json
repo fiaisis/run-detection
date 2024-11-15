@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "molspecstitch": true,
   "irisreduction": true,
-  "iriscalibration": {"002": "00105275", "004": "00105275"}
+  "iriscalibration": {"002": "00105275", "004": "00105275"},
+  "molspecstitch": true
 }
