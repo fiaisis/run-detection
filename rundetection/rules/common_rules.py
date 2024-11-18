@@ -109,7 +109,7 @@ class MolSpecStitchRule(Rule[bool]):
         job_request.additional_values["input_runs"] = [job_request.run_number]
         run_numbers = self._get_runs_to_stitch(
             job_request.filepath,
-            job_request.run_number - 1,
+            job_request.run_number,
             job_request.experiment_title,
             job_request.instrument.upper(),
         )
