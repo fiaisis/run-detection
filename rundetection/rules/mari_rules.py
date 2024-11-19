@@ -10,6 +10,7 @@ from typing import Any
 
 from rundetection.ingestion.ingest import get_run_title
 from rundetection.job_requests import JobRequest
+from rundetection.rules.common_rules import create_list_of_files, find_path_for_run_number
 from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)
@@ -78,9 +79,26 @@ class MariMaskFileRule(Rule[str]):
 
 class MariWBVANRule(Rule[int]):
     """
-    Inserts the cycles wbvan number into the script. This value is manually calculated by the MARI instrument scientist
-    once per cycle.
+    If a new vanadium file has not been defined for this cycle yet, we will attempt to find the vanadium file using the
+    same method that SANs instruments use to find previous roles.
     """
-
     def verify(self, job_request: JobRequest) -> None:
+        if self._value is None:
+            return
+        if (find_path_for_run_number(
+                run_number=job_request.run_number,
+                cycle_path=Path("/archive/NDXMARI/Instrument/data") / job_request.additional_values["cycle_string"],
+                file_start="MAR")
+                is not None):
+            logger.info("Set MARI vanadium file is for this cycle, use defined value")
+            job_request.additional_values["wbvan"] = self._value
+            return
+        logger.info("MARI vanadium file not from this cycle, going to find it from the given cycle")
+        mari_files = create_list_of_files(job_request=job_request)
+        for mari_file in mari_files:
+            if ("van" in mari_file.title.lower() and "30mev" in mari_file.title.lower()
+                    and "50hz" in mari_file.title.lower() and job_request.experiment_number == 0):
+                job_request.additional_values["wbvan"] = mari_file.run_number
+                return
+        logger.info("MARI vanadium file not found and defaulting to what is set... this will likely be bad data")
         job_request.additional_values["wbvan"] = self._value

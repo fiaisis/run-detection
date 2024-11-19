@@ -1,14 +1,13 @@
-import tempfile
 from pathlib import Path
 from unittest import mock
 
 import pytest
 
 from rundetection.job_requests import JobRequest
+from rundetection.rules.common_rules import FileData
 from rundetection.rules.loq_rules import (
     LoqFindFiles,
     LoqUserFile,
-    SansFileData,
     _extract_run_number_from_filename,
     _find_can_scatter_file,
     _find_can_trans_file,
@@ -18,18 +17,15 @@ from rundetection.rules.loq_rules import (
     _is_can_transmission_file,
     _is_sample_direct_file,
     _is_sample_transmission_file,
-    find_path_for_run_number,
-    grab_cycle_instrument_index,
-    strip_excess_files,
 )
 
 SANS_FILES = [
-    SansFileData(title="{direct/empty beam}", type="TRANS", run_number="-1"),
-    SansFileData(title="{Banana}", type="SANS/TRANS", run_number="0"),
-    SansFileData(title="{Banana}", type="TRANS", run_number="1"),
-    SansFileData(title="{Apple}", type="SANS/TRANS", run_number="2"),
-    SansFileData(title="{Apple}", type="TRANS", run_number="3"),
-    SansFileData(title="{direct beam}", type="TRANS", run_number="4"),
+    FileData(title="{direct/empty beam}", type="TRANS", run_number="-1"),
+    FileData(title="{Banana}", type="SANS/TRANS", run_number="0"),
+    FileData(title="{Banana}", type="TRANS", run_number="1"),
+    FileData(title="{Apple}", type="SANS/TRANS", run_number="2"),
+    FileData(title="{Apple}", type="TRANS", run_number="3"),
+    FileData(title="{direct beam}", type="TRANS", run_number="4"),
 ]
 
 
@@ -44,10 +40,10 @@ def test_extract_run_number_from_filename(filename, result):
 @pytest.mark.parametrize(
     ("sans_file", "sample_title", "result"),
     [
-        (SansFileData(title="{Banana}", type="SANS/TRANS", run_number="0"), "Banana", False),
-        (SansFileData(title="{Banana}", type="TRANS", run_number="0"), "Banana", True),
-        (SansFileData(title="{Banana}", type="SANS", run_number="0"), "Banana", False),
-        (SansFileData(title="{Banana}", type="TRANS", run_number="0"), "Apple", False),
+        (FileData(title="{Banana}", type="SANS/TRANS", run_number="0"), "Banana", False),
+        (FileData(title="{Banana}", type="TRANS", run_number="0"), "Banana", True),
+        (FileData(title="{Banana}", type="SANS", run_number="0"), "Banana", False),
+        (FileData(title="{Banana}", type="TRANS", run_number="0"), "Apple", False),
     ],
 )
 def test_is_sample_transmission_file(sans_file, sample_title, result):
@@ -57,11 +53,11 @@ def test_is_sample_transmission_file(sans_file, sample_title, result):
 @pytest.mark.parametrize(
     ("sans_file", "result"),
     [
-        (SansFileData(title="{Banana}", type="TRANS", run_number="0"), False),
-        (SansFileData(title="{Banana direct}", type="SANS/TRANS", run_number="0"), False),
-        (SansFileData(title="{Banana direct}", type="TRANS", run_number="0"), True),
-        (SansFileData(title="{Banana empty}", type="TRANS", run_number="0"), True),
-        (SansFileData(title="{Banana direct}", type="SANS", run_number="0"), False),
+        (FileData(title="{Banana}", type="TRANS", run_number="0"), False),
+        (FileData(title="{Banana direct}", type="SANS/TRANS", run_number="0"), False),
+        (FileData(title="{Banana direct}", type="TRANS", run_number="0"), True),
+        (FileData(title="{Banana empty}", type="TRANS", run_number="0"), True),
+        (FileData(title="{Banana direct}", type="SANS", run_number="0"), False),
     ],
 )
 def test_is_sample_direct_file(sans_file, result):
@@ -71,10 +67,10 @@ def test_is_sample_direct_file(sans_file, result):
 @pytest.mark.parametrize(
     ("sans_file", "can_title", "result"),
     [
-        (SansFileData(title="{Banana}", type="SANS/TRANS", run_number="0"), "{Banana}", True),
-        (SansFileData(title="{Banana}", type="SANS/TRANS", run_number="0"), "{Apple}", False),
-        (SansFileData(title="{Banana}", type="TRANS", run_number="0"), "{Banana}", False),
-        (SansFileData(title="{Banana}_{}", type="TRANS", run_number="0"), "{Banana}", False),
+        (FileData(title="{Banana}", type="SANS/TRANS", run_number="0"), "{Banana}", True),
+        (FileData(title="{Banana}", type="SANS/TRANS", run_number="0"), "{Apple}", False),
+        (FileData(title="{Banana}", type="TRANS", run_number="0"), "{Banana}", False),
+        (FileData(title="{Banana}_{}", type="TRANS", run_number="0"), "{Banana}", False),
     ],
 )
 def test_is_can_scatter_file(sans_file, can_title, result):
@@ -84,9 +80,9 @@ def test_is_can_scatter_file(sans_file, can_title, result):
 @pytest.mark.parametrize(
     ("sans_file", "can_title", "result"),
     [
-        (SansFileData(title="{Banana}", type="SANS/TRANS", run_number="0"), "{Banana}", False),
-        (SansFileData(title="{Banana}", type="TRANS", run_number="0"), "{Apple}", False),
-        (SansFileData(title="{Banana}", type="TRANS", run_number="0"), "{Banana}", True),
+        (FileData(title="{Banana}", type="SANS/TRANS", run_number="0"), "{Banana}", False),
+        (FileData(title="{Banana}", type="TRANS", run_number="0"), "{Apple}", False),
+        (FileData(title="{Banana}", type="TRANS", run_number="0"), "{Banana}", True),
     ],
 )
 def test_is_can_transmission_file(sans_file, can_title, result):
@@ -115,48 +111,6 @@ def test_find_can_scatter_file():
 
 def test_can_trans_files():
     assert _find_can_trans_file(SANS_FILES, "{Apple}") == SANS_FILES[4]
-
-
-def test_path_for_run_number_with_some_zeros():
-    tempdir = tempfile.mkdtemp()
-    path = f"{tempdir}/LOQ0012345.nxs"
-    with Path(path).open("a"):
-        assert find_path_for_run_number(tempdir, 12345) == Path(path)
-
-
-def test_path_for_run_number_with_no_zeros():
-    tempdir = tempfile.mkdtemp()
-    path = f"{tempdir}/LOQ12345.nxs"
-    with Path(path).open("a"):
-        assert find_path_for_run_number(tempdir, 12345) == Path(path)
-
-
-def test_path_for_run_number_too_many_zeros():
-    tempdir = tempfile.mkdtemp()
-    with Path(f"{tempdir}/LOQ00000000000012345.nxs").open("a"):
-        assert find_path_for_run_number(tempdir, 12345) is None
-
-
-def test_path_for_run_number_doesnt_exist():
-    tempdir = tempfile.mkdtemp()
-    assert find_path_for_run_number(tempdir, 12345) is None
-
-
-def test_grab_cycle_instrument_index():
-    with mock.patch("rundetection.rules.loq_rules.requests") as requests:
-        cycle_index_text = grab_cycle_instrument_index("cycle_24_2")
-        assert cycle_index_text == requests.get.return_value.text
-        requests.get.assert_called_once_with("http://data.isis.rl.ac.uk/journals/ndxloq/journal_24_2.xml", timeout=5)
-
-
-def test_strip_excess_files():
-    files = [
-        SansFileData(title="", type="", run_number="0"),
-        SansFileData(title="", type="", run_number="1"),
-        SansFileData(title="", type="", run_number="2"),
-    ]
-    new_list = strip_excess_files(files, 1)
-    assert new_list == [SansFileData(title="", type="", run_number="0")]
 
 
 def test_loq_find_files_verify_title_too_long():
@@ -238,10 +192,10 @@ def test_loq_find_files_verify_some_files_found_but_none_valid():
         additional_requests=[],
     )
     with (
-        mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[SansFileData("", "", "")]),
+        mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[FileData("", "", "")]),
         mock.patch(
             "rundetection.rules.loq_rules.strip_excess_files",
-            return_value=[SansFileData("", "", ""), SansFileData("", "", ""), SansFileData("", "", "")],
+            return_value=[FileData("", "", ""), FileData("", "", ""), FileData("", "", "")],
         ),
     ):
         loq_find_files = LoqFindFiles(value=True)
@@ -267,13 +221,13 @@ def test_loq_find_files_trans_file_found():
         additional_requests=[],
     )
     with (
-        mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[SansFileData("", "", "")]),
+        mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[FileData("", "", "")]),
         mock.patch(
             "rundetection.rules.loq_rules.strip_excess_files",
             return_value=[
-                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-                SansFileData(title="{background}", type="TRANS", run_number="2"),
-                SansFileData(title="{direct}", type="SANS/TRANS", run_number="3"),
+                FileData(title="{scatter}", type="TRANS", run_number="1"),
+                FileData(title="{background}", type="TRANS", run_number="2"),
+                FileData(title="{direct}", type="SANS/TRANS", run_number="3"),
             ],
         ),
     ):
@@ -301,14 +255,14 @@ def test_loq_find_files_can_transmission_file_found():
         additional_requests=[],
     )
     with (
-        mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[SansFileData("", "", "")]),
+        mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[FileData("", "", "")]),
         mock.patch(
             "rundetection.rules.loq_rules.strip_excess_files",
             return_value=[
-                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-                SansFileData(title="{background}", type="SANS/TRANS", run_number="2"),
-                SansFileData(title="{background}", type="TRANS", run_number="3"),
-                SansFileData(title="{direct}", type="SANS/TRANS", run_number="4"),
+                FileData(title="{scatter}", type="TRANS", run_number="1"),
+                FileData(title="{background}", type="SANS/TRANS", run_number="2"),
+                FileData(title="{background}", type="TRANS", run_number="3"),
+                FileData(title="{direct}", type="SANS/TRANS", run_number="4"),
             ],
         ),
     ):
@@ -336,14 +290,14 @@ def test_loq_find_files_direct_file_found():
         additional_requests=[],
     )
     with (
-        mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[SansFileData("", "", "")]),
+        mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[FileData("", "", "")]),
         mock.patch(
             "rundetection.rules.loq_rules.strip_excess_files",
             return_value=[
-                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-                SansFileData(title="{background}", type="SANS/TRANS", run_number="2"),
-                SansFileData(title="{background}", type="TRANS", run_number="3"),
-                SansFileData(title="{direct}", type="TRANS", run_number="4"),
+                FileData(title="{scatter}", type="TRANS", run_number="1"),
+                FileData(title="{background}", type="SANS/TRANS", run_number="2"),
+                FileData(title="{background}", type="TRANS", run_number="3"),
+                FileData(title="{direct}", type="TRANS", run_number="4"),
             ],
         ),
     ):
@@ -372,14 +326,14 @@ def test_loq_find_files_can_scatter_file_found():
         additional_requests=[],
     )
     with (
-        mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[SansFileData("", "", "")]),
+        mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[FileData("", "", "")]),
         mock.patch(
             "rundetection.rules.loq_rules.strip_excess_files",
             return_value=[
-                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-                SansFileData(title="{background}", type="SANS/TRANS", run_number="2"),
-                SansFileData(title="{background}", type="TRANS", run_number="3"),
-                SansFileData(title="{direct}", type="SANS/TRANS", run_number="4"),
+                FileData(title="{scatter}", type="TRANS", run_number="1"),
+                FileData(title="{background}", type="SANS/TRANS", run_number="2"),
+                FileData(title="{background}", type="TRANS", run_number="3"),
+                FileData(title="{direct}", type="SANS/TRANS", run_number="4"),
             ],
         ),
     ):
@@ -390,7 +344,7 @@ def test_loq_find_files_can_scatter_file_found():
     assert job_request.additional_values["can_scatter"] == "2"
 
 
-def test_loq_user_file_():
+def test_loq_user_file():
     job_request = JobRequest(
         run_number=0,
         instrument="",

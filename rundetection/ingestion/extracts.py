@@ -136,6 +136,7 @@ def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     job_request.additional_values["remove_bkg"] = remove_bkg
     job_request.additional_values["sum_runs"] = False
     job_request.additional_values["runno"] = job_request.run_number
+    job_request.additional_values["cycle_string"] = get_cycle_string_from_path(job_request.filepath)
 
     return job_request
 
