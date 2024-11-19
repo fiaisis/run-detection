@@ -62,7 +62,7 @@ def tosca_extract(job_request: JobRequest, _: Any) -> JobRequest:
     return job_request
 
 
-def osiris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+def osiris_and_iris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     """
     Get the frequencies, and time channels from the dataset
     :param job_request: The job request
@@ -101,6 +101,26 @@ def osiris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     job_request.additional_values["tcb_monitor_max"] = tcb_monitor_max
 
     return job_request
+
+
+def osiris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+    """
+    Get the frequencies, and time channels from the dataset
+    :param job_request: The job request
+    :param dataset: The nexus file dataset
+    :return: The updated job request
+    """
+    return osiris_and_iris_extract(job_request, dataset)
+
+
+def iris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+    """
+    Get the frequencies, and time channels from the dataset
+    :param job_request: The job request
+    :param dataset: The nexus file dataset
+    :return: The updated job request
+    """
+    return osiris_and_iris_extract(job_request, dataset)
 
 
 def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
@@ -155,6 +175,8 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
             return osiris_extract
         case "loq":
             return loq_extract
+        case "iris":
+            return iris_extract
         case _:
             return skip_extract
 

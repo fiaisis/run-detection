@@ -4,8 +4,9 @@ Module containing the factory function for each rule
 
 from typing import Any
 
-from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule
+from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule, MolSpecStitchRule
 from rundetection.rules.inter_rules import InterStitchRule
+from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.loq_rules import LoqFindFiles, LoqUserFile
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
@@ -13,10 +14,8 @@ from rundetection.rules.osiris_rules import (
     OsirisDefaultSpectroscopy,
     OsirisReductionModeRule,
     OsirisReflectionCalibrationRule,
-    OsirisStitchRule,
 )
 from rundetection.rules.rule import MissingRuleError, Rule, T
-from rundetection.rules.tosca_rules import ToscaStitchRule
 
 
 def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912
@@ -33,9 +32,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "interstitch":
             if isinstance(value, bool):
                 return InterStitchRule(value)
-        case "toscastitch":
+        case "molspecstitch":
             if isinstance(value, bool):
-                return ToscaStitchRule(value)
+                return MolSpecStitchRule(value)
         case "maristitch":
             if isinstance(value, bool):
                 return MariStitchRule(value)
@@ -45,9 +44,6 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "mariwbvan":
             if isinstance(value, int):
                 return MariWBVANRule(value)
-        case "osirisstitch":
-            if isinstance(value, bool):
-                return OsirisStitchRule(value)
         case "osiriscalibfilesandreflection":
             if isinstance(value, dict):
                 return OsirisReflectionCalibrationRule(value)
@@ -69,6 +65,12 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "loquserfile":
             if isinstance(value, str):
                 return LoqUserFile(value)
+        case "irisreduction":
+            if isinstance(value, bool):
+                return IrisReductionRule(value)
+        case "iriscalibration":
+            if isinstance(value, dict):
+                return IrisCalibrationRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 
