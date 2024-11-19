@@ -87,7 +87,7 @@ class MolSpecStitchRule(Rule[bool]):
             if instrument.upper() == "TOSCA":
                 next_run_number = f"TSC{run_number}.nxs"
             else:
-                next_run_number = f"{instrument}{run_number:08d}.nxs"
+                next_run_number = f"{instrument.upper()}{run_number:08d}.nxs"
             run_path = Path(run_path.parent, next_run_number)
         logger.info("Run path %s does not exist", run_path)
         logger.info("Returning run numbers %s", run_numbers)
