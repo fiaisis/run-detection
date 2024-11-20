@@ -82,11 +82,9 @@ jobs:
           python -m pip install .
           cd ..
 
-      - name: Start FIA-API
+      - name: Start FIA-API and run e2e tests
         run: |
           cd FIA-API
-          uvicorn --reload --port 8080 fia_api.fia_api:app
-
-      - name: Run e2e test
-        run: pytest -l -v --random-order --random-order-bucket=global test/test_e2e.py
+          uvicorn --reload --port 8080 fia_api.fia_api:app &
+          pytest -l -v --random-order --random-order-bucket=global test/test_e2e.py
 
