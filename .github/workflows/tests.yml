@@ -39,6 +39,26 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14.7
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: fia
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      rabbit-mq:
+        image: "rabbitmq:3.12-management"
+        ports:
+          - "5672:5672"
+          - "15672:15672"
+        env:
+          RABBITMQ_USER: guest
+          RABBITMQ_PASSWORD: guest
+    
     steps:
       - name: Checkout project
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
@@ -59,10 +79,8 @@ jobs:
           repository: fiaisis/FIA-API
           path: FIA-API
 
-      - name: Run docker-compose
-        uses: hoverkraft-tech/compose-action@v2.0.1
-        with:
-          compose-file: 'test/docker-compose.yml'
+      - name: Start FIA-API
+        run: uvicorn --reload --port 8080 FIA-API/fia_api/fia_api.py
 
       - name: Run e2e test
         run: pytest -l -v --random-order --random-order-bucket=global test/test_e2e.py
