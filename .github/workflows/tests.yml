@@ -85,10 +85,3 @@ jobs:
       - name: Run e2e test
         run: pytest -l -v --random-order --random-order-bucket=global test/test_e2e.py
 
-      - name: View logs on fail
-        if: failure()
-        run: |
-          cd test
-          docker compose logs run-detection
-          docker compose logs rabbit-mq
-          docker compose logs fia-api
