@@ -83,7 +83,9 @@ jobs:
           cd ..
 
       - name: Start FIA-API
-        run: uvicorn --reload --port 8080 FIA-API/fia_api/fia_api.py
+        run: |
+          cd FIA-API
+          uvicorn --reload --port 8080 fia_api.fia_api:app
 
       - name: Run e2e test
         run: pytest -l -v --random-order --random-order-bucket=global test/test_e2e.py
