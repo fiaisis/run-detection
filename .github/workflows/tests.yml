@@ -82,21 +82,16 @@ jobs:
           python -m pip install .
           cd ..
 
-      - name: Start run-detection
-        run: |
-          cd test
-          docker compose up -d
-
       - name: Start FIA-API and run e2e tests
+        env:
+          FIA_API_URL: localhost:8080
+          FIA_API_API_KEY: shh
+          QUEUE_HOST: 'rabbit-mq'
+          INGRESS_QUEUE_NAME: 'watched-files'
+          EGRESS_QUEUE_NAME: 'scheduled-jobs'
         run: |
           cd FIA-API
           uvicorn --reload --port 8080 fia_api.fia_api:app &
           cd ..
+          python rundetection/run_detection.py &
           pytest -l -v --random-order --random-order-bucket=global test/test_e2e.py
-
-      - name: View logs on fail
-        if: failure()
-        run: |
-          cd test
-          docker compose logs run-detection
-          docker compose logs rabbit-mq
