@@ -82,6 +82,11 @@ jobs:
           python -m pip install .
           cd ..
 
+      - name: Start run-detection
+        run: |
+          cd test
+          docker compose up -d
+
       - name: Start FIA-API and run e2e tests
         run: |
           cd FIA-API
@@ -89,3 +94,9 @@ jobs:
           cd ..
           pytest -l -v --random-order --random-order-bucket=global test/test_e2e.py
 
+      - name: View logs on fail
+        if: failure()
+        run: |
+          cd test
+          docker compose logs run-detection
+          docker compose logs rabbit-mq

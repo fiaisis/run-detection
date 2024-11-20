@@ -1,29 +1,8 @@
 services:
-  rabbit-mq:
-    image: 'rabbitmq:3.12-management'
-    ports:
-      - '5672:5672'
-      - '15672:15672'
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
-    environment:
-      RABBITMQ_USER: guest
-      RABBITMQ_PASSWORD: guest
-
   run-detection:
     build:
       context: ../
       dockerfile: container/Dockerfile
-    depends_on:
-      rabbit-mq:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-      fia_api:
-        condition: service_healthy
     environment:
       FIA_API_URL: http://fia_api
       FIA_API_API_KEY: shh
@@ -33,47 +12,3 @@ services:
     volumes:
       - ../test/test_data/e2e_data:/archive
 
-  fia_api:
-    build:
-      context: ../FIA-API
-      dockerfile: container/fia_api.D
-    container_name: fia_api
-    image: ghcr.io/fiaisis/fia-api
-    ports:
-      - '8000:80'
-    depends_on:
-      db:
-        condition: service_healthy
-    healthcheck:
-      test: curl --fail 'http://localhost:80/healthz' || exit 1
-      interval: 30s
-      timeout: 30s
-      retries: 3
-    environment:
-      DB_IP: db
-      FIA_API_API_KEY: shh
-      DEV_MODE: 'True'
-    command: bash -c "
-      apt-get update
-      && apt-get -y install curl
-      && pip install .[all]
-      && pip install .[test]
-      && python -m utils.db_generator
-      && uvicorn fia_api.fia_api:app --host 0.0.0.0 --port 80"
-
-  db:
-    image: postgres:latest
-    restart: always
-    container_name: fiadb
-    ports:
-      - '5432:5432'
-    user: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: fia
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready']
-      interval: 10s
-      timeout: 5s
-      retries: 10
