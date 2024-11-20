@@ -3,8 +3,12 @@ services:
     build:
       context: ../
       dockerfile: container/Dockerfile
+    ports:
+      - "8080:8080"
+      - "5672:5672"
+      - "15672:15672"
     environment:
-      FIA_API_URL: http://fia_api
+      FIA_API_URL: localhost:8080
       FIA_API_API_KEY: shh
       QUEUE_HOST: 'rabbit-mq'
       INGRESS_QUEUE_NAME: 'watched-files'
