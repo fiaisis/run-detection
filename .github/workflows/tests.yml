@@ -68,16 +68,19 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install .[test]
-
       - name: Checkout the fia-api repository
         uses: actions/checkout@v4
         with:
           repository: fiaisis/FIA-API
           path: FIA-API
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[test]
+          cd FIA-API
+          python -m pip install .
+          cd ..
 
       - name: Start FIA-API
         run: uvicorn --reload --port 8080 FIA-API/fia_api/fia_api.py
