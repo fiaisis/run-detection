@@ -85,3 +85,6 @@ ignore = [
 
 [tool.ruff.lint.pylint]
 max-args = 10
+
+[tool.pytest.ini_options]
+log_level = "INFO"
