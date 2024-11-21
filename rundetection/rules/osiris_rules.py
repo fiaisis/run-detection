@@ -124,7 +124,7 @@ class OsirisDefaultGraniteAnalyser(Rule[bool]):
             job_request.additional_values["analyser"] = "graphite"
 
 
-class OsirisReflectionCalibrationRule(Rule[dict[str, str]]):
+class OsirisReflectionCalibrationRule(Rule[dict[str, list[str]]]):
     """
     Determine the reflection and set calibration run number based on the reflection
     """
@@ -173,4 +173,4 @@ class OsirisReflectionCalibrationRule(Rule[dict[str, str]]):
         reflection = self._determine_reflection(job_request)
 
         job_request.additional_values["reflection"] = reflection
-        job_request.additional_values["calibration_run_number"] = self._value[reflection]
+        job_request.additional_values["calibration_run_numbers"] = self._value[reflection]
