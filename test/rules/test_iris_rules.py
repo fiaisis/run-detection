@@ -89,8 +89,8 @@ def test_iris_reduction_rule_verify(phases, freq10, tcb_1, tcb_2, results, job_r
 @pytest.mark.parametrize(
     ("reflection", "analyser", "output"),
     [
-        ("002", "graphite", "00105275"),
-        ("004", "graphite", "00105276"),
+        ("002", "graphite", "105275"),
+        ("004", "graphite", "105276"),
     ],
 )
 def test_iris_calibration_rule_verify(reflection, analyser, output, reflection_rule, job_request):
