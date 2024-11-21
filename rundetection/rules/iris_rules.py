@@ -80,4 +80,4 @@ class IrisCalibrationRule(Rule[dict[str, str]]):
         if not self._value:
             return
         reflection = job_request.additional_values["reflection"]
-        job_request.additional_values["calibration_run_number"] = self._value[reflection]
+        job_request.additional_values["calibration_run_numbers"] = self._value[reflection]
