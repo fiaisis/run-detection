@@ -191,7 +191,7 @@ def test_analyser_rule_verify_freq_less_than_50(job_request, reflection_rule):
     job_request.additional_values["freq10"] = 49
     reflection_rule.verify(job_request)
     assert job_request.additional_values["reflection"] == "002"
-    assert job_request.additional_values["calibration_run_number"] == "00148587"
+    assert job_request.additional_values["calibration_run_numbers"] == "00148587"
 
 
 def test_analyser_rule_verify_freq_less_than_50_but_close(job_request, reflection_rule):
@@ -204,7 +204,7 @@ def test_analyser_rule_verify_freq_less_than_50_but_close(job_request, reflectio
     job_request.additional_values["tcb_monitor_max"] = 36700.0
     reflection_rule.verify(job_request)
     assert job_request.additional_values["reflection"] == "004"
-    assert job_request.additional_values["calibration_run_number"] == "00148587"
+    assert job_request.additional_values["calibration_run_numbers"] == "00148587"
 
 
 def test_verify_freq_greater_than_50_valid_tcb(job_request, reflection_rule):
@@ -218,7 +218,7 @@ def test_verify_freq_greater_than_50_valid_tcb(job_request, reflection_rule):
     }
     reflection_rule.verify(job_request)
     assert job_request.additional_values["reflection"] == "002"
-    assert job_request.additional_values["calibration_run_number"] == "00148587"
+    assert job_request.additional_values["calibration_run_numbers"] == "00148587"
 
 
 def test_analyser_verify_raises_when_freq_greater_than_50_invalid_tcb(job_request, reflection_rule):

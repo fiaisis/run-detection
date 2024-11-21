@@ -31,7 +31,7 @@ def job_request():
 @pytest.fixture()
 def reflection_rule():
     """Analyser rule fixture"""
-    return IrisCalibrationRule({"002": "00105275", "004": "00105276"})
+    return IrisCalibrationRule({"002": "105275", "004": "105276"})
 
 
 @pytest.fixture()
@@ -94,10 +94,10 @@ def test_iris_reduction_rule_verify(phases, freq10, tcb_1, tcb_2, results, job_r
     ],
 )
 def test_iris_calibration_rule_verify(reflection, analyser, output, reflection_rule, job_request):
-    job_request.additional_values["calibration_run_number"] = None
+    job_request.additional_values["calibration_run_numbers"] = None
     job_request.additional_values["reflection"] = reflection
     job_request.additional_values["analyser"] = analyser
 
     reflection_rule.verify(job_request)
 
-    assert output == job_request.additional_values["calibration_run_number"]
+    assert output == job_request.additional_values["calibration_run_numbers"]
