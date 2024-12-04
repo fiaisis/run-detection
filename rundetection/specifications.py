@@ -1,11 +1,12 @@
 """
 Contains the InstrumentSpecification class, the abstract Rule Class and Rule Implementations
 """
-
-import json
+import datetime
 import logging
+import os
 import typing
-from pathlib import Path
+
+import requests
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
@@ -18,6 +19,10 @@ if typing.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+FIA_API_API_KEY = os.environ["FIA_API_API_KEY"]
+FIA_API_URL = os.getenv("FIA_API_URL", "http://localhost:8000")
+SPEC_REQUEST_TIMEOUT_MINS = 10
+
 
 class InstrumentSpecification:
     """
@@ -26,20 +31,26 @@ class InstrumentSpecification:
     """
 
     def __init__(self, instrument: str) -> None:
-        logger.info("Loading instrument specification for: %s", instrument)
         self._instrument = instrument
         self._rules: list[Rule[Any]] = []
-        self._load_rules()
+        self.loaded_time = None
+        self._load_rules_from_api()
 
-    def _load_rules(self) -> None:
-        try:
-            path = Path(f"rundetection/specifications/{self._instrument.lower()}_specification.json")
-            with path.open(encoding="utf-8") as spec_file:
-                spec: dict[str, Any] = json.load(spec_file)
-                self._rules = [rule_factory(key, value) for key, value in spec.items()]
-        except FileNotFoundError:
-            logger.error("No specification for file: %s", self._instrument)
-            raise
+    def _load_rules_from_api(self) -> None:
+        logger.info("Requesting specification from API for %s", self._instrument)
+        headers: dict = {"Authorization": f"Bearer {FIA_API_API_KEY}", "accept": "application/json"}
+        response = requests.get(
+            url=f"{FIA_API_URL}/instrument/{self._instrument.upper()}/specification", headers=headers, timeout=1
+        )
+        response.raise_for_status()
+        spec: dict[str, Any] = response.json()
+        logger.info("Response from API for spec is: \n%s", spec)
+        self._rules = [rule_factory(key, value) for key, value in spec.items()]
+        self.loaded_time = datetime.datetime.now(tz=datetime.UTC)
+        logger.info("Loaded instrument specification for: %s at: %s, specification is: %s", self._instrument, self.loaded_time, spec)
+
+    def _rule_old(self) -> bool:
+        return self.loaded_time is None or datetime.timedelta(minutes=SPEC_REQUEST_TIMEOUT_MINS) > (datetime.datetime.now(tz=datetime.UTC) - self.loaded_time)
 
     def verify(self, job_request: JobRequest) -> None:
         """
@@ -48,6 +59,9 @@ class InstrumentSpecification:
         :param job_request: A JobRequest
         :return: whether the specification is met
         """
+        if self._rule_old():
+            logger.info("Rule for instrument %s is older than %s minutes, reloading rule from API", self._instrument, SPEC_REQUEST_TIMEOUT_MINS)
+            self._load_rules_from_api()
         if len(self._rules) == 0:
             job_request.will_reduce = False
         for rule in self._rules:
@@ -60,3 +74,32 @@ class InstrumentSpecification:
             if job_request.will_reduce is False:
                 logger.info("Rule %s not met for run %s", rule, job_request)
                 break  # Stop processing as soon as one rule is not met.
+
+
+def main() -> None:
+    """
+    Entry point for run detection
+    :return: None
+    """
+    spec = InstrumentSpecification("mari")
+    from pathlib import Path
+    job_request = JobRequest(
+        run_number=123456,
+        instrument="Mari",
+        experiment_title="",
+        experiment_number="",
+        filepath=Path("/archive/NDXMARI/Instrument/data/cycle_24_4/MAR30031.nxs"),
+        run_start="",
+        run_end="",
+        raw_frames=0,
+        good_frames=0,
+        users="",
+        will_reduce=True,
+        additional_values={},
+        additional_requests=[]
+    )
+    spec.verify(job_request)
+
+
+if __name__ == "__main__":
+    main()
