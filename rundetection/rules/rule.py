@@ -14,6 +14,8 @@ class Rule(Generic[T], ABC):
     """
     Abstract Rule, implement to define a rule that must be followed to allow a reduction to be run on a nexus file
     """
+    def __eq__(self, other):
+        return isinstance(other, type(self)) and self._value == other._value
 
     def __init__(self, value: T):
         self._value: T = value

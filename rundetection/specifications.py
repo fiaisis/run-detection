@@ -20,7 +20,6 @@ if typing.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-FIA_API_API_KEY = os.environ["FIA_API_API_KEY"]
 FIA_API_URL = os.getenv("FIA_API_URL", "http://localhost:8000")
 SPEC_REQUEST_TIMEOUT_MINS = 10
 
@@ -39,7 +38,8 @@ class InstrumentSpecification:
 
     def _load_rules_from_api(self) -> None:
         logger.info("Requesting specification from API for %s", self._instrument)
-        headers: dict = {"Authorization": f"Bearer {FIA_API_API_KEY}", "accept": "application/json"}
+        fia_api_api_key = os.environ["FIA_API_API_KEY"]
+        headers: dict = {"Authorization": f"Bearer {fia_api_api_key}", "accept": "application/json"}
         response = requests.get(
             url=f"{FIA_API_URL}/instrument/{self._instrument.upper()}/specification", headers=headers, timeout=1
         )
@@ -48,12 +48,7 @@ class InstrumentSpecification:
         logger.info("Response from API for spec is: \n%s", spec)
         self._rules = [rule_factory(key, value) for key, value in spec.items()]
         self.loaded_time = datetime.datetime.now(tz=datetime.UTC)
-        logger.info(
-            "Loaded instrument specification for: %s at: %s, specification is: %s",
-            self._instrument,
-            self.loaded_time,
-            spec,
-        )
+        logger.info("Loaded instrument specification for: %s at: %s", self._instrument, self.loaded_time)
 
     def _rule_old(self) -> bool:
         return self.loaded_time is None or datetime.timedelta(minutes=SPEC_REQUEST_TIMEOUT_MINS) > (
@@ -86,33 +81,3 @@ class InstrumentSpecification:
             if job_request.will_reduce is False:
                 logger.info("Rule %s not met for run %s", rule, job_request)
                 break  # Stop processing as soon as one rule is not met.
-
-
-def main() -> None:
-    """
-    Entry point for run detection
-    :return: None
-    """
-    spec = InstrumentSpecification("mari")
-    from pathlib import Path
-
-    job_request = JobRequest(
-        run_number=123456,
-        instrument="Mari",
-        experiment_title="",
-        experiment_number="",
-        filepath=Path("/archive/NDXMARI/Instrument/data/cycle_24_4/MAR30031.nxs"),
-        run_start="",
-        run_end="",
-        raw_frames=0,
-        good_frames=0,
-        users="",
-        will_reduce=True,
-        additional_values={},
-        additional_requests=[],
-    )
-    spec.verify(job_request)
-
-
-if __name__ == "__main__":
-    main()
