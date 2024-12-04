@@ -51,7 +51,7 @@ class InstrumentSpecification:
         logger.info("Loaded instrument specification for: %s at: %s", self._instrument, self.loaded_time)
 
     def _rule_old(self) -> bool:
-        return self.loaded_time is None or datetime.timedelta(minutes=SPEC_REQUEST_TIMEOUT_MINS) > (
+        return self.loaded_time is None or datetime.timedelta(minutes=SPEC_REQUEST_TIMEOUT_MINS) < (
             datetime.datetime.now(tz=datetime.UTC) - self.loaded_time
         )
 
