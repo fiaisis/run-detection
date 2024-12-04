@@ -1,6 +1,7 @@
 """
 Specification unit test module
 """
+
 import datetime
 import os
 from pathlib import Path
@@ -64,13 +65,14 @@ def test_instrument_specification_load_rules_for_api(requests, specification):
     requests.get.return_value.json.return_value = {
         "molspecstitch": True,
         "mariwbvan": 100,
-        "loquserfile": "user_file.toml"
+        "loquserfile": "user_file.toml",
     }
 
     specification._load_rules_from_api()
 
-    requests.get.assert_called_once_with(url="http://localhost:8000/instrument/FOO/specification", headers=headers,
-                                         timeout=1)
+    requests.get.assert_called_once_with(
+        url="http://localhost:8000/instrument/FOO/specification", headers=headers, timeout=1
+    )
     assert specification._rules == [MolSpecStitchRule(True), MariWBVANRule(100), LoqUserFile("user_file.toml")]
 
 
@@ -79,7 +81,9 @@ def test_instrument_specification_load_rules_for_api_sets_loaded_time(requests, 
     headers: dict = {"Authorization": "Bearer shh", "accept": "application/json"}
     specification._load_rules_from_api()
 
-    requests.get.assert_called_once_with(url="http://localhost:8000/instrument/FOO/specification", headers=headers, timeout=1)
+    requests.get.assert_called_once_with(
+        url="http://localhost:8000/instrument/FOO/specification", headers=headers, timeout=1
+    )
     assert specification.loaded_time is not None
     assert datetime.timedelta(minutes=1) > datetime.datetime.now(tz=datetime.UTC) - specification.loaded_time
 
