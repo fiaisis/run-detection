@@ -14,7 +14,7 @@ from rundetection.ingestion.ingest import JobRequest
 from rundetection.specifications import InstrumentSpecification
 
 
-@pytest.fixture
+@pytest.fixture()
 def job_request():
     """
     JobRequest fixture
@@ -23,7 +23,7 @@ def job_request():
     return JobRequest(1, "larmor", "1", "1", Path("/archive/larmor/1/1,nxs"), "start time", "end time", 1, 1, "user")
 
 
-@pytest.fixture
+@pytest.fixture()
 @patch("rundetection.specifications.InstrumentSpecification._load_rules_from_api")
 def specification(_) -> InstrumentSpecification:
     """
@@ -33,7 +33,7 @@ def specification(_) -> InstrumentSpecification:
     return InstrumentSpecification("foo")
 
 
-@pytest.fixture
+@pytest.fixture()
 def _working_directory_fix():
     # Set dir to repo root for purposes of the test.
     current_working_directory = Path.cwd()

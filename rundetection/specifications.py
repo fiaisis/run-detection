@@ -1,6 +1,7 @@
 """
 Contains the InstrumentSpecification class, the abstract Rule Class and Rule Implementations
 """
+
 import datetime
 import logging
 import os
@@ -47,10 +48,17 @@ class InstrumentSpecification:
         logger.info("Response from API for spec is: \n%s", spec)
         self._rules = [rule_factory(key, value) for key, value in spec.items()]
         self.loaded_time = datetime.datetime.now(tz=datetime.UTC)
-        logger.info("Loaded instrument specification for: %s at: %s, specification is: %s", self._instrument, self.loaded_time, spec)
+        logger.info(
+            "Loaded instrument specification for: %s at: %s, specification is: %s",
+            self._instrument,
+            self.loaded_time,
+            spec,
+        )
 
     def _rule_old(self) -> bool:
-        return self.loaded_time is None or datetime.timedelta(minutes=SPEC_REQUEST_TIMEOUT_MINS) > (datetime.datetime.now(tz=datetime.UTC) - self.loaded_time)
+        return self.loaded_time is None or datetime.timedelta(minutes=SPEC_REQUEST_TIMEOUT_MINS) > (
+            datetime.datetime.now(tz=datetime.UTC) - self.loaded_time
+        )
 
     def verify(self, job_request: JobRequest) -> None:
         """
@@ -60,7 +68,11 @@ class InstrumentSpecification:
         :return: whether the specification is met
         """
         if self._rule_old():
-            logger.info("Rule for instrument %s is older than %s minutes, reloading rule from API", self._instrument, SPEC_REQUEST_TIMEOUT_MINS)
+            logger.info(
+                "Rule for instrument %s is older than %s minutes, reloading rule from API",
+                self._instrument,
+                SPEC_REQUEST_TIMEOUT_MINS,
+            )
             self._load_rules_from_api()
         if len(self._rules) == 0:
             job_request.will_reduce = False
@@ -83,6 +95,7 @@ def main() -> None:
     """
     spec = InstrumentSpecification("mari")
     from pathlib import Path
+
     job_request = JobRequest(
         run_number=123456,
         instrument="Mari",
@@ -96,7 +109,7 @@ def main() -> None:
         users="",
         will_reduce=True,
         additional_values={},
-        additional_requests=[]
+        additional_requests=[],
     )
     spec.verify(job_request)
 
