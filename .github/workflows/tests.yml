@@ -39,9 +39,35 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: fia
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      rabbit-mq:
+        image: "rabbitmq:3.12-management"
+        ports:
+          - "5672:5672"
+          - "15672:15672"
+        env:
+          RABBITMQ_USER: guest
+          RABBITMQ_PASSWORD: guest
     steps:
       - name: Checkout project
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Checkout FIA-API
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          repository: "https://github.com/fiaisis/FIA-API"
+          path: "fia-api"
+
       - name: Set up python
         uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
         with:
@@ -50,12 +76,27 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install .[test]
-      - name: Start e2e docker compose environment
-        run: |
-          cd test
-          docker compose up -d
-      - name: Run e2e test
-        run: pytest -l -v --random-order --random-order-bucket=global test/test_e2e.py
+          cd fia-api
+          python -m pip install .
+          cd ..
+
+      - name: Start API and rundetection then run e2e test
+        env:
+          QUEUE_HOST: "rabbit-mq"
+          INGRESS_QUEUE_NAME: "watched-files"
+          EGRESS_QUEUE_NAME: "scheduled-jobs"
+          FIA_API_API_KEY: "shh"
+          FIA_API_URL: http://localhost:8000
+          DB_IP: "localhost:5432"
+          DB_USERNAME: "postgres"
+          DB_PASSWORD: "password"
+          DEV_MODE: "True"
+        run:
+          cd fia-api
+          uvicorn fia_api.fia_api:app &
+          cd ..
+          python rundetection/run_detection.py &
+          pytest -l -v --random-order --random-order-bucket=global test/test_e2e.py
 
       - name: View logs on fail
         if: failure()

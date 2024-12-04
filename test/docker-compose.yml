@@ -13,6 +13,22 @@ services:
       RABBITMQ_USER: guest
       RABBITMQ_PASSWORD: guest
 
+  fia-api:
+    ports:
+      - "80:8000"
+    build:
+      context: ../fia-api/
+      dockerfile: ../fia-api/container/fia_api.D
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FIA_API_API_KEY: "shh"
+      DB_IP: ""
+      DB_USERNAME: ""
+      DB_PASSWORD: ""
+      DEV_MODE: "True"
+
   run-detection:
     build:
       context: ../
@@ -24,5 +40,7 @@ services:
       QUEUE_HOST: "rabbit-mq"
       INGRESS_QUEUE_NAME: "watched-files"
       EGRESS_QUEUE_NAME: "scheduled-jobs"
+      FIA_API_API_KEY: "shh"
+      FIA_API_URL: http://localhost:8000
     volumes:
       - ../test/test_data/e2e_data:/archive
