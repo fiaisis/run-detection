@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class MariStitchRule(Rule[bool]):
     """
-    The MariStitchRule is the rule that applies
+    The MariStitchRule is the rule that applies, dependent on the other rules running first. This runs last.
     """
 
     def __init__(self, value: bool) -> None:
