@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import typing
 from pathlib import Path
+from unittest import mock
 
 import pytest
 from pika import BlockingConnection
@@ -57,6 +58,18 @@ def produce_message(message: str, channel: BlockingChannel) -> None:
     channel.basic_publish("watched-files", "", body=message.encode())
 
 
+def get_specification_from_file(instrument: str) -> Any:
+    """
+    Given an instrument, return the specification
+    :param instrument: The instrument for which specification to get
+    :return: The specification file contents
+    """
+    path = Path(f"test/test_data/specifications/{instrument.lower()}_specification.json")
+    with path.open(encoding="utf-8") as fle:
+        spec = json.load(fle)
+        return spec
+
+
 def get_specification_value(instrument: str, key: str) -> Any:
     """
     Given an instrument and key, return the specification value
@@ -64,10 +77,8 @@ def get_specification_value(instrument: str, key: str) -> Any:
     :param key: The key for the rule
     :return: The rule value
     """
-    path = Path(f"rundetection/specifications/{instrument.lower()}_specification.json")
-    with path.open(encoding="utf-8") as fle:
-        spec = json.load(fle)
-        return spec[key]
+    spec = get_specification_from_file(instrument)
+    return spec[key]
 
 
 def consume_all_messages(consumer_channel: BlockingChannel) -> list[dict[str, Any]]:
@@ -99,9 +110,10 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
 
 
 @pytest.mark.parametrize(
-    ("messages", "expected_requests"),
+    ("instrument", "messages", "expected_requests"),
     [
         (
+            "MARI",
             [
                 "/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs",
                 "/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27030.nxs",
@@ -203,6 +215,7 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
             ],
         ),
         (
+            "TOSCA",
             [
                 "/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25234.nxs",
                 "/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25235.nxs",
@@ -277,6 +290,7 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
             ],
         ),
         (
+            "OSIRIS",
             [
                 "/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108538.nxs",
                 "/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108539.nxs",
@@ -402,6 +416,7 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
             ],
         ),
         (
+            "IRIS",
             ["/archive/NDXIRIS/Instrument/data/cycle_24_3/IRIS00103226.nxs"],
             [
                 {
@@ -460,17 +475,19 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
                 },
             ],
         ),
-        (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
+        ("IMAT", ["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
     ],
 )
-def test_e2e(producer_channel, consumer_channel, messages, expected_requests):
+def test_e2e(producer_channel, consumer_channel, instrument, messages, expected_requests):
     """Test expected messages are consumed from the scheduled jobs queue
     When the given messages are sent to the watched-files queue"""
-    for message in messages:
-        produce_message(message, producer_channel)
-    if len(expected_requests) > 0:
-        recieved_runs = consume_all_messages(consumer_channel)
-        for request in expected_requests:
-            assert_run_in_recieved(request, recieved_runs)
-    else:
-        assert not consume_all_messages(consumer_channel)
+    with mock.patch("rundetection.specifications.requests") as requests:
+        requests.get.return_value = get_specification_from_file(instrument)
+        for message in messages:
+            produce_message(message, producer_channel)
+        if len(expected_requests) > 0:
+            recieved_runs = consume_all_messages(consumer_channel)
+            for request in expected_requests:
+                assert_run_in_recieved(request, recieved_runs)
+        else:
+            assert not consume_all_messages(consumer_channel)
