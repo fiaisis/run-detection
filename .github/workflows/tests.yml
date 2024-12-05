@@ -40,15 +40,6 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
 
-    services:
-      rabbit-mq:
-        image: "rabbitmq:3.12-management"
-        ports:
-          - "5672:5672"
-          - "15672:15672"
-        env:
-          RABBITMQ_USER: guest
-          RABBITMQ_PASSWORD: guest
     steps:
       - name: Checkout project
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7

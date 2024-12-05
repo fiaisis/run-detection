@@ -13,22 +13,6 @@ services:
       RABBITMQ_USER: guest
       RABBITMQ_PASSWORD: guest
 
-  fia-api:
-    ports:
-      - "80:8000"
-    build:
-      context: ../fia-api/
-      dockerfile: ../fia-api/container/fia_api.D
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      FIA_API_API_KEY: "shh"
-      DB_IP: ""
-      DB_USERNAME: ""
-      DB_PASSWORD: ""
-      DEV_MODE: "True"
-
   run-detection:
     build:
       context: ../
