@@ -33,13 +33,13 @@ class InstrumentSpecification:
     def __init__(self, instrument: str) -> None:
         self._instrument = instrument
         self._rules: list[Rule[Any]] = []
-        self.loaded_time = None
+        self.loaded_time: datetime.datetime | None = None
         self._load_rules_from_api()
 
     def _load_rules_from_api(self) -> None:
         logger.info("Requesting specification from API for %s", self._instrument)
         fia_api_api_key = os.environ["FIA_API_API_KEY"]
-        headers: dict = {"Authorization": f"Bearer {fia_api_api_key}", "accept": "application/json"}
+        headers: dict[str, Any] = {"Authorization": f"Bearer {fia_api_api_key}", "accept": "application/json"}
         response = requests.get(
             url=f"{FIA_API_URL}/instrument/{self._instrument.upper()}/specification", headers=headers, timeout=1
         )
