@@ -105,7 +105,7 @@ def test_verify_multiple_runs(mari_stitch_rule_true, job_request):
 
     assert len(job_request.additional_requests) == 1
     assert job_request.additional_requests[0].additional_values["mask_file_link"] == "some link"
-    assert job_request.additional_requests[0].additional_values["wbvan"] == 1234567
+    assert job_request.additional_requests[0].additional_values["wbvan"] == 1234567  # noqa: PLR2004
 
 
 def test_mari_mask_rule(job_request):
