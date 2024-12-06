@@ -7,7 +7,6 @@ from __future__ import annotations
 import json
 import typing
 from pathlib import Path
-from unittest import mock
 
 import pytest
 from pika import BlockingConnection
@@ -65,9 +64,10 @@ def get_specification_from_file(instrument: str) -> Any:
     :return: The specification file contents
     """
     path = Path(f"test/test_data/specifications/{instrument.lower()}_specification.json")
+    if not path.exists():
+        path = Path(f"test_data/specifications/{instrument.lower()}_specification.json")
     with path.open(encoding="utf-8") as fle:
-        spec = json.load(fle)
-        return spec
+        return json.load(fle)
 
 
 def get_specification_value(instrument: str, key: str) -> Any:
@@ -481,13 +481,11 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
 def test_e2e(producer_channel, consumer_channel, instrument, messages, expected_requests):
     """Test expected messages are consumed from the scheduled jobs queue
     When the given messages are sent to the watched-files queue"""
-    with mock.patch("rundetection.specifications.requests") as requests:
-        requests.get.return_value = get_specification_from_file(instrument)
-        for message in messages:
-            produce_message(message, producer_channel)
-        if len(expected_requests) > 0:
-            recieved_runs = consume_all_messages(consumer_channel)
-            for request in expected_requests:
-                assert_run_in_recieved(request, recieved_runs)
-        else:
-            assert not consume_all_messages(consumer_channel)
+    for message in messages:
+        produce_message(message, producer_channel)
+    if len(expected_requests) > 0:
+        recieved_runs = consume_all_messages(consumer_channel)
+        for request in expected_requests:
+            assert_run_in_recieved(request, recieved_runs)
+    else:
+        assert not consume_all_messages(consumer_channel)

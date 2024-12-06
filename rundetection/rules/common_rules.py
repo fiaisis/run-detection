@@ -89,7 +89,6 @@ class MolSpecStitchRule(Rule[bool]):
             else:
                 next_run_number = f"{instrument.upper()}{run_number:08d}.nxs"
             run_path = Path(run_path.parent, next_run_number)
-        logger.info("Run path %s does not exist", run_path)
         logger.info("Returning run numbers %s", run_numbers)
         return run_numbers
 

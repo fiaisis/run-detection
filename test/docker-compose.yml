@@ -13,6 +13,19 @@ services:
       RABBITMQ_USER: guest
       RABBITMQ_PASSWORD: guest
 
+  fake-fia-api:
+    build:
+      context: e2e_components/
+      dockerfile: Dockerfile
+    healthcheck:
+      test: curl --fail http://localhost:80/healthz || exit 1
+      interval: 1s
+      timeout: 1s
+      retries: 3
+      start_period: 1s
+    volumes:
+      - ../test/test_data/specifications:/data
+
   run-detection:
     build:
       context: ../
@@ -20,11 +33,15 @@ services:
     depends_on:
       rabbit-mq:
         condition: service_healthy
+      fake-fia-api:
+        condition: service_healthy
     environment:
       QUEUE_HOST: "rabbit-mq"
+      QUEUE_USER: "guest"
+      QUEUE_PASSWORD: "guest"
       INGRESS_QUEUE_NAME: "watched-files"
       EGRESS_QUEUE_NAME: "scheduled-jobs"
       FIA_API_API_KEY: "shh"
-      FIA_API_URL: http://localhost:8000
+      FIA_API_URL: http://fake-fia-api:80
     volumes:
       - ../test/test_data/e2e_data:/archive
