@@ -55,6 +55,9 @@ class MolSpecStitchRule(Rule[bool]):
     """
     Enables Tosca, Osiris, and Iris Run stitching
     """
+    def __init__(self, value: bool) -> None:
+        super().__init__(value)
+        self.should_be_last = True
 
     @staticmethod
     def _is_title_similar(title: str, other_title: str) -> bool:

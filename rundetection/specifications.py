@@ -1,7 +1,6 @@
 """
 Contains the InstrumentSpecification class, the abstract Rule Class and Rule Implementations
 """
-
 import datetime
 import logging
 import os
@@ -47,8 +46,19 @@ class InstrumentSpecification:
         spec: dict[str, Any] = response.json()
         logger.info("Response from API for spec is: \n%s", spec)
         self._rules = [rule_factory(key, value) for key, value in spec.items()]
+        self._order_rules()
         self.loaded_time = datetime.datetime.now(tz=datetime.UTC)
         logger.info("Loaded instrument specification for: %s at: %s", self._instrument, self.loaded_time)
+
+    def _order_rules(self):
+        """
+        Sometimes we need to ensure some rules end up at the end of the list, notably those with stitch in the name
+        """
+        for rule in self._rules:
+            # We need to ensure rules that do a stitch, or any that added extra jobs, need to come last.
+            if rule.should_be_last:
+                self._rules.remove(rule)
+                self._rules.append(rule)
 
     def _rule_old(self) -> bool:
         return self.loaded_time is None or datetime.timedelta(minutes=SPEC_REQUEST_TIMEOUT_MINS) < (

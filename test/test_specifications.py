@@ -13,6 +13,7 @@ import pytest
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import MolSpecStitchRule
+from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.loq_rules import LoqUserFile
 from rundetection.rules.mari_rules import MariWBVANRule
 from rundetection.specifications import InstrumentSpecification
@@ -136,3 +137,13 @@ def test_specification_verify_rule_violation_doesnt_verify_more(specification, j
     specification._rules[0].verify.assert_called_once()
     specification._rules[1].verify.assert_called_once()
     specification._rules[2].verify.assert_not_called()
+
+
+def test_specification_ensures_rule_order_respected(specification):
+    specification._rules = [IrisReductionRule(True), MolSpecStitchRule(True), IrisCalibrationRule({})]
+
+    specification._order_rules()
+
+    assert specification._rules[0] == IrisReductionRule(True)
+    assert specification._rules[1] == IrisCalibrationRule({})
+    assert specification._rules[-1] == MolSpecStitchRule(True)

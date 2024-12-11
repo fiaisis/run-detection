@@ -20,6 +20,7 @@ class MariStitchRule(Rule[bool]):
 
     def __init__(self, value: bool) -> None:
         super().__init__(value)
+        self.should_be_last = True
 
     @staticmethod
     def _get_runs_to_stitch(run_path: Path, run_number: int, run_title: str) -> list[int]:
