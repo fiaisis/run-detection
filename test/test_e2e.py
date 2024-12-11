@@ -63,7 +63,8 @@ def get_specification_from_file(instrument: str) -> Any:
     :param instrument: The instrument for which specification to get
     :return: The specification file contents
     """
-    #This is ran in 2 places the CI and locally. On the CI, it has a different working directory to the default selected by IDEs for local testing this works with either, if this fails raising is fine.
+    #This is ran in 2 places the CI and locally. On the CI, it has a different working directory to the default
+    # selected by IDEs for local testing this works with either, if this fails raising is fine.
     path = Path(f"test/test_data/specifications/{instrument.lower()}_specification.json")
     if not path.exists():
         path = Path(f"test_data/specifications/{instrument.lower()}_specification.json")
