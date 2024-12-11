@@ -1,6 +1,7 @@
 """
 Contains the InstrumentSpecification class, the abstract Rule Class and Rule Implementations
 """
+
 import datetime
 import logging
 import os

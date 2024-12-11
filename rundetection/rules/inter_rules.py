@@ -11,6 +11,7 @@ class InterStitchRule(Rule[bool]):
     """
     Rule for collecting each related inter run and including them into the additional values
     """
+
     def __init__(self, value: bool) -> None:
         super().__init__(value)
         self.should_be_last = True
