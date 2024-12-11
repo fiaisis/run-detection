@@ -74,7 +74,7 @@ def test_instrument_specification_load_rules_for_api(requests, specification):
     requests.get.assert_called_once_with(
         url="http://localhost:8000/instrument/FOO/specification", headers=headers, timeout=1
     )
-    assert specification._rules == [MolSpecStitchRule(True), MariWBVANRule(100), LoqUserFile("user_file.toml")]
+    assert specification._rules == [MariWBVANRule(100), LoqUserFile("user_file.toml"), MolSpecStitchRule(True)]
 
 
 @mock.patch("rundetection.specifications.requests")
