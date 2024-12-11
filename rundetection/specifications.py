@@ -51,7 +51,7 @@ class InstrumentSpecification:
         self.loaded_time = datetime.datetime.now(tz=datetime.UTC)
         logger.info("Loaded instrument specification for: %s at: %s", self._instrument, self.loaded_time)
 
-    def _order_rules(self):
+    def _order_rules(self) -> None:
         """
         Sometimes we need to ensure some rules end up at the end of the list, notably those with stitch in the name
         """

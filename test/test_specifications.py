@@ -55,7 +55,7 @@ def _working_directory_fix():
 
 
 @mock.patch("rundetection.specifications.InstrumentSpecification._load_rules_from_api")
-def test_instrument_specification_tries_to_loads_api_from_db(load_rules_from_api):
+def test_instrument_specification_tries_to_load_api_from_db(load_rules_from_api):
     InstrumentSpecification("mari")
     load_rules_from_api.assert_called_once_with()
 

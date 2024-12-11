@@ -110,10 +110,9 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
 
 
 @pytest.mark.parametrize(
-    ("instrument", "messages", "expected_requests"),
+    ("messages", "expected_requests"),
     [
         (
-            "MARI",
             [
                 "/archive/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs",
                 "/archive/NDXMAR/Instrument/data/cycle_19_4/MAR27030.nxs",
@@ -215,7 +214,6 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
             ],
         ),
         (
-            "TOSCA",
             [
                 "/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25234.nxs",
                 "/archive/NDXTOSCA/Instrument/data/cycle_19_4/TSC25235.nxs",
@@ -290,7 +288,6 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
             ],
         ),
         (
-            "OSIRIS",
             [
                 "/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108538.nxs",
                 "/archive/NDXOSIRIS/Instrument/data/cycle_14_1/OSIRIS00108539.nxs",
@@ -416,7 +413,6 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
             ],
         ),
         (
-            "IRIS",
             ["/archive/NDXIRIS/Instrument/data/cycle_24_3/IRIS00103226.nxs"],
             [
                 {
@@ -475,10 +471,10 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
                 },
             ],
         ),
-        ("IMAT", ["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
+        (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
     ],
 )
-def test_e2e(producer_channel, consumer_channel, instrument, messages, expected_requests):
+def test_e2e(producer_channel, consumer_channel, messages, expected_requests):
     """Test expected messages are consumed from the scheduled jobs queue
     When the given messages are sent to the watched-files queue"""
     for message in messages:
