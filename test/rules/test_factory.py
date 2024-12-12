@@ -4,7 +4,6 @@ Rule factory unit tests
 
 import unittest
 from typing import Any
-from unittest.mock import patch
 
 import pytest
 
@@ -64,8 +63,7 @@ def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
     :param expected_rule: The expected rule class
     :return: None
     """
-    with patch("rundetection.rules.mari_rules.MariStitchRule._load_mari_spec"):
-        assert_correct_rule(rule_key, rule_value, expected_rule)
+    assert_correct_rule(rule_key, rule_value, expected_rule)
 
 
 def test_raises_exception_for_missing_rule_class() -> None:

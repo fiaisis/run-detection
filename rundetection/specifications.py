@@ -2,10 +2,12 @@
 Contains the InstrumentSpecification class, the abstract Rule Class and Rule Implementations
 """
 
-import json
+import datetime
 import logging
+import os
 import typing
-from pathlib import Path
+
+import requests
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
@@ -18,6 +20,9 @@ if typing.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+FIA_API_URL = os.getenv("FIA_API_URL", "http://localhost:8000")
+SPEC_REQUEST_TIMEOUT_MINS = 10
+
 
 class InstrumentSpecification:
     """
@@ -26,20 +31,40 @@ class InstrumentSpecification:
     """
 
     def __init__(self, instrument: str) -> None:
-        logger.info("Loading instrument specification for: %s", instrument)
         self._instrument = instrument
         self._rules: list[Rule[Any]] = []
-        self._load_rules()
+        self.loaded_time: datetime.datetime | None = None
+        self._load_rules_from_api()
 
-    def _load_rules(self) -> None:
-        try:
-            path = Path(f"rundetection/specifications/{self._instrument.lower()}_specification.json")
-            with path.open(encoding="utf-8") as spec_file:
-                spec: dict[str, Any] = json.load(spec_file)
-                self._rules = [rule_factory(key, value) for key, value in spec.items()]
-        except FileNotFoundError:
-            logger.error("No specification for file: %s", self._instrument)
-            raise
+    def _load_rules_from_api(self) -> None:
+        logger.info("Requesting specification from API for %s", self._instrument)
+        fia_api_api_key = os.environ["FIA_API_API_KEY"]
+        headers: dict[str, Any] = {"Authorization": f"Bearer {fia_api_api_key}", "accept": "application/json"}
+        response = requests.get(
+            url=f"{FIA_API_URL}/instrument/{self._instrument.upper()}/specification", headers=headers, timeout=1
+        )
+        response.raise_for_status()
+        spec: dict[str, Any] = response.json()
+        logger.info("Response from API for spec is: \n%s", spec)
+        self._rules = [rule_factory(key, value) for key, value in spec.items()]
+        self._order_rules()
+        self.loaded_time = datetime.datetime.now(tz=datetime.UTC)
+        logger.info("Loaded instrument specification for: %s at: %s", self._instrument, self.loaded_time)
+
+    def _order_rules(self) -> None:
+        """
+        Sometimes we need to ensure some rules end up at the end of the list, notably those with stitch in the name
+        """
+        for rule in self._rules:
+            # We need to ensure rules that do a stitch, or any that added extra jobs, need to come last.
+            if rule.should_be_last:
+                self._rules.remove(rule)
+                self._rules.append(rule)
+
+    def _rule_old(self) -> bool:
+        return self.loaded_time is None or datetime.timedelta(minutes=SPEC_REQUEST_TIMEOUT_MINS) < (
+            datetime.datetime.now(tz=datetime.UTC) - self.loaded_time
+        )
 
     def verify(self, job_request: JobRequest) -> None:
         """
@@ -48,6 +73,13 @@ class InstrumentSpecification:
         :param job_request: A JobRequest
         :return: whether the specification is met
         """
+        if self._rule_old():
+            logger.info(
+                "Rule for instrument %s is older than %s minutes, reloading rule from API",
+                self._instrument,
+                SPEC_REQUEST_TIMEOUT_MINS,
+            )
+            self._load_rules_from_api()
         if len(self._rules) == 0:
             job_request.will_reduce = False
         for rule in self._rules:

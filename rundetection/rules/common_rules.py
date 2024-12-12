@@ -56,6 +56,10 @@ class MolSpecStitchRule(Rule[bool]):
     Enables Tosca, Osiris, and Iris Run stitching
     """
 
+    def __init__(self, value: bool) -> None:
+        super().__init__(value)
+        self.should_be_last = True
+
     @staticmethod
     def _is_title_similar(title: str, other_title: str) -> bool:
         """
@@ -89,7 +93,6 @@ class MolSpecStitchRule(Rule[bool]):
             else:
                 next_run_number = f"{instrument.upper()}{run_number:08d}.nxs"
             run_path = Path(run_path.parent, next_run_number)
-        logger.info("Run path %s does not exist", run_path)
         logger.info("Returning run numbers %s", run_numbers)
         return run_numbers
 

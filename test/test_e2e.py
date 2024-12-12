@@ -57,6 +57,21 @@ def produce_message(message: str, channel: BlockingChannel) -> None:
     channel.basic_publish("watched-files", "", body=message.encode())
 
 
+def get_specification_from_file(instrument: str) -> Any:
+    """
+    Given an instrument, return the specification
+    :param instrument: The instrument for which specification to get
+    :return: The specification file contents
+    """
+    # This is ran in 2 places the CI and locally. On the CI, it has a different working directory to the default
+    # selected by IDEs for local testing this works with either, if this fails raising is fine.
+    path = Path(f"test/test_data/specifications/{instrument.lower()}_specification.json")
+    if not path.exists():
+        path = Path(f"test_data/specifications/{instrument.lower()}_specification.json")
+    with path.open(encoding="utf-8") as fle:
+        return json.load(fle)
+
+
 def get_specification_value(instrument: str, key: str) -> Any:
     """
     Given an instrument and key, return the specification value
@@ -64,10 +79,8 @@ def get_specification_value(instrument: str, key: str) -> Any:
     :param key: The key for the rule
     :return: The rule value
     """
-    path = Path(f"rundetection/specifications/{instrument.lower()}_specification.json")
-    with path.open(encoding="utf-8") as fle:
-        spec = json.load(fle)
-        return spec[key]
+    spec = get_specification_from_file(instrument)
+    return spec[key]
 
 
 def consume_all_messages(consumer_channel: BlockingChannel) -> list[dict[str, Any]]:
