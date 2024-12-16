@@ -5,6 +5,7 @@ Rules for LOQ
 from __future__ import annotations
 
 import logging
+import re
 import typing
 from dataclasses import dataclass
 from pathlib import Path
@@ -98,12 +99,10 @@ def create_list_of_files(job_request: JobRequest) -> list[SansFileData]:
     cycle_run_info = xmltodict.parse(xml)
     list_of_files = []
     for run_info in cycle_run_info["NXroot"]["NXentry"]:
-        title_contents = run_info["title"]["#text"].split("_")
+        title = run_info["title"]["#text"]
         run_number = run_info["run_number"]["#text"]
-        if len(title_contents) not in {2, 3}:
-            continue
-        file_type = title_contents[-1]
-        list_of_files.append(SansFileData(title=run_info["title"]["#text"], type=file_type, run_number=run_number))
+        file_type = title.split("_")[-1]
+        list_of_files.append(SansFileData(title=title, type=file_type, run_number=run_number))
     return list_of_files
 
 
@@ -116,20 +115,68 @@ def strip_excess_files(sans_files: list[SansFileData], scatter_run_number: int) 
     return new_list_of_files
 
 
+def _strip_excess_braces(string: str) -> str:
+    return string.strip("}")
+
+
+def _set_transmission_file(job_request, sample_title, sans_files):
+    # If using M4 monitor then scatter is the transmission
+    if not job_request.additional_values["included_trans_as_scatter"]:
+        trans_file = _find_trans_file(sans_files=sans_files, sample_title=sample_title)
+        logger.info("LOQ trans found %s", trans_file)
+    else:
+        trans_file = job_request.run_number
+        logger.info("LOQ trans set as scatter %s", trans_file)
+    if trans_file is not None:
+        job_request.additional_values["scatter_transmission"] = trans_file.run_number
+
+
+def _set_can_files(can_title, job_request, sans_files):
+    if can_title is not None:
+        can_scatter = _find_can_scatter_file(sans_files=sans_files, can_title=can_title)
+        logger.info("LOQ can scatter found %s", can_scatter)
+        if can_scatter is not None:
+            job_request.additional_values["can_scatter"] = can_scatter.run_number
+
+        # If using M4 monitor then can scatter is the transmission
+        if not job_request.additional_values["included_trans_as_scatter"]:
+            can_trans = _find_can_trans_file(sans_files=sans_files, can_title=can_title)
+            logger.info("LOQ can trans found %s", can_trans)
+        else:
+            can_trans = can_scatter
+            logger.info("LOQ can trans set as scatter %s", can_scatter)
+        if can_trans is not None and can_scatter is not None:
+            job_request.additional_values["can_transmission"] = can_trans.run_number
+
+
+def _set_direct_files(job_request, sans_files):
+    direct_file = _find_direct_file(sans_files=sans_files)
+    if direct_file is not None:
+        if "can_scatter" in job_request.additional_values:
+            job_request.additional_values["scatter_direct"] = direct_file.run_number
+        if "can_scatter" in job_request.additional_values and "can_transmission" in job_request.additional_values:
+            job_request.additional_values["can_direct"] = direct_file.run_number
+
+
 class LoqFindFiles(Rule[bool]):
+    def __init__(self, value: bool):
+        super().__init__(value)
+        self._should_be_last = True
+
     def verify(self, job_request: JobRequest) -> None:
-        # Expecting 3 values
-        title_parts = job_request.experiment_title.split("_")
-        if len(title_parts) != 3:  # noqa: PLR2004
-            job_request.will_reduce = False
-            logger.error(
-                f"Less or more than 3 sections to the experiment_title, probably missing Can Scatter title: "
-                f"{job_request.experiment_title}"
-            )
-            return
-        sample_title, can_title, ___ = title_parts
+        title = job_request.experiment_title
+        logger.info("LOQ title is %s", title)
+        # Find all of the "titles" [0] is the scatter, [1] is the background
+        title_parts = re.findall(r"{.*?}", title)
+        sample_title = title_parts[0]
+        logger.info("LOQ sample title is %s", sample_title)
+        # If background was defined in the title set can title
+        can_title = title_parts[1] if len(title_parts) > 1 else None
+        logger.info("LOQ can title is %s from list %s", can_title, title_parts)
+
+        # Get the file lists
         sans_files = create_list_of_files(job_request)
-        if sans_files == []:
+        if not sans_files:  # == None
             job_request.will_reduce = False
             logger.error("No files found for this cycle excluding this run.")
             return
@@ -137,26 +184,13 @@ class LoqFindFiles(Rule[bool]):
 
         job_request.additional_values["run_number"] = job_request.run_number
 
-        trans_file = _find_trans_file(sans_files=sans_files, sample_title=sample_title)
-        if trans_file is not None:
-            job_request.additional_values["scatter_transmission"] = trans_file.run_number
-
-        can_scatter = _find_can_scatter_file(sans_files=sans_files, can_title=can_title)
-        if can_scatter is not None:
-            job_request.additional_values["can_scatter"] = can_scatter.run_number
-
-        can_trans = _find_can_trans_file(sans_files=sans_files, can_title=can_title)
-        if can_trans is not None and can_scatter is not None:
-            job_request.additional_values["can_transmission"] = can_trans.run_number
-
-        direct_file = _find_direct_file(sans_files=sans_files)
-        if direct_file is not None:
-            if trans_file is not None:
-                job_request.additional_values["scatter_direct"] = direct_file.run_number
-            if can_scatter is not None and can_trans is not None:
-                job_request.additional_values["can_direct"] = direct_file.run_number
+        _set_transmission_file(job_request, sample_title, sans_files)
+        _set_can_files(can_title, job_request, sans_files)
+        _set_direct_files(job_request, sans_files)
 
 
 class LoqUserFile(Rule[str]):
     def verify(self, job_request: JobRequest) -> None:
+        # If M4 in user file then the transmission and scatter files are the same.
+        job_request.additional_values["included_trans_as_scatter"] = "_M4" in self._value
         job_request.additional_values["user_file"] = f"/extras/loq/{self._value}"

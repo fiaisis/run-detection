@@ -21,6 +21,7 @@ class Rule(Generic[T], ABC):
     def __init__(self, value: T):
         self._value: T = value
         self.should_be_last = False
+        self.should_be_first = False
 
     @abstractmethod
     def verify(self, job_request: JobRequest) -> None:

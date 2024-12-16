@@ -60,6 +60,9 @@ class InstrumentSpecification:
             if rule.should_be_last:
                 self._rules.remove(rule)
                 self._rules.append(rule)
+            if rule.should_be_first:
+                self._rules.remove(rule)
+                self._rules.insert(0, rule)
 
     def _rule_old(self) -> bool:
         return self.loaded_time is None or datetime.timedelta(minutes=SPEC_REQUEST_TIMEOUT_MINS) < (
