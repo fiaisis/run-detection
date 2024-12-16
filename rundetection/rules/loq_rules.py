@@ -42,7 +42,8 @@ def _is_sample_direct_file(sans_file: SansFileData) -> bool:
 
 
 def _is_can_scatter_file(sans_file: SansFileData, can_title: str) -> bool:
-    return can_title == sans_file.title.split("_")[0] and sans_file.type == "SANS/TRANS"
+    title_contents = re.findall(r"{.*?}", sans_file.title)
+    return len(title_contents) == 1 and can_title == title_contents[0] and sans_file.type == "SANS/TRANS"
 
 
 def _is_can_transmission_file(sans_file: SansFileData, can_title: str) -> bool:
@@ -151,8 +152,9 @@ def _set_can_files(can_title, job_request, sans_files):
 
 def _set_direct_files(job_request, sans_files):
     direct_file = _find_direct_file(sans_files=sans_files)
+    logger.info("LOQ direct files found %s", direct_file)
     if direct_file is not None:
-        if "can_scatter" in job_request.additional_values:
+        if "scatter_transmission" in job_request.additional_values:
             job_request.additional_values["scatter_direct"] = direct_file.run_number
         if "can_scatter" in job_request.additional_values and "can_transmission" in job_request.additional_values:
             job_request.additional_values["can_direct"] = direct_file.run_number
