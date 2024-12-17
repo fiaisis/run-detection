@@ -33,10 +33,15 @@ class NotAScatterFileError(Exception):
 
 
 class CheckIfScatterSANS(Rule[bool]):
+    def __init__(self, value: bool):
+        super().__init__(value)
+        self.should_be_first = True
+
     def verify(self, job_request: JobRequest) -> None:
-        if "_SANS/TRANS" not in job_request.experiment_title:
+        if not job_request.experiment_title.endswith("_SANS/TRANS"):
             job_request.will_reduce = False
-            logger.error("Not a scatter run. Does not have _SANS/TRANS in the experiment title.")
+            logger.error("Not a scatter run. Does not have _SANS/TRANS at the end of the experiment title.")
+            return
         # If it has empty or direct in the title assume it is a direct run file instead of a normal scatter.
         if (
             "empty" in job_request.experiment_title
@@ -49,6 +54,11 @@ class CheckIfScatterSANS(Rule[bool]):
                 "If it is a scatter, contains empty or direct in the title and is assumed to be a scatter "
                 "for an empty can run."
             )
+            return
+        if "{" not in job_request.experiment_title and "}" not in job_request.experiment_title:
+            job_request.will_reduce = False
+            logger.error("If it is a scatter, contains {} in format {x}_{y}_SANS/TRANS. or {x}_SANS/TRANS.")
+            return
 
 
 class MolSpecStitchRule(Rule[bool]):
