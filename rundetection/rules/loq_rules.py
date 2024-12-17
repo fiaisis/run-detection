@@ -116,20 +116,17 @@ def strip_excess_files(sans_files: list[SansFileData], scatter_run_number: int) 
     return new_list_of_files
 
 
-def _strip_excess_braces(string: str) -> str:
-    return string.strip("}")
-
-
 def _set_transmission_file(job_request, sample_title, sans_files):
     # If using M4 monitor then scatter is the transmission
     if not job_request.additional_values["included_trans_as_scatter"]:
         trans_file = _find_trans_file(sans_files=sans_files, sample_title=sample_title)
-        logger.info("LOQ trans found %s", trans_file)
+        trans_run_number = trans_file.run_number if trans_file is not None else None
+        logger.info("LOQ trans found %s", trans_run_number)
     else:
-        trans_file = job_request.run_number
-        logger.info("LOQ trans set as scatter %s", trans_file)
-    if trans_file is not None:
-        job_request.additional_values["scatter_transmission"] = trans_file.run_number
+        trans_run_number = job_request.run_number
+        logger.info("LOQ trans set as scatter %s", trans_run_number)
+    if trans_run_number is not None:
+        job_request.additional_values["scatter_transmission"] = trans_run_number
 
 
 def _set_can_files(can_title, job_request, sans_files):
