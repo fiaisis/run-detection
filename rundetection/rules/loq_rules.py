@@ -123,7 +123,7 @@ def _set_transmission_file(job_request: JobRequest, sample_title: str, sans_file
         trans_run_number = trans_file.run_number if trans_file is not None else None
         logger.info("LOQ trans found %s", trans_run_number)
     else:
-        trans_run_number = job_request.run_number
+        trans_run_number = str(job_request.run_number)
         logger.info("LOQ trans set as scatter %s", trans_run_number)
     if trans_run_number is not None:
         job_request.additional_values["scatter_transmission"] = trans_run_number
@@ -147,7 +147,7 @@ def _set_can_files(can_title: str, job_request: JobRequest, sans_files: list[San
             job_request.additional_values["can_transmission"] = can_trans.run_number
 
 
-def _set_direct_files(job_request: JobRequest, sans_files: list[SansFileData]):
+def _set_direct_files(job_request: JobRequest, sans_files: list[SansFileData]) -> None:
     direct_file = _find_direct_file(sans_files=sans_files)
     logger.info("LOQ direct files found %s", direct_file)
     if direct_file is not None:
