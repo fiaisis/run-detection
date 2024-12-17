@@ -116,7 +116,7 @@ def strip_excess_files(sans_files: list[SansFileData], scatter_run_number: int) 
     return new_list_of_files
 
 
-def _set_transmission_file(job_request, sample_title, sans_files):
+def _set_transmission_file(job_request: JobRequest, sample_title: str, sans_files: list[SansFileData]) -> None:
     # If using M4 monitor then scatter is the transmission
     if not job_request.additional_values["included_trans_as_scatter"]:
         trans_file = _find_trans_file(sans_files=sans_files, sample_title=sample_title)
@@ -129,7 +129,7 @@ def _set_transmission_file(job_request, sample_title, sans_files):
         job_request.additional_values["scatter_transmission"] = trans_run_number
 
 
-def _set_can_files(can_title, job_request, sans_files):
+def _set_can_files(can_title: str, job_request: JobRequest, sans_files: list[SansFileData]) -> None:
     if can_title is not None:
         can_scatter = _find_can_scatter_file(sans_files=sans_files, can_title=can_title)
         logger.info("LOQ can scatter found %s", can_scatter)
@@ -147,7 +147,7 @@ def _set_can_files(can_title, job_request, sans_files):
             job_request.additional_values["can_transmission"] = can_trans.run_number
 
 
-def _set_direct_files(job_request, sans_files):
+def _set_direct_files(job_request: JobRequest, sans_files: list[SansFileData]):
     direct_file = _find_direct_file(sans_files=sans_files)
     logger.info("LOQ direct files found %s", direct_file)
     if direct_file is not None:
