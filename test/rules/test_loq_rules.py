@@ -172,9 +172,7 @@ def test_loq_find_files_verify_no_files_left():
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={
-            "included_trans_as_scatter": False
-        },
+        additional_values={"included_trans_as_scatter": False},
         additional_requests=[],
     )
     with mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[]):
@@ -196,9 +194,7 @@ def test_loq_find_files_verify_some_files_found_but_none_valid():
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={
-            "included_trans_as_scatter": False
-        },
+        additional_values={"included_trans_as_scatter": False},
         additional_requests=[],
     )
     with (
@@ -227,9 +223,7 @@ def test_loq_find_files_trans_file_found():
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={
-            "included_trans_as_scatter": False
-        },
+        additional_values={"included_trans_as_scatter": False},
         additional_requests=[],
     )
     with (
@@ -264,9 +258,7 @@ def test_loq_find_files_can_transmission_file_found():
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={
-            "included_trans_as_scatter": False
-        },
+        additional_values={"included_trans_as_scatter": False},
         additional_requests=[],
     )
     with (
@@ -301,9 +293,7 @@ def test_loq_find_files_direct_file_found():
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={
-            "included_trans_as_scatter": False
-        },
+        additional_values={"included_trans_as_scatter": False},
         additional_requests=[],
     )
     with (
@@ -339,9 +329,7 @@ def test_loq_find_files_can_scatter_file_found():
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={
-            "included_trans_as_scatter": False
-        },
+        additional_values={"included_trans_as_scatter": False},
         additional_requests=[],
     )
     with (
@@ -420,9 +408,7 @@ def test_loq_verify_checks_m4():
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={
-            "included_trans_as_scatter": True
-        },
+        additional_values={"included_trans_as_scatter": True},
         additional_requests=[],
     )
     with (
@@ -444,5 +430,3 @@ def test_loq_verify_checks_m4():
     assert job_request.additional_values["scatter_transmission"] == 5  # noqa: PLR2004
     assert job_request.additional_values["can_scatter"] == "2"
     assert job_request.additional_values["can_transmission"] == "2"
-
-
