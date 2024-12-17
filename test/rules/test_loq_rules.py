@@ -427,6 +427,6 @@ def test_loq_verify_checks_m4():
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is True
     assert job_request.additional_values["run_number"] == 5  # noqa: PLR2004
-    assert job_request.additional_values["scatter_transmission"] == 5  # noqa: PLR2004
+    assert job_request.additional_values["scatter_transmission"] == "5"
     assert job_request.additional_values["can_scatter"] == "2"
     assert job_request.additional_values["can_transmission"] == "2"
