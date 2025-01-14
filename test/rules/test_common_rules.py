@@ -9,10 +9,10 @@ from unittest import mock
 import pytest
 
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule, is_y_within_5_percent_of_x
+from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule, SansSliceWavs, is_y_within_5_percent_of_x
 
 
-@pytest.fixture()
+@pytest.fixture
 def job_request():
     """
     job_request Fixture
@@ -87,6 +87,17 @@ def test_checkifscattersans_verify_raises_for_direct_or_empty_in_title(to_raise)
 def test_is_y_within_5_percent_of_x(x, y, expected):
     """Simple test cases for is_y_within_5_percent_of_x"""
     assert is_y_within_5_percent_of_x(x, y) is expected
+
+
+def test_sans_slice_wavs_rule_when_not_enabled(job_request) -> None:
+    """
+    Test verify method will return expected value
+    :param job_request: JobRequest fixture
+    :return: None
+    """
+    rule = SansSliceWavs("[1.0, 2.0, 3.0, 4.0]")
+    rule.verify(job_request)
+    assert job_request.additional_values["slice_wavs"] == "[1.0, 2.0, 3.0, 4.0]"
 
 
 if __name__ == "__main__":
