@@ -4,7 +4,13 @@ Module containing the factory function for each rule
 
 from typing import Any
 
-from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule, MolSpecStitchRule, SansSliceWavs
+from rundetection.rules.common_rules import (
+    CheckIfScatterSANS,
+    EnabledRule,
+    MolSpecStitchRule,
+    SansPhiLimits,
+    SansSliceWavs,
+)
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.loq_rules import LoqFindFiles, LoqUserFile
@@ -65,6 +71,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "loquserfile":
             if isinstance(value, str):
                 return LoqUserFile(value)
+        case "sansphilimits":
+            if isinstance(value, str):
+                return SansPhiLimits(value)
         case "sansslicewavs":
             if isinstance(value, str):
                 return SansSliceWavs(value)

@@ -66,6 +66,11 @@ class SansSliceWavs(Rule[str]):
         job_request.additional_values["slice_wavs"] = self._value
 
 
+class SansPhiLimits(Rule[str]):
+    def verify(self, job_request: JobRequest) -> None:
+        job_request.additional_values["phi_limits"] = self._value
+
+
 class MolSpecStitchRule(Rule[bool]):
     """
     Enables Tosca, Osiris, and Iris Run stitching
