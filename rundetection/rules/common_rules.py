@@ -61,6 +61,7 @@ class SansSliceWavs(Rule[str]):
     """
     This rule enables users to set the SliceWavs for each script
     """
+
     def verify(self, job_request: JobRequest) -> None:
         job_request.additional_values["slice_wavs"] = self._value
 
@@ -69,6 +70,7 @@ class SansPhiLimits(Rule[str]):
     """
     This rule enables users to set the PhiLimits for each script
     """
+
     def verify(self, job_request: JobRequest) -> None:
         job_request.additional_values["phi_limits"] = self._value
 
