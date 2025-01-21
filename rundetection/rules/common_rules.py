@@ -28,10 +28,6 @@ class EnabledRule(Rule[bool]):
         job_request.will_reduce = self._value
 
 
-class NotAScatterFileError(Exception):
-    pass
-
-
 class CheckIfScatterSANS(Rule[bool]):
     def __init__(self, value: bool):
         super().__init__(value)
@@ -62,8 +58,21 @@ class CheckIfScatterSANS(Rule[bool]):
 
 
 class SansSliceWavs(Rule[str]):
+    """
+    This rule enables users to set the SliceWavs for each script
+    """
+
     def verify(self, job_request: JobRequest) -> None:
         job_request.additional_values["slice_wavs"] = self._value
+
+
+class SansPhiLimits(Rule[str]):
+    """
+    This rule enables users to set the PhiLimits for each script
+    """
+
+    def verify(self, job_request: JobRequest) -> None:
+        job_request.additional_values["phi_limits"] = self._value
 
 
 class MolSpecStitchRule(Rule[bool]):

@@ -7,7 +7,13 @@ from typing import Any
 
 import pytest
 
-from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule, MolSpecStitchRule
+from rundetection.rules.common_rules import (
+    CheckIfScatterSANS,
+    EnabledRule,
+    MolSpecStitchRule,
+    SansPhiLimits,
+    SansSliceWavs,
+)
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
@@ -51,6 +57,8 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("checkifscattersans", True, CheckIfScatterSANS),
         ("loquserfile", "loquserfile.toml", LoqUserFile),
         ("loqfindfiles", True, LoqFindFiles),
+        ("sansphilimits", "[(1.0, 2.0), (3.0, 4.0)]", SansPhiLimits),
+        ("sansslicewavs", "[2.7, 3.7, 4.7, 5.7, 6.7, 8.7, 10.5]", SansSliceWavs),
         ("irisreduction", True, IrisReductionRule),
         ("iriscalibration", {"002": "00148587", "004": "00148587"}, IrisCalibrationRule),
     ],
