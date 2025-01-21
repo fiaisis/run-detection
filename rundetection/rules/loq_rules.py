@@ -129,7 +129,7 @@ def _set_transmission_file(job_request: JobRequest, sample_title: str, sans_file
         job_request.additional_values["scatter_transmission"] = trans_run_number
 
 
-def _set_can_files(can_title: str, job_request: JobRequest, sans_files: list[SansFileData]) -> None:
+def _set_can_files(can_title: str | None, job_request: JobRequest, sans_files: list[SansFileData]) -> None:
     if can_title is not None:
         can_scatter = _find_can_scatter_file(sans_files=sans_files, can_title=can_title)
         logger.info("LOQ can scatter found %s", can_scatter)
