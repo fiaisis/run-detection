@@ -20,7 +20,7 @@ def _working_directory_fix():
         os.chdir(current_working_directory / ".." / "..")
 
 
-@pytest.fixture()
+@pytest.fixture
 def job_request():
     """
     job request fixture
@@ -42,7 +42,7 @@ def job_request():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def mari_stitch_rule_true():
     """
     stitch rule fixture for true
@@ -51,7 +51,7 @@ def mari_stitch_rule_true():
     return MariStitchRule(value=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mari_stitch_rule_false():
     """
     Stitch rule fixture for false

@@ -20,7 +20,7 @@ from rundetection.rules.osiris_rules import (
 from rundetection.rules.rule import Rule
 
 
-@pytest.fixture()
+@pytest.fixture
 def job_request():
     """
     job request fixture
@@ -42,13 +42,13 @@ def job_request():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def reflection_rule():
     """Analyser rule fixture"""
     return OsirisReflectionCalibrationRule({"002": "00148587", "004": "00148587"})
 
 
-@pytest.fixture()
+@pytest.fixture
 def osiris_mode_rule():
     """Reduction mode rule fixture"""
     return OsirisReductionModeRule(True)
