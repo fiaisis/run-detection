@@ -18,7 +18,7 @@ from rundetection.rules.common_rules import (
 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def job_request():
     """
     job_request Fixture
