@@ -26,7 +26,9 @@ def _is_sample_transmission_file(sans_file: SansFileData, sample_title: str) -> 
 
 
 def _is_sample_direct_file(sans_file: SansFileData) -> bool:
-    return ("direct" in sans_file.title.lower() or "empty" in sans_file.title.lower()) and sans_file.type == "TRANS"
+    return (("direct" in sans_file.title.lower() or "empty" in sans_file.title.lower() or "mt " in
+            sans_file.title.lower() or " mt" in sans_file.title.lower() or sans_file.title.lower() == "{mt}") and
+            sans_file.type=="TRANS")
 
 
 def _is_can_scatter_file(sans_file: SansFileData, can_title: str) -> bool:

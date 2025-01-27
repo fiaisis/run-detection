@@ -35,7 +35,6 @@ SANS_FILES = [
     [
         (SansFileData(title="{Banana}", type="SANS", run_number="0"), "Banana", False),
         (SansFileData(title="{Banana}", type="TRANS", run_number="0"), "Banana", True),
-        (SansFileData(title="{Banana}", type="SANS", run_number="0"), "Banana", False),
         (SansFileData(title="{Banana}", type="TRANS", run_number="0"), "Apple", False),
     ],
 )
@@ -50,7 +49,12 @@ def test_is_sample_transmission_file(sans_file, sample_title, result):
         (SansFileData(title="{Banana direct}", type="SANS", run_number="0"), False),
         (SansFileData(title="{Banana direct}", type="TRANS", run_number="0"), True),
         (SansFileData(title="{Banana empty}", type="TRANS", run_number="0"), True),
-        (SansFileData(title="{Banana direct}", type="SANS", run_number="0"), False),
+        (SansFileData(title="{mt beam}", type="TRANS", run_number="0"), True),
+        (SansFileData(title="{mt}", type="TRANS", run_number="0"), True),
+        (SansFileData(title="{beam mt}", type="TRANS", run_number="0"), True),
+        (SansFileData(title="{beam mt cell}", type="TRANS", run_number="0"), True),
+        (SansFileData(title="{mtcool}", type="TRANS", run_number="0"), False),
+        (SansFileData(title="{statemt}", type="TRANS", run_number="0"), False),
     ],
 )
 def test_is_sample_direct_file(sans_file, result):
