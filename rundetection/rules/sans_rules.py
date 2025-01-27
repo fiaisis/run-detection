@@ -26,9 +26,13 @@ def _is_sample_transmission_file(sans_file: SansFileData, sample_title: str) -> 
 
 
 def _is_sample_direct_file(sans_file: SansFileData) -> bool:
-    return (("direct" in sans_file.title.lower() or "empty" in sans_file.title.lower() or "mt " in
-            sans_file.title.lower() or " mt" in sans_file.title.lower() or sans_file.title.lower() == "{mt}") and
-            sans_file.type=="TRANS")
+    return (
+        "direct" in sans_file.title.lower()
+        or "empty" in sans_file.title.lower()
+        or "mt " in sans_file.title.lower()
+        or " mt" in sans_file.title.lower()
+        or sans_file.title.lower() == "{mt}"
+    ) and sans_file.type == "TRANS"
 
 
 def _is_can_scatter_file(sans_file: SansFileData, can_title: str) -> bool:
@@ -144,7 +148,9 @@ class CheckIfScatterSANS(Rule[bool]):
         self.should_be_first = True
 
     def verify(self, job_request: JobRequest) -> None:
-        if not job_request.experiment_title.endswith("_SANS/TRANS") and not job_request.experiment_title.endswith("_SANS"):
+        if not job_request.experiment_title.endswith("_SANS/TRANS") and not job_request.experiment_title.endswith(
+            "_SANS"
+        ):
             job_request.will_reduce = False
             logger.error("Not a scatter run. Does not have _SANS or _SANS/TRANS at the end of the experiment title.")
             return
@@ -171,6 +177,7 @@ class SansSliceWavs(Rule[str]):
     """
     This rule enables users to set the SliceWavs for each script
     """
+
     def verify(self, job_request: JobRequest) -> None:
         job_request.additional_values["slice_wavs"] = self._value
 
@@ -179,6 +186,7 @@ class SansPhiLimits(Rule[str]):
     """
     This rule enables users to set the PhiLimits for each script
     """
+
     def verify(self, job_request: JobRequest) -> None:
         job_request.additional_values["phi_limits"] = self._value
 

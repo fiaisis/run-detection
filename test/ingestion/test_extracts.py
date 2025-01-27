@@ -20,7 +20,7 @@ from rundetection.ingestion.extracts import (
 from rundetection.job_requests import JobRequest
 
 
-@pytest.fixture()
+@pytest.fixture
 def job_request():
     """job_request fixture"""
     return JobRequest(
