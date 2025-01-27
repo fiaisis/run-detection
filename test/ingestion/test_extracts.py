@@ -11,9 +11,9 @@ from rundetection.exceptions import IngestError, ReductionMetadataError
 from rundetection.ingestion.extracts import (
     get_cycle_string_from_path,
     get_extraction_function,
-    loq_extract,
     mari_extract,
     osiris_extract,
+    sans_extract,
     skip_extract,
     tosca_extract,
 )
@@ -239,7 +239,7 @@ def test_osiris_extract_raises_on_bad_frequencies(job_request):
         osiris_extract(job_request, dataset)
 
 
-def test_loq_extract(job_request):
+def test_sans_extract(job_request):
     dataset = {
         "sample": {
             "thickness": [1.0],
@@ -249,7 +249,7 @@ def test_loq_extract(job_request):
         }
     }
     with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
-        loq_extract(job_request, dataset)
+        sans_extract(job_request, dataset)
 
     assert job_request.additional_values["cycle_string"] == "some string"
     assert job_request.additional_values["sample_thickness"] == 1.0
