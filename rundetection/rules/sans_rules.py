@@ -154,13 +154,10 @@ class CheckIfScatterSANS(Rule[bool]):
             job_request.will_reduce = False
             logger.error("Not a scatter run. Does not have _SANS or _SANS/TRANS at the end of the experiment title.")
             return
-        # If it has empty or direct in the title assume it is a direct run file instead of a normal scatter.
-        if (
-            "empty" in job_request.experiment_title
-            or "EMPTY" in job_request.experiment_title
-            or "direct" in job_request.experiment_title
-            or "DIRECT" in job_request.experiment_title
-        ):
+        # If it is a direct fix, sans or trans, it should fail, which is why hard coded TRANS as we want to check
+        # part of the logic not all.
+        if _is_sample_direct_file(SansFileData(title=job_request.experiment_title, type="TRANS",
+                                               run_number=str(job_request.run_number))):
             job_request.will_reduce = False
             logger.error(
                 "If it is a scatter, contains empty or direct in the title and is assumed to be a scatter "
