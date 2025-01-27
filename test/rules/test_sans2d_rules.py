@@ -381,13 +381,15 @@ def test_sans2d_verify_checks_m4():
     )
     with (
         mock.patch("rundetection.rules.sans_rules.create_list_of_files", return_value=[SansFileData("", "", "")]),
-        mock.patch("rundetection.rules.sans_rules.strip_excess_files",
-                   return_value=[
-                        SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-                        SansFileData(title="{background}", type="SANS", run_number="2"),
-                        SansFileData(title="{background}", type="TRANS", run_number="3"),
-                        SansFileData(title="{direct}", type="SANS", run_number="4"),
-                   ])
+        mock.patch(
+            "rundetection.rules.sans_rules.strip_excess_files",
+            return_value=[
+                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
+                SansFileData(title="{background}", type="SANS", run_number="2"),
+                SansFileData(title="{background}", type="TRANS", run_number="3"),
+                SansFileData(title="{direct}", type="SANS", run_number="4"),
+            ],
+        ),
     ):
         sans2d_find_files = SansFindFiles(value=True)
         sans2d_find_files.verify(job_request)

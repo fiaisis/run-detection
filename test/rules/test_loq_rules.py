@@ -377,13 +377,15 @@ def test_loq_verify_checks_m4():
     )
     with (
         mock.patch("rundetection.rules.sans_rules.create_list_of_files", return_value=[SansFileData("", "", "")]),
-        mock.patch("rundetection.rules.sans_rules.strip_excess_files",
-                   return_value=[
-                        SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-                        SansFileData(title="{background}", type="SANS/TRANS", run_number="2"),
-                        SansFileData(title="{background}", type="TRANS", run_number="3"),
-                        SansFileData(title="{direct}", type="SANS/TRANS", run_number="4"),
-                   ])
+        mock.patch(
+            "rundetection.rules.sans_rules.strip_excess_files",
+            return_value=[
+                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
+                SansFileData(title="{background}", type="SANS/TRANS", run_number="2"),
+                SansFileData(title="{background}", type="TRANS", run_number="3"),
+                SansFileData(title="{direct}", type="SANS/TRANS", run_number="4"),
+            ],
+        ),
     ):
         loq_find_files = SansFindFiles(value=True)
         loq_find_files.verify(job_request)
