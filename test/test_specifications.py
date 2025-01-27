@@ -14,12 +14,12 @@ from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import MolSpecStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
-from rundetection.rules.loq_rules import LoqUserFile
 from rundetection.rules.mari_rules import MariWBVANRule
+from rundetection.rules.sans_rules import SansUserFile
 from rundetection.specifications import InstrumentSpecification
 
 
-@pytest.fixture
+@pytest.fixture()
 def job_request():
     """
     JobRequest fixture
@@ -28,7 +28,7 @@ def job_request():
     return JobRequest(1, "larmor", "1", "1", Path("/archive/larmor/1/1,nxs"), "start time", "end time", 1, 1, "user")
 
 
-@pytest.fixture
+@pytest.fixture()
 @patch("rundetection.specifications.InstrumentSpecification._load_rules_from_api")
 def specification(_) -> InstrumentSpecification:
     """
@@ -46,7 +46,7 @@ def _set_api_key() -> None:
     os.environ["FIA_API_API_KEY"] = "shh"
 
 
-@pytest.fixture
+@pytest.fixture()
 def _working_directory_fix():
     # Set dir to repo root for purposes of the test.
     current_working_directory = Path.cwd()
@@ -74,7 +74,7 @@ def test_instrument_specification_load_rules_for_api(requests, specification):
     requests.get.assert_called_once_with(
         url="http://localhost:8000/instrument/FOO/specification", headers=headers, timeout=1
     )
-    assert specification._rules == [MariWBVANRule(100), LoqUserFile("user_file.toml"), MolSpecStitchRule(True)]
+    assert specification._rules == [MariWBVANRule(100), SansUserFile("user_file.toml"), MolSpecStitchRule(True)]
 
 
 @mock.patch("rundetection.specifications.requests")

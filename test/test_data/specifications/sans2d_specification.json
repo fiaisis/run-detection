@@ -1,3 +1,8 @@
 {
-  "enabled": false
+  "enabled": true,
+  "checkifscattersans": true,
+  "sansfindfiles": true,
+  "sansuserfile": "USER_SANS2D_244N_12m_5_8mm_M3_Ruzicka_DLS_merged_spot.TOML",
+  "sansslicewavs":  "[1.75, 2.75, 3.75, 4.75, 5.75, 6.75, 8.75, 10.75, 12.5]",
+  "sansphilimits": "[(-30, 30), (60, 120)]"
 }

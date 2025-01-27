@@ -28,53 +28,6 @@ class EnabledRule(Rule[bool]):
         job_request.will_reduce = self._value
 
 
-class CheckIfScatterSANS(Rule[bool]):
-    def __init__(self, value: bool):
-        super().__init__(value)
-        self.should_be_first = True
-
-    def verify(self, job_request: JobRequest) -> None:
-        if not job_request.experiment_title.endswith("_SANS/TRANS"):
-            job_request.will_reduce = False
-            logger.error("Not a scatter run. Does not have _SANS/TRANS at the end of the experiment title.")
-            return
-        # If it has empty or direct in the title assume it is a direct run file instead of a normal scatter.
-        if (
-            "empty" in job_request.experiment_title
-            or "EMPTY" in job_request.experiment_title
-            or "direct" in job_request.experiment_title
-            or "DIRECT" in job_request.experiment_title
-        ):
-            job_request.will_reduce = False
-            logger.error(
-                "If it is a scatter, contains empty or direct in the title and is assumed to be a scatter "
-                "for an empty can run."
-            )
-            return
-        if "{" not in job_request.experiment_title and "}" not in job_request.experiment_title:
-            job_request.will_reduce = False
-            logger.error("If it is a scatter, contains {} in format {x}_{y}_SANS/TRANS. or {x}_SANS/TRANS.")
-            return
-
-
-class SansSliceWavs(Rule[str]):
-    """
-    This rule enables users to set the SliceWavs for each script
-    """
-
-    def verify(self, job_request: JobRequest) -> None:
-        job_request.additional_values["slice_wavs"] = self._value
-
-
-class SansPhiLimits(Rule[str]):
-    """
-    This rule enables users to set the PhiLimits for each script
-    """
-
-    def verify(self, job_request: JobRequest) -> None:
-        job_request.additional_values["phi_limits"] = self._value
-
-
 class MolSpecStitchRule(Rule[bool]):
     """
     Enables Tosca, Osiris, and Iris Run stitching

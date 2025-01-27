@@ -34,7 +34,7 @@ def skip_extract(job_request: JobRequest, _: Any) -> JobRequest:
     return job_request
 
 
-def loq_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+def sans_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     """
     Get the sample details and the cycle strings
     :param job_request: The job request
@@ -173,8 +173,8 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
             return tosca_extract
         case "osiris":
             return osiris_extract
-        case "loq":
-            return loq_extract
+        case "loq" | "sans2d":
+            return sans_extract
         case "iris":
             return iris_extract
         case _:

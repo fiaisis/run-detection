@@ -1,15 +1,13 @@
-import tempfile
 from pathlib import Path
 from unittest import mock
 
 import pytest
 
 from rundetection.job_requests import JobRequest
-from rundetection.rules.loq_rules import (
-    LoqFindFiles,
-    LoqUserFile,
+from rundetection.rules.sans_rules import (
     SansFileData,
-    _extract_run_number_from_filename,
+    SansFindFiles,
+    SansUserFile,
     _find_can_scatter_file,
     _find_can_trans_file,
     _find_direct_file,
@@ -18,7 +16,6 @@ from rundetection.rules.loq_rules import (
     _is_can_transmission_file,
     _is_sample_direct_file,
     _is_sample_transmission_file,
-    find_path_for_run_number,
     grab_cycle_instrument_index,
     strip_excess_files,
 )
@@ -31,14 +28,6 @@ SANS_FILES = [
     SansFileData(title="{Apple}", type="TRANS", run_number="3"),
     SansFileData(title="{direct beam}", type="TRANS", run_number="4"),
 ]
-
-
-@pytest.mark.parametrize(
-    ("filename", "result"),
-    [("LOQ00100002.nxs", "100002"), ("LOQ123456789.nxs", "123456789"), ("LOQ.nxs", ""), ("LOQ00000.nxs", "")],
-)
-def test_extract_run_number_from_filename(filename, result):
-    assert _extract_run_number_from_filename(filename) == result
 
 
 @pytest.mark.parametrize(
@@ -117,31 +106,6 @@ def test_can_trans_files():
     assert _find_can_trans_file(SANS_FILES, "{Apple}") == SANS_FILES[4]
 
 
-def test_path_for_run_number_with_some_zeros():
-    tempdir = tempfile.mkdtemp()
-    path = f"{tempdir}/LOQ0012345.nxs"
-    with Path(path).open("a"):
-        assert find_path_for_run_number(tempdir, 12345) == Path(path)
-
-
-def test_path_for_run_number_with_no_zeros():
-    tempdir = tempfile.mkdtemp()
-    path = f"{tempdir}/LOQ12345.nxs"
-    with Path(path).open("a"):
-        assert find_path_for_run_number(tempdir, 12345) == Path(path)
-
-
-def test_path_for_run_number_too_many_zeros():
-    tempdir = tempfile.mkdtemp()
-    with Path(f"{tempdir}/LOQ00000000000012345.nxs").open("a"):
-        assert find_path_for_run_number(tempdir, 12345) is None
-
-
-def test_path_for_run_number_doesnt_exist():
-    tempdir = tempfile.mkdtemp()
-    assert find_path_for_run_number(tempdir, 12345) is None
-
-
 def test_grab_cycle_instrument_index():
     with mock.patch("rundetection.rules.loq_rules.requests") as requests:
         cycle_index_text = grab_cycle_instrument_index("cycle_24_2")
@@ -176,7 +140,7 @@ def test_loq_find_files_verify_no_files_left():
         additional_requests=[],
     )
     with mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[]):
-        loq_find_files = LoqFindFiles(value=True)
+        loq_find_files = SansFindFiles(value=True)
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is False
 
@@ -204,7 +168,7 @@ def test_loq_find_files_verify_some_files_found_but_none_valid():
             return_value=[SansFileData("", "", ""), SansFileData("", "", ""), SansFileData("", "", "")],
         ),
     ):
-        loq_find_files = LoqFindFiles(value=True)
+        loq_find_files = SansFindFiles(value=True)
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is True
     assert job_request.additional_values["run_number"] == 0
@@ -237,7 +201,7 @@ def test_loq_find_files_trans_file_found():
             ],
         ),
     ):
-        loq_find_files = LoqFindFiles(value=True)
+        loq_find_files = SansFindFiles(value=True)
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is True
     assert job_request.additional_values["run_number"] == 5  # noqa: PLR2004
@@ -273,7 +237,7 @@ def test_loq_find_files_can_transmission_file_found():
             ],
         ),
     ):
-        loq_find_files = LoqFindFiles(value=True)
+        loq_find_files = SansFindFiles(value=True)
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is True
     assert job_request.additional_values["run_number"] == 5  # noqa: PLR2004
@@ -308,7 +272,7 @@ def test_loq_find_files_direct_file_found():
             ],
         ),
     ):
-        loq_find_files = LoqFindFiles(value=True)
+        loq_find_files = SansFindFiles(value=True)
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is True
     assert job_request.additional_values["run_number"] == 5  # noqa: PLR2004
@@ -344,7 +308,7 @@ def test_loq_find_files_can_scatter_file_found():
             ],
         ),
     ):
-        loq_find_files = LoqFindFiles(value=True)
+        loq_find_files = SansFindFiles(value=True)
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is True
     assert job_request.additional_values["run_number"] == 5  # noqa: PLR2004
@@ -367,7 +331,7 @@ def test_loq_user_file_m3():
         additional_values={},
         additional_requests=[],
     )
-    LoqUserFile(value="loq_user_file_M3").verify(job_request)
+    SansUserFile(value="loq_user_file_M3").verify(job_request)
     assert job_request.additional_values["user_file"] == "/extras/loq/loq_user_file_M3"
     assert not job_request.additional_values["included_trans_as_scatter"]
     assert len(job_request.additional_values) == 2  # noqa: PLR2004
@@ -389,7 +353,7 @@ def test_loq_user_file_m4():
         additional_values={},
         additional_requests=[],
     )
-    LoqUserFile(value="loq_user_file_M4").verify(job_request)
+    SansUserFile(value="loq_user_file_M4").verify(job_request)
     assert job_request.additional_values["user_file"] == "/extras/loq/loq_user_file_M4"
     assert job_request.additional_values["included_trans_as_scatter"]
     assert len(job_request.additional_values) == 2  # noqa: PLR2004
@@ -401,18 +365,18 @@ def test_loq_verify_checks_m4():
         instrument="",
         experiment_title="{scatter}_{background}_sans/trans",
         experiment_number="",
-        filepath=Path("/path/cycle_24_2/LOQ.nxs"),
+        filepath=Path("/path/cycle_24_4/LOQ.nxs"),
         run_start="",
         run_end="",
         raw_frames=0,
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={"included_trans_as_scatter": True},
+        additional_values={"included_trans_as_scatter": True, "cycle_string": "cycle_24_4"},
         additional_requests=[],
     )
     with (
-        mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[SansFileData("", "", "")]),
+        # mock.patch("rundetection.rules.loq_rules.create_list_of_files", return_value=[SansFileData("", "", "")]),
         mock.patch(
             "rundetection.rules.loq_rules.strip_excess_files",
             return_value=[
@@ -423,7 +387,7 @@ def test_loq_verify_checks_m4():
             ],
         ),
     ):
-        loq_find_files = LoqFindFiles(value=True)
+        loq_find_files = SansFindFiles(value=True)
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is True
     assert job_request.additional_values["run_number"] == 5  # noqa: PLR2004

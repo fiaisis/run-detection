@@ -20,7 +20,7 @@ from rundetection.ingestion.extracts import (
 from rundetection.job_requests import JobRequest
 
 
-@pytest.fixture
+@pytest.fixture()
 def job_request():
     """job_request fixture"""
     return JobRequest(
@@ -60,7 +60,8 @@ def test_skip_extract(caplog: LogCaptureFixture):
         ("mari", "mari_extract"),
         ("tosca", "tosca_extract"),
         ("osiris", "osiris_extract"),
-        ("loq", "loq_extract"),
+        ("loq", "sans_extract"),
+        ("sans2d", "sans_extract"),
     ],
 )
 def test_get_extraction_function(input_value, expected_function_name):

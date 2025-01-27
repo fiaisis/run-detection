@@ -10,15 +10,13 @@ import pytest
 
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import (
-    CheckIfScatterSANS,
     EnabledRule,
-    SansPhiLimits,
-    SansSliceWavs,
     is_y_within_5_percent_of_x,
 )
+from rundetection.rules.sans_rules import CheckIfScatterSANS, SansPhiLimits, SansSliceWavs
 
 
-@pytest.fixture
+@pytest.fixture()
 def job_request():
     """
     job_request Fixture
