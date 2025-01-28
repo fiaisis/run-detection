@@ -156,8 +156,9 @@ class CheckIfScatterSANS(Rule[bool]):
             return
         # If it is a direct fix, sans or trans, it should fail, which is why hard coded TRANS as we want to check
         # part of the logic not all.
-        if _is_sample_direct_file(SansFileData(title=job_request.experiment_title, type="TRANS",
-                                               run_number=str(job_request.run_number))):
+        if _is_sample_direct_file(
+            SansFileData(title=job_request.experiment_title, type="TRANS", run_number=str(job_request.run_number))
+        ):
             job_request.will_reduce = False
             logger.info("File is an empty cell or direct beam scatter run, and should not be processed")
             return
