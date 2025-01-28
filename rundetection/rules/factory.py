@@ -5,15 +5,11 @@ Module containing the factory function for each rule
 from typing import Any
 
 from rundetection.rules.common_rules import (
-    CheckIfScatterSANS,
     EnabledRule,
     MolSpecStitchRule,
-    SansPhiLimits,
-    SansSliceWavs,
 )
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
-from rundetection.rules.loq_rules import LoqFindFiles, LoqUserFile
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraniteAnalyser,
@@ -22,6 +18,7 @@ from rundetection.rules.osiris_rules import (
     OsirisReflectionCalibrationRule,
 )
 from rundetection.rules.rule import MissingRuleError, Rule, T
+from rundetection.rules.sans_rules import CheckIfScatterSANS, SansFindFiles, SansPhiLimits, SansSliceWavs, SansUserFile
 
 
 def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912
@@ -65,12 +62,12 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "checkifscattersans":
             if isinstance(value, bool):
                 return CheckIfScatterSANS(value)
-        case "loqfindfiles":
+        case "loqfindfiles" | "sansfindfiles":
             if isinstance(value, bool):
-                return LoqFindFiles(value)
-        case "loquserfile":
+                return SansFindFiles(value)
+        case "loquserfile" | "sansuserfile":
             if isinstance(value, str):
-                return LoqUserFile(value)
+                return SansUserFile(value)
         case "sansphilimits":
             if isinstance(value, str):
                 return SansPhiLimits(value)

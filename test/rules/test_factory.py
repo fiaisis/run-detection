@@ -8,16 +8,12 @@ from typing import Any
 import pytest
 
 from rundetection.rules.common_rules import (
-    CheckIfScatterSANS,
     EnabledRule,
     MolSpecStitchRule,
-    SansPhiLimits,
-    SansSliceWavs,
 )
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
-from rundetection.rules.loq_rules import LoqFindFiles, LoqUserFile
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraniteAnalyser,
@@ -26,6 +22,7 @@ from rundetection.rules.osiris_rules import (
     OsirisReflectionCalibrationRule,
 )
 from rundetection.rules.rule import MissingRuleError, Rule
+from rundetection.rules.sans_rules import CheckIfScatterSANS, SansFindFiles, SansPhiLimits, SansSliceWavs, SansUserFile
 
 
 def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
@@ -55,8 +52,8 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("osirisdefaultgraniteanalyser", True, OsirisDefaultGraniteAnalyser),
         ("osirisreductionmode", True, OsirisReductionModeRule),
         ("checkifscattersans", True, CheckIfScatterSANS),
-        ("loquserfile", "loquserfile.toml", LoqUserFile),
-        ("loqfindfiles", True, LoqFindFiles),
+        ("loquserfile", "loquserfile.toml", SansUserFile),
+        ("loqfindfiles", True, SansFindFiles),
         ("sansphilimits", "[(1.0, 2.0), (3.0, 4.0)]", SansPhiLimits),
         ("sansslicewavs", "[2.7, 3.7, 4.7, 5.7, 6.7, 8.7, 10.5]", SansSliceWavs),
         ("irisreduction", True, IrisReductionRule),

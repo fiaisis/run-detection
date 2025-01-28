@@ -10,12 +10,10 @@ import pytest
 
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import (
-    CheckIfScatterSANS,
     EnabledRule,
-    SansPhiLimits,
-    SansSliceWavs,
     is_y_within_5_percent_of_x,
 )
+from rundetection.rules.sans_rules import CheckIfScatterSANS, SansPhiLimits, SansSliceWavs
 
 
 @pytest.fixture
@@ -49,7 +47,7 @@ def test_enabled_rule_when_not_enabled(job_request) -> None:
     assert job_request.will_reduce is False
 
 
-@pytest.mark.parametrize("end_of_title", ["_TRANS", "_SANS", "COOL", "_sans/trans"])
+@pytest.mark.parametrize("end_of_title", ["_TRANS", "COOL", "_sans/trans"])
 def test_checkifscattersans_verify_raises_for_no_sans_trans(end_of_title) -> None:
     job_request = mock.MagicMock()
     job_request.experiment_title = "{fancy chemical}" + end_of_title
@@ -62,6 +60,8 @@ def test_checkifscattersans_verify_raises_for_no_sans_trans(end_of_title) -> Non
 def test_checkifscattersans_verify_raises_for_direct_or_empty_in_title(to_raise) -> None:
     job_request = mock.MagicMock()
     job_request.experiment_title = "{fancy chemical " + to_raise + "}_SANS/TRANS"
+    job_request.will_reduce = True
+    job_request.run_number = 223312
     CheckIfScatterSANS(True).verify(job_request)
 
     assert job_request.will_reduce is False
