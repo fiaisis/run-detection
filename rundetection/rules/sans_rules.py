@@ -164,8 +164,9 @@ class CheckIfScatterSANS(Rule[bool]):
             return
         if "{" not in job_request.experiment_title and "}" not in job_request.experiment_title:
             job_request.will_reduce = False
-            logger.info("Not a parsable scatter title, a scatter contains {} in format {x}_{y}_SANS/TRANS. or "
-                        "{x}_SANS/TRANS.")
+            logger.info(
+                "Not a parsable scatter title, a scatter contains {} in format {x}_{y}_SANS/TRANS. or {x}_SANS/TRANS."
+            )
             return
 
 
