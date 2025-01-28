@@ -152,21 +152,19 @@ class CheckIfScatterSANS(Rule[bool]):
             "_SANS"
         ):
             job_request.will_reduce = False
-            logger.error("Not a scatter run. Does not have _SANS or _SANS/TRANS at the end of the experiment title.")
+            logger.info("Not a scatter run. Does not have _SANS or _SANS/TRANS at the end of the experiment title.")
             return
         # If it is a direct fix, sans or trans, it should fail, which is why hard coded TRANS as we want to check
         # part of the logic not all.
         if _is_sample_direct_file(SansFileData(title=job_request.experiment_title, type="TRANS",
                                                run_number=str(job_request.run_number))):
             job_request.will_reduce = False
-            logger.error(
-                "If it is a scatter, contains empty or direct in the title and is assumed to be a scatter "
-                "for an empty can run."
-            )
+            logger.info("File is an empty cell or direct beam scatter run, and should not be processed")
             return
         if "{" not in job_request.experiment_title and "}" not in job_request.experiment_title:
             job_request.will_reduce = False
-            logger.error("If it is a scatter, contains {} in format {x}_{y}_SANS/TRANS. or {x}_SANS/TRANS.")
+            logger.info("Not a parsable scatter title, a scatter contains {} in format {x}_{y}_SANS/TRANS. or "
+                        "{x}_SANS/TRANS.")
             return
 
 
