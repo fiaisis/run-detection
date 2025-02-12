@@ -75,6 +75,7 @@ class IrisCalibrationRule(Rule[dict[str, str]]):
     Set calibration run number based on the reflection, needs to be called after the IrisReductionRule so reflection and
     analyser are set in the job_request.additional_values
     """
+
     def __init__(self, value: dict[str, str]):
         super().__init__(value)
         self._should_be_last = True
