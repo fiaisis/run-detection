@@ -6,7 +6,7 @@ from rundetection.job_requests import JobRequest
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 
 
-@pytest.fixture
+@pytest.fixture()
 def job_request():
     """
     job request fixture
@@ -23,18 +23,18 @@ def job_request():
         users="",
         run_start="",
         run_end="",
-        instrument="osiris",
+        instrument="iris",
         experiment_number="",
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def reflection_rule():
     """Analyser rule fixture"""
     return IrisCalibrationRule({"002": "105275", "004": "105276"})
 
 
-@pytest.fixture
+@pytest.fixture()
 def iris_mode_rule():
     """Reduction mode rule fixture"""
     return IrisReductionRule(True)
