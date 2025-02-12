@@ -54,7 +54,7 @@ class IrisReductionRule(Rule[bool]):
             job_request.additional_values["reflection"] = "002"
             job_request.additional_values["analyser"] = "graphite"
             return
-        reflection = None
+        reflection = "002"
         phases = (job_request.additional_values["phase6"], job_request.additional_values["phase10"])
         tcb_1 = (job_request.additional_values["tcb_detector_min"], job_request.additional_values["tcb_detector_max"])
         tcb_2 = (job_request.additional_values["tcb_monitor_min"], job_request.additional_values["tcb_monitor_max"])
@@ -64,7 +64,7 @@ class IrisReductionRule(Rule[bool]):
                 and self._tuple_match(tcb_1, spec_type["tcb_1"])  # type: ignore
                 and self._tuple_match(tcb_2, spec_type["tcb_2"])  # type: ignore
             ):
-                reflection = spec_type["reflection"]
+                reflection = str(spec_type["reflection"])
                 break
         job_request.additional_values["reflection"] = reflection
         job_request.additional_values["analyser"] = "graphite"
@@ -75,6 +75,10 @@ class IrisCalibrationRule(Rule[dict[str, str]]):
     Set calibration run number based on the reflection, needs to be called after the IrisReductionRule so reflection and
     analyser are set in the job_request.additional_values
     """
+
+    def __init__(self, value: dict[str, str]):
+        super().__init__(value)
+        self._should_be_last = True
 
     def verify(self, job_request: JobRequest) -> None:
         if not self._value:

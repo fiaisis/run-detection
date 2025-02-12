@@ -23,7 +23,7 @@ def job_request():
         users="",
         run_start="",
         run_end="",
-        instrument="osiris",
+        instrument="iris",
         experiment_number="",
     )
 
