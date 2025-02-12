@@ -64,7 +64,7 @@ class IrisReductionRule(Rule[bool]):
                 and self._tuple_match(tcb_1, spec_type["tcb_1"])  # type: ignore
                 and self._tuple_match(tcb_2, spec_type["tcb_2"])  # type: ignore
             ):
-                reflection = spec_type["reflection"]
+                reflection = str(spec_type["reflection"])
                 break
         job_request.additional_values["reflection"] = reflection
         job_request.additional_values["analyser"] = "graphite"
