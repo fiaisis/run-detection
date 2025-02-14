@@ -12,11 +12,11 @@ from rundetection.rules.sans_rules import (
     _find_can_trans_file,
     _find_direct_file,
     _find_trans_file,
+    _grab_cycle_instrument_index,
     _is_can_scatter_file,
     _is_can_transmission_file,
     _is_sample_direct_file,
     _is_sample_transmission_file,
-    grab_cycle_instrument_index,
     strip_excess_files,
 )
 
@@ -112,7 +112,7 @@ def test_can_trans_files():
 
 def test_grab_cycle_instrument_index():
     with mock.patch("rundetection.rules.sans_rules.requests") as requests:
-        cycle_index_text = grab_cycle_instrument_index("cycle_24_2", instrument="SANS2D")
+        cycle_index_text = _grab_cycle_instrument_index("cycle_24_2", instrument="SANS2D")
         assert cycle_index_text == requests.get.return_value.text
         requests.get.assert_called_once_with("http://data.isis.rl.ac.uk/journals/ndxsans2d/journal_24_2.xml", timeout=5)
 

@@ -50,6 +50,59 @@ def sans_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     return job_request
 
 
+def generate_loq_direct_instrumentation(dataset: Any) -> dict[str, Any]:
+    return {"seloq": {"Apperture_2": str(dataset.get("selog").get("Apperture_2").get("value")[0])}}
+
+
+def loq_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+    """
+    Extract the LOQ specific SANs data needed later, additional_values will have a new dictionary called
+    "instrument_direct_file_comparison". The dictionary will be populated in the same way as the nexus file is
+    structured, excluding the raw_data_1 initial data set, this allows comparison with the direct files.
+    :param job_request: The job request
+    :param dataset: The nexus file dataset
+    :return: The updated job request
+    """
+    job_request.additional_values["instrument_direct_file_comparison"] = generate_loq_direct_instrumentation(dataset)
+    return sans_extract(job_request, dataset)
+
+
+def generate_sans2d_direct_instrumentation(dataset: Any) -> dict[str, Any]:
+    selog_dict = {
+        "selog": {
+            "Rear_Det_Z": dataset.get("selog").get("Rear_Det_Z").get("value")[0],
+            "Front_Det_Z": dataset.get("selog").get("Front_Det_Z").get("value")[0]
+        }
+    }
+    # G1-5
+    for ii in range(1, 6):
+        g_str = f"G{ii}"
+        selog_dict["selog"][g_str] = dataset.get("selog").get(g_str).get("value")[0]
+    # S1-6
+    for ii in range(1, 7):
+        s_str = f"S{ii}"
+        selog_dict["selog"][s_str] = dataset.get("selog").get(s_str).get("value")[0]
+    # Jaw_E, Jaw_N, Jaw_S, Jaw_W
+    for ii in ("E", "N", "S", "W"):
+        jaw_str = f"Jaw_{ii}"
+        selog_dict["selog"][jaw_str] = dataset.get("selog").get(jaw_str).get("value")[0]
+
+    return selog_dict
+
+
+def sans2d_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+    """
+    Extract the SANs2D specific SANs data needed later, additional_values will have a new dictionary called
+    "instrument_direct_file_comparison". The dictionary will be populated in the same way as the nexus file is
+    structured, excluding the raw_data_1 initial data set, this allows comparison with the direct files.
+    :param job_request: The job request
+    :param dataset: The nexus file dataset
+    :return: The updated job request
+    """
+    job_request.additional_values["instrument_direct_file_comparison"] = generate_sans2d_direct_instrumentation(dataset)
+    return sans_extract(job_request, dataset)
+
+
 def tosca_extract(job_request: JobRequest, _: Any) -> JobRequest:
     """
     Add the cycle_string to the job request
@@ -173,8 +226,10 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
             return tosca_extract
         case "osiris":
             return osiris_extract
-        case "loq" | "sans2d":
-            return sans_extract
+        case "loq":
+            return loq_extract
+        case "sans2d":
+            return sans2d_extract
         case "iris":
             return iris_extract
         case _:
