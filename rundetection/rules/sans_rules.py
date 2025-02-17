@@ -178,7 +178,8 @@ class SansScatterTransFiles(Rule[bool]):
 
     @staticmethod
     def _verify_trans(job_request: JobRequest, job_file: SansFileData):
-        scatter_file = _find_file_in_journal_by_title_and_type(title=job_file.title,
+        scatter_title = _get_scatter_title(job_file)
+        scatter_file = _find_file_in_journal_by_title_and_type(title=scatter_title,
                                                                file_types={"SANS/TRANS", "SANS"})
         direct_file = _find_direct(job_request)
         if scatter_file is None or direct_file is None:
