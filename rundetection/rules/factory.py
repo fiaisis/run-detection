@@ -45,8 +45,8 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
             if isinstance(value, str):
                 return MariMaskFileRule(value)
         case "mariwbvan":
-            if isinstance(value, int):
-                return MariWBVANRule(value)
+            if isinstance(value, int | str):
+                return MariWBVANRule(int(value))
         case "osiriscalibfilesandreflection":
             if isinstance(value, dict):
                 return OsirisReflectionCalibrationRule(value)
