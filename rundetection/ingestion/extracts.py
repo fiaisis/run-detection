@@ -51,7 +51,11 @@ def sans_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
 
 
 def generate_loq_direct_instrumentation(dataset: Any) -> dict[str, Any]:
-    return {"seloq": {"Apperture_2": str(dataset.get("selog").get("Apperture_2").get("value")[0])}}
+    keys = dataset.get("selog").keys()
+    for key in keys:
+        if "Aperture_" in key:
+            return {"selog": {key: dataset.get("selog").get(key).get("value")[0]}}
+    return {}
 
 
 def loq_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
@@ -63,7 +67,8 @@ def loq_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     :param dataset: The nexus file dataset
     :return: The updated job request
     """
-    job_request.additional_values["instrument_direct_file_comparison"] = generate_loq_direct_instrumentation(dataset)
+    direct_instrumentation = generate_loq_direct_instrumentation(dataset)
+    job_request.additional_values["instrument_direct_file_comparison"] = direct_instrumentation
     return sans_extract(job_request, dataset)
 
 
