@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
     from rundetection.job_requests import JobRequest
 
+# Global List of data so it can be reused by multiple classes.
 SANS_FILES: list[SansFileData] | None = None
 
 
