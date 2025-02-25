@@ -60,8 +60,8 @@ def test_skip_extract(caplog: LogCaptureFixture):
         ("mari", "mari_extract"),
         ("tosca", "tosca_extract"),
         ("osiris", "osiris_extract"),
-        ("loq", "sans_extract"),
-        ("sans2d", "sans_extract"),
+        ("loq", "loq_extract"),
+        ("sans2d", "sans2d_extract"),
     ],
 )
 def test_get_extraction_function(input_value, expected_function_name):
