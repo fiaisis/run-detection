@@ -135,9 +135,7 @@ def _grab_file_prefix(job_file_path: Path) -> str:
 
 def _get_zeros(job_file_path: Path, run_number: str) -> str:
     num_zeros = len(job_file_path.stem) - len(run_number) - len(_grab_file_prefix(job_file_path))
-    if num_zeros > 0:
-        return num_zeros * "0"
-    return ""
+    return num_zeros * "0"
 
 
 def _generate_direct_file_path(job_file_path: Path, run_number: int) -> Path | None:
