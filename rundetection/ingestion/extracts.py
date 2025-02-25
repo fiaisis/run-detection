@@ -104,7 +104,7 @@ def sans2d_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     :param dataset: The nexus file dataset
     :return: The updated job request
     """
-    job_request.additional_values["instrument_direct_file_comparison"] = generate_sans2d_direct_instrumentation(dataset)
+    job_request.additional_values["instrument_direct_file_comparison"] = _generate_sans2d_direct_instrumentation(dataset)
     return sans_extract(job_request, dataset)
 
 
