@@ -56,12 +56,15 @@ def _create_list_of_files(job_request: JobRequest) -> list[SansFileData]:
     cycle = job_request.additional_values["cycle_string"]
     xml = _grab_cycle_instrument_index(cycle=cycle, instrument=job_request.instrument)
     cycle_run_info = xmltodict.parse(xml)
-    return [_create_sans_file_data(title=run_info["title"]["#text"], run_number=run_info["run_number"]["#text"]) for
-            run_info in cycle_run_info["NXroot"]["NXentry"]]
+    return [
+        _create_sans_file_data(title=run_info["title"]["#text"], run_number=run_info["run_number"]["#text"])
+        for run_info in cycle_run_info["NXroot"]["NXentry"]
+    ]
 
 
-def _set_metadata_files(job_request: JobRequest, scatter_file: SansFileData, trans_file: SansFileData,
-                        direct_file: SansFileData) -> None:
+def _set_metadata_files(
+    job_request: JobRequest, scatter_file: SansFileData, trans_file: SansFileData, direct_file: SansFileData
+) -> None:
     # Used in later rules
     job_request.additional_values["scatter_title"] = scatter_file.title
     job_request.additional_values["scatter_direct_title"] = direct_file.title
@@ -84,7 +87,7 @@ def _get_background_title(scatter_title: str) -> str | None:
     if "}_{" in scatter_title:
         title = scatter_title.split("}_{")[1]
         # Strip off the _SANS/TRANS or _SANS from the title
-        title = title[:len(title) - 1 - len(title.split("_")[-1])]
+        title = title[: len(title) - 1 - len(title.split("_")[-1])]
         return title.lstrip("{").rstrip("}")
     return None
 
@@ -150,9 +153,14 @@ def _generate_direct_file_path(job_file_path: Path, run_number: int) -> Path | N
 def _find_direct(job_request: JobRequest) -> SansFileData | None:
     direct_files = set()
     for empty_shorthand in ("direct", "empty", " mt", "mt ", "{mt}"):
-        direct_files.update(_find_all_files_in_journal_on_condition(
-            partial(lambda file, empty_shorthand: empty_shorthand in file.title.lower() and file.type == "TRANS",
-                    empty_shorthand=empty_shorthand)))
+        direct_files.update(
+            _find_all_files_in_journal_on_condition(
+                partial(
+                    lambda file, empty_shorthand: empty_shorthand in file.title.lower() and file.type == "TRANS",
+                    empty_shorthand=empty_shorthand,
+                )
+            )
+        )
     # Remove duplicates and sort in order to get most recent direct file first
     direct_files = list(direct_files)
     direct_files.sort(key=lambda x: x.run_number, reverse=True)
@@ -175,7 +183,8 @@ def _find_all_files_in_journal_on_condition(condition: Callable) -> list[SansFil
 
 def _find_file_in_journal_by_title_and_type(title: str, file_types: set[str]) -> SansFileData | None:
     found_files = _find_all_files_in_journal_on_condition(
-        lambda file: "{" + title.lower() + "}" in file.title.lower() and file.type in file_types)
+        lambda file: "{" + title.lower() + "}" in file.title.lower() and file.type in file_types
+    )
     return found_files[0] if len(found_files) > 0 else None
 
 
@@ -203,14 +212,14 @@ class SansScatterTransFiles(Rule[bool]):
         else:
             # Is a scatter file, and found it's trans, and direct files.
             job_request.will_reduce = True
-            _set_metadata_files(job_request=job_request, scatter_file=job_file, trans_file=trans_file,
-                                direct_file=direct_file)
+            _set_metadata_files(
+                job_request=job_request, scatter_file=job_file, trans_file=trans_file, direct_file=direct_file
+            )
 
     @staticmethod
     def _verify_trans(job_request: JobRequest, job_file: SansFileData):
         scatter_title = _get_scatter_title(job_file)
-        scatter_file = _find_file_in_journal_by_title_and_type(title=scatter_title,
-                                                               file_types={"SANS/TRANS", "SANS"})
+        scatter_file = _find_file_in_journal_by_title_and_type(title=scatter_title, file_types={"SANS/TRANS", "SANS"})
         logger.info("Found scatter file %s", scatter_file)
         direct_file = _find_direct(job_request)
         logger.info("Found direct file %s", direct_file)
@@ -220,8 +229,9 @@ class SansScatterTransFiles(Rule[bool]):
         else:
             # Is a trans file and found its scatter, and direct files.
             job_request.will_reduce = True
-            _set_metadata_files(job_request=job_request, scatter_file=scatter_file, trans_file=job_file,
-                                direct_file=direct_file)
+            _set_metadata_files(
+                job_request=job_request, scatter_file=scatter_file, trans_file=job_file, direct_file=direct_file
+            )
 
     def verify(self, job_request: JobRequest) -> None:
         if not self._value:
@@ -250,8 +260,11 @@ class SansCanFiles(Rule[bool]):
         # Ensure the job_request was set up correctly by previous rules
         for required_key in ("scatter_title", "scatter_direct_number", "scatter_direct_title"):
             if required_key not in job_request.additional_values:
-                logger.error("%s rule needs rules to be ran before it and does not have %s in the job_request "
-                             "additional values", self.__class__, required_key)
+                logger.error(
+                    "%s rule needs rules to be ran before it and does not have %s in the job_request additional values",
+                    self.__class__,
+                    required_key,
+                )
                 job_request.will_reduce = False
                 return
 
@@ -259,17 +272,21 @@ class SansCanFiles(Rule[bool]):
         scatter_title = job_request.additional_values["scatter_title"]
         background_title = _get_background_title(scatter_title)
         if background_title:
-            background_scatter = _find_file_in_journal_by_title_and_type(title=background_title,
-                                                                         file_types={"SANS", "SANS/TRANS"})
+            background_scatter = _find_file_in_journal_by_title_and_type(
+                title=background_title, file_types={"SANS", "SANS/TRANS"}
+            )
             background_trans = _find_trans(scatter=background_scatter, job_request=job_request)
         else:
             # Go and find the scatter/sans file for the direct and use that instead
             background_scatter = _find_file_in_journal_by_title_and_type(
                 title=_get_scatter_title(job_request.additional_values["scatter_direct_title"]),
-                file_types={"SANS", "SANS/TRANS"}
+                file_types={"SANS", "SANS/TRANS"},
             )
-            background_trans = SansFileData(title=job_request.additional_values["scatter_direct_title"], type="TRANS",
-                                            run_number=job_request.additional_values["scatter_direct_number"])
+            background_trans = SansFileData(
+                title=job_request.additional_values["scatter_direct_title"],
+                type="TRANS",
+                run_number=job_request.additional_values["scatter_direct_number"],
+            )
 
         if background_trans is None or background_scatter is None:
             logger.error("Background trans or scatter is not found for title: %s", background_title)

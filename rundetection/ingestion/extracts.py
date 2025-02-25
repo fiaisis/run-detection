@@ -76,7 +76,7 @@ def generate_sans2d_direct_instrumentation(dataset: Any) -> dict[str, Any]:
     selog_dict = {
         "selog": {
             "Rear_Det_Z": dataset.get("selog").get("Rear_Det_Z").get("value")[0],
-            "Front_Det_Z": dataset.get("selog").get("Front_Det_Z").get("value")[0]
+            "Front_Det_Z": dataset.get("selog").get("Front_Det_Z").get("value")[0],
         }
     }
     # G1-5

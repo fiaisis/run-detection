@@ -29,12 +29,18 @@ def test_sans2d_trans_file_last():
         additional_values={"included_trans_as_scatter": False},
         additional_requests=[],
     )
-    with (mock.patch("rundetection.rules.sans_rules._create_list_of_files", return_value=[
-        SansFileData(title="{Banana}", type="SANS", run_number="1"),
-        SansFileData(title="{Apple}", type="SANS", run_number="2"),
-        SansFileData(title="{Apple}", type="TRANS", run_number="3"),
-        SansFileData(title="{direct beam}", type="TRANS", run_number="4"),
-    ]), mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True)):
+    with (
+        mock.patch(
+            "rundetection.rules.sans_rules._create_list_of_files",
+            return_value=[
+                SansFileData(title="{Banana}", type="SANS", run_number="1"),
+                SansFileData(title="{Apple}", type="SANS", run_number="2"),
+                SansFileData(title="{Apple}", type="TRANS", run_number="3"),
+                SansFileData(title="{direct beam}", type="TRANS", run_number="4"),
+            ],
+        ),
+        mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True),
+    ):
         loq_find_files = SansScatterTransFiles(value=True)
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is True
@@ -59,11 +65,17 @@ def test_sans2d_trans_file_last_not_found_scatter():
         additional_values={"included_trans_as_scatter": False},
         additional_requests=[],
     )
-    with (mock.patch("rundetection.rules.sans_rules._create_list_of_files", return_value=[
-        SansFileData(title="{Apple}", type="SANS", run_number="2"),
-        SansFileData(title="{Apple}", type="TRANS", run_number="3"),
-        SansFileData(title="{direct beam}", type="TRANS", run_number="4"),
-    ]), mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True)):
+    with (
+        mock.patch(
+            "rundetection.rules.sans_rules._create_list_of_files",
+            return_value=[
+                SansFileData(title="{Apple}", type="SANS", run_number="2"),
+                SansFileData(title="{Apple}", type="TRANS", run_number="3"),
+                SansFileData(title="{direct beam}", type="TRANS", run_number="4"),
+            ],
+        ),
+        mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True),
+    ):
         loq_find_files = SansScatterTransFiles(value=True)
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is False
@@ -107,7 +119,10 @@ def test_sans2d_find_files_verify_some_files_found_but_none_valid():
         additional_values={"included_trans_as_scatter": False},
         additional_requests=[],
     )
-    with mock.patch("rundetection.rules.sans_rules._create_list_of_files", return_value=[SansFileData("", "", ""), SansFileData("", "", ""), SansFileData("", "", "")]):
+    with mock.patch(
+        "rundetection.rules.sans_rules._create_list_of_files",
+        return_value=[SansFileData("", "", ""), SansFileData("", "", ""), SansFileData("", "", "")],
+    ):
         loq_find_files = SansScatterTransFiles(value=True)
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is False
@@ -129,12 +144,18 @@ def test_sans2d_find_files_trans_file_found():
         additional_values={"included_trans_as_scatter": False},
         additional_requests=[],
     )
-    with (mock.patch("rundetection.rules.sans_rules._create_list_of_files", return_value=[
-            SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-            SansFileData(title="{background}", type="TRANS", run_number="2"),
-            SansFileData(title="{background}", type="SANS", run_number="3"),
-            SansFileData(title="{direct}", type="TRANS", run_number="4")
-    ]), mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True)):
+    with (
+        mock.patch(
+            "rundetection.rules.sans_rules._create_list_of_files",
+            return_value=[
+                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
+                SansFileData(title="{background}", type="TRANS", run_number="2"),
+                SansFileData(title="{background}", type="SANS", run_number="3"),
+                SansFileData(title="{direct}", type="TRANS", run_number="4"),
+            ],
+        ),
+        mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True),
+    ):
         loq_find_files = SansScatterTransFiles(value=True)
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is True
@@ -157,19 +178,19 @@ def test_sans2d_find_files_can_transmission_file_found():
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={
-            "included_trans_as_scatter": False,
-            "scatter_title": "{scatter}_{background}_sans"
-        },
+        additional_values={"included_trans_as_scatter": False, "scatter_title": "{scatter}_{background}_sans"},
         additional_requests=[],
     )
     with (
-        mock.patch("rundetection.rules.sans_rules._create_list_of_files", return_value=[
-            SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-            SansFileData(title="{background}", type="SANS", run_number="2"),
-            SansFileData(title="{background}", type="TRANS", run_number="3"),
-            SansFileData(title="{direct}", type="SANS", run_number="4"),
-        ]),
+        mock.patch(
+            "rundetection.rules.sans_rules._create_list_of_files",
+            return_value=[
+                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
+                SansFileData(title="{background}", type="SANS", run_number="2"),
+                SansFileData(title="{background}", type="TRANS", run_number="3"),
+                SansFileData(title="{direct}", type="SANS", run_number="4"),
+            ],
+        ),
         mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True),
     ):
         _refresh_local_journal(job_request=job_request)
@@ -196,19 +217,19 @@ def test_loq_find_files_no_background_use_direct_only():
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={
-            "included_trans_as_scatter": False,
-            "scatter_title": "{scatter}_{background}_sans"
-        },
+        additional_values={"included_trans_as_scatter": False, "scatter_title": "{scatter}_{background}_sans"},
         additional_requests=[],
     )
     with (
-        mock.patch("rundetection.rules.sans_rules._create_list_of_files", return_value=[
-            SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-            SansFileData(title="{background}", type="SANS", run_number="2"),
-            SansFileData(title="{direct}", type="TRANS", run_number="3"),
-            SansFileData(title="{direct}", type="SANS", run_number="4"),
-        ]),
+        mock.patch(
+            "rundetection.rules.sans_rules._create_list_of_files",
+            return_value=[
+                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
+                SansFileData(title="{background}", type="SANS", run_number="2"),
+                SansFileData(title="{direct}", type="TRANS", run_number="3"),
+                SansFileData(title="{direct}", type="SANS", run_number="4"),
+            ],
+        ),
         mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True),
     ):
         _refresh_local_journal(job_request=job_request)
@@ -220,7 +241,6 @@ def test_loq_find_files_no_background_use_direct_only():
     assert job_request.will_reduce is True
     assert job_request.additional_values["can_scatter"] == "4"
     assert job_request.additional_values["can_transmission"] == "3"
-
 
 
 def test_sans2d_find_files_direct_file_found():
@@ -239,21 +259,25 @@ def test_sans2d_find_files_direct_file_found():
         additional_values={
             "included_trans_as_scatter": False,
             "scatter_title": "{scatter}_{background}_sans/trans",
-            "instrument_direct_file_comparison": {"seloq": {"Jaw_N": 0.1}}
+            "instrument_direct_file_comparison": {"seloq": {"Jaw_N": 0.1}},
         },
         additional_requests=[],
     )
     with (
-        mock.patch("rundetection.rules.sans_rules._create_list_of_files", return_value=[
-            SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-            SansFileData(title="{background}", type="SANS", run_number="2"),
-            SansFileData(title="{background}", type="TRANS", run_number="3"),
-            SansFileData(title="{direct}", type="TRANS", run_number="4"),
-
-        ]),
-        mock.patch("rundetection.rules.sans_rules._generate_direct_file_path",
-                   return_value=Path("/path/cycle_24_2/SANS2D0004.nxs")),
-        mock.patch("rundetection.rules.sans_rules.load_h5py_dataset") as load_h5py_dataset
+        mock.patch(
+            "rundetection.rules.sans_rules._create_list_of_files",
+            return_value=[
+                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
+                SansFileData(title="{background}", type="SANS", run_number="2"),
+                SansFileData(title="{background}", type="TRANS", run_number="3"),
+                SansFileData(title="{direct}", type="TRANS", run_number="4"),
+            ],
+        ),
+        mock.patch(
+            "rundetection.rules.sans_rules._generate_direct_file_path",
+            return_value=Path("/path/cycle_24_2/SANS2D0004.nxs"),
+        ),
+        mock.patch("rundetection.rules.sans_rules.load_h5py_dataset") as load_h5py_dataset,
     ):
         load_h5py_dataset.return_value = {"seloq": {"Jaw_N": {"value": [0.1]}}}
         _refresh_local_journal(job_request=job_request)
@@ -283,12 +307,18 @@ def test_sans2d_find_files_can_scatter_file_found():
         additional_values={"included_trans_as_scatter": False},
         additional_requests=[],
     )
-    with (mock.patch("rundetection.rules.sans_rules._create_list_of_files", return_value=[
-        SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-        SansFileData(title="{background}", type="TRANS", run_number="2"),
-        SansFileData(title="{background}", type="SANS", run_number="3"),
-        SansFileData(title="{direct}", type="TRANS", run_number="4")
-    ]), mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True)):
+    with (
+        mock.patch(
+            "rundetection.rules.sans_rules._create_list_of_files",
+            return_value=[
+                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
+                SansFileData(title="{background}", type="TRANS", run_number="2"),
+                SansFileData(title="{background}", type="SANS", run_number="3"),
+                SansFileData(title="{direct}", type="TRANS", run_number="4"),
+            ],
+        ),
+        mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True),
+    ):
         loq_find_files = SansScatterTransFiles(value=True)
         loq_find_files.verify(job_request)
         loq_can_files = SansCanFiles(value=True)
@@ -358,12 +388,18 @@ def test_sans2d_verify_checks_m4():
         additional_values={"included_trans_as_scatter": True, "cycle_string": "cycle_24_4"},
         additional_requests=[],
     )
-    with (mock.patch("rundetection.rules.sans_rules._create_list_of_files", return_value=[
-        SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-        SansFileData(title="{background}", type="TRANS", run_number="2"),
-        SansFileData(title="{background}", type="SANS", run_number="3"),
-        SansFileData(title="{direct}", type="TRANS", run_number="4")
-    ]), mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True)):
+    with (
+        mock.patch(
+            "rundetection.rules.sans_rules._create_list_of_files",
+            return_value=[
+                SansFileData(title="{scatter}", type="TRANS", run_number="1"),
+                SansFileData(title="{background}", type="TRANS", run_number="2"),
+                SansFileData(title="{background}", type="SANS", run_number="3"),
+                SansFileData(title="{direct}", type="TRANS", run_number="4"),
+            ],
+        ),
+        mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True),
+    ):
         loq_find_files = SansScatterTransFiles(value=True)
         loq_find_files.verify(job_request)
         loq_can_files = SansCanFiles(value=True)
