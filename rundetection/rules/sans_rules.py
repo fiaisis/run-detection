@@ -26,15 +26,15 @@ class SansFileData:
     type: str
     run_number: str
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.title, self.type, self.run_number))
 
     @property
-    def is_scatter(self):
+    def is_scatter(self) -> bool:
         return self.type.upper() in ("SANS/TRANS", "SANS")
 
     @property
-    def is_trans(self):
+    def is_trans(self) -> bool:
         return self.type.upper() == "TRANS"
 
 
@@ -75,7 +75,9 @@ def _set_metadata_files(
     job_request.additional_values["scatter_transmission_number"] = trans_file.run_number
 
 
-def _get_scatter_title(scatter: SansFileData | str) -> str:
+def _get_scatter_title(scatter: SansFileData | str | None) -> str:
+    if scatter is None:
+        return ""
     if isinstance(scatter, SansFileData):
         scatter = scatter.title
     if "}_{" in scatter:
@@ -92,14 +94,14 @@ def _get_background_title(scatter_title: str) -> str | None:
     return None
 
 
-def _find_trans(job_request: JobRequest, scatter: SansFileData) -> SansFileData:
+def _find_trans(job_request: JobRequest, scatter: SansFileData | None) -> SansFileData | None:
     if job_request.additional_values["included_trans_as_scatter"]:
         # Trans is the scatter file
         return scatter
     return _find_file_in_journal_by_title_and_type(title=_get_scatter_title(scatter), file_types={"TRANS"})
 
 
-def _is_direct_file(job_request: JobRequest, file_path: Path) -> bool:
+def _is_direct_file(job_request: JobRequest, file_path: Path | None) -> bool:
     if file_path is None:
         return False
     possible_file = load_h5py_dataset(file_path)
@@ -162,9 +164,9 @@ def _find_direct(job_request: JobRequest) -> SansFileData | None:
             )
         )
     # Remove duplicates and sort in order to get most recent direct file first
-    direct_files = list(direct_files)
-    direct_files.sort(key=lambda x: x.run_number, reverse=True)
-    for file in direct_files:
+    direct_files_ordered = list(direct_files)
+    direct_files_ordered.sort(key=lambda x: x.run_number, reverse=True)
+    for file in direct_files_ordered:
         file_path = _generate_direct_file_path(job_request.filepath, job_request.run_number)
         if _is_direct_file(job_request=job_request, file_path=file_path):
             return file
@@ -177,7 +179,10 @@ def _refresh_local_journal(job_request: JobRequest) -> None:
     SANS_FILES = _create_list_of_files(job_request)
 
 
-def _find_all_files_in_journal_on_condition(condition: Callable) -> list[SansFileData]:
+def _find_all_files_in_journal_on_condition(condition: Callable[[SansFileData], bool]) -> list[SansFileData]:
+    global SANS_FILES  # noqa: PLW0603
+    if SANS_FILES is None:
+        SANS_FILES = []
     return [file for file in SANS_FILES if condition(file)]
 
 
@@ -217,7 +222,7 @@ class SansScatterTransFiles(Rule[bool]):
             )
 
     @staticmethod
-    def _verify_trans(job_request: JobRequest, job_file: SansFileData):
+    def _verify_trans(job_request: JobRequest, job_file: SansFileData) -> None:
         scatter_title = _get_scatter_title(job_file)
         scatter_file = _find_file_in_journal_by_title_and_type(title=scatter_title, file_types={"SANS/TRANS", "SANS"})
         logger.info("Found scatter file %s", scatter_file)

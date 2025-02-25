@@ -88,7 +88,7 @@ def generate_sans2d_direct_instrumentation(dataset: Any) -> dict[str, Any]:
         s_str = f"S{ii}"
         selog_dict["selog"][s_str] = dataset.get("selog").get(s_str).get("value")[0]
     # Jaw_E, Jaw_N, Jaw_S, Jaw_W
-    for ii in ("E", "N", "S", "W"):
+    for ii in ("E", "N", "S", "W"):  # type: ignore
         jaw_str = f"Jaw_{ii}"
         selog_dict["selog"][jaw_str] = dataset.get("selog").get(jaw_str).get("value")[0]
 
