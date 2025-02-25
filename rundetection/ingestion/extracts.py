@@ -218,7 +218,7 @@ def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     return job_request
 
 
-def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobRequest]:
+def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobRequest]:  # noqa: PLR0911
     """
     Given an instrument name, return the additional metadata extraction function for the instrument
     :param instrument: str - instrument name

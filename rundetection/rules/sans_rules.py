@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import partial
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import requests
@@ -14,6 +13,7 @@ from rundetection.rules.rule import Rule
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
 
     from rundetection.job_requests import JobRequest
 
@@ -171,11 +171,7 @@ def _refresh_local_journal(job_request: JobRequest) -> None:
 
 def _find_all_files_in_journal_on_condition(condition: Callable) -> list[SansFileData]:
     return [file for file in SANS_FILES if condition(file)]
-    # file_list = []
-    # for file in SANS_FILES:
-    #     if condition(file):
-    #         file_list.append(file)
-    # return file_list
+
 
 def _find_file_in_journal_by_title_and_type(title: str, file_types: set[str]) -> SansFileData | None:
     found_files = _find_all_files_in_journal_on_condition(
