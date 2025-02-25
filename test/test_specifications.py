@@ -66,7 +66,7 @@ def test_instrument_specification_load_rules_for_api(requests, specification):
     requests.get.return_value.json.return_value = {
         "molspecstitch": True,
         "mariwbvan": 100,
-        "loquserfile": "user_file.toml",
+        "sansuserfile": "user_file.toml",
     }
 
     specification._load_rules_from_api()
