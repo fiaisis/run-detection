@@ -62,6 +62,7 @@ def test_skip_extract(caplog: LogCaptureFixture):
         ("osiris", "osiris_extract"),
         ("loq", "loq_extract"),
         ("sans2d", "sans2d_extract"),
+        ("iris", "iris_extract")
     ],
 )
 def test_get_extraction_function(input_value, expected_function_name):
