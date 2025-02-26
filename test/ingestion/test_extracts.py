@@ -64,7 +64,7 @@ def test_skip_extract(caplog: LogCaptureFixture):
         ("osiris", "osiris_extract"),
         ("loq", "loq_extract"),
         ("sans2d", "sans2d_extract"),
-        ("iris", "iris_extract")
+        ("iris", "iris_extract"),
     ],
 )
 def test_get_extraction_function(input_value, expected_function_name):
@@ -287,10 +287,28 @@ def test_sans2d_instrumentation(job_request):
             "Jaw_N": {"value": ["15"]},
             "Jaw_S": {"value": ["16"]},
             "Jaw_W": {"value": ["17"]},
-        }
+        },
     }
     expected_instrumentation_dict = {
-        "selog": {"Rear_Det_Z": "1", "Front_Det_Z": "2", "G1": "3", "G2": "4", "G3": "5", "G4": "6", "G5": "7", "S1": "8", "S2": "9", "S3": "10", "S4": "11", "S5": "12", "S6": "13", "Jaw_E": "14", "Jaw_N": "15", "Jaw_S": "16", "Jaw_W": "17"}
+        "selog": {
+            "Rear_Det_Z": "1",
+            "Front_Det_Z": "2",
+            "G1": "3",
+            "G2": "4",
+            "G3": "5",
+            "G4": "6",
+            "G5": "7",
+            "S1": "8",
+            "S2": "9",
+            "S3": "10",
+            "S4": "11",
+            "S5": "12",
+            "S6": "13",
+            "Jaw_E": "14",
+            "Jaw_N": "15",
+            "Jaw_S": "16",
+            "Jaw_W": "17",
+        }
     }
     with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
         sans2d_extract(job_request, dataset)
@@ -313,11 +331,9 @@ def test_loq_instrumentation(job_request):
         },
         "selog": {
             "Aperture_2": {"value": ["MEDIUM"]},
-        }
+        },
     }
-    expected_instrumentation_dict = {
-        "selog": {"Aperture_2": "MEDIUM"}
-    }
+    expected_instrumentation_dict = {"selog": {"Aperture_2": "MEDIUM"}}
     with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
         loq_extract(job_request, dataset)
 
