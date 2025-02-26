@@ -77,6 +77,19 @@ def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
     assert_correct_rule(rule_key, rule_value, expected_rule)
 
 
+def test_mariwbvan_rule_factory_returns_correct_rule_int_and_str():
+    """
+    Test to ensure that the rule factory returns the correct Rule for MariWBVAN when using either a str or int to create
+    the rule from the specification.
+    """
+    rule = rule_factory("mariwbvan", 12345)
+    assert isinstance(rule, MariWBVANRule)
+    assert rule._value == 12345  # noqa: PLR2004
+    rule = rule_factory("mariwbvan", "12345")
+    assert isinstance(rule, MariWBVANRule)
+    assert rule._value == 12345  # noqa: PLR2004
+
+
 def test_raises_exception_for_missing_rule_class() -> None:
     """
     Test exception raised when non-existent rule name is given
