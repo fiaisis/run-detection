@@ -353,8 +353,7 @@ def test_loq_instrumentation_no_aperturs(job_request):
             "height": [8.0],
             "width": [8.0],
         },
-        "selog": {
-        },
+        "selog": {},
     }
     with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
         loq_extract(job_request, dataset)
