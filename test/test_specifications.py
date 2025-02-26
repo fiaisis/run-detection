@@ -66,7 +66,7 @@ def test_instrument_specification_load_rules_for_api(requests, specification):
     requests.get.return_value.json.return_value = {
         "molspecstitch": True,
         "mariwbvan": 100,
-        "loquserfile": "user_file.toml",
+        "sansuserfile": "user_file.toml",
     }
 
     specification._load_rules_from_api()
@@ -74,7 +74,7 @@ def test_instrument_specification_load_rules_for_api(requests, specification):
     requests.get.assert_called_once_with(
         url="http://localhost:8000/instrument/FOO/specification", headers=headers, timeout=1
     )
-    assert specification._rules == [MariWBVANRule(100), SansUserFile("user_file.toml"), MolSpecStitchRule(True)]
+    assert specification._rules == [SansUserFile("user_file.toml"), MariWBVANRule(100), MolSpecStitchRule(True)]
 
 
 @mock.patch("rundetection.specifications.requests")

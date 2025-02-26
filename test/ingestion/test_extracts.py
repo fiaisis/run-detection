@@ -11,8 +11,10 @@ from rundetection.exceptions import IngestError, ReductionMetadataError
 from rundetection.ingestion.extracts import (
     get_cycle_string_from_path,
     get_extraction_function,
+    loq_extract,
     mari_extract,
     osiris_extract,
+    sans2d_extract,
     sans_extract,
     skip_extract,
     tosca_extract,
@@ -60,8 +62,9 @@ def test_skip_extract(caplog: LogCaptureFixture):
         ("mari", "mari_extract"),
         ("tosca", "tosca_extract"),
         ("osiris", "osiris_extract"),
-        ("loq", "sans_extract"),
-        ("sans2d", "sans_extract"),
+        ("loq", "loq_extract"),
+        ("sans2d", "sans2d_extract"),
+        ("iris", "iris_extract"),
     ],
 )
 def test_get_extraction_function(input_value, expected_function_name):
@@ -256,6 +259,106 @@ def test_sans_extract(job_request):
     assert job_request.additional_values["sample_geometry"] == "Disc"
     assert job_request.additional_values["sample_height"] == 8.0  # noqa: PLR2004
     assert job_request.additional_values["sample_width"] == 8.0  # noqa: PLR2004
+
+
+def test_sans2d_instrumentation(job_request):
+    dataset = {
+        "sample": {
+            "thickness": [1.0],
+            "shape": ["b'Disc'"],
+            "height": [8.0],
+            "width": [8.0],
+        },
+        "selog": {
+            "Rear_Det_Z": {"value": ["1"]},
+            "Front_Det_Z": {"value": ["2"]},
+            "G1": {"value": ["3"]},
+            "G2": {"value": ["4"]},
+            "G3": {"value": ["5"]},
+            "G4": {"value": ["6"]},
+            "G5": {"value": ["7"]},
+            "S1": {"value": ["8"]},
+            "S2": {"value": ["9"]},
+            "S3": {"value": ["10"]},
+            "S4": {"value": ["11"]},
+            "S5": {"value": ["12"]},
+            "S6": {"value": ["13"]},
+            "Jaw_E": {"value": ["14"]},
+            "Jaw_N": {"value": ["15"]},
+            "Jaw_S": {"value": ["16"]},
+            "Jaw_W": {"value": ["17"]},
+        },
+    }
+    expected_instrumentation_dict = {
+        "selog": {
+            "Rear_Det_Z": "1",
+            "Front_Det_Z": "2",
+            "G1": "3",
+            "G2": "4",
+            "G3": "5",
+            "G4": "6",
+            "G5": "7",
+            "S1": "8",
+            "S2": "9",
+            "S3": "10",
+            "S4": "11",
+            "S5": "12",
+            "S6": "13",
+            "Jaw_E": "14",
+            "Jaw_N": "15",
+            "Jaw_S": "16",
+            "Jaw_W": "17",
+        }
+    }
+    with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
+        sans2d_extract(job_request, dataset)
+
+    assert job_request.additional_values["instrument_direct_file_comparison"] == expected_instrumentation_dict
+    assert job_request.additional_values["cycle_string"] == "some string"
+    assert job_request.additional_values["sample_thickness"] == 1.0
+    assert job_request.additional_values["sample_geometry"] == "Disc"
+    assert job_request.additional_values["sample_height"] == 8.0  # noqa: PLR2004
+    assert job_request.additional_values["sample_width"] == 8.0  # noqa: PLR2004
+
+
+def test_loq_instrumentation(job_request):
+    dataset = {
+        "sample": {
+            "thickness": [1.0],
+            "shape": ["b'Disc'"],
+            "height": [8.0],
+            "width": [8.0],
+        },
+        "selog": {
+            "Aperture_2": {"value": ["MEDIUM"]},
+        },
+    }
+    expected_instrumentation_dict = {"selog": {"Aperture_2": "MEDIUM"}}
+    with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
+        loq_extract(job_request, dataset)
+
+    assert job_request.additional_values["instrument_direct_file_comparison"] == expected_instrumentation_dict
+    assert job_request.additional_values["cycle_string"] == "some string"
+    assert job_request.additional_values["sample_thickness"] == 1.0
+    assert job_request.additional_values["sample_geometry"] == "Disc"
+    assert job_request.additional_values["sample_height"] == 8.0  # noqa: PLR2004
+    assert job_request.additional_values["sample_width"] == 8.0  # noqa: PLR2004
+
+
+def test_loq_instrumentation_no_aperturs(job_request):
+    dataset = {
+        "sample": {
+            "thickness": [1.0],
+            "shape": ["b'Disc'"],
+            "height": [8.0],
+            "width": [8.0],
+        },
+        "selog": {},
+    }
+    with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
+        loq_extract(job_request, dataset)
+
+    assert job_request.additional_values["instrument_direct_file_comparison"] == {}
 
 
 def test_get_cycle_string_from_path_valid():

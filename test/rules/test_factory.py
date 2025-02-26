@@ -22,7 +22,13 @@ from rundetection.rules.osiris_rules import (
     OsirisReflectionCalibrationRule,
 )
 from rundetection.rules.rule import MissingRuleError, Rule
-from rundetection.rules.sans_rules import CheckIfScatterSANS, SansFindFiles, SansPhiLimits, SansSliceWavs, SansUserFile
+from rundetection.rules.sans_rules import (
+    SansCanFiles,
+    SansPhiLimits,
+    SansScatterTransFiles,
+    SansSliceWavs,
+    SansUserFile,
+)
 
 
 def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
@@ -51,9 +57,9 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("osirisdefaultspectroscopy", True, OsirisDefaultSpectroscopy),
         ("osirisdefaultgraniteanalyser", True, OsirisDefaultGraniteAnalyser),
         ("osirisreductionmode", True, OsirisReductionModeRule),
-        ("checkifscattersans", True, CheckIfScatterSANS),
-        ("loquserfile", "loquserfile.toml", SansUserFile),
-        ("loqfindfiles", True, SansFindFiles),
+        ("sansscattertransfiles", True, SansScatterTransFiles),
+        ("sansuserfile", "loquserfile.toml", SansUserFile),
+        ("sanscanfiles", True, SansCanFiles),
         ("sansphilimits", "[(1.0, 2.0), (3.0, 4.0)]", SansPhiLimits),
         ("sansslicewavs", "[2.7, 3.7, 4.7, 5.7, 6.7, 8.7, 10.5]", SansSliceWavs),
         ("irisreduction", True, IrisReductionRule),
