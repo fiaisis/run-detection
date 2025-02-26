@@ -345,6 +345,23 @@ def test_loq_instrumentation(job_request):
     assert job_request.additional_values["sample_width"] == 8.0  # noqa: PLR2004
 
 
+def test_loq_instrumentation_no_aperturs(job_request):
+    dataset = {
+        "sample": {
+            "thickness": [1.0],
+            "shape": ["b'Disc'"],
+            "height": [8.0],
+            "width": [8.0],
+        },
+        "selog": {
+        },
+    }
+    with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
+        loq_extract(job_request, dataset)
+
+    assert job_request.additional_values["instrument_direct_file_comparison"] == {}
+
+
 def test_get_cycle_string_from_path_valid():
     """
     Test get cycle string returns correct string
