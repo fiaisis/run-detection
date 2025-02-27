@@ -18,7 +18,13 @@ from rundetection.rules.osiris_rules import (
     OsirisReflectionCalibrationRule,
 )
 from rundetection.rules.rule import MissingRuleError, Rule, T
-from rundetection.rules.sans_rules import CheckIfScatterSANS, SansFindFiles, SansPhiLimits, SansSliceWavs, SansUserFile
+from rundetection.rules.sans_rules import (
+    SansCanFiles,
+    SansPhiLimits,
+    SansScatterTransFiles,
+    SansSliceWavs,
+    SansUserFile,
+)
 
 
 def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912
@@ -59,15 +65,15 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "osirisreductionmode":
             if isinstance(value, bool):
                 return OsirisReductionModeRule(value)
-        case "checkifscattersans":
+        case "sansscattertransfiles":
             if isinstance(value, bool):
-                return CheckIfScatterSANS(value)
-        case "loqfindfiles" | "sansfindfiles":
-            if isinstance(value, bool):
-                return SansFindFiles(value)
-        case "loquserfile" | "sansuserfile":
+                return SansScatterTransFiles(value)
+        case "sansuserfile":
             if isinstance(value, str):
                 return SansUserFile(value)
+        case "sanscanfiles":
+            if isinstance(value, bool):
+                return SansCanFiles(value)
         case "sansphilimits":
             if isinstance(value, str):
                 return SansPhiLimits(value)
