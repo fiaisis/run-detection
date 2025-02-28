@@ -203,6 +203,13 @@ class SansUserFile(Rule[str]):
         job_request.additional_values["user_file"] = f"/extras/{job_request.instrument.lower()}/{self._value}"
 
 
+def _clean_up_job_request(job_request: JobRequest) -> None:
+    # We need to drop this in case it has none-JSON serializable data in it. Can be trivially extended to further
+    # cleanup the jobrequest.
+    if "instrument_direct_file_comparison" in job_request.additional_values:
+        job_request.additional_values.pop("instrument_direct_file_comparison")
+
+
 class SansScatterTransFiles(Rule[bool]):
     @staticmethod
     def _verify_scatter(job_request: JobRequest, job_file: SansFileData) -> None:
@@ -249,6 +256,7 @@ class SansScatterTransFiles(Rule[bool]):
         else:
             job_request.will_reduce = False
             logger.error("File: %s is neither TRANS nor a SANS scatter", job_file.title)
+        _clean_up_job_request(job_request)
 
 
 class SansCanFiles(Rule[bool]):
