@@ -66,7 +66,7 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("irisreduction", True, IrisReductionRule),
         ("iriscalibration", {"002": "00148587", "004": "00148587"}, IrisCalibrationRule),
         ("vesuvioipfilerule", "ip00001.par", VesuvioIPFileRule),
-        ("vesuviovemptyrunsrule", "123-321", VesuvioEmptyRunsRule)
+        ("vesuviovemptyrunsrule", "123-321", VesuvioEmptyRunsRule),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
