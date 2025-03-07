@@ -25,6 +25,7 @@ from rundetection.rules.sans_rules import (
     SansSliceWavs,
     SansUserFile,
 )
+from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule
 
 
 def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912
@@ -86,6 +87,12 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "iriscalibration":
             if isinstance(value, dict):
                 return IrisCalibrationRule(value)
+        case "vesuviovemptyrunsrule":
+            if isinstance(value, str):
+                return VesuvioEmptyRunsRule(value)
+        case "vesuvioipfilerule":
+            if isinstance(value, str):
+                return VesuvioIPFileRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 

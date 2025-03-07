@@ -18,6 +18,7 @@ from rundetection.ingestion.extracts import (
     sans_extract,
     skip_extract,
     tosca_extract,
+    vesuvio_extract,
 )
 from rundetection.job_requests import JobRequest
 
@@ -65,6 +66,7 @@ def test_skip_extract(caplog: LogCaptureFixture):
         ("loq", "loq_extract"),
         ("sans2d", "sans2d_extract"),
         ("iris", "iris_extract"),
+        ("vesuvio", "vesuvio_extract"),
     ],
 )
 def test_get_extraction_function(input_value, expected_function_name):
@@ -389,3 +391,12 @@ def test_get_cycle_string_from_path_invalid():
     path = Path("/no/cycle/string/here")
     with pytest.raises(IngestError):
         get_cycle_string_from_path(path)
+
+
+def test_vesuvio_extract_adds_runno(job_request):
+    """
+    Tests that the extract adds runno to Vesuvio jobs
+    """
+    result = vesuvio_extract(job_request, None)
+
+    assert result.additional_values["runno"] == 12345  # noqa: PLR2004

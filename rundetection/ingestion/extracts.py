@@ -220,6 +220,12 @@ def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     return job_request
 
 
+def vesuvio_extract(job_request: JobRequest, _: Any) -> JobRequest:
+    job_request.additional_values["runno"] = job_request.run_number
+
+    return job_request
+
+
 def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobRequest]:  # noqa: PLR0911
     """
     Given an instrument name, return the additional metadata extraction function for the instrument
@@ -239,6 +245,8 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
             return sans2d_extract
         case "iris":
             return iris_extract
+        case "vesuvio":
+            return vesuvio_extract
         case _:
             return skip_extract
 
