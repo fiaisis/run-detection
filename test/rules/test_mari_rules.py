@@ -4,7 +4,7 @@ Test for mari rules
 
 import os
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pytest
 
@@ -30,7 +30,7 @@ def job_request():
         run_number=100,
         filepath=Path("/archive/100/MARI100.nxs"),
         experiment_title="Test experiment",
-        additional_values={},
+        additional_values={"cycle_string": "cycle_24_5"},
         additional_requests=[],
         raw_frames=3,
         good_frames=0,
@@ -98,14 +98,22 @@ def test_verify_multiple_runs(mari_stitch_rule_true, job_request):
     """
     rule = MariMaskFileRule("some link")
     rule.verify(job_request)
-    rule = MariWBVANRule(1234567)
-    rule.verify(job_request)
-    with patch("rundetection.rules.mari_rules.MariStitchRule._get_runs_to_stitch", return_value=[1, 2, 3]):
+    with (patch("rundetection.rules.common_rules.requests") as requests_mock,
+          patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
+          patch("rundetection.rules.mari_rules.MariStitchRule._get_runs_to_stitch", return_value=[1, 2, 3])):
+        rule = MariWBVANRule(1234567)
+        rule.verify(job_request)
+        xmltodict_mock.parse.return_value = {
+            "NXroot": {
+                "NXentry": ""
+            }
+        }
         mari_stitch_rule_true.verify(job_request)
 
     assert len(job_request.additional_requests) == 1
     assert job_request.additional_requests[0].additional_values["mask_file_link"] == "some link"
     assert job_request.additional_requests[0].additional_values["wbvan"] == 1234567  # noqa: PLR2004
+    assert call(requests_mock.get().text) in xmltodict_mock.parse.call_args_list
 
 
 def test_mari_mask_rule(job_request):
@@ -120,13 +128,65 @@ def test_mari_mask_rule(job_request):
     assert job_request.additional_values["mask_file_link"] == "some link"
 
 
-def test_mari_wbvan_rule(job_request):
-    """
-    Test that the wbvan number is set via the specification
-    :param job_request: JobRequest fixture
-    :return: None
-    """
-    rule = MariWBVANRule(1234567)
-    rule.verify(job_request)
+def test_mari_wbvan_rule_run_from_this_cycle(job_request):
+    with (patch("rundetection.rules.common_rules.requests") as requests_mock,
+          patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock):
+        rule = MariWBVANRule(1234567)
+        xmltodict_mock.parse.return_value = {
+            "NXroot": {
+                "NXentry": ""
+            }
+        }
+        rule.verify(job_request)
 
     assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
+    assert call(requests_mock.get().text) in xmltodict_mock.parse.call_args_list
+
+
+def test_mari_wbvan_rule_run_from_old_cycle_new_van_unfindable(job_request):
+    with (patch("rundetection.rules.common_rules.requests") as requests_mock,
+          patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock):
+        rule = MariWBVANRule(1234567)
+        xmltodict_mock.parse.return_value = {
+            "NXroot": {
+                "NXentry": [
+                    {
+                        "run_number": {
+                            "#text": "1234567"
+                        },
+                        "title": {
+                            "#text": '"white van" - Ei=30meV 50Hz Gd chopper'
+                        }
+                    }
+                ]
+            }
+        }
+        rule.verify(job_request)
+
+    assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
+    assert call(requests_mock.get().text) in xmltodict_mock.parse.call_args_list
+
+
+def test_mari_wbvan_rule_run_from_old_cycle_van_found(job_request):
+    with (patch("rundetection.rules.common_rules.requests") as requests_mock,
+          patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock):
+        rule = MariWBVANRule(1234)
+        xmltodict_mock.parse.return_value = {
+            "NXroot": {
+                "NXentry": [
+                    {
+                        "run_number": {
+                            "#text": "1234567"
+                        },
+                        "title": {
+                            "#text": '"white van" - Ei=30meV 50Hz Gd chopper'
+                        }
+                    }
+                ]
+            }
+        }
+        rule.verify(job_request)
+
+    assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
+    assert call(requests_mock.get().text) in xmltodict_mock.parse.call_args_list
+

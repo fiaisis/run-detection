@@ -9,6 +9,8 @@ from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import requests
+
 from rundetection.ingestion.ingest import get_run_title
 from rundetection.rules.rule import Rule
 
@@ -109,3 +111,9 @@ def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
     """
 
     return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)
+
+
+def grab_cycle_instrument_index(cycle: str, instrument: str) -> str:
+    _, cycle_year, cycle_num = cycle.split("_")
+    url = f"http://data.isis.rl.ac.uk/journals/ndx{instrument.lower()}/journal_{cycle_year}_{cycle_num}.xml"
+    return requests.get(url, timeout=5).text
