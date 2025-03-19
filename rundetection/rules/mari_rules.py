@@ -68,6 +68,7 @@ class MariWBVANRule(Rule[int]):
     Inserts the cycles wbvan number into the script. This value is manually calculated by the MARI instrument scientist
     once per cycle.
     """
+
     def __init__(self, value: int):
         super().__init__(value)
         self.cycle_run_info = None
@@ -82,17 +83,24 @@ class MariWBVANRule(Rule[int]):
         if self.cycle_run_info is None:
             cycle_xml = grab_cycle_instrument_index(cycle_string, instrument)
             self.cycle_run_info = xmltodict.parse(cycle_xml)
-        return [(run_info["run_number"]["#text"], run_info["title"]["#text"]) for run_info in self.cycle_run_info["NXroot"]["NXentry"]]
+        return [
+            (run_info["run_number"]["#text"], run_info["title"]["#text"])
+            for run_info in self.cycle_run_info["NXroot"]["NXentry"]
+        ]
 
     def find_wbvan(self, job_request: JobRequest) -> int | None:
-        runs_this_cycle = self.get_run_numbers_and_titles(job_request.additional_values["cycle_string"], job_request.instrument)
+        runs_this_cycle = self.get_run_numbers_and_titles(
+            job_request.additional_values["cycle_string"], job_request.instrument
+        )
         for run_number, title in reversed(runs_this_cycle):
-            if ("van" in title.lower() and "30mev" in title.lower() and "50hz" in title.lower()):
+            if "van" in title.lower() and "30mev" in title.lower() and "50hz" in title.lower():
                 return int(run_number)
         return None
 
     def file_in_cycle(self, run_number: str, job_request: JobRequest) -> bool:
-        run_numbers = self.get_run_numbers_from_cycle(job_request.additional_values["cycle_string"], job_request.instrument)
+        run_numbers = self.get_run_numbers_from_cycle(
+            job_request.additional_values["cycle_string"], job_request.instrument
+        )
         return run_number in run_numbers
 
     def verify(self, job_request: JobRequest) -> None:
