@@ -5,6 +5,7 @@ Mari Rules
 import logging
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 import xmltodict
 
@@ -71,7 +72,7 @@ class MariWBVANRule(Rule[int]):
 
     def __init__(self, value: int):
         super().__init__(value)
-        self.cycle_run_info = None
+        self.cycle_run_info: dict[str, Any] | None = None
 
     def _get_run_numbers_from_cycle(self, cycle_string: str, instrument: str) -> list[str]:
         """
@@ -136,7 +137,7 @@ class MariWBVANRule(Rule[int]):
         :param job_request: JobRequest, the job that was requested
         :return: None
         """
-        wbvan = self._value
+        wbvan: int | None = self._value
         # If the run number is not from this cycle then we should try to find the most recent vanadium file from this
         # cycle.
         if not self._run_number_in_cycle(str(wbvan), job_request):
