@@ -86,7 +86,7 @@ class MariWBVANRule(Rule[int]):
             self.cycle_run_info = xmltodict.parse(cycle_xml)
         return [run_info["run_number"]["#text"] for run_info in self.cycle_run_info["NXroot"]["NXentry"]]
 
-    def _get_run_numbers_and_titles(self, cycle_string: str, instrument: str):
+    def _get_run_numbers_and_titles(self, cycle_string: str, instrument: str) -> list[tuple[str, str]]:
         """
         Find the run numbers and titles from this current cycle.
         :param cycle_string: str, the cycle this file belongs to
