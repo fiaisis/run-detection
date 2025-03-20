@@ -93,7 +93,8 @@ class MariWBVANRule(Rule[int]):
             job_request.additional_values["cycle_string"], job_request.instrument
         )
         for run_number, title in reversed(runs_this_cycle):
-            if "van" in title.lower() and "30mev" in title.lower() and "50hz" in title.lower():
+            if ("van" in title.lower() and "30mev" in title.lower().replace(" ", "") and
+                    "50hz" in title.lower().replace(" ", "")):
                 return int(run_number)
         return None
 

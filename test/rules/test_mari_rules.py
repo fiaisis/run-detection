@@ -175,3 +175,28 @@ def test_mari_wbvan_rule_run_from_old_cycle_van_found(job_request):
 
     assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
     assert call(requests_mock.get().text) in xmltodict_mock.parse.call_args_list
+
+
+def test_mari_wbvan_rule_run_from_old_cycle_van_found_with_spaces(job_request):
+    with (patch("rundetection.rules.common_rules.requests") as requests_mock,
+          patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock):
+        rule = MariWBVANRule(1234)
+        xmltodict_mock.parse.return_value = {
+            "NXroot": {
+                "NXentry": [
+                    {
+                        "run_number": {
+                            "#text": "1234567"
+                        },
+                        "title": {
+                            "#text": '"white van" - Ei=30 meV 50 Hz Gd chopper'
+                        }
+                    }
+                ]
+            }
+        }
+        rule.verify(job_request)
+
+    assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
+    assert call(requests_mock.get().text) in xmltodict_mock.parse.call_args_list
+
