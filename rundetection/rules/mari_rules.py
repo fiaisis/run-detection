@@ -73,13 +73,25 @@ class MariWBVANRule(Rule[int]):
         super().__init__(value)
         self.cycle_run_info = None
 
-    def get_run_numbers_from_cycle(self, cycle_string, instrument):
+    def _get_run_numbers_from_cycle(self, cycle_string: str, instrument: str) -> list[str]:
+        """
+        Find the run numbers from this current cycle.
+        :param cycle_string: str, the cycle this file belongs to
+        :param instrument: str, the name of the instrument
+        :return: list of run numbers as strings
+        """
         if self.cycle_run_info is None:
             cycle_xml = grab_cycle_instrument_index(cycle_string, instrument)
             self.cycle_run_info = xmltodict.parse(cycle_xml)
         return [run_info["run_number"]["#text"] for run_info in self.cycle_run_info["NXroot"]["NXentry"]]
 
-    def get_run_numbers_and_titles(self, cycle_string, instrument):
+    def _get_run_numbers_and_titles(self, cycle_string: str, instrument: str):
+        """
+        Find the run numbers and titles from this current cycle.
+        :param cycle_string: str, the cycle this file belongs to
+        :param instrument: str, the name of the instrument
+        :return: list of tuples with run numbers as strings and then titles as strings.
+        """
         if self.cycle_run_info is None:
             cycle_xml = grab_cycle_instrument_index(cycle_string, instrument)
             self.cycle_run_info = xmltodict.parse(cycle_xml)
@@ -88,8 +100,13 @@ class MariWBVANRule(Rule[int]):
             for run_info in self.cycle_run_info["NXroot"]["NXentry"]
         ]
 
-    def find_wbvan(self, job_request: JobRequest) -> int | None:
-        runs_this_cycle = self.get_run_numbers_and_titles(
+    def _find_wbvan_run_number_from_cycle(self, job_request: JobRequest) -> int | None:
+        """
+        Find the WbVAN for this cycle and return it or None if not found.
+        :param job_request: The job_request for this cycle
+        :return: the run number as an int or return None
+        """
+        runs_this_cycle = self._get_run_numbers_and_titles(
             job_request.additional_values["cycle_string"], job_request.instrument
         )
         for run_number, title in reversed(runs_this_cycle):
@@ -101,18 +118,29 @@ class MariWBVANRule(Rule[int]):
                 return int(run_number)
         return None
 
-    def file_in_cycle(self, run_number: str, job_request: JobRequest) -> bool:
-        run_numbers = self.get_run_numbers_from_cycle(
+    def _run_number_in_cycle(self, run_number: str, job_request: JobRequest) -> bool:
+        """
+        Find the run number from this cycle and return if it is present
+        :param run_number: str, the run number to find
+        :param job_request: JobRequest, the job request for this run
+        :return: True if run number present in cycle, else false.
+        """
+        run_numbers = self._get_run_numbers_from_cycle(
             job_request.additional_values["cycle_string"], job_request.instrument
         )
         return run_number in run_numbers
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify this rule and check whether we should use the defined value
+        :param job_request: JobRequest, the job that was requested
+        :return: None
+        """
         wbvan = self._value
         # If the run number is not from this cycle then we should try to find the most recent vanadium file from this
         # cycle.
-        if not self.file_in_cycle(str(wbvan), job_request):
-            wbvan = self.find_wbvan(job_request)
+        if not self._run_number_in_cycle(str(wbvan), job_request):
+            wbvan = self._find_wbvan_run_number_from_cycle(job_request)
             if wbvan is None:
                 # If wbvan cannot be found still, give up and use the defaulted value.
                 wbvan = self._value
