@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import typing
 from pathlib import Path
+from unittest import mock
 
 import pytest
 from pika import BlockingConnection
@@ -109,6 +110,14 @@ EXPECTED_MARI_WBVAN = get_specification_value("mari", "mariwbvan")
 EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
 EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandreflection")
 EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
+
+MARI_XML_DICT = {
+                    "NXroot": {
+                        "NXentry": [
+                            {"run_number": {"#text": EXPECTED_MARI_WBVAN}},
+                        ]
+                    }
+                }
 
 
 @pytest.mark.parametrize(
@@ -484,7 +493,15 @@ def test_e2e(producer_channel, consumer_channel, messages, expected_requests):
     """Test expected messages are consumed from the scheduled jobs queue
     When the given messages are sent to the watched-files queue"""
     for message in messages:
-        produce_message(message, producer_channel)
+        if "NDXMAR" in message:
+            with (
+                mock.patch("rundetection.rules.common_rules.requests"),
+                mock.patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
+            ):
+                xmltodict_mock.parse.return_value = MARI_XML_DICT
+                produce_message(message, producer_channel)
+        else:
+            produce_message(message, producer_channel)
     if len(expected_requests) > 0:
         recieved_runs = consume_all_messages(consumer_channel)
         for request in expected_requests:
