@@ -41,13 +41,9 @@ async def get_instrument_specification(instrument_name: str) -> Any:
 @ROUTER.get("/journals/{instrument}/{journal_file}", response_model=None)
 async def journal_call(instrument: str, journal_file: str) -> str | None:
     if instrument == "mari":
-        return xmltodict.unparse({
-            "NXroot": {
-                "NXentry": [
-                    {"run_number": {"#text": get_specification_value("mari", "mariwbvan")}}
-                ]
-            }
-        })
+        return xmltodict.unparse(
+            {"NXroot": {"NXentry": [{"run_number": {"#text": get_specification_value("mari", "mariwbvan")}}]}}
+        )
     return None
 
 
