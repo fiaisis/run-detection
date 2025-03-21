@@ -112,12 +112,12 @@ EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandref
 EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
 
 MARI_XML_DICT = {
-                    "NXroot": {
-                        "NXentry": [
-                            {"run_number": {"#text": EXPECTED_MARI_WBVAN}},
-                        ]
-                    }
-                }
+    "NXroot": {
+        "NXentry": [
+            {"run_number": {"#text": EXPECTED_MARI_WBVAN}},
+        ]
+    }
+}
 
 
 @pytest.mark.parametrize(
