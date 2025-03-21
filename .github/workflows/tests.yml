@@ -57,7 +57,7 @@ jobs:
       - name: Start e2e docker compose environment
         run: |
           cd test
-          docker compose -f docker-compose.yml up
+          docker compose -f docker-compose.yml up -d
 
       - name: Run e2e test
         run: pytest -l -v --random-order --random-order-bucket=global test/test_e2e.py
