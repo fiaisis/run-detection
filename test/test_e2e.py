@@ -133,6 +133,7 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
                     "good_frames": 133622,
                     "users": "Goel,Le,Mittal",
                     "additional_values": {
+                        "cycle_string": "cycle_19_4",
                         "ei": "'auto'",
                         "sam_mass": 0.0,
                         "sam_rmm": 0.0,
@@ -156,6 +157,7 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
                     "good_frames": 133470,
                     "users": "Goel,Le,Mittal",
                     "additional_values": {
+                        "cycle_string": "cycle_19_4",
                         "ei": "'auto'",
                         "sam_mass": 0.0,
                         "sam_rmm": 0.0,
@@ -179,6 +181,7 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
                     "good_frames": 133622,
                     "users": "Goel,Le,Mittal",
                     "additional_values": {
+                        "cycle_string": "cycle_19_4",
                         "ei": "'auto'",
                         "sam_mass": 0.0,
                         "sam_rmm": 0.0,
@@ -202,6 +205,7 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
                     "good_frames": 6452,
                     "users": "Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara",
                     "additional_values": {
+                        "cycle_string": "cycle_22_04",
                         "ei": "'auto'",
                         "sam_mass": 0.0,
                         "sam_rmm": 0.0,
