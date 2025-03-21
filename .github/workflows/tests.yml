@@ -57,7 +57,7 @@ jobs:
       - name: Start e2e docker compose environment
         run: |
           cd test
-          docker compose up -d
+          docker-compose -f docker-compose.yml up
 
       - name: Run e2e test
         run: pytest -l -v --random-order --random-order-bucket=global test/test_e2e.py
@@ -68,3 +68,4 @@ jobs:
           cd test
           docker compose logs run-detection
           docker compose logs rabbit-mq
+          docker compose logs fake-fia-api
