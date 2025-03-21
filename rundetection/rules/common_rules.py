@@ -5,6 +5,7 @@ Module containing rule implementations for instrument shared rules
 from __future__ import annotations
 
 import logging
+import os
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -115,5 +116,6 @@ def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
 
 def grab_cycle_instrument_index(cycle: str, instrument: str) -> str:
     _, cycle_year, cycle_num = cycle.split("_")
-    url = f"http://data.isis.rl.ac.uk/journals/ndx{instrument.lower()}/journal_{cycle_year}_{cycle_num}.xml"
+    base_url = os.environ.get("JOURNAL_BASE_URL", "http://data.isis.rl.ac.uk/")
+    url = f"{base_url}/journals/ndx{instrument.lower()}/journal_{cycle_year}_{cycle_num}.xml"
     return requests.get(url, timeout=5).text
