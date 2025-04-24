@@ -13,7 +13,7 @@ from rundetection.rules.sans_rules import (
 )
 
 
-def test_loq_trans_file_last():
+def test_sans2d_trans_file_last():
     job_request = JobRequest(
         run_number=5,
         instrument="",
@@ -33,8 +33,8 @@ def test_loq_trans_file_last():
         mock.patch(
             "rundetection.rules.sans_rules._create_list_of_files",
             return_value=[
-                SansFileData(title="{Banana}", type="SANS/TRANS", run_number="1"),
-                SansFileData(title="{Apple}", type="SANS/TRANS", run_number="2"),
+                SansFileData(title="{Banana}", type="SANS", run_number="1"),
+                SansFileData(title="{Apple}", type="SANS", run_number="2"),
                 SansFileData(title="{Apple}", type="TRANS", run_number="3"),
                 SansFileData(title="{direct beam}", type="TRANS", run_number="4"),
             ],
@@ -49,7 +49,7 @@ def test_loq_trans_file_last():
     assert job_request.additional_values["scatter_transmission_number"] == "5"
 
 
-def test_loq_trans_file_last_not_found_scatter():
+def test_sans2d_trans_file_last_not_found_scatter():
     job_request = JobRequest(
         run_number=5,
         instrument="",
@@ -69,7 +69,7 @@ def test_loq_trans_file_last_not_found_scatter():
         mock.patch(
             "rundetection.rules.sans_rules._create_list_of_files",
             return_value=[
-                SansFileData(title="{Apple}", type="SANS/TRANS", run_number="2"),
+                SansFileData(title="{Apple}", type="SANS", run_number="2"),
                 SansFileData(title="{Apple}", type="TRANS", run_number="3"),
                 SansFileData(title="{direct beam}", type="TRANS", run_number="4"),
             ],
@@ -81,11 +81,11 @@ def test_loq_trans_file_last_not_found_scatter():
     assert job_request.will_reduce is False
 
 
-def test_loq_find_files_verify_no_files_left():
+def test_sans2d_find_files_verify_no_files_left():
     job_request = JobRequest(
         run_number=0,
         instrument="",
-        experiment_title="{}_{}_sans/trans",
+        experiment_title="{}_{}_sans",
         experiment_number="",
         filepath=Path(),
         run_start="",
@@ -103,13 +103,13 @@ def test_loq_find_files_verify_no_files_left():
     assert job_request.will_reduce is False
 
 
-def test_loq_find_files_verify_some_files_found_but_none_valid():
+def test_sans2d_find_files_verify_some_files_found_but_none_valid():
     job_request = JobRequest(
         run_number=0,
         instrument="",
-        experiment_title="{}_{}_sans/trans",
+        experiment_title="{}_{}_sans",
         experiment_number="",
-        filepath=Path("/path/cycle_24_2/LOQ.nxs"),
+        filepath=Path("/path/cycle_24_2/SANS2D.nxs"),
         run_start="",
         run_end="",
         raw_frames=0,
@@ -128,13 +128,13 @@ def test_loq_find_files_verify_some_files_found_but_none_valid():
     assert job_request.will_reduce is False
 
 
-def test_loq_find_files_trans_file_found():
+def test_sans2d_find_files_trans_file_found():
     job_request = JobRequest(
         run_number=5,
         instrument="",
-        experiment_title="{scatter}_{background}_sans/trans",
+        experiment_title="{scatter}_{background}_sans",
         experiment_number="",
-        filepath=Path("/path/cycle_24_2/LOQ.nxs"),
+        filepath=Path("/path/cycle_24_2/SANS2D.nxs"),
         run_start="",
         run_end="",
         raw_frames=0,
@@ -150,7 +150,7 @@ def test_loq_find_files_trans_file_found():
             return_value=[
                 SansFileData(title="{scatter}", type="TRANS", run_number="1"),
                 SansFileData(title="{background}", type="TRANS", run_number="2"),
-                SansFileData(title="{background}", type="SANS/TRANS", run_number="3"),
+                SansFileData(title="{background}", type="SANS", run_number="3"),
                 SansFileData(title="{direct}", type="TRANS", run_number="4"),
             ],
         ),
@@ -160,25 +160,25 @@ def test_loq_find_files_trans_file_found():
         loq_find_files.verify(job_request)
     assert job_request.will_reduce is True
     assert job_request.additional_values["scatter_number"] == "5"
-    assert job_request.additional_values["scatter_title"] == "{scatter}_{background}_sans/trans"
+    assert job_request.additional_values["scatter_title"] == "{scatter}_{background}_sans"
     assert job_request.additional_values["scatter_transmission_number"] == "1"
     assert "can_scatter" not in job_request.additional_values
 
 
-def test_loq_find_files_can_transmission_file_found():
+def test_sans2d_find_files_can_transmission_file_found():
     job_request = JobRequest(
         run_number=5,
         instrument="",
-        experiment_title="{scatter}_{background}_sans/trans",
+        experiment_title="{scatter}_{background}_sans",
         experiment_number="",
-        filepath=Path("/path/cycle_24_2/LOQ0001234.nxs"),
+        filepath=Path("/path/cycle_24_2/SANS2D0001234.nxs"),
         run_start="",
         run_end="",
         raw_frames=0,
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={"included_trans_as_scatter": False, "scatter_title": "{scatter}_{background}_sans/trans"},
+        additional_values={"included_trans_as_scatter": False, "scatter_title": "{scatter}_{background}_sans"},
         additional_requests=[],
     )
     with (
@@ -186,15 +186,15 @@ def test_loq_find_files_can_transmission_file_found():
             "rundetection.rules.sans_rules._create_list_of_files",
             return_value=[
                 SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-                SansFileData(title="{background}", type="SANS/TRANS", run_number="2"),
+                SansFileData(title="{background}", type="SANS", run_number="2"),
                 SansFileData(title="{background}", type="TRANS", run_number="3"),
-                SansFileData(title="{direct}", type="SANS/TRANS", run_number="4"),
+                SansFileData(title="{direct}", type="SANS", run_number="4"),
             ],
         ),
         mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True),
     ):
         _refresh_local_journal(job_request=job_request)
-        job_request.additional_values["scatter_title"] = "{scatter}_{background}_sans/trans"
+        job_request.additional_values["scatter_title"] = "{scatter}_{background}_sans"
         job_request.additional_values["scatter_direct_number"] = "4"
         job_request.additional_values["scatter_direct_title"] = "{direct}_trans"
         loq_find_files = SansCanFiles(value=True)
@@ -208,16 +208,16 @@ def test_loq_find_files_no_background_use_direct_only():
     job_request = JobRequest(
         run_number=5,
         instrument="",
-        experiment_title="{scatter}_sans/trans",
+        experiment_title="{scatter}_sans",
         experiment_number="",
-        filepath=Path("/path/cycle_24_2/LOQ0001234.nxs"),
+        filepath=Path("/path/cycle_24_2/SANS2D0001234.nxs"),
         run_start="",
         run_end="",
         raw_frames=0,
         good_frames=0,
         users="",
         will_reduce=True,
-        additional_values={"included_trans_as_scatter": False, "scatter_title": "{scatter}_{background}_sans/trans"},
+        additional_values={"included_trans_as_scatter": False, "scatter_title": "{scatter}_{background}_sans"},
         additional_requests=[],
     )
     with (
@@ -225,15 +225,15 @@ def test_loq_find_files_no_background_use_direct_only():
             "rundetection.rules.sans_rules._create_list_of_files",
             return_value=[
                 SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-                SansFileData(title="{background}", type="SANS/TRANS", run_number="2"),
+                SansFileData(title="{background}", type="SANS", run_number="2"),
                 SansFileData(title="{direct}", type="TRANS", run_number="3"),
-                SansFileData(title="{direct}", type="SANS/TRANS", run_number="4"),
+                SansFileData(title="{direct}", type="SANS", run_number="4"),
             ],
         ),
         mock.patch("rundetection.rules.sans_rules._is_direct_file", return_value=True),
     ):
         _refresh_local_journal(job_request=job_request)
-        job_request.additional_values["scatter_title"] = "{scatter}_sans/trans"
+        job_request.additional_values["scatter_title"] = "{scatter}_sans"
         job_request.additional_values["scatter_direct_number"] = "3"
         job_request.additional_values["scatter_direct_title"] = "{direct}_trans"
         loq_find_files = SansCanFiles(value=True)
@@ -243,13 +243,13 @@ def test_loq_find_files_no_background_use_direct_only():
     assert job_request.additional_values["can_transmission"] == "3"
 
 
-def test_loq_find_files_direct_file_found():
+def test_sans2d_find_files_direct_file_found():
     job_request = JobRequest(
         run_number=5,
         instrument="",
-        experiment_title="{scatter}_{background}_sans/trans",
+        experiment_title="{scatter}_{background}_sans",
         experiment_number="",
-        filepath=Path("/path/cycle_24_2/LOQ0005.nxs"),
+        filepath=Path("/path/cycle_24_2/SANS2D0005.nxs"),
         run_start="",
         run_end="",
         raw_frames=0,
@@ -268,14 +268,14 @@ def test_loq_find_files_direct_file_found():
             "rundetection.rules.sans_rules._create_list_of_files",
             return_value=[
                 SansFileData(title="{scatter}", type="TRANS", run_number="1"),
-                SansFileData(title="{background}", type="SANS/TRANS", run_number="2"),
+                SansFileData(title="{background}", type="SANS", run_number="2"),
                 SansFileData(title="{background}", type="TRANS", run_number="3"),
                 SansFileData(title="{direct}", type="TRANS", run_number="4"),
             ],
         ),
         mock.patch(
             "rundetection.rules.sans_rules._generate_direct_file_path",
-            return_value=Path("/path/cycle_24_2/LOQ0004.nxs"),
+            return_value=Path("/path/cycle_24_2/SANS2D0004.nxs"),
         ),
         mock.patch("rundetection.rules.sans_rules.load_h5py_dataset") as load_h5py_dataset,
     ):
@@ -291,13 +291,13 @@ def test_loq_find_files_direct_file_found():
     assert job_request.additional_values["can_direct"] == "4"
 
 
-def test_loq_find_files_can_scatter_file_found():
+def test_sans2d_find_files_can_scatter_file_found():
     job_request = JobRequest(
         run_number=5,
         instrument="",
-        experiment_title="{scatter}_{background}_sans/trans",
+        experiment_title="{scatter}_{background}_sans",
         experiment_number="",
-        filepath=Path("/path/cycle_24_2/LOQ.nxs"),
+        filepath=Path("/path/cycle_24_2/SANS2D.nxs"),
         run_start="",
         run_end="",
         raw_frames=0,
@@ -313,7 +313,7 @@ def test_loq_find_files_can_scatter_file_found():
             return_value=[
                 SansFileData(title="{scatter}", type="TRANS", run_number="1"),
                 SansFileData(title="{background}", type="TRANS", run_number="2"),
-                SansFileData(title="{background}", type="SANS/TRANS", run_number="3"),
+                SansFileData(title="{background}", type="SANS", run_number="3"),
                 SansFileData(title="{direct}", type="TRANS", run_number="4"),
             ],
         ),
@@ -328,10 +328,10 @@ def test_loq_find_files_can_scatter_file_found():
     assert job_request.additional_values["can_scatter"] == "3"
 
 
-def test_loq_user_file_m3():
+def test_sans2d_user_file_m3():
     job_request = JobRequest(
         run_number=0,
-        instrument="LOQ",
+        instrument="SANS2D",
         experiment_title="",
         experiment_number="",
         filepath=Path(),
@@ -344,16 +344,16 @@ def test_loq_user_file_m3():
         additional_values={},
         additional_requests=[],
     )
-    SansUserFile(value="loq_user_file_M3").verify(job_request)
-    assert job_request.additional_values["user_file"] == "/extras/loq/loq_user_file_M3"
+    SansUserFile(value="sans2d_user_file_M3").verify(job_request)
+    assert job_request.additional_values["user_file"] == "/extras/sans2d/sans2d_user_file_M3"
     assert not job_request.additional_values["included_trans_as_scatter"]
     assert len(job_request.additional_values) == 2  # noqa: PLR2004
 
 
-def test_loq_user_file_m4():
+def test_sans2d_user_file_m4():
     job_request = JobRequest(
         run_number=0,
-        instrument="LOQ",
+        instrument="SANS2D",
         experiment_title="",
         experiment_number="",
         filepath=Path(),
@@ -366,19 +366,19 @@ def test_loq_user_file_m4():
         additional_values={},
         additional_requests=[],
     )
-    SansUserFile(value="loq_user_file_M4").verify(job_request)
-    assert job_request.additional_values["user_file"] == "/extras/loq/loq_user_file_M4"
+    SansUserFile(value="sans2d_user_file_M4").verify(job_request)
+    assert job_request.additional_values["user_file"] == "/extras/sans2d/sans2d_user_file_M4"
     assert job_request.additional_values["included_trans_as_scatter"]
     assert len(job_request.additional_values) == 2  # noqa: PLR2004
 
 
-def test_loq_verify_checks_m4():
+def test_sans2d_verify_checks_m4():
     job_request = JobRequest(
         run_number=5,
-        instrument="LOQ",
-        experiment_title="{scatter}_{background}_sans/trans",
+        instrument="SANS2D",
+        experiment_title="{scatter}_{background}_sans",
         experiment_number="",
-        filepath=Path("/path/cycle_24_4/LOQ.nxs"),
+        filepath=Path("/path/cycle_24_4/SANS2D.nxs"),
         run_start="",
         run_end="",
         raw_frames=0,
@@ -394,7 +394,7 @@ def test_loq_verify_checks_m4():
             return_value=[
                 SansFileData(title="{scatter}", type="TRANS", run_number="1"),
                 SansFileData(title="{background}", type="TRANS", run_number="2"),
-                SansFileData(title="{background}", type="SANS/TRANS", run_number="3"),
+                SansFileData(title="{background}", type="SANS", run_number="3"),
                 SansFileData(title="{direct}", type="TRANS", run_number="4"),
             ],
         ),
@@ -411,10 +411,10 @@ def test_loq_verify_checks_m4():
     assert job_request.additional_values["can_transmission"] == "3"
 
 
-def test_loq_slice_wavs():
+def test_sans2d_slice_wavs():
     job_request = JobRequest(
         run_number=5,
-        instrument="LOQ",
+        instrument="SANS2D",
         experiment_title="{scatter}_{background}_sans/trans",
         experiment_number="",
         filepath=Path(),
@@ -432,10 +432,10 @@ def test_loq_slice_wavs():
     assert len(job_request.additional_values) == 1
 
 
-def test_loq_phi_limits():
+def test_sans2d_phi_limits():
     job_request = JobRequest(
         run_number=5,
-        instrument="LOQ",
+        instrument="SANS2D",
         experiment_title="{scatter}_{background}_sans/trans",
         experiment_number="",
         filepath=Path(),
@@ -448,6 +448,6 @@ def test_loq_phi_limits():
         additional_values={},
         additional_requests=[],
     )
-    SansPhiLimits("[(-30, 30), (60, 120)]").verify(job_request)
-    assert job_request.additional_values["phi_limits"] == "[(-30, 30), (60, 120)]"
+    SansPhiLimits("[1.2, 2.3, 3.4]").verify(job_request)
+    assert job_request.additional_values["phi_limits"] == "[1.2, 2.3, 3.4]"
     assert len(job_request.additional_values) == 1

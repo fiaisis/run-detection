@@ -1,0 +1,6 @@
+{
+  "enabled": true,
+  "irisreduction": true,
+  "iriscalibration": {"002": "105313, 105315, 105317", "004": "105275"},
+  "molspecstitch": true
+}

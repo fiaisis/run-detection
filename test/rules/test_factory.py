@@ -4,24 +4,32 @@ Rule factory unit tests
 
 import unittest
 from typing import Any
-from unittest.mock import patch
 
 import pytest
 
-from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule
+from rundetection.rules.common_rules import (
+    EnabledRule,
+    MolSpecStitchRule,
+)
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
-from rundetection.rules.loq_rules import LoqFindFiles, LoqUserFile
+from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraniteAnalyser,
     OsirisDefaultSpectroscopy,
     OsirisReductionModeRule,
     OsirisReflectionCalibrationRule,
-    OsirisStitchRule,
 )
 from rundetection.rules.rule import MissingRuleError, Rule
-from rundetection.rules.tosca_rules import ToscaStitchRule
+from rundetection.rules.sans_rules import (
+    SansCanFiles,
+    SansPhiLimits,
+    SansScatterTransFiles,
+    SansSliceWavs,
+    SansUserFile,
+)
+from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule
 
 
 def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
@@ -42,18 +50,23 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
     [
         ("enabled", True, EnabledRule),
         ("interstitch", True, InterStitchRule),
-        ("toscastitch", True, ToscaStitchRule),
+        ("molspecstitch", True, MolSpecStitchRule),
         ("maristitch", True, MariStitchRule),
         ("marimaskfile", "foo", MariMaskFileRule),
         ("mariwbvan", 12345, MariWBVANRule),
-        ("osirisstitch", True, OsirisStitchRule),
         ("osiriscalibfilesandreflection", {"002": "00148587", "004": "00148587"}, OsirisReflectionCalibrationRule),
         ("osirisdefaultspectroscopy", True, OsirisDefaultSpectroscopy),
         ("osirisdefaultgraniteanalyser", True, OsirisDefaultGraniteAnalyser),
         ("osirisreductionmode", True, OsirisReductionModeRule),
-        ("checkifscattersans", True, CheckIfScatterSANS),
-        ("loquserfile", "loquserfile.toml", LoqUserFile),
-        ("loqfindfiles", True, LoqFindFiles),
+        ("sansscattertransfiles", True, SansScatterTransFiles),
+        ("sansuserfile", "loquserfile.toml", SansUserFile),
+        ("sanscanfiles", True, SansCanFiles),
+        ("sansphilimits", "[(1.0, 2.0), (3.0, 4.0)]", SansPhiLimits),
+        ("sansslicewavs", "[2.7, 3.7, 4.7, 5.7, 6.7, 8.7, 10.5]", SansSliceWavs),
+        ("irisreduction", True, IrisReductionRule),
+        ("iriscalibration", {"002": "00148587", "004": "00148587"}, IrisCalibrationRule),
+        ("vesuvioipfilerule", "ip00001.par", VesuvioIPFileRule),
+        ("vesuviovemptyrunsrule", "123-321", VesuvioEmptyRunsRule),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
@@ -64,8 +77,20 @@ def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
     :param expected_rule: The expected rule class
     :return: None
     """
-    with patch("rundetection.rules.mari_rules.MariStitchRule._load_mari_spec"):
-        assert_correct_rule(rule_key, rule_value, expected_rule)
+    assert_correct_rule(rule_key, rule_value, expected_rule)
+
+
+def test_mariwbvan_rule_factory_returns_correct_rule_int_and_str():
+    """
+    Test to ensure that the rule factory returns the correct Rule for MariWBVAN when using either a str or int to create
+    the rule from the specification.
+    """
+    rule = rule_factory("mariwbvan", 12345)
+    assert isinstance(rule, MariWBVANRule)
+    assert rule._value == 12345  # noqa: PLR2004
+    rule = rule_factory("mariwbvan", "12345")
+    assert isinstance(rule, MariWBVANRule)
+    assert rule._value == 12345  # noqa: PLR2004
 
 
 def test_raises_exception_for_missing_rule_class() -> None:

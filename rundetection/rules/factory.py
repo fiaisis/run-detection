@@ -4,19 +4,28 @@ Module containing the factory function for each rule
 
 from typing import Any
 
-from rundetection.rules.common_rules import CheckIfScatterSANS, EnabledRule
+from rundetection.rules.common_rules import (
+    EnabledRule,
+    MolSpecStitchRule,
+)
 from rundetection.rules.inter_rules import InterStitchRule
-from rundetection.rules.loq_rules import LoqFindFiles, LoqUserFile
+from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraniteAnalyser,
     OsirisDefaultSpectroscopy,
     OsirisReductionModeRule,
     OsirisReflectionCalibrationRule,
-    OsirisStitchRule,
 )
 from rundetection.rules.rule import MissingRuleError, Rule, T
-from rundetection.rules.tosca_rules import ToscaStitchRule
+from rundetection.rules.sans_rules import (
+    SansCanFiles,
+    SansPhiLimits,
+    SansScatterTransFiles,
+    SansSliceWavs,
+    SansUserFile,
+)
+from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule
 
 
 def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912
@@ -33,9 +42,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "interstitch":
             if isinstance(value, bool):
                 return InterStitchRule(value)
-        case "toscastitch":
+        case "molspecstitch":
             if isinstance(value, bool):
-                return ToscaStitchRule(value)
+                return MolSpecStitchRule(value)
         case "maristitch":
             if isinstance(value, bool):
                 return MariStitchRule(value)
@@ -43,11 +52,8 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
             if isinstance(value, str):
                 return MariMaskFileRule(value)
         case "mariwbvan":
-            if isinstance(value, int):
-                return MariWBVANRule(value)
-        case "osirisstitch":
-            if isinstance(value, bool):
-                return OsirisStitchRule(value)
+            if isinstance(value, int | str):
+                return MariWBVANRule(int(value))
         case "osiriscalibfilesandreflection":
             if isinstance(value, dict):
                 return OsirisReflectionCalibrationRule(value)
@@ -60,15 +66,33 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "osirisreductionmode":
             if isinstance(value, bool):
                 return OsirisReductionModeRule(value)
-        case "checkifscattersans":
+        case "sansscattertransfiles":
             if isinstance(value, bool):
-                return CheckIfScatterSANS(value)
-        case "loqfindfiles":
-            if isinstance(value, bool):
-                return LoqFindFiles(value)
-        case "loquserfile":
+                return SansScatterTransFiles(value)
+        case "sansuserfile":
             if isinstance(value, str):
-                return LoqUserFile(value)
+                return SansUserFile(value)
+        case "sanscanfiles":
+            if isinstance(value, bool):
+                return SansCanFiles(value)
+        case "sansphilimits":
+            if isinstance(value, str):
+                return SansPhiLimits(value)
+        case "sansslicewavs":
+            if isinstance(value, str):
+                return SansSliceWavs(value)
+        case "irisreduction":
+            if isinstance(value, bool):
+                return IrisReductionRule(value)
+        case "iriscalibration":
+            if isinstance(value, dict):
+                return IrisCalibrationRule(value)
+        case "vesuviovemptyrunsrule":
+            if isinstance(value, str):
+                return VesuvioEmptyRunsRule(value)
+        case "vesuvioipfilerule":
+            if isinstance(value, str):
+                return VesuvioIPFileRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 

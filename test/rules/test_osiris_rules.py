@@ -10,18 +10,17 @@ import pytest
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
+from rundetection.rules.common_rules import MolSpecStitchRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraniteAnalyser,
     OsirisDefaultSpectroscopy,
     OsirisReductionModeRule,
     OsirisReflectionCalibrationRule,
-    OsirisStitchRule,
-    is_y_within_5_percent_of_x,
 )
 from rundetection.rules.rule import Rule
 
 
-@pytest.fixture()
+@pytest.fixture
 def job_request():
     """
     job request fixture
@@ -43,41 +42,13 @@ def job_request():
     )
 
 
-@pytest.mark.parametrize(
-    ("y", "x", "expected"),
-    [
-        (100, 95, True),
-        (100, 105, True),
-        (100, 100, True),
-        (50, 47.5, True),
-        (50, 52.5, True),
-        (100, 94.9, False),
-        (100, 105.1, False),
-        (50, 47.49, False),
-        (50, 52.51, False),
-        (-100, -95, True),
-        (-100, -105, True),
-        (-100, -94.9, False),
-        (-100, -105.1, False),
-        (-100, 95, False),
-        (100, -105, False),
-        (0, 0, True),
-        (0, 1, False),
-        (1, 0, False),
-    ],
-)
-def test_is_y_within_5_percent_of_x(x, y, expected):
-    """Simple test cases for is_y_within_5_percent_of_x"""
-    assert is_y_within_5_percent_of_x(x, y) is expected
-
-
-@pytest.fixture()
+@pytest.fixture
 def reflection_rule():
     """Analyser rule fixture"""
     return OsirisReflectionCalibrationRule({"002": "00148587", "004": "00148587"})
 
 
-@pytest.fixture()
+@pytest.fixture
 def osiris_mode_rule():
     """Reduction mode rule fixture"""
     return OsirisReductionModeRule(True)
@@ -186,7 +157,7 @@ def test_osiris_stitch_rule_will_do_nothing_if_diffraction_mode(job_request):
     Test that sum runs will not be enabled for a diffraction run
     """
     job_request.additional_values["mode"] = "diffraction"
-    rule = OsirisStitchRule(True)
+    rule = MolSpecStitchRule(True)
     rule.verify(job_request)
     assert job_request.additional_values["sum_runs"] is False
 
@@ -220,7 +191,20 @@ def test_analyser_rule_verify_freq_less_than_50(job_request, reflection_rule):
     job_request.additional_values["freq10"] = 49
     reflection_rule.verify(job_request)
     assert job_request.additional_values["reflection"] == "002"
-    assert job_request.additional_values["calibration_run_number"] == "00148587"
+    assert job_request.additional_values["calibration_run_numbers"] == "00148587"
+
+
+def test_analyser_rule_verify_freq_less_than_50_but_close(job_request, reflection_rule):
+    """Test correct analyser returned"""
+    job_request.additional_values["mode"] = "spectroscopy"
+    job_request.additional_values["freq10"] = 49.981
+    job_request.additional_values["tcb_detector_min"] = 20500.0
+    job_request.additional_values["tcb_detector_max"] = 40500.0
+    job_request.additional_values["tcb_monitor_min"] = 16700.0
+    job_request.additional_values["tcb_monitor_max"] = 36700.0
+    reflection_rule.verify(job_request)
+    assert job_request.additional_values["reflection"] == "004"
+    assert job_request.additional_values["calibration_run_numbers"] == "00148587"
 
 
 def test_verify_freq_greater_than_50_valid_tcb(job_request, reflection_rule):
@@ -234,7 +218,7 @@ def test_verify_freq_greater_than_50_valid_tcb(job_request, reflection_rule):
     }
     reflection_rule.verify(job_request)
     assert job_request.additional_values["reflection"] == "002"
-    assert job_request.additional_values["calibration_run_number"] == "00148587"
+    assert job_request.additional_values["calibration_run_numbers"] == "00148587"
 
 
 def test_analyser_verify_raises_when_freq_greater_than_50_invalid_tcb(job_request, reflection_rule):
@@ -257,12 +241,12 @@ def test_verify_should_stitch(job_request: JobRequest) -> None:
     """
     with (
         patch(
-            "rundetection.rules.osiris_rules.get_run_title",
+            "rundetection.rules.common_rules.get_run_title",
             side_effect=[job_request.experiment_title, "Test experiment  run 2", "different random title"],
         ),
-        patch("rundetection.rules.osiris_rules.Path.exists", return_value=True),
+        patch("rundetection.rules.common_rules.Path.exists", return_value=True),
     ):
-        rule = OsirisStitchRule(True)
+        rule = MolSpecStitchRule(True)
         rule.verify(job_request)
 
     assert job_request.additional_requests[0].additional_values["input_runs"] == [100, 99]

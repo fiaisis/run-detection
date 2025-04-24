@@ -57,6 +57,21 @@ def produce_message(message: str, channel: BlockingChannel) -> None:
     channel.basic_publish("watched-files", "", body=message.encode())
 
 
+def get_specification_from_file(instrument: str) -> Any:
+    """
+    Given an instrument, return the specification
+    :param instrument: The instrument for which specification to get
+    :return: The specification file contents
+    """
+    # This is ran in 2 places the CI and locally. On the CI, it has a different working directory to the default
+    # selected by IDEs for local testing this works with either, if this fails raising is fine.
+    path = Path(f"test/test_data/specifications/{instrument.lower()}_specification.json")
+    if not path.exists():
+        path = Path(f"test_data/specifications/{instrument.lower()}_specification.json")
+    with path.open(encoding="utf-8") as fle:
+        return json.load(fle)
+
+
 def get_specification_value(instrument: str, key: str) -> Any:
     """
     Given an instrument and key, return the specification value
@@ -64,10 +79,8 @@ def get_specification_value(instrument: str, key: str) -> Any:
     :param key: The key for the rule
     :return: The rule value
     """
-    path = Path(f"rundetection/specifications/{instrument.lower()}_specification.json")
-    with path.open(encoding="utf-8") as fle:
-        spec = json.load(fle)
-        return spec[key]
+    spec = get_specification_from_file(instrument)
+    return spec[key]
 
 
 def consume_all_messages(consumer_channel: BlockingChannel) -> list[dict[str, Any]]:
@@ -95,6 +108,7 @@ def assert_run_in_recieved(run: Any, recieved: list[Any]):
 EXPECTED_MARI_WBVAN = get_specification_value("mari", "mariwbvan")
 EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
 EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandreflection")
+EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
 
 
 @pytest.mark.parametrize(
@@ -304,7 +318,7 @@ EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandref
                         "tcb_monitor_min": 40700.0,
                         "tcb_monitor_max": 60700.0,
                         "reflection": "002",
-                        "calibration_run_number": EXPECTED_OSIRIS_MASK["002"],
+                        "calibration_run_numbers": EXPECTED_OSIRIS_MASK["002"],
                         "spectroscopy_reduction": "true",
                         "diffraction_reduction": "false",
                         "analyser": "graphite",
@@ -333,7 +347,7 @@ EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandref
                         "tcb_monitor_min": 40700.0,
                         "tcb_monitor_max": 60700.0,
                         "reflection": "002",
-                        "calibration_run_number": EXPECTED_OSIRIS_MASK["002"],
+                        "calibration_run_numbers": EXPECTED_OSIRIS_MASK["002"],
                         "spectroscopy_reduction": "true",
                         "diffraction_reduction": "false",
                         "analyser": "graphite",
@@ -362,7 +376,7 @@ EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandref
                         "tcb_monitor_min": 40700.0,
                         "tcb_monitor_max": 60700.0,
                         "reflection": "002",
-                        "calibration_run_number": EXPECTED_OSIRIS_MASK["002"],
+                        "calibration_run_numbers": EXPECTED_OSIRIS_MASK["002"],
                         "spectroscopy_reduction": "true",
                         "diffraction_reduction": "false",
                         "analyser": "graphite",
@@ -391,11 +405,70 @@ EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandref
                         "tcb_monitor_min": 11700.0,
                         "tcb_monitor_max": 51700.0,
                         "reflection": "002",
-                        "calibration_run_number": EXPECTED_OSIRIS_MASK["002"],
+                        "calibration_run_numbers": EXPECTED_OSIRIS_MASK["002"],
                         "spectroscopy_reduction": "true",
                         "diffraction_reduction": "false",
                         "analyser": "graphite",
                         "input_runs": [98933],
+                    },
+                },
+            ],
+        ),
+        (
+            ["/archive/NDXIRIS/Instrument/data/cycle_24_3/IRIS00103226.nxs"],
+            [
+                {
+                    "run_number": 103226,
+                    "instrument": "IRIS",
+                    "experiment_title": "Quiet Counts 24/2",
+                    "experiment_number": "123456",
+                    "filepath": "/archive/NDXIRIS/Instrument/data/cycle_24_3/IRIS00103226.nxs",
+                    "run_start": "2024-09-10T11:04:11",
+                    "run_end": "2024-09-10T17:04:18",
+                    "raw_frames": 1080339,
+                    "good_frames": 1080340,
+                    "users": "team",
+                    "additional_values": {
+                        "cycle_string": "cycle_24_3",
+                        "freq6": 50.0,
+                        "freq10": 50.0,
+                        "phase6": 8967.0,
+                        "phase10": 14413.0,
+                        "tcb_detector_min": 56000.0,
+                        "tcb_detector_max": 76000.0,
+                        "tcb_monitor_min": 52200.0,
+                        "tcb_monitor_max": 72200.0,
+                        "reflection": "002",
+                        "calibration_run_numbers": EXPECTED_IRIS_MASK["002"],
+                        "analyser": "graphite",
+                        "input_runs": [103226],
+                    },
+                },
+                {
+                    "run_number": 103226,
+                    "instrument": "IRIS",
+                    "experiment_title": "Quiet Counts 24/2",
+                    "experiment_number": "123456",
+                    "filepath": "/archive/NDXIRIS/Instrument/data/cycle_24_3/IRIS00103226.nxs",
+                    "run_start": "2024-09-10T11:04:11",
+                    "run_end": "2024-09-10T17:04:18",
+                    "raw_frames": 1080339,
+                    "good_frames": 1080340,
+                    "users": "team",
+                    "additional_values": {
+                        "cycle_string": "cycle_24_3",
+                        "freq6": 50.0,
+                        "freq10": 50.0,
+                        "phase6": 8967.0,
+                        "phase10": 14413.0,
+                        "tcb_detector_min": 56000.0,
+                        "tcb_detector_max": 76000.0,
+                        "tcb_monitor_min": 52200.0,
+                        "tcb_monitor_max": 72200.0,
+                        "reflection": "002",
+                        "calibration_run_numbers": EXPECTED_IRIS_MASK["002"],
+                        "analyser": "graphite",
+                        "input_runs": [103226, 103225],
                     },
                 },
             ],

@@ -24,7 +24,7 @@ def _check_if_nexus_file(path: Path) -> None:
         raise ValueError(f"File: {path} is not a nexus file")
 
 
-def _load_h5py_dataset(path: Path) -> Any:
+def load_h5py_dataset(path: Path) -> Any:
     """
     Load the nexus file into a h5py dataset
     :param path: the path of the nexus file
@@ -48,7 +48,7 @@ def ingest(path: Path) -> JobRequest:
     """
     logger.info("Ingesting file: %s", path)
     _check_if_nexus_file(path)
-    dataset = _load_h5py_dataset(path)
+    dataset = load_h5py_dataset(path)
     job_request = _build_initial_job_request(dataset, path)
     logger.info("Extracting instrument specific metadata...")
     additional_extraction_function = get_extraction_function(job_request.instrument)

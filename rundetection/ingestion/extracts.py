@@ -34,7 +34,7 @@ def skip_extract(job_request: JobRequest, _: Any) -> JobRequest:
     return job_request
 
 
-def loq_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+def sans_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     """
     Get the sample details and the cycle strings
     :param job_request: The job request
@@ -50,6 +50,66 @@ def loq_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     return job_request
 
 
+def _generate_loq_direct_instrumentation(dataset: Any) -> dict[str, Any]:
+    keys = dataset.get("selog").keys()
+    for key in keys:
+        if "Aperture_" in key:
+            return {"selog": {key: dataset.get("selog").get(key).get("value")[0]}}
+    return {}
+
+
+def loq_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+    """
+    Extract the LOQ specific SANs data needed later, additional_values will have a new dictionary called
+    "instrument_direct_file_comparison". The dictionary will be populated in the same way as the nexus file is
+    structured, excluding the raw_data_1 initial data set, this allows comparison with the direct files.
+    :param job_request: The job request
+    :param dataset: The nexus file dataset
+    :return: The updated job request
+    """
+    direct_instrumentation = _generate_loq_direct_instrumentation(dataset)
+    job_request.additional_values["instrument_direct_file_comparison"] = direct_instrumentation
+    return sans_extract(job_request, dataset)
+
+
+def _generate_sans2d_direct_instrumentation(dataset: Any) -> dict[str, Any]:
+    selog_dict = {
+        "selog": {
+            "Rear_Det_Z": dataset.get("selog").get("Rear_Det_Z").get("value")[0],
+            "Front_Det_Z": dataset.get("selog").get("Front_Det_Z").get("value")[0],
+        }
+    }
+    # G1-5
+    for ii in range(1, 6):
+        g_str = f"G{ii}"
+        selog_dict["selog"][g_str] = dataset.get("selog").get(g_str).get("value")[0]
+    # S1-6
+    for ii in range(1, 7):
+        s_str = f"S{ii}"
+        selog_dict["selog"][s_str] = dataset.get("selog").get(s_str).get("value")[0]
+    # Jaw_E, Jaw_N, Jaw_S, Jaw_W
+    for ii in ("E", "N", "S", "W"):  # type: ignore
+        jaw_str = f"Jaw_{ii}"
+        selog_dict["selog"][jaw_str] = dataset.get("selog").get(jaw_str).get("value")[0]
+
+    return selog_dict
+
+
+def sans2d_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+    """
+    Extract the SANs2D specific SANs data needed later, additional_values will have a new dictionary called
+    "instrument_direct_file_comparison". The dictionary will be populated in the same way as the nexus file is
+    structured, excluding the raw_data_1 initial data set, this allows comparison with the direct files.
+    :param job_request: The job request
+    :param dataset: The nexus file dataset
+    :return: The updated job request
+    """
+    job_request.additional_values["instrument_direct_file_comparison"] = _generate_sans2d_direct_instrumentation(
+        dataset
+    )
+    return sans_extract(job_request, dataset)
+
+
 def tosca_extract(job_request: JobRequest, _: Any) -> JobRequest:
     """
     Add the cycle_string to the job request
@@ -62,7 +122,7 @@ def tosca_extract(job_request: JobRequest, _: Any) -> JobRequest:
     return job_request
 
 
-def osiris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+def osiris_and_iris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     """
     Get the frequencies, and time channels from the dataset
     :param job_request: The job request
@@ -103,6 +163,26 @@ def osiris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     return job_request
 
 
+def osiris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+    """
+    Get the frequencies, and time channels from the dataset
+    :param job_request: The job request
+    :param dataset: The nexus file dataset
+    :return: The updated job request
+    """
+    return osiris_and_iris_extract(job_request, dataset)
+
+
+def iris_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
+    """
+    Get the frequencies, and time channels from the dataset
+    :param job_request: The job request
+    :param dataset: The nexus file dataset
+    :return: The updated job request
+    """
+    return osiris_and_iris_extract(job_request, dataset)
+
+
 def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     """
     Extracts additional metadata specific to the MARI instrument from the given dataset and updates the JobRequest
@@ -140,7 +220,13 @@ def mari_extract(job_request: JobRequest, dataset: Any) -> JobRequest:
     return job_request
 
 
-def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobRequest]:
+def vesuvio_extract(job_request: JobRequest, _: Any) -> JobRequest:
+    job_request.additional_values["runno"] = job_request.run_number
+
+    return job_request
+
+
+def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobRequest]:  # noqa: PLR0911
     """
     Given an instrument name, return the additional metadata extraction function for the instrument
     :param instrument: str - instrument name
@@ -155,6 +241,12 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
             return osiris_extract
         case "loq":
             return loq_extract
+        case "sans2d":
+            return sans2d_extract
+        case "iris":
+            return iris_extract
+        case "vesuvio":
+            return vesuvio_extract
         case _:
             return skip_extract
 

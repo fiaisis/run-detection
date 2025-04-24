@@ -2,28 +2,14 @@
 Test for mari rules
 """
 
-import json
 import os
 from pathlib import Path
-from typing import Any
 from unittest.mock import patch
 
 import pytest
 
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
-
-
-def get_specification_value(key: str) -> Any:
-    """
-    Given a key, return the specification value
-    :param key: The key for the rule
-    :return: The rule value
-    """
-    path = Path("rundetection/specifications/mari_specification.json")
-    with path.open(encoding="utf-8") as fle:
-        spec = json.load(fle)
-        return spec[key]
 
 
 @pytest.fixture(autouse=True)
@@ -34,7 +20,7 @@ def _working_directory_fix():
         os.chdir(current_working_directory / ".." / "..")
 
 
-@pytest.fixture()
+@pytest.fixture
 def job_request():
     """
     job request fixture
@@ -56,7 +42,7 @@ def job_request():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def mari_stitch_rule_true():
     """
     stitch rule fixture for true
@@ -65,7 +51,7 @@ def mari_stitch_rule_true():
     return MariStitchRule(value=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mari_stitch_rule_false():
     """
     Stitch rule fixture for false
@@ -110,14 +96,16 @@ def test_verify_multiple_runs(mari_stitch_rule_true, job_request):
     :param job_request: job request fixture
     :return: None
     """
+    rule = MariMaskFileRule("some link")
+    rule.verify(job_request)
+    rule = MariWBVANRule(1234567)
+    rule.verify(job_request)
     with patch("rundetection.rules.mari_rules.MariStitchRule._get_runs_to_stitch", return_value=[1, 2, 3]):
         mari_stitch_rule_true.verify(job_request)
 
     assert len(job_request.additional_requests) == 1
-    assert job_request.additional_requests[0].additional_values["mask_file_link"] == get_specification_value(
-        "marimaskfile"
-    )
-    assert job_request.additional_requests[0].additional_values["wbvan"] == get_specification_value("mariwbvan")
+    assert job_request.additional_requests[0].additional_values["mask_file_link"] == "some link"
+    assert job_request.additional_requests[0].additional_values["wbvan"] == 1234567  # noqa: PLR2004
 
 
 def test_mari_mask_rule(job_request):

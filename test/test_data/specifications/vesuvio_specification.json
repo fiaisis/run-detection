@@ -1,0 +1,5 @@
+{
+  "enabled": true,
+  "vesuvioipfilerule": "IP0005.par",
+  "vesuviovemptyrunsrule": "50309-50341"
+}
