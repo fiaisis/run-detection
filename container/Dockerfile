@@ -4,4 +4,6 @@ FROM python:3.13-slim@sha256:8f3aba466a471c0ab903dbd7cb979abd4bda370b04789d25440
 ADD . .
 RUN python -m pip install --no-cache-dir .
 
+COPY ./container/liveness.bash .
+
 CMD run-detection
