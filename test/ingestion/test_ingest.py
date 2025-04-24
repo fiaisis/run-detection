@@ -73,19 +73,20 @@ TEST_DATA_PATH = Path("../test_data") if Path("../test_data").exists() else Path
             ),
         ),
         (
-            "e2e_data/25581/MAR25581.nxs",
+            "e2e_data/25581/cycle_24_5/MAR25581.nxs",
             JobRequest(
                 run_number=25581,
                 instrument="MARI",
                 experiment_title="Whitebeam - vanadium - detector tests - vacuum bad - HT on not on all LAB",
                 experiment_number="1820497",
-                filepath=Path(TEST_DATA_PATH, "e2e_data/25581/MAR25581.nxs"),
+                filepath=Path(TEST_DATA_PATH, "e2e_data/25581/cycle_24_5/MAR25581.nxs"),
                 raw_frames=8067,
                 good_frames=6452,
                 run_start="2019-03-22T10:15:44",
                 run_end="2019-03-22T10:18:26",
                 users="Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara",
                 additional_values={
+                    "cycle_string": "cycle_24_5",
                     "ei": "'auto'",
                     "monovan": 0,
                     "runno": 25581,

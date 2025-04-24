@@ -5,6 +5,7 @@ requires-python = ">= 3.11"
 dependencies = [
     "fastapi[all]==0.111.1",
     "pydantic==2.8.2",
+    "xmltodict==0.14.2",
 ]
 
 [tool.ruff]

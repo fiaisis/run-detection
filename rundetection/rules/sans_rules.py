@@ -4,11 +4,10 @@ from dataclasses import dataclass
 from functools import partial
 from typing import TYPE_CHECKING
 
-import requests
 import xmltodict
 
 from rundetection.ingestion.ingest import load_h5py_dataset
-from rundetection.rules.common_rules import logger
+from rundetection.rules.common_rules import grab_cycle_instrument_index, logger
 from rundetection.rules.rule import Rule
 
 if TYPE_CHECKING:
@@ -43,19 +42,13 @@ class SansFileError(Exception):
     pass
 
 
-def _grab_cycle_instrument_index(cycle: str, instrument: str) -> str:
-    _, cycle_year, cycle_num = cycle.split("_")
-    url = f"http://data.isis.rl.ac.uk/journals/ndx{instrument.lower()}/journal_{cycle_year}_{cycle_num}.xml"
-    return requests.get(url, timeout=5).text
-
-
 def _create_sans_file_data(title: str, run_number: str) -> SansFileData:
     return SansFileData(title=title, type=title.split("_")[-1], run_number=run_number)
 
 
 def _create_list_of_files(job_request: JobRequest) -> list[SansFileData]:
     cycle = job_request.additional_values["cycle_string"]
-    xml = _grab_cycle_instrument_index(cycle=cycle, instrument=job_request.instrument)
+    xml = grab_cycle_instrument_index(cycle=cycle, instrument=job_request.instrument)
     cycle_run_info = xmltodict.parse(xml)
     return [
         _create_sans_file_data(title=run_info["title"]["#text"], run_number=run_info["run_number"]["#text"])
