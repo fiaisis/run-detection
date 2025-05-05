@@ -43,7 +43,7 @@ jobs:
           token: ${{ secrets.GITOPS_STAGING_EDIT_TOKEN }}
 
       - name: Edit the YAML rundetection file for staging
-        uses: mikefarah/yq@v4.45.1
+        uses: mikefarah/yq@v4.45.2
         with:
           cmd: yq e -i '.spec.template.spec.containers[] |= select(.name == "rundetection").image = "ghcr.io/fiaisis/rundetection@${{ steps.docker_build.outputs.digest }}"' './components/rundetection/envs/staging/rundetection.yml'
 
