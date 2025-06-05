@@ -1,6 +1,4 @@
-"""
-Main module for run detection
-"""
+"""Main module for run detection."""
 
 from __future__ import annotations
 
@@ -46,7 +44,7 @@ def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
     Given an exchange and queue name, return a blocking channel to the exchange and queue
     :param exchange_name: The exchange name
     :param queue_name: The queue name
-    :return: The Blocking Channel
+    :return: The Blocking Channel.
     """
     credentials = PlainCredentials(
         username=os.environ.get("QUEUE_USER", "guest"), password=os.environ.get("QUEUE_PASSWORD", "guest")
@@ -66,7 +64,7 @@ def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
 def producer() -> Generator[BlockingChannel | BlockingChannel, Any, None]:
     """
     Return a context managed pika producer channel
-    :return: BlockingChannel
+    :return: BlockingChannel.
     """
     logger.info("Creating producer...")
     channel = get_channel("scheduled-jobs", "scheduled-jobs")
@@ -83,7 +81,7 @@ def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -
     the given notification queue
     :param message: The message to process
     :param notification_queue: The notification queue to update
-    :return: None
+    :return: None.
     """
     logger.info("Proccessing message: %s", message)
     data_path = Path(message)
@@ -105,7 +103,7 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
     the notification queue
     :param channel: The channel for consuming from
     :param notification_queue: The notification queue
-    :return: None
+    :return: None.
     """
     for method_frame, _, body in channel.consume(INGRESS_QUEUE_NAME, inactivity_timeout=5):
         try:
@@ -128,7 +126,7 @@ def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
     """
     Produce messages until the notification queue is empty
     :param notification_queue: The notification queue
-    :return: None
+    :return: None.
     """
     while not notification_queue.empty():
         detected_run = notification_queue.get()
@@ -141,7 +139,7 @@ def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
 def write_readiness_probe_file() -> None:
     """
     Write the file with the timestamp for the readinessprobe
-    :return: None
+    :return: None.
     """
     path = Path("/tmp/heartbeat")  # noqa: S108
     with path.open("w", encoding="utf-8") as file:
@@ -150,10 +148,9 @@ def write_readiness_probe_file() -> None:
 
 def start_run_detection() -> None:
     """
-    Main Coroutine starts the producer and consumer in a loop
-    :return: None
+    Start the producer and consumer in a loop.
+    :return: None.
     """
-
     logger.info("Starting Run Detection")
     logger.info("Creating consumer...")
     consumer_channel = get_channel(INGRESS_QUEUE_NAME, INGRESS_QUEUE_NAME)
@@ -173,7 +170,7 @@ def start_run_detection() -> None:
 
 
 def verify_archive_access() -> None:
-    """Log archive access"""
+    """Log archive access."""
     if Path("/archive", "NDXALF").exists():
         logger.info("The archive has been mounted correctly, and can be accessed.")
     else:
@@ -183,7 +180,7 @@ def verify_archive_access() -> None:
 def main() -> None:
     """
     Entry point for run detection
-    :return: None
+    :return: None.
     """
     verify_archive_access()
     start_run_detection()

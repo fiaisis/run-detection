@@ -1,3 +1,10 @@
+"""
+Tool for generating instrument specification files.
+
+This script generates default specification JSON files for all instruments,
+with the ability to mark certain instruments as disabled.
+"""
+
 import json
 from pathlib import Path
 
@@ -70,7 +77,7 @@ def generate_specification(instrument: str, enabled: bool = True) -> None:
     Generate an empty specification file for the given instrument
     :param enabled: Whether or not reduction should be enabled
     :param instrument: the instrument to generate for
-    :return: None
+    :return: None.
     """
     default_rules = {
         "enabled": enabled,

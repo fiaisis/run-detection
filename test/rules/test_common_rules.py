@@ -1,6 +1,4 @@
-"""
-Unit tests for common rules
-"""
+"""Unit tests for common rules."""
 
 import unittest
 from pathlib import Path
@@ -19,7 +17,7 @@ from rundetection.rules.sans_rules import SansPhiLimits, SansSliceWavs
 def job_request():
     """
     job_request Fixture
-    :return: JobRequest
+    :return: JobRequest.
     """
     return JobRequest(1, "larmor", "1", "1", Path("/archive/larmor/1/1.nxs"), "start time", "end time", 1, 1, "users")
 
@@ -28,7 +26,7 @@ def test_enabled_rule_when_enabled(job_request) -> None:
     """
     Test verify method will return true when value is true
     :param job_request: JobRequest fixture
-    :return: None
+    :return: None.
     """
     rule = EnabledRule(True)
     rule.verify(job_request)
@@ -39,7 +37,7 @@ def test_enabled_rule_when_not_enabled(job_request) -> None:
     """
     Test verify method will return false when value is false
     :param job_request: JobRequest fixture
-    :return: None
+    :return: None.
     """
     rule = EnabledRule(False)
     rule.verify(job_request)
@@ -70,7 +68,7 @@ def test_enabled_rule_when_not_enabled(job_request) -> None:
     ],
 )
 def test_is_y_within_5_percent_of_x(x, y, expected):
-    """Simple test cases for is_y_within_5_percent_of_x"""
+    """Simple test cases for is_y_within_5_percent_of_x."""
     assert is_y_within_5_percent_of_x(x, y) is expected
 
 
@@ -78,7 +76,7 @@ def test_sans_slice_wavs_rule_when_not_enabled(job_request) -> None:
     """
     Test verify method will return expected value
     :param job_request: JobRequest fixture
-    :return: None
+    :return: None.
     """
     rule = SansSliceWavs("[1.0, 2.0, 3.0, 4.0]")
     rule.verify(job_request)
@@ -89,7 +87,7 @@ def test_sans_phi_limit_rule_when_not_enabled(job_request) -> None:
     """
     Test verify method will return expected value
     :param job_request: JobRequest fixture
-    :return: None
+    :return: None.
     """
     rule = SansPhiLimits("[(1.0, 2.0), (3.0, 4.0)]")
     rule.verify(job_request)

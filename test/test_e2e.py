@@ -1,6 +1,4 @@
-"""
-End-to-end tests
-"""
+"""End-to-end tests."""
 
 from __future__ import annotations
 
@@ -19,7 +17,7 @@ if typing.TYPE_CHECKING:
 
 @pytest.fixture(autouse=True, scope="module")
 def producer_channel() -> BlockingChannel:
-    """Producer channel fixture"""
+    """Return a producer channel fixture."""
     connection = BlockingConnection()
     channel = connection.channel()
     channel.exchange_declare("watched-files", exchange_type="direct", durable=True)
@@ -30,7 +28,7 @@ def producer_channel() -> BlockingChannel:
 
 @pytest.fixture(autouse=True, scope="module")
 def consumer_channel() -> BlockingChannel:
-    """Consumer channel fixture"""
+    """Return a consumer channel fixture."""
     connection = BlockingConnection()
     channel = connection.channel()
     channel.exchange_declare("scheduled-jobs", exchange_type="direct", durable=True)
@@ -41,7 +39,7 @@ def consumer_channel() -> BlockingChannel:
 
 @pytest.fixture(autouse=True)
 def _purge_queues(producer_channel, consumer_channel):
-    """Purge queues on setup and teardown"""
+    """Purge queues on setup and teardown."""
     yield
     producer_channel.queue_purge(queue="watched-files")
     consumer_channel.queue_purge(queue="scheduled-jobs")
@@ -52,7 +50,7 @@ def produce_message(message: str, channel: BlockingChannel) -> None:
     Given a message and a channel, produce the message to the queue on that channel
     :param message: The message to produce
     :param channel: The channel to produce to
-    :return: None
+    :return: None.
     """
     channel.basic_publish("watched-files", "", body=message.encode())
 
@@ -61,7 +59,7 @@ def get_specification_from_file(instrument: str) -> Any:
     """
     Given an instrument, return the specification
     :param instrument: The instrument for which specification to get
-    :return: The specification file contents
+    :return: The specification file contents.
     """
     # This is ran in 2 places the CI and locally. On the CI, it has a different working directory to the default
     # selected by IDEs for local testing this works with either, if this fails raising is fine.
@@ -77,14 +75,14 @@ def get_specification_value(instrument: str, key: str) -> Any:
     Given an instrument and key, return the specification value
     :param instrument: The instrument for which specification to check
     :param key: The key for the rule
-    :return: The rule value
+    :return: The rule value.
     """
     spec = get_specification_from_file(instrument)
     return spec[key]
 
 
 def consume_all_messages(consumer_channel: BlockingChannel) -> list[dict[str, Any]]:
-    """Consume all messages from the queue"""
+    """Consume all messages from the queue."""
     recieved_messages = []
     for mf, _, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=1):
         if mf is None:
@@ -477,8 +475,10 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
     ],
 )
 def test_e2e(producer_channel, consumer_channel, messages, expected_requests):
-    """Test expected messages are consumed from the scheduled jobs queue
-    When the given messages are sent to the watched-files queue"""
+    """
+    Test expected messages are consumed from the scheduled jobs queue
+    When the given messages are sent to the watched-files queue.
+    """
     for message in messages:
         produce_message(message, producer_channel)
     if len(expected_requests) > 0:

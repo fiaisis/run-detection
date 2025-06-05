@@ -1,6 +1,4 @@
-"""
-Tests for inter specific rules
-"""
+"""Tests for inter specific rules."""
 
 import unittest
 from pathlib import Path
@@ -15,7 +13,7 @@ def test_verify(mock_get_siblings):
     """
     Tests that additional files from the same run are added to the additional values, while ignoring unrelated
     :param mock_get_siblings: mocked function
-    :return: (None)
+    :return: (None).
     """
     job_request = JobRequest(
         1,

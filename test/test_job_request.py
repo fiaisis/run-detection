@@ -1,6 +1,4 @@
-"""
-Tests for JobRequest class
-"""
+"""Tests for JobRequest class."""
 
 from pathlib import Path
 
@@ -10,7 +8,7 @@ from rundetection.job_requests import JobRequest
 def test_to_json_string() -> None:
     """
     Test valid json string can be built from metadata
-    :return: None
+    :return: None.
     """
     job_request = JobRequest(
         run_number=12345,

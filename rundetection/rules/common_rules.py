@@ -1,6 +1,4 @@
-"""
-Module containing rule implementations for instrument shared rules
-"""
+"""Module containing rule implementations for instrument shared rules."""
 
 from __future__ import annotations
 
@@ -19,31 +17,46 @@ logger = logging.getLogger(__name__)
 
 
 class EnabledRule(Rule[bool]):
+
     """
-    Rule for the enabled setting in specifications. If enabled is True, the run will be reduced, if not,
-    it will be skipped
+    Rule for the enabled setting in specifications.
+
+    If enabled is True, the run will be reduced, if not,
+    it will be skipped.
     """
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
         job_request.will_reduce = self._value
 
 
 class MolSpecStitchRule(Rule[bool]):
-    """
-    Enables Tosca, Osiris, and Iris Run stitching
-    """
+
+    """Enable Tosca, Osiris, and Iris Run stitching."""
 
     def __init__(self, value: bool) -> None:
+        """
+        Initialize the MolSpecStitchRule.
+
+        :param value: The value of the rule.
+        :return: None.
+        """
         super().__init__(value)
         self.should_be_last = True
 
     @staticmethod
     def _is_title_similar(title: str, other_title: str) -> bool:
         """
-        Compare one run title to another to check for similarity
-        :param title:the first run title
-        :param other_title:the second run title
-        :return: (bool) True if similar False otherwise
+        Compare one run title to another to check for similarity.
+
+        :param title: The first run title.
+        :param other_title: The second run title.
+        :return: (bool) True if similar False otherwise.
         """
         logger.info("Comparing titles %s and %s", title, other_title)
         if title == other_title:
@@ -74,6 +87,12 @@ class MolSpecStitchRule(Rule[bool]):
         return run_numbers
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
         if not self._value:  # if the stitch rule is set to false, skip
             return
 
@@ -102,10 +121,10 @@ class MolSpecStitchRule(Rule[bool]):
 
 def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
     """
-    Given 2 numbers, x and y, return True if y is within 5% of x
+    Check if y is within 5% of x.
+
     :param x: x number
     :param y: y number
-    :return: True if y is within 5% of x
+    :return: True if y is within 5% of x.
     """
-
     return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)

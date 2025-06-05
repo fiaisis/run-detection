@@ -1,6 +1,4 @@
-"""
-Rule factory unit tests
-"""
+"""Rule factory unit tests."""
 
 import unittest
 from typing import Any
@@ -38,7 +36,7 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
     :param name: the rule name
     :param value: the rule value
     :param rule_type: the rule type
-    :return: None
+    :return: None.
     """
     rule = rule_factory(name, value)
     assert isinstance(rule, rule_type)
@@ -75,7 +73,7 @@ def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
     :param rule_key: The key to identify the rule
     :param rule_value: The value associated with the rule
     :param expected_rule: The expected rule class
-    :return: None
+    :return: None.
     """
     assert_correct_rule(rule_key, rule_value, expected_rule)
 
@@ -96,7 +94,7 @@ def test_mariwbvan_rule_factory_returns_correct_rule_int_and_str():
 def test_raises_exception_for_missing_rule_class() -> None:
     """
     Test exception raised when non-existent rule name is given
-    :return: None
+    :return: None.
     """
     with pytest.raises(MissingRuleError):
         rule_factory("foo", "bar")
@@ -105,7 +103,7 @@ def test_raises_exception_for_missing_rule_class() -> None:
 def test_raises_exception_for_incorrect_rule_value_type() -> None:
     """
     Test exception raised when incorrect value type
-    :return: None
+    :return: None.
     """
     with pytest.raises(ValueError):  # noqa: PT011
         rule_factory("enabled", "string")

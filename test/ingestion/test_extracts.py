@@ -25,7 +25,7 @@ from rundetection.job_requests import JobRequest
 
 @pytest.fixture
 def job_request():
-    """job_request fixture"""
+    """job_request fixture."""
     return JobRequest(
         run_number=12345,
         instrument="instrument",
@@ -45,7 +45,7 @@ def test_skip_extract(caplog: LogCaptureFixture):
     Test that run remains unchanged and log is made
     :param caplog: LogCaptureFixture
     Tests that a list of job requests are returned when ingesting sibling nexus files
-    :return: None
+    :return: None.
     """
     job_request = Mock()
     job_request.instrument = "instrument"
@@ -74,7 +74,7 @@ def test_get_extraction_function(input_value, expected_function_name):
     Test that the correct function is returned from the factory function
     :param input_value: The input value to the factory function
     :param expected_function_name: The expected name of the function returned
-    :return: None
+    :return: None.
     """
     extracted_func = get_extraction_function(input_value)
     assert extracted_func.__name__ == expected_function_name
@@ -84,7 +84,7 @@ def test_mari_extract_single_ei(job_request):
     """
     Test mari extract with single ei value. we use a dict instead of a h5py group since they have identical API
     :param job_request: job request fixture
-    :return: None
+    :return: None.
     """
     dataset = {"ei": [10.0], "sam_mass": [5.0], "sam_rmm": [100.0]}
     result = mari_extract(job_request, dataset)
@@ -100,7 +100,7 @@ def test_mari_extract_multiple_ei(job_request):
     """
     Test mari extract with multiple ei values. we use a dict instead of a h5py group since they have identical API
     :param job_request: job request fixture
-    :return: None
+    :return: None.
     """
     dataset = {"ei": [10.0, 20.0], "sam_mass": [5.0], "sam_rmm": [100.0]}
     result = mari_extract(job_request, dataset)
@@ -116,7 +116,7 @@ def test_mari_extract_no_ei(job_request):
     """
     Test mari extract with no ei values. we use a dict instead of a h5py group since they have identical API
     :param job_request: job request fixture
-    :return: None
+    :return: None.
     """
     dataset = {"sam_mass": [5.0], "sam_rmm": [100.0]}
     result = mari_extract(job_request, dataset)
@@ -132,7 +132,7 @@ def test_mari_extract_no_sam_mass_or_sam_rmm(job_request):
     """
     Test mari extract with no sample values. we use a dict instead of a h5py group since they have identical API
     :param job_request: job request fixture
-    :return: None
+    :return: None.
     """
     dataset = {"ei": [10.0]}
     result = mari_extract(job_request, dataset)
@@ -149,7 +149,7 @@ def test_mari_extract_remove_bkg_true(job_request):
     Test mari extract with no background radiation correction we use a dict instead of a h5py group since they have
     identical API
     :param job_request: job request fixture
-    :return: None
+    :return: None.
     """
     dataset = {"ei": [10.0], "sam_mass": [5.0], "sam_rmm": [100.0], "remove_bkg": [True]}
     result = mari_extract(job_request, dataset)
@@ -162,14 +162,14 @@ def test_mari_extract_remove_bkg_true(job_request):
 
 
 def test_tosca_extract(job_request):
-    """Test Tosca Extract adds_cycle_string"""
+    """Test Tosca Extract adds_cycle_string."""
     with patch("rundetection.ingestion.extracts.get_cycle_string_from_path", return_value="some string"):
         tosca_extract(job_request, None)
         assert job_request.additional_values["cycle_string"] == "some string"
 
 
 def test_osiris_extract(job_request):
-    """Test Osiris extract"""
+    """Test Osiris extract."""
     dataset = {
         "selog": {
             "phase6": {"value": (1221.0,)},
@@ -198,7 +198,7 @@ def test_osiris_extract(job_request):
 
 
 def test_osiris_extract_non_matching_freqs_within_error_boundary(job_request):
-    """Test Osiris extract"""
+    """Test Osiris extract."""
     dataset = {
         "selog": {
             "phase6": {"value": (1221.0,)},
@@ -227,7 +227,7 @@ def test_osiris_extract_non_matching_freqs_within_error_boundary(job_request):
 
 
 def test_osiris_extract_raises_on_bad_frequencies(job_request):
-    """Test correct exception raised when freq6 and freq10 do not match"""
+    """Test correct exception raised when freq6 and freq10 do not match."""
     dataset = {
         "selog": {"freq6": {"value_log": {"value": (6,)}}, "freq10": {"value_log": {"value": (11,)}}},
         "instrument": {
@@ -245,6 +245,12 @@ def test_osiris_extract_raises_on_bad_frequencies(job_request):
 
 
 def test_sans_extract(job_request):
+    """
+    Test SANS extract function correctly processes sample data.
+
+    :param job_request: job request fixture
+    :return: None.
+    """
     dataset = {
         "sample": {
             "thickness": [1.0],
@@ -264,6 +270,12 @@ def test_sans_extract(job_request):
 
 
 def test_sans2d_instrumentation(job_request):
+    """
+    Test SANS2D extract function correctly processes instrumentation data.
+
+    :param job_request: job request fixture
+    :return: None.
+    """
     dataset = {
         "sample": {
             "thickness": [1.0],
@@ -324,6 +336,12 @@ def test_sans2d_instrumentation(job_request):
 
 
 def test_loq_instrumentation(job_request):
+    """
+    Test LOQ extract function correctly processes instrumentation data with aperture.
+
+    :param job_request: job request fixture
+    :return: None.
+    """
     dataset = {
         "sample": {
             "thickness": [1.0],
@@ -348,6 +366,12 @@ def test_loq_instrumentation(job_request):
 
 
 def test_loq_instrumentation_no_aperturs(job_request):
+    """
+    Test LOQ extract function correctly processes instrumentation data without aperture.
+
+    :param job_request: job request fixture
+    :return: None.
+    """
     dataset = {
         "sample": {
             "thickness": [1.0],
@@ -366,7 +390,7 @@ def test_loq_instrumentation_no_aperturs(job_request):
 def test_get_cycle_string_from_path_valid():
     """
     Test get cycle string returns correct string
-    :return: None
+    :return: None.
     """
     path = Path("/some/path/to/cycle_2023_42/and/some/file")
     result = get_cycle_string_from_path(path)
@@ -376,7 +400,7 @@ def test_get_cycle_string_from_path_valid():
 def test_get_cycle_string_from_path_valid_alternative():
     """
     Test get cycle string returns correct string for short year
-    :return: None
+    :return: None.
     """
     path = Path("/another/path/cycle_19_2/file")
     result = get_cycle_string_from_path(path)
@@ -386,7 +410,7 @@ def test_get_cycle_string_from_path_valid_alternative():
 def test_get_cycle_string_from_path_invalid():
     """
     Test get cycle string raises when year missing
-    :return: None
+    :return: None.
     """
     path = Path("/no/cycle/string/here")
     with pytest.raises(IngestError):
@@ -394,9 +418,7 @@ def test_get_cycle_string_from_path_invalid():
 
 
 def test_vesuvio_extract_adds_runno(job_request):
-    """
-    Tests that the extract adds runno to Vesuvio jobs
-    """
+    """Tests that the extract adds runno to Vesuvio jobs."""
     result = vesuvio_extract(job_request, None)
 
     assert result.additional_values["runno"] == 12345  # noqa: PLR2004

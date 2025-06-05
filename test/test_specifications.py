@@ -1,6 +1,4 @@
-"""
-Specification unit test module
-"""
+"""Specification unit test module."""
 
 import datetime
 import os
@@ -23,7 +21,7 @@ from rundetection.specifications import InstrumentSpecification
 def job_request():
     """
     JobRequest fixture
-    :return: The job request fixture
+    :return: The job request fixture.
     """
     return JobRequest(1, "larmor", "1", "1", Path("/archive/larmor/1/1,nxs"), "start time", "end time", 1, 1, "user")
 
@@ -33,7 +31,7 @@ def job_request():
 def specification(_) -> InstrumentSpecification:
     """
     InstrumentSpecification Fixture
-    :return: InstrumentSpecification
+    :return: InstrumentSpecification.
     """
     spec = InstrumentSpecification("foo")
     spec.loaded_time = datetime.datetime.now(tz=datetime.UTC)
@@ -56,12 +54,14 @@ def _working_directory_fix():
 
 @mock.patch("rundetection.specifications.InstrumentSpecification._load_rules_from_api")
 def test_instrument_specification_tries_to_load_api_from_db(load_rules_from_api):
+    """Test that InstrumentSpecification constructor calls _load_rules_from_api."""
     InstrumentSpecification("mari")
     load_rules_from_api.assert_called_once_with()
 
 
 @mock.patch("rundetection.specifications.requests")
 def test_instrument_specification_load_rules_for_api(requests, specification):
+    """Test that _load_rules_from_api correctly loads rules from the API response."""
     headers: dict = {"Authorization": "Bearer shh", "accept": "application/json"}
     requests.get.return_value.json.return_value = {
         "molspecstitch": True,
@@ -79,6 +79,7 @@ def test_instrument_specification_load_rules_for_api(requests, specification):
 
 @mock.patch("rundetection.specifications.requests")
 def test_instrument_specification_load_rules_for_api_sets_loaded_time(requests, specification):
+    """Test that _load_rules_from_api sets the loaded_time attribute."""
     headers: dict = {"Authorization": "Bearer shh", "accept": "application/json"}
     specification._load_rules_from_api()
 
@@ -90,6 +91,7 @@ def test_instrument_specification_load_rules_for_api_sets_loaded_time(requests, 
 
 
 def test_rule_old(specification):
+    """Test the _rule_old method correctly identifies when rules are old."""
     specification.loaded_time = datetime.datetime.now(tz=datetime.UTC) - datetime.timedelta(minutes=11)
     assert specification._rule_old()
 
@@ -101,6 +103,7 @@ def test_rule_old(specification):
 
 
 def test_specification_rule_old(specification, job_request):
+    """Test that verify reloads rules from API when rules are old."""
     specification._rule_old = mock.MagicMock(return_value=True)
     specification._load_rules_from_api = mock.MagicMock()
 
@@ -110,6 +113,7 @@ def test_specification_rule_old(specification, job_request):
 
 
 def test_specification__rules_len_0(specification, job_request):
+    """Test that verify sets will_reduce to False when there are no rules."""
     specification._rules = []
 
     specification.verify(job_request)
@@ -118,6 +122,7 @@ def test_specification__rules_len_0(specification, job_request):
 
 
 def test_runs_verify_on_all_rules(specification, job_request):
+    """Test that verify runs on all rules and sets will_reduce to True."""
     specification.verify(job_request)
 
     assert job_request.will_reduce
@@ -126,6 +131,7 @@ def test_runs_verify_on_all_rules(specification, job_request):
 
 
 def test_specification_verify_rule_violation_doesnt_verify_more(specification, job_request):
+    """Test that rule verification stops when a rule violation occurs."""
     def raise_exception(_):
         raise RuleViolationError()
 
@@ -140,6 +146,7 @@ def test_specification_verify_rule_violation_doesnt_verify_more(specification, j
 
 
 def test_specification_ensures_rule_order_respected(specification):
+    """Test that rules are ordered correctly with rules marked as 'should_be_last' at the end."""
     specification._rules = [IrisReductionRule(True), MolSpecStitchRule(True), IrisCalibrationRule({})]
 
     specification._order_rules()

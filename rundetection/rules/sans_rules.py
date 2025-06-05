@@ -1,3 +1,10 @@
+"""
+Module for SANS instrument specific rules and data handling.
+
+This module contains classes and functions for handling SANS data files,
+including finding scatter, transmission, and direct files for reduction.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -23,23 +30,53 @@ SANS_FILES: list[SansFileData] | None = None
 
 @dataclass
 class SansFileData:
+
+    """
+    Data class representing a SANS file with its metadata.
+
+    This class holds information about a SANS file, including its title,
+    type (scatter or transmission), and run number.
+    """
+
     title: str
     type: str
     run_number: str
 
     def __hash__(self) -> int:
+        """
+        Generate a hash for this object.
+
+        :return: Hash value based on title, type, and run_number
+        """
         return hash((self.title, self.type, self.run_number))
 
     @property
     def is_scatter(self) -> bool:
+        """
+        Check if this file is a scatter file.
+
+        :return: True if the file is a scatter file, False otherwise
+        """
         return self.type.upper() in ("SANS/TRANS", "SANS")
 
     @property
     def is_trans(self) -> bool:
+        """
+        Check if this file is a transmission file.
+
+        :return: True if the file is a transmission file, False otherwise
+        """
         return self.type.upper() == "TRANS"
 
 
 class SansFileError(Exception):
+
+    """
+    Exception raised for errors related to SANS files.
+
+    This exception is raised when there are issues with SANS file operations.
+    """
+
     pass
 
 
@@ -193,11 +230,30 @@ def _find_file_in_journal_by_title_and_type(title: str, file_types: set[str]) ->
 
 
 class SansUserFile(Rule[str]):
+
+    """
+    Rule for handling SANS user file configuration.
+
+    This rule sets up the user file path and determines if transmission and scatter files are the same.
+    """
+
     def __init__(self, value: str):
+        """
+        Initialize the SansUserFile rule.
+
+        :param value: The user file name
+        """
         super().__init__(value)
         self.should_be_first = True
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule and set up user file configuration.
+
+        If M4 is in the user file name, the transmission and scatter files are considered the same.
+
+        :param job_request: The job request to update
+        """
         # If M4 in user file then the transmission and scatter files are the same.
         job_request.additional_values["included_trans_as_scatter"] = "_M4" in self._value
         job_request.additional_values["user_file"] = f"/extras/{job_request.instrument.lower()}/{self._value}"
@@ -211,8 +267,22 @@ def _clean_up_job_request(job_request: JobRequest) -> None:
 
 
 class SansScatterTransFiles(Rule[bool]):
+
+    """
+    Rule for handling SANS scatter and transmission files.
+
+    This rule identifies and validates scatter, transmission, and direct files
+    needed for SANS data reduction.
+    """
+
     @staticmethod
     def _verify_scatter(job_request: JobRequest, job_file: SansFileData) -> None:
+        """
+        Verify a scatter file and find its associated transmission and direct files.
+
+        :param job_request: The job request to update
+        :param job_file: The scatter file to verify
+        """
         trans_file = _find_trans(job_request, job_file)
         logger.info("Found trans file %s", trans_file)
         direct_file = _find_direct(job_request)
@@ -229,6 +299,12 @@ class SansScatterTransFiles(Rule[bool]):
 
     @staticmethod
     def _verify_trans(job_request: JobRequest, job_file: SansFileData) -> None:
+        """
+        Verify a transmission file and find its associated scatter and direct files.
+
+        :param job_request: The job request to update
+        :param job_file: The transmission file to verify
+        """
         scatter_title = _get_scatter_title(job_file)
         scatter_file = _find_file_in_journal_by_title_and_type(title=scatter_title, file_types={"SANS/TRANS", "SANS"})
         logger.info("Found scatter file %s", scatter_file)
@@ -245,6 +321,14 @@ class SansScatterTransFiles(Rule[bool]):
             )
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule and identify required files for SANS reduction.
+
+        This method determines if the file is a scatter or transmission file
+        and finds the associated files needed for reduction.
+
+        :param job_request: The job request to update
+        """
         if not self._value:
             return
         _refresh_local_journal(job_request=job_request)
@@ -260,13 +344,34 @@ class SansScatterTransFiles(Rule[bool]):
 
 
 class SansCanFiles(Rule[bool]):
+
+    """
+    Rule for handling SANS can (background) files.
+
+    This rule identifies and validates the background files needed for SANS data reduction.
+    It must be run after the scatter and transmission files have been identified.
+    """
+
     def __init__(self, value: bool):
+        """
+        Initialize the SansCanFiles rule.
+
+        :param value: Whether to enable can file processing
+        """
         super().__init__(value)
         # Ordered last for 2 reasons, 1, dependent on scatter_title and scatter_direct_title, 2, No need to refresh
         # journal again
         self.should_be_last = True
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule and identify background files for SANS reduction.
+
+        This method finds the appropriate background (can) files for the sample
+        and adds them to the job request.
+
+        :param job_request: The job request to update
+        """
         if not self._value:
             return
         # Ensure the job_request was set up correctly by previous rules
@@ -310,18 +415,26 @@ class SansCanFiles(Rule[bool]):
 
 
 class SansSliceWavs(Rule[str]):
-    """
-    This rule enables users to set the SliceWavs for each script
-    """
+
+    """Rule that enables users to set the SliceWavs for each script."""
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule and set the slice_wavs parameter.
+
+        :param job_request: The job request to update
+        """
         job_request.additional_values["slice_wavs"] = self._value
 
 
 class SansPhiLimits(Rule[str]):
-    """
-    This rule enables users to set the PhiLimits for each script
-    """
+
+    """Rule that enables users to set the PhiLimits for each script."""
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule and set the phi_limits parameter.
+
+        :param job_request: The job request to update
+        """
         job_request.additional_values["phi_limits"] = self._value

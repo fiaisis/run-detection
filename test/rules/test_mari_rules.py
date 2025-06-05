@@ -1,6 +1,4 @@
-"""
-Test for mari rules
-"""
+"""Test for mari rules."""
 
 import os
 from pathlib import Path
@@ -23,8 +21,8 @@ def _working_directory_fix():
 @pytest.fixture
 def job_request():
     """
-    job request fixture
-    :return: job request
+    Job request fixture
+    :return: job request.
     """
     return JobRequest(
         run_number=100,
@@ -45,8 +43,8 @@ def job_request():
 @pytest.fixture
 def mari_stitch_rule_true():
     """
-    stitch rule fixture for true
-    :return: MariStitchRule
+    Stitch rule fixture for true
+    :return: MariStitchRule.
     """
     return MariStitchRule(value=True)
 
@@ -55,7 +53,7 @@ def mari_stitch_rule_true():
 def mari_stitch_rule_false():
     """
     Stitch rule fixture for false
-    :return: MariStitchRule
+    :return: MariStitchRule.
     """
     return MariStitchRule(value=False)
 
@@ -66,7 +64,7 @@ def test_verify_with_stitch_rule_false(mari_stitch_rule_false, job_request):
     Test not added when none to stitch
     :param mari_stitch_rule_false: rule fixture
     :param job_request: run fixture
-    :return: none
+    :return: none.
     """
     mari_stitch_rule_false.verify(job_request)
     assert not job_request.additional_requests
@@ -78,7 +76,7 @@ def test_verify_with_single_run(mari_stitch_rule_true, job_request):
     Test not added for single run
     :param mari_stitch_rule_true: stitch rule fixture
     :param job_request: job request fixture
-    :return: none
+    :return: none.
     """
     with (
         patch("rundetection.ingestion.ingest.get_run_title", return_value="Test experiment"),
@@ -94,7 +92,7 @@ def test_verify_multiple_runs(mari_stitch_rule_true, job_request):
     Test additional requests are included with other rules applied
     :param mari_stitch_rule_true: rule fixture
     :param job_request: job request fixture
-    :return: None
+    :return: None.
     """
     rule = MariMaskFileRule("some link")
     rule.verify(job_request)
@@ -112,7 +110,7 @@ def test_mari_mask_rule(job_request):
     """
     Test given link is attached to additional values
     :param job_request: job request fixture
-    :return: none
+    :return: none.
     """
     rule = MariMaskFileRule("some link")
     rule.verify(job_request)
@@ -124,7 +122,7 @@ def test_mari_wbvan_rule(job_request):
     """
     Test that the wbvan number is set via the specification
     :param job_request: JobRequest fixture
-    :return: None
+    :return: None.
     """
     rule = MariWBVANRule(1234567)
     rule.verify(job_request)

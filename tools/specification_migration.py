@@ -1,5 +1,5 @@
 """
-This script moves the all json specifications from this repository to the database via PUT calls to the FIA_API
+Script that moves all json specifications from this repository to the database via PUT calls to the FIA_API.
 
 It should be run from the root directory of this repository.
 It expects 2 command line args, the FIA_API_URL and the FIA_API_API_KEY
