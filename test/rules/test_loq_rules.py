@@ -1,4 +1,5 @@
 """Tests for LOQ rules."""
+
 from pathlib import Path
 from unittest import mock
 

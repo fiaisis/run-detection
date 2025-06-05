@@ -1,4 +1,5 @@
 """Tests for Sans2D rules"""
+
 from pathlib import Path
 from unittest import mock
 

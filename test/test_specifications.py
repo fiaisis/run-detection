@@ -132,6 +132,7 @@ def test_runs_verify_on_all_rules(specification, job_request):
 
 def test_specification_verify_rule_violation_doesnt_verify_more(specification, job_request):
     """Test that rule verification stops when a rule violation occurs."""
+
     def raise_exception(_):
         raise RuleViolationError()
 
