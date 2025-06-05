@@ -1,3 +1,5 @@
+"""Tests for iris rules."""
+
 from pathlib import Path
 
 import pytest
@@ -9,8 +11,8 @@ from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 @pytest.fixture
 def job_request():
     """
-    job request fixture
-    :return: job request
+    Job request fixture
+    :return: job request.
     """
     return JobRequest(
         run_number=100,
@@ -30,13 +32,13 @@ def job_request():
 
 @pytest.fixture
 def reflection_rule():
-    """Analyser rule fixture"""
+    """Analyser rule fixture."""
     return IrisCalibrationRule({"002": "105275", "004": "105276"})
 
 
 @pytest.fixture
 def iris_mode_rule():
-    """Reduction mode rule fixture"""
+    """Reduction mode rule fixture."""
     return IrisReductionRule(True)
 
 
@@ -51,12 +53,29 @@ def iris_mode_rule():
     ],
 )
 def test_iris_reduction_rule_tuple_match(first_tuple, second_tuple, expected_result, iris_mode_rule):
+    """
+    Test the tuple matching functionality of the IrisReductionRule.
+
+    :param first_tuple: First tuple to compare
+    :param second_tuple: Second tuple to compare
+    :param expected_result: Expected result of the comparison
+    :param iris_mode_rule: Fixture for the IrisReductionRule
+    :return: None.
+    """
     result = iris_mode_rule._tuple_match(first_tuple, second_tuple)
     assert result == expected_result
 
 
 @pytest.mark.parametrize(("freq10"), [25, 49.4, 16.6])
 def test_iris_reduction_rule_verify_freq10_below_50(freq10, iris_mode_rule, job_request):
+    """
+    Test that IrisReductionRule correctly sets reflection and analyser when freq10 is below 50.
+
+    :param freq10: Test frequency value below 50
+    :param iris_mode_rule: Fixture for the IrisReductionRule
+    :param job_request: Job request fixture
+    :return: None.
+    """
     job_request.additional_values["freq10"] = freq10
 
     iris_mode_rule.verify(job_request)
@@ -75,6 +94,18 @@ def test_iris_reduction_rule_verify_freq10_below_50(freq10, iris_mode_rule, job_
     ],
 )
 def test_iris_reduction_rule_verify(phases, freq10, tcb_1, tcb_2, results, job_request, iris_mode_rule):
+    """
+    Test that IrisReductionRule correctly identifies analyser and reflection based on input parameters.
+
+    :param phases: Tuple of phase6 and phase10 values
+    :param freq10: Frequency value
+    :param tcb_1: Tuple of detector time channel boundaries
+    :param tcb_2: Tuple of monitor time channel boundaries
+    :param results: Expected results dictionary with analyser and reflection
+    :param job_request: Job request fixture
+    :param iris_mode_rule: Fixture for the IrisReductionRule
+    :return: None.
+    """
     job_request.additional_values["phase6"], job_request.additional_values["phase10"] = phases
     job_request.additional_values["tcb_detector_min"], job_request.additional_values["tcb_detector_max"] = tcb_1
     job_request.additional_values["tcb_monitor_min"], job_request.additional_values["tcb_monitor_max"] = tcb_2
@@ -94,6 +125,16 @@ def test_iris_reduction_rule_verify(phases, freq10, tcb_1, tcb_2, results, job_r
     ],
 )
 def test_iris_calibration_rule_verify(reflection, analyser, output, reflection_rule, job_request):
+    """
+    Test that IrisCalibrationRule correctly sets calibration run numbers based on reflection and analyser.
+
+    :param reflection: Reflection value to test
+    :param analyser: Analyser value to test
+    :param output: Expected calibration run number
+    :param reflection_rule: Fixture for the IrisCalibrationRule
+    :param job_request: Job request fixture
+    :return: None.
+    """
     job_request.additional_values["calibration_run_numbers"] = None
     job_request.additional_values["reflection"] = reflection
     job_request.additional_values["analyser"] = analyser

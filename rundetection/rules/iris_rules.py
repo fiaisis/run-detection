@@ -1,6 +1,4 @@
-"""
-Rules for Iris
-"""
+"""Rules for Iris."""
 
 from __future__ import annotations
 
@@ -37,15 +35,22 @@ GRAPHITE_DATA = [
 
 
 class IrisReductionRule(Rule[bool]):
-    """
-    Determines the type of reduction to produce (spectroscopy or diffraction)
-    """
+
+    """Determines the type of reduction to produce (spectroscopy or diffraction)."""
 
     @staticmethod
     def _tuple_match(x: tuple[int | float, int | float], y: tuple[int | float, int | float]) -> bool:
         return is_y_within_5_percent_of_x(x[0], y[0]) and is_y_within_5_percent_of_x(x[1], y[1])
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Determines the type of reduction to produce (spectroscopy or diffraction).
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
         if not self._value:
             return
         if round(job_request.additional_values["freq10"]) < 50:  # noqa: PLR2004
@@ -71,16 +76,33 @@ class IrisReductionRule(Rule[bool]):
 
 
 class IrisCalibrationRule(Rule[dict[str, str]]):
+
     """
-    Set calibration run number based on the reflection, needs to be called after the IrisReductionRule so reflection and
-    analyser are set in the job_request.additional_values
+    Set calibration run number based on the reflection.
+
+    Needs to be called after the IrisReductionRule so reflection and
+    analyser are set in the job_request.additional_values.
     """
 
     def __init__(self, value: dict[str, str]):
+        """
+        Initialize the IrisCalibrationRule.
+
+        :param value: The value of the rule.
+        :return: None.
+        """
         super().__init__(value)
         self._should_be_last = True
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Sets the calibration run number based on the reflection.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
         if not self._value:
             return
         reflection = job_request.additional_values["reflection"]

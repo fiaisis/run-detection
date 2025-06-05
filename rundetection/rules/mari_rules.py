@@ -1,6 +1,4 @@
-"""
-Mari Rules
-"""
+"""Mari Rules."""
 
 import logging
 from copy import deepcopy
@@ -14,11 +12,16 @@ logger = logging.getLogger(__name__)
 
 
 class MariStitchRule(Rule[bool]):
-    """
-    The MariStitchRule is the rule that applies, dependent on the other rules running first. This runs last.
-    """
+
+    """The MariStitchRule is the rule that applies, dependent on the other rules running first. This runs last."""
 
     def __init__(self, value: bool) -> None:
+        """
+        Initialize the MariStitchRule.
+
+        :param value: The value of the rule.
+        :return: None.
+        """
         super().__init__(value)
         self.should_be_last = True
 
@@ -34,6 +37,14 @@ class MariStitchRule(Rule[bool]):
         return run_numbers
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Stitches together multiple MARI runs if they have the same title.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
         if not self._value:  # if the stitch rule is set to false, skip
             return
 
@@ -44,27 +55,44 @@ class MariStitchRule(Rule[bool]):
             additional_request = deepcopy(job_request)
             additional_request.additional_values["runno"] = run_numbers
             additional_request.additional_values["sum_runs"] = True
-            # We must reapply the common mari rules manually here, if we apply the whole spec automatically it will
-            # produce an infinite loop
+            # We must reapply the common mari rules manually here, if we apply the whole spec
+            # automatically it will produce an infinite loop
             additional_request.additional_values["mask_file_link"] = job_request.additional_values["mask_file_link"]
             additional_request.additional_values["wbvan"] = job_request.additional_values["wbvan"]
             job_request.additional_requests.append(additional_request)
 
 
 class MariMaskFileRule(Rule[str]):
-    """
-    Adds the permalink of the maskfile to the additional outputs
-    """
+
+    """Add the permalink of the maskfile to the additional outputs."""
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Adds the mask file link to the additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
         job_request.additional_values["mask_file_link"] = self._value
 
 
 class MariWBVANRule(Rule[int]):
+
     """
-    Inserts the cycles wbvan number into the script. This value is manually calculated by the MARI instrument scientist
-    once per cycle.
+    Insert the cycles wbvan number into the script.
+
+    This value is manually calculated by the MARI instrument scientist once per cycle.
     """
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Adds the wbvan number to the additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
         job_request.additional_values["wbvan"] = self._value

@@ -1,6 +1,4 @@
-"""
-Module containing the factory function for each rule
-"""
+"""Module containing the factory function for each rule."""
 
 from typing import Any
 
@@ -30,10 +28,11 @@ from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFile
 
 def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912
     """
-    Given the rule key, and rule value, return the rule implementation
+    Return the rule implementation for the given rule key and value.
+
     :param key_: The key of the rule
     :param value: The value of the rule
-    :return: The Rule implementation
+    :return: The Rule implementation.
     """
     match key_.lower():
         case "enabled":

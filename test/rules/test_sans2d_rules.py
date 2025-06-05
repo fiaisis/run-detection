@@ -1,3 +1,5 @@
+"""Tests for Sans2D rules"""
+
 from pathlib import Path
 from unittest import mock
 
@@ -14,6 +16,11 @@ from rundetection.rules.sans_rules import (
 
 
 def test_sans2d_trans_file_last():
+    """
+    Test that SANS2D transmission file is correctly identified when it's the last file.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=5,
         instrument="",
@@ -50,6 +57,11 @@ def test_sans2d_trans_file_last():
 
 
 def test_sans2d_trans_file_last_not_found_scatter():
+    """
+    Test that reduction is skipped when scatter file is not found for SANS2D transmission file.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=5,
         instrument="",
@@ -82,6 +94,11 @@ def test_sans2d_trans_file_last_not_found_scatter():
 
 
 def test_sans2d_find_files_verify_no_files_left():
+    """
+    Test that reduction is skipped when no files are found for SANS2D.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=0,
         instrument="",
@@ -104,6 +121,11 @@ def test_sans2d_find_files_verify_no_files_left():
 
 
 def test_sans2d_find_files_verify_some_files_found_but_none_valid():
+    """
+    Test that reduction is skipped when files are found for SANS2D but none are valid.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=0,
         instrument="",
@@ -129,6 +151,11 @@ def test_sans2d_find_files_verify_some_files_found_but_none_valid():
 
 
 def test_sans2d_find_files_trans_file_found():
+    """
+    Test that SANS2D transmission file is correctly identified and processed.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=5,
         instrument="",
@@ -166,6 +193,11 @@ def test_sans2d_find_files_trans_file_found():
 
 
 def test_sans2d_find_files_can_transmission_file_found():
+    """
+    Test that SANS2D can transmission file is correctly identified and processed.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=5,
         instrument="",
@@ -205,6 +237,11 @@ def test_sans2d_find_files_can_transmission_file_found():
 
 
 def test_loq_find_files_no_background_use_direct_only():
+    """
+    Test that SANS2D direct file is used when no background is available.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=5,
         instrument="",
@@ -244,6 +281,11 @@ def test_loq_find_files_no_background_use_direct_only():
 
 
 def test_sans2d_find_files_direct_file_found():
+    """
+    Test that SANS2D direct file is correctly identified and processed.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=5,
         instrument="",
@@ -292,6 +334,11 @@ def test_sans2d_find_files_direct_file_found():
 
 
 def test_sans2d_find_files_can_scatter_file_found():
+    """
+    Test that SANS2D can scatter file is correctly identified and processed.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=5,
         instrument="",
@@ -329,6 +376,11 @@ def test_sans2d_find_files_can_scatter_file_found():
 
 
 def test_sans2d_user_file_m3():
+    """
+    Test that SANS2D user file M3 is correctly set and does not include transmission as scatter.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=0,
         instrument="SANS2D",
@@ -351,6 +403,11 @@ def test_sans2d_user_file_m3():
 
 
 def test_sans2d_user_file_m4():
+    """
+    Test that SANS2D user file M4 is correctly set and includes transmission as scatter.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=0,
         instrument="SANS2D",
@@ -373,6 +430,11 @@ def test_sans2d_user_file_m4():
 
 
 def test_sans2d_verify_checks_m4():
+    """
+    Test that SANS2D M4 mode correctly processes transmission as scatter.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=5,
         instrument="SANS2D",
@@ -412,6 +474,11 @@ def test_sans2d_verify_checks_m4():
 
 
 def test_sans2d_slice_wavs():
+    """
+    Test that SANS2D slice wavelengths are correctly set in the job request.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=5,
         instrument="SANS2D",
@@ -433,6 +500,11 @@ def test_sans2d_slice_wavs():
 
 
 def test_sans2d_phi_limits():
+    """
+    Test that SANS2D phi limits are correctly set in the job request.
+
+    :return: None.
+    """
     job_request = JobRequest(
         run_number=5,
         instrument="SANS2D",

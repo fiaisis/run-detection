@@ -1,6 +1,4 @@
-"""
-Rules for Osiris
-"""
+"""Rules for Osiris."""
 
 from __future__ import annotations
 
@@ -20,9 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 class OsirisReductionModeRule(Rule[bool]):
-    """
-    Determines the type of reduction to produce (spectroscopy or diffraction)
-    """
+
+    """Determines the type of reduction to produce (spectroscopy or diffraction)."""
 
     # The spec phase tuples are (<phase6>, <phase10>) for the next 2 arrays Based on the PDF available here:
     # https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf.
@@ -93,6 +90,14 @@ class OsirisReductionModeRule(Rule[bool]):
         return "diffraction" if is_diff_phases else "spectroscopy"
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule and determine the reduction mode.
+
+        This method determines whether the run is a diffraction or spectroscopy run
+        based on the phase values, frequency, and detector time channel boundaries.
+
+        :param job_request: The job request to update
+        """
         if not self._value:
             return
         mode = self._determine_mode(
@@ -112,22 +117,46 @@ class OsirisReductionModeRule(Rule[bool]):
 
 
 class OsirisDefaultSpectroscopy(Rule[bool]):
+
+    """
+    Rule for setting default spectroscopy reduction settings.
+
+    This rule enables spectroscopy reduction and disables diffraction reduction
+    when activated.
+    """
+
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule and set spectroscopy reduction settings.
+
+        :param job_request: The job request to update
+        """
         if self._value is True:
             job_request.additional_values["spectroscopy_reduction"] = "true"
             job_request.additional_values["diffraction_reduction"] = "false"
 
 
 class OsirisDefaultGraniteAnalyser(Rule[bool]):
+
+    """
+    Rule for setting the default analyser to graphite.
+
+    This rule sets the analyser to graphite when activated.
+    """
+
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule and set the analyser to graphite.
+
+        :param job_request: The job request to update
+        """
         if self._value is True:
             job_request.additional_values["analyser"] = "graphite"
 
 
 class OsirisReflectionCalibrationRule(Rule[dict[str, list[str]]]):
-    """
-    Determine the reflection and set calibration run number based on the reflection
-    """
+
+    """Determine the reflection and set calibration run number based on the reflection."""
 
     # This map is based on the Appendix 1 - Quasi / inelastic settings pdf. It is reduced as the values for
     # frequency < 50 are removed as they default to reflection 002
@@ -168,6 +197,14 @@ class OsirisReflectionCalibrationRule(Rule[dict[str, list[str]]]):
         )
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule and determine the reflection and calibration run numbers.
+
+        This method determines the reflection (002 or 004) based on the frequency and
+        time channel boundaries, then sets the appropriate calibration run numbers.
+
+        :param job_request: The job request to update
+        """
         if not self._value:
             return
         reflection = self._determine_reflection(job_request)

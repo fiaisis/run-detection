@@ -1,6 +1,4 @@
-"""
-Ingest and metadata tests
-"""
+"""Ingest and metadata tests."""
 
 import unittest
 from pathlib import Path
@@ -102,7 +100,7 @@ TEST_DATA_PATH = Path("../test_data") if Path("../test_data").exists() else Path
 def test_ingest(pair) -> None:
     """
     Test the metadata is built from test nexus files
-    :return: None
+    :return: None.
     """
     nexus_file = TEST_DATA_PATH / pair[0]
     assert (ingest(nexus_file)) == pair[1]
@@ -111,7 +109,7 @@ def test_ingest(pair) -> None:
 def test_ingest_raises_exception_non_nexus_file() -> None:
     """
     Test value error is raised when a non nexus file is given to be ingested
-    :return: None
+    :return: None.
     """
     with pytest.raises(ValueError):  # noqa: PT011
         ingest(Path("25581.log"))
@@ -122,7 +120,7 @@ def test_get_sibling_runs(mock_ingest: Mock):
     """
     Tests that a list of job requests are returned when ingesting sibling nexus files
     :param mock_ingest: Mock ingest
-    :return: None
+    :return: None.
     """
     job_request = JobRequest(1, "inst", "title", "num", Path("path"), "run_start", "run_end", 0, 0, "users")
     mock_ingest.return_value = job_request
@@ -136,7 +134,7 @@ def test_logging_and_exception_when_nexus_file_does_not_exit(caplog: LogCaptureF
     """
     Test correct logging and exception reraised when nexus file is missing
     :param caplog: LogCaptureFixture
-    :return: None
+    :return: None.
     """
     with pytest.raises(FileNotFoundError):
         ingest(Path("e2e_data/25581/bar.nxs"))
@@ -149,7 +147,7 @@ def test_get_run_title(mock_ingest):
     """
     Test file ingested and title returned
     :param mock_ingest: Mock ingest function
-    :return: None
+    :return: None.
     """
     mock_job_request = Mock()
     mock_job_request.experiment_title = "25581"
@@ -161,7 +159,7 @@ def test_get_run_title(mock_ingest):
 def test_get_sibling_nexus_files():
     """
     Test that nexus files from within the same directory are returned
-    :return: None
+    :return: None.
     """
     with TemporaryDirectory() as temp_dir:
         Path(temp_dir, "1.nxs").touch()
@@ -172,7 +170,7 @@ def test_get_sibling_nexus_files():
 
 
 def test_get_cycle_from_string_empty_path():
-    """Test if the function raises an IngestError for an empty path"""
+    """Test if the function raises an IngestError for an empty path."""
     path = Path()
     with pytest.raises(IngestError):
         get_cycle_string_from_path(path)
@@ -181,7 +179,7 @@ def test_get_cycle_from_string_empty_path():
 def test_ingest_to_json_string_produces_no_decode_errors():
     """
     Test the full process from ingestion to json string. Specifically to check for decode errors
-    :return: None
+    :return: None.
     """
     job_request = ingest(Path(TEST_DATA_PATH, "e2e_data/1510111/ENGINX00241391.nxs"))
     job_request.to_json_string()

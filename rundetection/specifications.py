@@ -1,6 +1,4 @@
-"""
-Contains the InstrumentSpecification class, the abstract Rule Class and Rule Implementations
-"""
+"""Contains the InstrumentSpecification class, the abstract Rule Class and Rule Implementations."""
 
 import datetime
 import logging
@@ -25,12 +23,18 @@ SPEC_REQUEST_TIMEOUT_MINS = 10
 
 
 class InstrumentSpecification:
+
     """
     The instrument specification loads the rules from the relevant specification json file
-    and allows verification of the rules given some nexus metadata
+    and allows verification of the rules given some nexus metadata.
     """
 
     def __init__(self, instrument: str) -> None:
+        """
+        Initialize the InstrumentSpecification with the given instrument.
+
+        :param str instrument: The instrument name to load rules for.
+        """
         self._instrument = instrument
         self._rules: list[Rule[Any]] = []
         self.loaded_time: datetime.datetime | None = None
@@ -53,7 +57,9 @@ class InstrumentSpecification:
 
     def _order_rules(self) -> None:
         """
-        Sometimes we need to ensure some rules end up at the end of the list, notably those with stitch in the name
+        Ensure rules are ordered correctly.
+
+        Some rules need to be at the end of the list, notably those with stitch in the name.
         """
         for rule in self._rules:
             # We need to ensure rules that do a stitch, or any that added extra jobs, need to come last.
@@ -74,7 +80,7 @@ class InstrumentSpecification:
         Verify that every rule for the JobRequest is met, and that the specification contains at least one rule.
         If the specification is empty verify will return false
         :param job_request: A JobRequest
-        :return: whether the specification is met
+        :return: whether the specification is met.
         """
         if self._rule_old():
             logger.info(

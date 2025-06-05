@@ -1,4 +1,4 @@
-"""Module containing the job request model"""
+"""Module containing the job request model."""
 
 from __future__ import annotations
 
@@ -14,8 +14,10 @@ if typing.TYPE_CHECKING:
 # splitting this class would be worse than this disable
 @dataclasses.dataclass
 class JobRequest:
+
     """
-    JobRequest
+    JobRequest represents an autoreduction job within FIA. It should contain all necessary metadata to trigger the
+    reduction
     """
 
     run_number: int
@@ -34,8 +36,9 @@ class JobRequest:
 
     def to_json_string(self) -> str:
         """
-        Returns the metadata as a json string.
-        :return: The json string
+        Return the metadata as a json string.
+
+        :return: The json string.
         """
         dict_ = dataclasses.asdict(self)
         dict_["filepath"] = str(dict_["filepath"])

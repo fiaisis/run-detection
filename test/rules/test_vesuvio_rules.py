@@ -1,6 +1,4 @@
-"""
-Test for vesuvio rules
-"""
+"""Test for vesuvio rules."""
 
 import os
 from pathlib import Path
@@ -22,8 +20,8 @@ def _working_directory_fix():
 @pytest.fixture
 def job_request():
     """
-    job request fixture
-    :return: job request
+    Return a Job request fixture
+    :return: job request.
     """
     return JobRequest(
         run_number=100,
@@ -45,7 +43,7 @@ def test_vesuvio_empty_runs_rule(job_request):
     """
     Test empty runs are set and attached to additional values
     :param job_request: job request fixture
-    :return: none
+    :return: none.
     """
     rule = VesuvioEmptyRunsRule("123-132")
     rule.verify(job_request)
@@ -57,7 +55,7 @@ def test_vesuvio_ip_file_rule(job_request):
     """
     Test that the IP file is set via the specification
     :param job_request: JobRequest fixture
-    :return: None
+    :return: None.
     """
     rule = VesuvioIPFileRule("IP0001.par")
     rule.verify(job_request)

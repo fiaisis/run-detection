@@ -1,6 +1,4 @@
-"""
-Tests for run detection module
-"""
+"""Tests for run detection module."""
 
 import logging
 import re
@@ -36,7 +34,7 @@ def test_process_message(
     Test that process message loads the correct spec and calls ingest
     :param mock_instrument_spec: Mock Specification class
     :param mock_ingest: Mock ingest function
-    :return: None
+    :return: None.
     """
     notification_queue = SimpleQueue()
     mock_additional_request = MagicMock(spec=JobRequest)
@@ -71,7 +69,7 @@ def test_process_message_no_notification(mock_instrument_spec, mock_ingest):
     Test process message does not update notification queue if spec fails to verify
     :param mock_instrument_spec: Mock Spec class
     :param mock_ingest: Mock ingest function
-    :return: None
+    :return: None.
     """
     notification_queue = SimpleQueue()
     mock_additional_request = MagicMock(spec=JobRequest)
@@ -104,7 +102,7 @@ def test_process_messages(mock_process):
     """
     Test each message is processed and acked
     :param mock_process: Mock process messages function
-    :return: None
+    :return: None.
     """
     channel = MagicMock()
     method_frame = MagicMock()
@@ -125,7 +123,7 @@ def test_process_messages_raises_exception_nacks(mock_process):
     """
     Test messages are still acked after exception in processing
     :param mock_process: Mock Process messages function
-    :return: None
+    :return: None.
     """
     channel = MagicMock()
     method_frame = MagicMock()
@@ -146,7 +144,7 @@ def test_process_messages_raises_metadataerror_still_acks(mock_process):
     """
     Test messages are still acked after exception in processing
     :param mock_process: Mock Process messages function
-    :return: None
+    :return: None.
     """
     channel = MagicMock()
     method_frame = MagicMock()
@@ -167,7 +165,7 @@ def test_process_messages_does_not_ack_attribute_error():
     Test messages are not acked after AttributeError in processing. As this should only occur when no message is
     consumed.
     :param mock_process: Mock Process messages function
-    :return: None
+    :return: None.
     """
     channel = MagicMock()
     channel.consume.return_value = [(None, None, None)]
@@ -186,7 +184,7 @@ def test_process_notifications(mock_producer):
     """
     Tests messages in the notification queue are produced by the producer
     :param mock_byte: Mock bytearray class
-    :return: None
+    :return: None.
     """
     detected_run_1 = MagicMock()
     detected_run_1.run_number = "1"
@@ -216,7 +214,7 @@ def test_process_notifications(mock_producer):
 def test_start_run_detection():
     """
     Mock run detection start up
-    :return:  None
+    :return:  None.
     """
     mock_channel = Mock()
 
@@ -242,7 +240,7 @@ def test_verify_archive_access_accessible(mock_path, caplog):
     Test logging when archive is accessible
     :param mock_path: mock Path class
     :param caplog: log capture fixture
-    :return: None
+    :return: None.
     """
     mock_path.return_value.exists.return_value = True
     with caplog.at_level(logging.INFO):
@@ -257,7 +255,7 @@ def test_verify_archive_access_not_accessible(mock_path, caplog):
     Test logging when archive not accessible
     :param mock_path: Mock path class
     :param caplog: Log capture fixture
-    :return: None
+    :return: None.
     """
     mock_path.return_value.exists.return_value = False
     with caplog.at_level(logging.INFO):
@@ -270,7 +268,7 @@ def test_verify_archive_access_not_accessible(mock_path, caplog):
 @patch("rundetection.run_detection.ConnectionParameters")
 @patch("rundetection.run_detection.BlockingConnection")
 def test_get_channel(mock_blocking_connection, mock_connection_parameters, mock_plain_credentials):
-    """Test channel is created and returned"""
+    """Test channel is created and returned."""
     mock_channel = MagicMock()
     mock_blocking_connection.return_value.channel.return_value = mock_channel
 
@@ -296,7 +294,7 @@ def test_get_channel(mock_blocking_connection, mock_connection_parameters, mock_
 
 @patch("rundetection.run_detection.get_channel")  # Replace with actual module name
 def test_producer(mock_get_channel):
-    """Test the producer context manager"""
+    """Test the producer context manager."""
     mock_channel = MagicMock()
     mock_get_channel.return_value = mock_channel
 
@@ -311,7 +309,7 @@ def test_producer(mock_get_channel):
 def test_write_readiness_probe_file():
     """
     Test the write_readiness_probe
-    :return: None
+    :return: None.
     """
     # Call the function to create the file
     write_readiness_probe_file()

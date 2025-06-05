@@ -16,9 +16,10 @@ logger = logging.getLogger(__name__)
 
 def _check_if_nexus_file(path: Path) -> None:
     """
-    Check if a given path is a nexus file, if not raise ValueError
+    Check if a given path is a nexus file, if not raise ValueError.
+
     :param path: path to check
-    :return: None
+    :return: None.
     """
     if path.suffix != ".nxs":
         raise ValueError(f"File: {path} is not a nexus file")
@@ -26,9 +27,10 @@ def _check_if_nexus_file(path: Path) -> None:
 
 def load_h5py_dataset(path: Path) -> Any:
     """
-    Load the nexus file into a h5py dataset
+    Load the nexus file into a h5py dataset.
+
     :param path: the path of the nexus file
-    :return: (Any) The h5py dataset
+    :return: (Any) The h5py dataset.
     """
     try:
         logger.info("loading dataset for %s", path)
@@ -42,9 +44,10 @@ def load_h5py_dataset(path: Path) -> Any:
 
 def ingest(path: Path) -> JobRequest:
     """
-    Given the path of a nexus file, Create and return a JobRequest
+    Given the path of a nexus file, Create and return a JobRequest.
+
     :param path: The path of the nexus file
-    :return: The JobRequest built from the given nexus file
+    :return: The JobRequest built from the given nexus file.
     """
     logger.info("Ingesting file: %s", path)
     _check_if_nexus_file(path)
@@ -59,9 +62,10 @@ def ingest(path: Path) -> JobRequest:
 
 def _build_initial_job_request(dataset: Any, path: Path) -> JobRequest:
     """
-    Build the initial job request from the given h5py job request
+    Build the initial job request from the given h5py job request.
+
     :param dataset: the dataset
-    :return: the new jobrequest
+    :return: the new jobrequest.
     """
     logger.info("Extracting common metadata...")
     return JobRequest(
@@ -80,27 +84,30 @@ def _build_initial_job_request(dataset: Any, path: Path) -> JobRequest:
 
 def get_sibling_nexus_files(nexus_path: Path) -> list[Path]:
     """
-    Given the path of a nexus file, return a list of any other nexus files in the same directory
+    Given the path of a nexus file, return a list of any other nexus files in the same directory.
+
     :param nexus_path: The nexus file for which directory to search
-    :return: List of sibling nexus files
+    :return: List of sibling nexus files.
     """
     return [Path(file) for file in nexus_path.parents[0].glob("*.nxs") if Path(file) != nexus_path]
 
 
 def get_sibling_runs(nexus_path: Path) -> list[JobRequest]:
     """
-    Given the path of a nexus file, return a list of ingested sibling nexus files in the same directory
+    Given the path of a nexus file, return a list of ingested sibling nexus files in the same directory.
+
     :param nexus_path: The nexus file for which directory to search
-    :return: List of JobRequest Objects
+    :return: List of JobRequest Objects.
     """
     return [ingest(file) for file in get_sibling_nexus_files(nexus_path)]
 
 
 def get_run_title(nexus_path: Path) -> str:
     """
-    Given the path of a nexus file, get the run title for that file
+    Given the path of a nexus file, get the run title for that file.
+
     :param nexus_path: Path - the nexus file path
-    :return: str - The title of the files run
+    :return: str - The title of the files run.
     """
     # Instead of using Ingest here and reusing code, we won't bother with loading too much of the file every time and
     # JUST load the title instead of everything.
