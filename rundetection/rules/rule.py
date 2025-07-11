@@ -35,6 +35,10 @@ class Rule(Generic[T], ABC):
         self.should_be_last = False
         self.should_be_first = False
 
+    def __hash__(self) -> int:
+        """Hash the rule based on the value"""
+        return hash(self._value)
+
     @abstractmethod
     def verify(self, job_request: JobRequest) -> None:
         """
