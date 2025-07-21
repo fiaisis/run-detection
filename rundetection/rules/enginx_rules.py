@@ -5,7 +5,7 @@ from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
 
 
-class EnginxVanadiumRunRule(Rule[int]):
+class EnginxVanadiumRunRule(Rule[int | str]):
 
     """
     Insert the vanadium run number into the JobRequest
@@ -23,26 +23,7 @@ class EnginxVanadiumRunRule(Rule[int]):
         job_request.additional_values["vanadium_run"] = self._value
 
 
-class EnginxFocusRunsRule(Rule[list[int]]):
-
-    """
-    Insert the focus runs into the JobRequest.
-
-    """
-
-    def verify(self, job_request: JobRequest) -> None:
-        """
-        Verify the rule against the job request.
-
-        Adds the focus runs to the additional values.
-
-        :param job_request: The job request to verify.
-        :return: None.
-        """
-        job_request.additional_values["focus_runs"] = self._value
-
-
-class EnginxCeriaRunRule(Rule[int]):
+class EnginxCeriaRunRule(Rule[int | str]):
 
     """
     Insert the ceria run number into the JobRequest

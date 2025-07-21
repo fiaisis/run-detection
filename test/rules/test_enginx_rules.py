@@ -3,7 +3,7 @@
 import pytest
 
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.enginx_rules import EnginxVanadiumRunRule, EnginxFocusRunsRule, EnginxCeriaRunRule
+from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxVanadiumRunRule
 
 
 @pytest.fixture
@@ -38,19 +38,6 @@ def test_enginx_vanadium_run_rule(job_request):
     rule.verify(job_request)
 
     assert job_request.additional_values["vanadium_run"] == 12345
-
-
-def test_enginx_focus_runs_rule(job_request):
-    """
-    Test that the focus runs are set via the specification
-    :param job_request: JobRequest fixture
-    :return: None.
-    """
-    focus_runs = [23456, 23457, 23458]
-    rule = EnginxFocusRunsRule(focus_runs)
-    rule.verify(job_request)
-
-    assert job_request.additional_values["focus_runs"] == focus_runs
 
 
 def test_enginx_ceria_run_rule(job_request):
