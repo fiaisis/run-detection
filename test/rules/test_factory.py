@@ -9,6 +9,7 @@ from rundetection.rules.common_rules import (
     EnabledRule,
     MolSpecStitchRule,
 )
+from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxVanadiumRunRule
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
@@ -65,6 +66,8 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("iriscalibration", {"002": "00148587", "004": "00148587"}, IrisCalibrationRule),
         ("vesuvioipfilerule", "ip00001.par", VesuvioIPFileRule),
         ("vesuviovemptyrunsrule", "123-321", VesuvioEmptyRunsRule),
+        ("enginxvanadiumrun", 12345, EnginxVanadiumRunRule),
+        ("enginxceriarun", 34567, EnginxCeriaRunRule),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
@@ -91,6 +94,28 @@ def test_mariwbvan_rule_factory_returns_correct_rule_int_and_str():
     assert rule._value == 12345  # noqa: PLR2004
 
 
+def test_enginx_rules_factory_returns_correct_rule_int_and_str():
+    """
+    Test to ensure that the rule factory returns the correct Rule for Enginx rules when using either a str or int to
+    create the rule from the specification.
+    """
+    # Test EnginxVanadiumRunRule
+    rule = rule_factory("enginxvanadiumrun", 12345)
+    assert isinstance(rule, EnginxVanadiumRunRule)
+    assert rule._value == 12345  # noqa: PLR2004
+    rule = rule_factory("enginxvanadiumrun", "12345")
+    assert isinstance(rule, EnginxVanadiumRunRule)
+    assert rule._value == 12345  # noqa: PLR2004
+
+    # Test EnginxCeriaRunRule
+    rule = rule_factory("enginxceriarun", 34567)
+    assert isinstance(rule, EnginxCeriaRunRule)
+    assert rule._value == 34567  # noqa: PLR2004
+    rule = rule_factory("enginxceriarun", "34567")
+    assert isinstance(rule, EnginxCeriaRunRule)
+    assert rule._value == 34567  # noqa: PLR2004
+
+
 def test_raises_exception_for_missing_rule_class() -> None:
     """
     Test exception raised when non-existent rule name is given
@@ -115,6 +140,10 @@ def test_raises_exception_for_incorrect_rule_value_type() -> None:
         rule_factory("marimaskfile", 5)
     with pytest.raises(ValueError):  # noqa: PT011
         rule_factory("mariwbvan", 3.3)
+    with pytest.raises(ValueError):  # noqa: PT011
+        rule_factory("enginxvanadiumrun", 3.3)
+    with pytest.raises(ValueError):  # noqa: PT011
+        rule_factory("enginxceriarun", 3.3)
 
 
 if __name__ == "__main__":
