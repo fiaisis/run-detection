@@ -1,15 +1,12 @@
 """Enginx Rules."""
 
-
 from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
 
 
 class EnginxVanadiumRunRule(Rule[int | str]):
 
-    """
-    Insert the vanadium run number into the JobRequest
-    """
+    """Insert the vanadium run number into the JobRequest"""
 
     def verify(self, job_request: JobRequest) -> None:
         """

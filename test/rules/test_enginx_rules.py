@@ -37,7 +37,7 @@ def test_enginx_vanadium_run_rule(job_request):
     rule = EnginxVanadiumRunRule(12345)
     rule.verify(job_request)
 
-    assert job_request.additional_values["vanadium_run"] == 12345
+    assert job_request.additional_values["vanadium_run"] == 12345  # noqa: PLR2004
 
 
 def test_enginx_ceria_run_rule(job_request):
@@ -49,4 +49,4 @@ def test_enginx_ceria_run_rule(job_request):
     rule = EnginxCeriaRunRule(34567)
     rule.verify(job_request)
 
-    assert job_request.additional_values["ceria_run"] == 34567
+    assert job_request.additional_values["ceria_run"] == 34567  # noqa: PLR2004

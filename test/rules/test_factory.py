@@ -96,8 +96,8 @@ def test_mariwbvan_rule_factory_returns_correct_rule_int_and_str():
 
 def test_enginx_rules_factory_returns_correct_rule_int_and_str():
     """
-    Test to ensure that the rule factory returns the correct Rule for Enginx rules when using either a str or int to create
-    the rule from the specification.
+    Test to ensure that the rule factory returns the correct Rule for Enginx rules when using either a str or int to
+    create the rule from the specification.
     """
     # Test EnginxVanadiumRunRule
     rule = rule_factory("enginxvanadiumrun", 12345)
