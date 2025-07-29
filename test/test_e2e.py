@@ -107,6 +107,8 @@ EXPECTED_MARI_WBVAN = get_specification_value("mari", "mariwbvan")
 EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
 EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandreflection")
 EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
+EXPECTED_ENGINX_VANADIUM = get_specification_value("enginx", "enginxvanadiumrun")
+EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
 
 
 @pytest.mark.parametrize(
@@ -472,6 +474,29 @@ EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
             ],
         ),
         (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
+        (
+            ["/archive/NDXENGINX/Instrument/data/cycle_22_1/ENGINX00299080.nxs"],
+            [
+                {
+                    "run_number": 12345,
+                    "instrument": "ENGINX",
+                    "experiment_title": "Test experiment",
+                    "experiment_number": "2200123",
+                    "filepath": "/archive/NDXENGINX/Instrument/data/cycle_22_1/ENGINX00299080.nxs",
+                    "run_start": "2022-01-01T00:00:00",
+                    "run_end": "2022-01-01T01:00:00",
+                    "raw_frames": 100000,
+                    "good_frames": 90000,
+                    "users": "Test User",
+                    "additional_values": {
+                        "cycle_string": "cycle_22_1",
+                        "vanadium_run": EXPECTED_ENGINX_VANADIUM,
+                        "ceria_run": EXPECTED_ENGINX_CERIA,
+                        "input_runs": [12345],
+                    },
+                },
+            ],
+        ),
     ],
 )
 def test_e2e(producer_channel, consumer_channel, messages, expected_requests):
