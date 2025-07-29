@@ -1,3 +1,5 @@
 {
-  "enabled": false
+  "enabled": true,
+  "enginxvanadiumrun": 123,
+  "enginxceriarun": 456
 }
