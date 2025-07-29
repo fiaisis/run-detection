@@ -475,14 +475,14 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
         ),
         (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
         (
-            ["/archive/NDXENGINX/Instrument/data/cycle_22_1/ENGINX00299080.nxs"],
+            ["/archive/NDXENGINX/Instrument/data/cycle_20_01/ENGINX00299080.nxs"],
             [
                 {
                     "run_number": 12345,
                     "instrument": "ENGINX",
                     "experiment_title": "Test experiment",
                     "experiment_number": "2200123",
-                    "filepath": "/archive/NDXENGINX/Instrument/data/cycle_22_1/ENGINX00299080.nxs",
+                    "filepath": "/archive/NDXENGINX/Instrument/data/cycle_20_01/ENGINX00299080.nxs",
                     "run_start": "2022-01-01T00:00:00",
                     "run_end": "2022-01-01T01:00:00",
                     "raw_frames": 100000,
