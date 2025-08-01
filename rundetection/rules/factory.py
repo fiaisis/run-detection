@@ -6,6 +6,7 @@ from rundetection.rules.common_rules import (
     EnabledRule,
     MolSpecStitchRule,
 )
+from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxVanadiumRunRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
@@ -92,6 +93,12 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "vesuvioipfilerule":
             if isinstance(value, str):
                 return VesuvioIPFileRule(value)
+        case "enginxvanadiumrun":
+            if isinstance(value, int | str):
+                return EnginxVanadiumRunRule(int(value))
+        case "enginxceriarun":
+            if isinstance(value, int | str):
+                return EnginxCeriaRunRule(int(value))
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 
