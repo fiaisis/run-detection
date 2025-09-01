@@ -15,7 +15,7 @@ from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
-    OsirisDefaultGraniteAnalyser,
+    OsirisDefaultGraphiteAnalyser,
     OsirisDefaultSpectroscopy,
     OsirisReductionModeRule,
     OsirisReflectionCalibrationRule,
@@ -55,7 +55,7 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("mariwbvan", 12345, MariWBVANRule),
         ("osiriscalibfilesandreflection", {"002": "00148587", "004": "00148587"}, OsirisReflectionCalibrationRule),
         ("osirisdefaultspectroscopy", True, OsirisDefaultSpectroscopy),
-        ("osirisdefaultgraniteanalyser", True, OsirisDefaultGraniteAnalyser),
+        ("osirisdefaultgraphiteanalyser", True, OsirisDefaultGraphiteAnalyser),
         ("osirisreductionmode", True, OsirisReductionModeRule),
         ("sansscattertransfiles", True, SansScatterTransFiles),
         ("sansuserfile", "loquserfile.toml", SansUserFile),

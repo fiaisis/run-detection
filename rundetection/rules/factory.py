@@ -11,7 +11,7 @@ from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
-    OsirisDefaultGraniteAnalyser,
+    OsirisDefaultGraphiteAnalyser,
     OsirisDefaultSpectroscopy,
     OsirisReductionModeRule,
     OsirisReflectionCalibrationRule,
@@ -60,9 +60,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "osirisdefaultspectroscopy":
             if isinstance(value, bool):
                 return OsirisDefaultSpectroscopy(value)
-        case "osirisdefaultgraniteanalyser":
+        case "osirisdefaultgraphiteanalyser":
             if isinstance(value, bool):
-                return OsirisDefaultGraniteAnalyser(value)
+                return OsirisDefaultGraphiteAnalyser(value)
         case "osirisreductionmode":
             if isinstance(value, bool):
                 return OsirisReductionModeRule(value)
