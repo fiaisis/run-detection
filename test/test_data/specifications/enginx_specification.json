@@ -1,5 +1,6 @@
 {
   "enabled": true,
   "enginxvanadiumrun": 123,
-  "enginxceriarun": 456
+  "enginxceriarun": 456,
+  "enginxgroup": "BOTH"
 }
