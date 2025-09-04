@@ -59,6 +59,7 @@ class MariStitchRule(Rule[bool]):
             # automatically it will produce an infinite loop
             additional_request.additional_values["mask_file_link"] = job_request.additional_values["mask_file_link"]
             additional_request.additional_values["wbvan"] = job_request.additional_values["wbvan"]
+            additional_request.additional_values["git_sha"] = job_request.additional_values["git_sha"]
             job_request.additional_requests.append(additional_request)
 
 
@@ -96,3 +97,18 @@ class MariWBVANRule(Rule[int]):
         :return: None.
         """
         job_request.additional_values["wbvan"] = self._value
+
+class MariGitShaRule(Rule[int]):
+
+    """Insert the cycles git_sha number into the script."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Adds the git_sha to the additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["git_sha"] = self._value
