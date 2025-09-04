@@ -2,8 +2,9 @@
 
 import pytest
 
+from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxVanadiumRunRule
+from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxGroupRule, EnginxVanadiumRunRule
 
 
 @pytest.fixture
@@ -50,3 +51,19 @@ def test_enginx_ceria_run_rule(job_request):
     rule.verify(job_request)
 
     assert job_request.additional_values["ceria_run"] == 34567  # noqa: PLR2004
+
+
+def test_enginx_group_rule_valid_values(job_request):
+    """Test that valid group values are accepted and set in additional_values"""
+    valid_groups = ["both", "north", "south", "cropped", "custom", "texture20", "texture30"]
+    for group in valid_groups:
+        jr = job_request
+        rule = EnginxGroupRule(group)
+        rule.verify(jr)
+        assert jr.additional_values["group"] == group
+
+
+def test_enginx_group_rule_invalid_value_raises(job_request):
+    """Test that an invalid group raises an exception"""
+    with pytest.raises(RuleViolationError):
+        EnginxGroupRule("invalid_group").verify(job_request)

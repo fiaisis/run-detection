@@ -1,5 +1,6 @@
 """Enginx Rules."""
 
+from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
 
@@ -38,3 +39,27 @@ class EnginxCeriaRunRule(Rule[int | str]):
         :return: None.
         """
         job_request.additional_values["ceria_run"] = self._value
+
+
+class EnginxGroupRule(Rule[str]):
+
+    """Insert the group type into the JobRequest"""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Adds the group type to the additional values after validating it against a list of valid group types.
+
+        :param job_request: The job request to verify.
+        :raises RuleViolationError: If the group type is not in the list of valid groups.
+        :return: None.
+        """
+        group = self._value
+
+        valid_groups = ["both", "north", "south", "cropped", "custom", "texture20", "texture30"]
+
+        if group.lower() not in valid_groups:
+            raise RuleViolationError(f"Invalid group type: {group} for EnginxGroupRule")
+
+        job_request.additional_values["group"] = group
