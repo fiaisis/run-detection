@@ -9,7 +9,12 @@ from rundetection.rules.common_rules import (
     EnabledRule,
     MolSpecStitchRule,
 )
-from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxCeriaCycleRule, EnginxGroupRule, EnginxVanadiumRunRule
+from rundetection.rules.enginx_rules import (
+    EnginxCeriaCycleRule,
+    EnginxCeriaRunRule,
+    EnginxGroupRule,
+    EnginxVanadiumRunRule,
+)
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule

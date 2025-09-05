@@ -4,7 +4,12 @@ import pytest
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxCeriaCycleRule, EnginxGroupRule, EnginxVanadiumRunRule
+from rundetection.rules.enginx_rules import (
+    EnginxCeriaCycleRule,
+    EnginxCeriaRunRule,
+    EnginxGroupRule,
+    EnginxVanadiumRunRule,
+)
 
 
 @pytest.fixture
