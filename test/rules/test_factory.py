@@ -18,7 +18,7 @@ from rundetection.rules.enginx_rules import (
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
-from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
+from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraniteAnalyser,
     OsirisDefaultSpectroscopy,
@@ -58,6 +58,7 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("maristitch", True, MariStitchRule),
         ("marimaskfile", "foo", MariMaskFileRule),
         ("mariwbvan", 12345, MariWBVANRule),
+        ("git_sha", "abc1234567", MariGitShaRule),
         ("osiriscalibfilesandreflection", {"002": "00148587", "004": "00148587"}, OsirisReflectionCalibrationRule),
         ("osirisdefaultspectroscopy", True, OsirisDefaultSpectroscopy),
         ("osirisdefaultgraniteanalyser", True, OsirisDefaultGraniteAnalyser),
@@ -147,6 +148,8 @@ def test_raises_exception_for_incorrect_rule_value_type() -> None:
         rule_factory("marimaskfile", 5)
     with pytest.raises(ValueError):  # noqa: PT011
         rule_factory("mariwbvan", 3.3)
+    with pytest.raises(ValueError):  # noqa: PT011
+        rule_factory("git_sha", 4)
     with pytest.raises(ValueError):  # noqa: PT011
         rule_factory("enginxvanadiumrun", 3.3)
     with pytest.raises(ValueError):  # noqa: PT011
