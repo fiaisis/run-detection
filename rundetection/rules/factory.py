@@ -9,7 +9,7 @@ from rundetection.rules.common_rules import (
 from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxGroupRule, EnginxVanadiumRunRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
-from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule, MariGitShaRule
+from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraniteAnalyser,
     OsirisDefaultSpectroscopy,
