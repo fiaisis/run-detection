@@ -112,7 +112,7 @@ def test_mari_mask_rule(job_request):
     """
     Test given link is attached to additional values
     :param job_request: job request fixture
-    :return: none.
+    :return: None.
     """
     rule = MariMaskFileRule("some link")
     rule.verify(job_request)
@@ -133,9 +133,11 @@ def test_mari_wbvan_rule(job_request):
 
 def test_mari_git_sha_rule(job_request):
     """
+    Test that the git_sha number is attached to additional values
+    :pram job_request: job request fixture
+    :return: None.
     """
     rule = MariGitShaRule("abc1234567")
     rule.verify(job_request)
 
     assert job_request.additional_values["git_sha"] == "abc1234567"
-    
