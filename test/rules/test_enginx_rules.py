@@ -4,7 +4,7 @@ import pytest
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxGroupRule, EnginxVanadiumRunRule
+from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxCeriaCycleRule, EnginxGroupRule, EnginxVanadiumRunRule
 
 
 @pytest.fixture
@@ -67,3 +67,10 @@ def test_enginx_group_rule_invalid_value_raises(job_request):
     """Test that an invalid group raises an exception"""
     with pytest.raises(RuleViolationError):
         EnginxGroupRule("invalid_group").verify(job_request)
+
+
+def test_enginx_ceria_cycle_rule(job_request):
+    """Test that the ceria cycle string is set via the specification"""
+    rule = EnginxCeriaCycleRule("cycle_20_01")
+    rule.verify(job_request)
+    assert job_request.additional_values["ceria_cycle"] == "cycle_20_01"

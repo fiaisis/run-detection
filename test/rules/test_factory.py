@@ -9,7 +9,7 @@ from rundetection.rules.common_rules import (
     EnabledRule,
     MolSpecStitchRule,
 )
-from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxGroupRule, EnginxVanadiumRunRule
+from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxCeriaCycleRule, EnginxGroupRule, EnginxVanadiumRunRule
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
@@ -69,6 +69,7 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("enginxvanadiumrun", 12345, EnginxVanadiumRunRule),
         ("enginxceriarun", 34567, EnginxCeriaRunRule),
         ("enginxgroup", "north", EnginxGroupRule),
+        ("enginxceriacycle", "cycle_20_01", EnginxCeriaCycleRule),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
@@ -147,6 +148,8 @@ def test_raises_exception_for_incorrect_rule_value_type() -> None:
         rule_factory("enginxceriarun", 3.3)
     with pytest.raises(ValueError):  # noqa: PT011
         rule_factory("enginxgroup", 123)
+    with pytest.raises(ValueError):  # noqa: PT011
+        rule_factory("enginxceriacycle", 123)
 
 
 if __name__ == "__main__":
