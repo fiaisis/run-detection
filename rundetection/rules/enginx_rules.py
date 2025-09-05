@@ -63,3 +63,23 @@ class EnginxGroupRule(Rule[str]):
             raise RuleViolationError(f"Invalid group type: {group} for EnginxGroupRule")
 
         job_request.additional_values["group"] = group
+
+
+class EnginxCeriaCycleRule(Rule[str]):
+
+    """
+    Insert the ceria cyle string into the JobRequest
+
+    This value is used for calibration.
+    """
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Adds the ceria run number to the additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["ceria_cycle"] = self._value

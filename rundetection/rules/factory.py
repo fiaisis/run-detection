@@ -6,7 +6,12 @@ from rundetection.rules.common_rules import (
     EnabledRule,
     MolSpecStitchRule,
 )
-from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxGroupRule, EnginxVanadiumRunRule
+from rundetection.rules.enginx_rules import (
+    EnginxCeriaCycleRule,
+    EnginxCeriaRunRule,
+    EnginxGroupRule,
+    EnginxVanadiumRunRule,
+)
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
@@ -105,6 +110,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "enginxgroup":
             if isinstance(value, str):
                 return EnginxGroupRule(value)
+        case "enginxceriacycle":
+            if isinstance(value, str):
+                return EnginxCeriaCycleRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 

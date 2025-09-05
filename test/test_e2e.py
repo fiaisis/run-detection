@@ -493,7 +493,12 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                     "raw_frames": 95760,
                     "good_frames": 76485,
                     "users": "Garcia,Lee",
-                    "additional_values": {"vanadium_run": 123, "ceria_run": 456, "group": "BOTH"},
+                    "additional_values": {
+                        "vanadium_run": 123,
+                        "ceria_cycle": "21_1",
+                        "ceria_run": 456,
+                        "group": "BOTH",
+                    },
                 },
             ],
         ),
