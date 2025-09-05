@@ -99,7 +99,7 @@ class MariWBVANRule(Rule[int]):
         job_request.additional_values["wbvan"] = self._value
 
 
-class MariGitShaRule(Rule[int]):
+class MariGitShaRule(Rule[str]):
 
     """Insert the cycles git_sha number into the script."""
 
