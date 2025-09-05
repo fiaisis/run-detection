@@ -109,6 +109,8 @@ EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandref
 EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
 EXPECTED_ENGINX_VANADIUM = get_specification_value("enginx", "enginxvanadiumrun")
 EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
+EXPECTED_ENGINX_VANADIUM_CYCLE = get_specification_value("enginx", "enginxvanadiumcycle")
+EXPECTED_ENGINX_FOCUS_CYCLE = get_specification_value("enginx", "enginxfocuscycle")
 
 
 @pytest.mark.parametrize(
@@ -493,6 +495,8 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                         "ceria_cycle": "21_1",
                         "ceria_run": 456,
                         "group": "BOTH",
+                        "vanadium_cycle": EXPECTED_ENGINX_VANADIUM_CYCLE,
+                        "focus_cycle": EXPECTED_ENGINX_FOCUS_CYCLE,
                     },
                 },
             ],

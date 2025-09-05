@@ -9,7 +9,9 @@ from rundetection.rules.common_rules import (
 from rundetection.rules.enginx_rules import (
     EnginxCeriaCycleRule,
     EnginxCeriaRunRule,
+    EnginxFocusCycleRule,
     EnginxGroupRule,
+    EnginxVanadiumCycleRule,
     EnginxVanadiumRunRule,
 )
 from rundetection.rules.inter_rules import InterStitchRule
@@ -110,6 +112,12 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "enginxceriacycle":
             if isinstance(value, str):
                 return EnginxCeriaCycleRule(value)
+        case "enginxvanadiumcycle":
+            if isinstance(value, str):
+                return EnginxVanadiumCycleRule(value)
+        case "enginxfocuscycle":
+            if isinstance(value, str):
+                return EnginxFocusCycleRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 

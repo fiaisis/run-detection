@@ -3,5 +3,7 @@
   "enginxvanadiumrun": 123,
   "enginxceriarun": 456,
   "enginxgroup": "BOTH",
-  "enginxceriacycle": "21_1"
+  "enginxceriacycle": "21_1",
+  "enginxvanadiumcycle": "cycle_20_01",
+  "enginxfocuscycle": "cycle_20_01"
 }

@@ -83,3 +83,43 @@ class EnginxCeriaCycleRule(Rule[str]):
         :return: None.
         """
         job_request.additional_values["ceria_cycle"] = self._value
+
+
+class EnginxVanadiumCycleRule(Rule[str]):
+
+    """
+    Insert the vanadium cycle string into the JobRequest
+
+    This value may be used for vanadium processing.
+    """
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Adds the vanadium cycle string to the additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["vanadium_cycle"] = self._value
+
+
+class EnginxFocusCycleRule(Rule[str]):
+
+    """
+    Insert the focus cycle string into the JobRequest
+
+    This value may be used for focus processing.
+    """
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Adds the focus cycle string to the additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["focus_cycle"] = self._value

@@ -7,7 +7,9 @@ from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.enginx_rules import (
     EnginxCeriaCycleRule,
     EnginxCeriaRunRule,
+    EnginxFocusCycleRule,
     EnginxGroupRule,
+    EnginxVanadiumCycleRule,
     EnginxVanadiumRunRule,
 )
 
@@ -79,3 +81,17 @@ def test_enginx_ceria_cycle_rule(job_request):
     rule = EnginxCeriaCycleRule("cycle_20_01")
     rule.verify(job_request)
     assert job_request.additional_values["ceria_cycle"] == "cycle_20_01"
+
+
+def test_enginx_vanadium_cycle_rule(job_request):
+    """Test that the vanadium cycle string is set via the specification"""
+    rule = EnginxVanadiumCycleRule("cycle_20_01")
+    rule.verify(job_request)
+    assert job_request.additional_values["vanadium_cycle"] == "cycle_20_01"
+
+
+def test_enginx_focus_cycle_rule(job_request):
+    """Test that the focus cycle string is set via the specification"""
+    rule = EnginxFocusCycleRule("cycle_20_01")
+    rule.verify(job_request)
+    assert job_request.additional_values["focus_cycle"] == "cycle_20_01"
