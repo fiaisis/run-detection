@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
+from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule, MariGitShaRule
 
 
 @pytest.fixture(autouse=True)
@@ -98,6 +98,8 @@ def test_verify_multiple_runs(mari_stitch_rule_true, job_request):
     rule.verify(job_request)
     rule = MariWBVANRule(1234567)
     rule.verify(job_request)
+    rule = MariGitShaRule("abc1234567")
+    rule.verify(job_request)
     with patch("rundetection.rules.mari_rules.MariStitchRule._get_runs_to_stitch", return_value=[1, 2, 3]):
         mari_stitch_rule_true.verify(job_request)
 
@@ -128,3 +130,12 @@ def test_mari_wbvan_rule(job_request):
     rule.verify(job_request)
 
     assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
+
+def test_mari_git_sha_rule(job_request):
+    """
+    """
+    rule = MariGitShaRule("abc1234567")
+    rule.verify(job_request)
+
+    assert job_request.additional_values["git_sha"] == "abc1234567"
+    
