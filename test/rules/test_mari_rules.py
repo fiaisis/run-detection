@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule, MariGitShaRule
+from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
 
 
 @pytest.fixture(autouse=True)
@@ -130,6 +130,7 @@ def test_mari_wbvan_rule(job_request):
     rule.verify(job_request)
 
     assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
+
 
 def test_mari_git_sha_rule(job_request):
     """
