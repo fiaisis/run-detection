@@ -6,7 +6,12 @@ from rundetection.rules.common_rules import (
     EnabledRule,
     MolSpecStitchRule,
 )
-from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxCeriaCycleRule, EnginxGroupRule, EnginxVanadiumRunRule
+from rundetection.rules.enginx_rules import (
+    EnginxCeriaCycleRule,
+    EnginxCeriaRunRule,
+    EnginxGroupRule,
+    EnginxVanadiumRunRule,
+)
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
@@ -27,7 +32,7 @@ from rundetection.rules.sans_rules import (
 from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule
 
 
-def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912
+def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912, PLR0915
     """
     Return the rule implementation for the given rule key and value.
 
