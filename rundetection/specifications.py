@@ -9,10 +9,6 @@ import requests
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
-from rundetection.rules.enginx_rules import (
-    EnginxCeriaPathRule,
-    EnginxVanadiumPathRule,
-)
 from rundetection.rules.factory import rule_factory
 
 if typing.TYPE_CHECKING:
@@ -104,7 +100,3 @@ class InstrumentSpecification:
             if not job_request.will_reduce:
                 logger.info("Rule %s not met for run %s", rule, job_request)
                 break  # Stop processing as soon as one rule is not met.
-
-        if job_request.instrument.upper() == "ENGINX":
-            EnginxCeriaPathRule("193749").verify(job_request)
-            EnginxVanadiumPathRule("236516").verify(job_request)
