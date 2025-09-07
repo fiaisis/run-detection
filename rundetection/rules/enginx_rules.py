@@ -90,23 +90,19 @@ class EnginxCeriaCycleRule(Rule[str]):
         job_request.additional_values["ceria_cycle"] = self._value
 
 
-class EnginxCeriaFullPathRule(Rule[int | str]):
-    """
-    Insert the ceria run number into the JobRequest and resolve its file path.
-    Looks for files like ENGINX1234.nxs or ENGINX0001234.nxs under cycle_* dirs.
-    """
-
+class EnginxBasePathRule(Rule[int | str]):
     _ROOT = Path("/archive/NDXENGINX/Instrument/data")
     _DIR_GLOB = "cycle_*"
-    _MAX_WORKERS = 16  # tune: 8–32 usually good for slow SMB
+    _MAX_WORKERS = 16  # This seems fine, recommended 8-32 for slow SMB shares
+    path_key: str = "x_path"  # example: "x_path", would be ceria_path, etc.
 
     def verify(self, job_request: JobRequest) -> None:
         run = self._coerce_run(self._value)  # e.g., "1234"
         job_request.additional_values["ceria_run"] = run
 
-        found = self._find_ceria_path(run)
+        found = self._find_path(run)
         if found is not None:
-            job_request.additional_values["ceria_path"] = str(found)
+            job_request.additional_values[self.path_key] = str(found)
             logger.info(f"Found ceria run {run} at {found}")
         else:
             # Optionally hard-fail:
@@ -123,7 +119,7 @@ class EnginxCeriaFullPathRule(Rule[int | str]):
         return m.group(1)
 
     @classmethod
-    def _find_ceria_path(cls, run: str) -> Path | None:
+    def _find_path(cls, run: str) -> Path | None:  # noqa: C901
         """
         Find a file ending with '0*{run}.nxs' (case-insensitive), where the digit
         sequence is not preceded by another digit. Examples:
@@ -167,3 +163,11 @@ class EnginxCeriaFullPathRule(Rule[int | str]):
                     return match
 
         return None
+
+
+class EnginxCeriaPathRule(EnginxBasePathRule):
+    path_key: str = "ceria_path"
+
+
+class EnginxVanadiumPathRule(EnginxBasePathRule):
+    path_key: str = "vanadium_path"

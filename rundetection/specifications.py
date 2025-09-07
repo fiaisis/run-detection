@@ -9,7 +9,10 @@ import requests
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
-from rundetection.rules.enginx_rules import EnginxCeriaFullPathRule
+from rundetection.rules.enginx_rules import (
+    EnginxCeriaPathRule,
+    EnginxVanadiumPathRule,
+)
 from rundetection.rules.factory import rule_factory
 
 if typing.TYPE_CHECKING:
@@ -103,4 +106,5 @@ class InstrumentSpecification:
                 break  # Stop processing as soon as one rule is not met.
 
         if job_request.instrument.upper() == "ENGINX":
-            EnginxCeriaFullPathRule("193749").verify(job_request)
+            EnginxCeriaPathRule("193749").verify(job_request)
+            EnginxVanadiumPathRule("236516").verify(job_request)
