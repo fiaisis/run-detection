@@ -252,7 +252,7 @@ def enginx_extract(job_request: JobRequest, _Any) -> JobRequest:
     :param _Any: Unused parameter
     :return: JobRequest instance with updated additional metadata
     """
-    job_request.additional_values["focus_path"] = job_request.filepath
+    job_request.additional_values["focus_path"] = str(job_request.filepath)
 
 
 def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobRequest]:  # noqa: PLR0911
