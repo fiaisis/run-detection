@@ -9,6 +9,7 @@ import requests
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
+from rundetection.rules.enginx_rules import EnginxCeriaFullPathRule
 from rundetection.rules.factory import rule_factory
 
 if typing.TYPE_CHECKING:
@@ -23,7 +24,6 @@ SPEC_REQUEST_TIMEOUT_MINS = 10
 
 
 class InstrumentSpecification:
-
     """
     The instrument specification loads the rules from the relevant specification json file
     and allows verification of the rules given some nexus metadata.
@@ -98,6 +98,9 @@ class InstrumentSpecification:
             except RuleViolationError:
                 job_request.will_reduce = False
 
-            if job_request.will_reduce is False:
+            if not job_request.will_reduce:
                 logger.info("Rule %s not met for run %s", rule, job_request)
                 break  # Stop processing as soon as one rule is not met.
+
+        if job_request.instrument.upper() == "ENGINX":
+            EnginxCeriaFullPathRule("193749").verify(job_request)
