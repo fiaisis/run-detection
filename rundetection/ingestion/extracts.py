@@ -245,6 +245,16 @@ def vesuvio_extract(job_request: JobRequest, _: Any) -> JobRequest:
     return job_request
 
 
+def enginx_extract(job_request: JobRequest, _Any) -> JobRequest:
+    """
+    Extract additional metadata specific to the ENGINX instrument.
+    :param job_request: JobRequest instance for which to extract additional metadata
+    :param _Any: Unused parameter
+    :return: JobRequest instance with updated additional metadata
+    """
+    job_request.additional_values["focus_path"] = job_request.filepath
+
+
 def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobRequest]:  # noqa: PLR0911
     """
     Given an instrument name, return the additional metadata extraction function for the instrument.
@@ -267,6 +277,8 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
             return iris_extract
         case "vesuvio":
             return vesuvio_extract
+        case "enginx":
+            return enginx_extract
         case _:
             return skip_extract
 
