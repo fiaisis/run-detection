@@ -93,7 +93,7 @@ class EnginxCeriaCycleRule(Rule[str]):
 class EnginxBasePathRule(Rule[int | str]):
     _ROOT = Path("/archive/NDXENGINX/Instrument/data")
     _DIR_GLOB = "cycle_*"
-    _MAX_WORKERS = 32  # This seems fine, recommended 8-32 for slow SMB shares
+    _MAX_WORKERS = 40  # This seems fine, recommended 8-32 for slow SMB shares
     path_key: str = "x_path"  # example: "x_path", would be ceria_path, etc.
 
     def verify(self, job_request: JobRequest) -> None:
