@@ -489,9 +489,8 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                     "good_frames": 76485,
                     "users": "Garcia,Lee",
                     "additional_values": {
-                        "vanadium_run": 123,
-                        "ceria_cycle": "21_1",
-                        "ceria_run": 456,
+                        "vanadium_path": "/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00241391.nxs",
+                        "ceria_path": "/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00241391.nxs",
                         "group": "BOTH",
                     },
                 },
