@@ -1,11 +1,15 @@
 """Enginx Rules."""
 
+import contextlib
 import logging
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from functools import lru_cache
 from pathlib import Path
 from threading import Event
+
+import xmltodict
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
@@ -39,7 +43,7 @@ class EnginxGroupRule(Rule[str]):
 
 class EnginxBasePathRule(Rule[int | str]):
     _ROOT = Path("/archive/NDXENGINX/Instrument/data")
-    _DIR_GLOB = "cycle_*"
+    _DIR_GLOB = "cycle_"
     _MAX_WORKERS = 10  # This seems fine, recommended 8-32 for slow SMB shares
     path_key: str = "x_path"  # example: "x_path", would be ceria_path, etc.
 
@@ -66,7 +70,7 @@ class EnginxBasePathRule(Rule[int | str]):
         return m.group(1)
 
     @classmethod
-    def _find_path(cls, run: str) -> Path | None:  # noqa: C901
+    def _find_path(cls, run: str, cycle_str: str) -> Path | None:  # noqa: C901
         """
         Find a file ending with '0*{run}.nxs' (case-insensitive), where the digit
         sequence is not preceded by another digit. Examples:
@@ -76,9 +80,10 @@ class EnginxBasePathRule(Rule[int | str]):
         """
         # non-digit boundary, then any number of '0', then the run, then .nxs at end
         file_re = re.compile(rf"(?i)(?<!\d)0*{re.escape(run)}\.nxs$")
+        cycle_str = build_enginx_run_number_cycle_map()[int(run)]
 
         try:
-            cycle_dirs = [p for p in cls._ROOT.glob(cls._DIR_GLOB) if p.is_dir()]
+            cycle_dirs = [p for p in cls._ROOT.glob(f"{cls._DIR_GLOB}{cycle_str}") if p.is_dir()]
         except OSError:
             cycle_dirs = []
         if not cycle_dirs:
@@ -118,3 +123,32 @@ class EnginxCeriaPathRule(EnginxBasePathRule):
 
 class EnginxVanadiumPathRule(EnginxBasePathRule):
     path_key: str = "vanadium_path"
+
+
+@lru_cache(maxsize=1)
+def build_enginx_run_number_cycle_map() -> dict[int, str]:
+    """
+    Generate a mapping of run numbers to cycle strings based on the journal files.
+    For example. mapping[242666] -> "15_1"
+    :return: A dict[int, str] mapping run numbers to cycle strings.
+    """
+    logger.info("Building run number cycle map")
+    mapping = {}
+
+    def _walk_node(node, journal_file):
+        if isinstance(node, dict):
+            if "@name" in node:
+                with contextlib.suppress(ValueError):
+                    mapping[int(node["@name"][6:])] = journal_file[8:]
+                return
+            for v in node.values():
+                _walk_node(v, journal_file)
+        elif isinstance(node, list):
+            for item in node:
+                _walk_node(item, journal_file)
+
+    for path in Path("/archive/NDXENGINX/Instrument/logs/journal").glob("*.xml"):
+        with path.open() as journal:
+            journal_dict = xmltodict.parse(journal.read())
+            _walk_node(journal_dict, path.stem)
+    return mapping
