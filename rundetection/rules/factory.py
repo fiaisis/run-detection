@@ -14,7 +14,7 @@ from rundetection.rules.enginx_rules import (
 )
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
-from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
+from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraniteAnalyser,
     OsirisDefaultSpectroscopy,
@@ -59,6 +59,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "mariwbvan":
             if isinstance(value, int | str):
                 return MariWBVANRule(int(value))
+        case "git_sha":
+            if isinstance(value, str):
+                return MariGitShaRule(value)
         case "osiriscalibfilesandreflection":
             if isinstance(value, dict):
                 return OsirisReflectionCalibrationRule(value)
