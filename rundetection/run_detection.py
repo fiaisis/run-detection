@@ -16,6 +16,7 @@ from pika import BlockingConnection, ConnectionParameters, PlainCredentials  # t
 from rundetection.exceptions import ReductionMetadataError
 from rundetection.health import Heartbeat
 from rundetection.ingestion.ingest import ingest
+from rundetection.rules.enginx_rules import build_enginx_run_number_cycle_map
 from rundetection.specifications import InstrumentSpecification
 
 if typing.TYPE_CHECKING:
@@ -171,6 +172,14 @@ def verify_archive_access() -> None:
         logger.error("The archive has not been mounted correctly, and cannot be accessed.")
 
 
+def pre_build_enginx_cycle_mapping() -> None:
+    """
+    Make an initial call to the enginx run_number_cycle_map to ensure it is cached ahead of time.
+    :return: None
+    """
+    build_enginx_run_number_cycle_map()
+
+
 def main() -> None:
     """
     Entry point for run detection
@@ -179,6 +188,7 @@ def main() -> None:
     verify_archive_access()
     heart_beat = Heartbeat()
     heart_beat.start()
+    build_enginx_run_number_cycle_map()
     try:
         start_run_detection()
     finally:
