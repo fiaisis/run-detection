@@ -70,7 +70,7 @@ class EnginxBasePathRule(Rule[int | str]):
         return m.group(1)
 
     @classmethod
-    def _find_path(cls, run: str, cycle_str: str) -> Path | None:  # noqa: C901
+    def _find_path(cls, run: str) -> Path | None:  # noqa: C901
         """
         Find a file ending with '0*{run}.nxs' (case-insensitive), where the digit
         sequence is not preceded by another digit. Examples:
