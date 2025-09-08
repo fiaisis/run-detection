@@ -58,8 +58,6 @@ class EnginxBasePathRule(Rule[int | str]):
             job_request.additional_values[self.path_key] = str(found)
             logger.info(f"Found ceria run {run} at {found}")
         else:
-            # Optionally hard-fail:
-            # raise RuleViolationError(f"Ceria run {run} not found")
             logger.warning(f"Ceria run {run} not found")
 
     @staticmethod
