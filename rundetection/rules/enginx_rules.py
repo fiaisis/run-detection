@@ -1,13 +1,13 @@
 """Enginx Rules."""
 
+from __future__ import annotations
+
 import contextlib
 import logging
 import os
 import re
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
 from pathlib import Path
-from threading import Event
 
 import xmltodict
 
@@ -70,7 +70,7 @@ class EnginxBasePathRule(Rule[int | str]):
         return m.group(1)
 
     @classmethod
-    def _find_path(cls, run: str) -> Path | None:  # noqa: C901
+    def _find_path(cls, run: str) -> Path | None:
         """
         Find a file ending with '0*{run}.nxs' (case-insensitive), where the digit
         sequence is not preceded by another digit. Examples:
@@ -79,42 +79,36 @@ class EnginxBasePathRule(Rule[int | str]):
           foo991234.nxs        ✗ (blocked by non-digit boundary)
         """
         # non-digit boundary, then any number of '0', then the run, then .nxs at end
+        # Determine which cycle directory to search
         file_re = re.compile(rf"(?i)(?<!\d)0*{re.escape(run)}\.nxs$")
-        cycle_str = build_enginx_run_number_cycle_map()[int(run)]
 
         try:
-            cycle_dirs = [p for p in cls._ROOT.glob(f"{cls._DIR_GLOB}{cycle_str}") if p.is_dir()]
-        except OSError:
-            cycle_dirs = []
-        if not cycle_dirs:
-            return None
+            cycle_str = build_enginx_run_number_cycle_map()[int(run)]
+            cycle_dir = cls._ROOT / f"{cls._DIR_GLOB}{cycle_str}"
+        except KeyError:
+            cycle_dir = cls._latest_cycle_dir()
 
-        stop = Event()
-
-        def scan_one_dir(d: Path) -> Path | None:
-            if stop.is_set():
-                return None
-            try:
-                with os.scandir(d) as it:
-                    for entry in it:
-                        if stop.is_set():
-                            return None
-                        name = entry.name
-                        if file_re.search(name):
-                            return d / name
-            except (PermissionError, FileNotFoundError, OSError):
-                return None
-            return None
-
-        with ThreadPoolExecutor(max_workers=cls._MAX_WORKERS) as ex:
-            futures = {ex.submit(scan_one_dir, d): d for d in cycle_dirs}
-            for fut in as_completed(futures):
-                match = fut.result()
-                if match:
-                    stop.set()
-                    return match
-
+        # Scan that directory for a matching file
+        try:
+            with os.scandir(cycle_dir) as it:
+                for entry in it:
+                    if file_re.search(entry.name):
+                        return cycle_dir / entry.name
+        except (PermissionError, FileNotFoundError, OSError):
+            pass
+        logger.warning(f"Could not find file ending with '0*{run}.nxs' in {cycle_dir}")
         return None
+
+    @classmethod
+    def _latest_cycle_dir(cls: EnginxBasePathRule) -> Path | None:
+        try:
+            dirs = [p for p in cls._ROOT.glob("cycle_*_*") if p.is_dir()]
+        except OSError:
+            return None
+        if not dirs:
+            return None
+        # reverse lexicographic order, pick first
+        return max(dirs, key=lambda p: p.name)
 
 
 class EnginxCeriaPathRule(EnginxBasePathRule):
