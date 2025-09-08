@@ -1,14 +1,17 @@
-"""Test for enginx rules."""
+"""Tests for Enginx rules (group and path resolution)."""
+
+from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.enginx_rules import (
-    EnginxCeriaCycleRule,
-    EnginxCeriaRunRule,
+    EnginxBasePathRule,
+    EnginxCeriaPathRule,
     EnginxGroupRule,
-    EnginxVanadiumRunRule,
+    EnginxVanadiumPathRule,
 )
 
 
@@ -20,7 +23,7 @@ def job_request():
     """
     return JobRequest(
         run_number=100,
-        filepath="/archive/100/ENGINX100.nxs",
+        filepath=Path("/archive/100/ENGINX100.nxs"),
         experiment_title="Test experiment",
         additional_values={},
         additional_requests=[],
@@ -32,30 +35,6 @@ def job_request():
         instrument="enginx",
         experiment_number="",
     )
-
-
-def test_enginx_vanadium_run_rule(job_request):
-    """
-    Test that the vanadium run number is set via the specification
-    :param job_request: JobRequest fixture
-    :return: None.
-    """
-    rule = EnginxVanadiumRunRule(12345)
-    rule.verify(job_request)
-
-    assert job_request.additional_values["vanadium_run"] == 12345  # noqa: PLR2004
-
-
-def test_enginx_ceria_run_rule(job_request):
-    """
-    Test that the ceria run number is set via the specification
-    :param job_request: JobRequest fixture
-    :return: None.
-    """
-    rule = EnginxCeriaRunRule(34567)
-    rule.verify(job_request)
-
-    assert job_request.additional_values["ceria_run"] == 34567  # noqa: PLR2004
 
 
 def test_enginx_group_rule_valid_values(job_request):
@@ -74,8 +53,70 @@ def test_enginx_group_rule_invalid_value_raises(job_request):
         EnginxGroupRule("invalid_group").verify(job_request)
 
 
-def test_enginx_ceria_cycle_rule(job_request):
-    """Test that the ceria cycle string is set via the specification"""
-    rule = EnginxCeriaCycleRule("cycle_20_01")
+@pytest.mark.parametrize(
+    "run, expected_file",
+    [
+        (241391, "ENGINX00241391.nxs"),
+        ("299080", "ENGINX00299080.nxs"),
+    ],
+)
+@patch(
+    "rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_01", 299080: "20_01"}
+)
+def test_enginx_ceria_path_rule_finds_file(mock_map, run, expected_file, job_request, monkeypatch):
+    """Test that EnginxCeriaPathRule sets ceria_run and ceria_path when file exists."""
+    # Point the root to test data
+    monkeypatch.setattr(EnginxBasePathRule, "_ROOT", Path("test/test_data/e2e_data/NDXENGINX/Instrument/data"))
+
+    rule = EnginxCeriaPathRule(run)
     rule.verify(job_request)
-    assert job_request.additional_values["ceria_cycle"] == "cycle_20_01"
+
+    # ceria_run is coerced to a string of trailing digits
+    expected_run = EnginxBasePathRule._coerce_run(run)
+    assert job_request.additional_values["ceria_run"] == expected_run
+
+    # path should end with expected_file
+    ceria_path = Path(job_request.additional_values["ceria_path"])  # type: ignore[index]
+    assert ceria_path.name == expected_file
+    assert ceria_path.parent.name == "cycle_20_01"
+
+
+@patch("rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_01"})
+def test_enginx_vanadium_path_rule_finds_file(_, job_request, monkeypatch):
+    """Test that EnginxVanadiumPathRule sets the vanadium path when the file exists."""
+    monkeypatch.setattr(EnginxBasePathRule, "_ROOT", Path("test/test_data/e2e_data/NDXENGINX/Instrument/data"))
+    rule = EnginxVanadiumPathRule(241391)
+    rule.verify(job_request)
+    path = Path(job_request.additional_values["vanadium_path"])  # type: ignore[index]
+    assert path.name == "ENGINX00241391.nxs"
+
+
+def test_enginx_path_rule_not_found(job_request, monkeypatch):
+    """If run cannot be found, no exception and no path_key set, but ceria_run still set."""
+    # Ensure latest cycle dir points to test data but run is missing
+    monkeypatch.setattr(EnginxBasePathRule, "_ROOT", Path("test/test_data/e2e_data/NDXENGINX/Instrument/data"))
+
+    # Empty mapping to force fallback search
+    with patch("rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={}):
+        rule = EnginxCeriaPathRule(123)  # run is not present in files
+        rule.verify(job_request)
+
+    assert job_request.additional_values["ceria_run"] == "123"
+    assert "ceria_path" not in job_request.additional_values
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (123, "123"),
+        ("abc123", "123"),
+        ("ENGINX0000123", "0000123"),
+    ],
+)
+def test_coerce_run_parsing(value, expected):
+    assert EnginxBasePathRule._coerce_run(value) == expected
+
+
+def test_coerce_run_invalid_raises():
+    with pytest.raises(ValueError):
+        EnginxBasePathRule._coerce_run("no-digits")

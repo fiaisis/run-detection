@@ -42,6 +42,8 @@ class EnginxGroupRule(Rule[str]):
 
 
 class EnginxBasePathRule(Rule[int | str]):
+    """Base rule for resolving nexus file paths in the archive"""
+
     _ROOT = Path("/archive/NDXENGINX/Instrument/data")
     _DIR_GLOB = "cycle_"
     _MAX_WORKERS = 10  # This seems fine, recommended 8-32 for slow SMB shares
@@ -112,10 +114,14 @@ class EnginxBasePathRule(Rule[int | str]):
 
 
 class EnginxCeriaPathRule(EnginxBasePathRule):
+    """Resolve and attach the CERIA calibration file path for an EnginX run."""
+
     path_key: str = "ceria_path"
 
 
 class EnginxVanadiumPathRule(EnginxBasePathRule):
+    """Resolve and attach the Vanadium calibration file path for an EnginX run."""
+
     path_key: str = "vanadium_path"
 
 

@@ -1,8 +1,6 @@
 """Tests for run detection module."""
 
 import logging
-import re
-import time
 import unittest
 from pathlib import Path
 from queue import SimpleQueue
@@ -14,13 +12,13 @@ from rundetection.exceptions import ReductionMetadataError
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.run_detection import (
     get_channel,
+    main,
     process_message,
     process_messages,
     process_notifications,
     producer,
     start_run_detection,
     verify_archive_access,
-    write_readiness_probe_file,
 )
 
 
@@ -66,7 +64,7 @@ def test_process_message(
 @patch("rundetection.run_detection.InstrumentSpecification")
 def test_process_message_no_notification(mock_instrument_spec, mock_ingest):
     """
-    Test process message does not update notification queue if spec fails to verify
+    Test process message does not update the notification queue if spec fails to verify
     :param mock_instrument_spec: Mock Spec class
     :param mock_ingest: Mock ingest function
     :return: None.
@@ -164,7 +162,6 @@ def test_process_messages_does_not_ack_attribute_error():
     """
     Test messages are not acked after AttributeError in processing. As this should only occur when no message is
     consumed.
-    :param mock_process: Mock Process messages function
     :return: None.
     """
     channel = MagicMock()
@@ -183,7 +180,6 @@ def test_process_messages_does_not_ack_attribute_error():
 def test_process_notifications(mock_producer):
     """
     Tests messages in the notification queue are produced by the producer
-    :param mock_byte: Mock bytearray class
     :return: None.
     """
     detected_run_1 = MagicMock()
@@ -237,7 +233,7 @@ def test_start_run_detection():
 @patch("rundetection.run_detection.Path")
 def test_verify_archive_access_accessible(mock_path, caplog):
     """
-    Test logging when archive is accessible
+    Test logging when the archive is accessible
     :param mock_path: mock Path class
     :param caplog: log capture fixture
     :return: None.
@@ -306,29 +302,20 @@ def test_producer(mock_get_channel):
     mock_channel.connection.close.assert_called_once()
 
 
-def test_write_readiness_probe_file():
-    """
-    Test the write_readiness_probe
-    :return: None.
-    """
-    # Call the function to create the file
-    write_readiness_probe_file()
-
-    path = Path("/tmp/heartbeat")  # noqa: S108
-    assert path.exists(), "Heartbeat file does not exist."
-
-    with path.open(encoding="utf-8") as file:
-        content = file.read()
-
-        # Check if the content matches the timestamp format
-        timestamp_format = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}")
-        assert timestamp_format.match(content), f"Unexpected content format: {content}"
-
-        # Assert a reasonable time difference
-        timestamp = time.strptime(content, "%Y-%m-%d %H:%M:%S")
-        current_time = time.localtime()
-        time_difference = time.mktime(current_time) - time.mktime(timestamp)
-        assert abs(time_difference) < 5, f"The timestamp difference is too large: {time_difference} seconds."  # noqa: PLR2004
+@patch("rundetection.run_detection.start_run_detection", side_effect=InterruptedError)
+@patch("rundetection.run_detection.build_enginx_run_number_cycle_map")
+@patch("rundetection.run_detection.Heartbeat")
+@patch("rundetection.run_detection.verify_archive_access")
+def test_main_starts_and_stops(mock_verify, mock_heartbeat_cls, mock_build, mock_start):
+    """Main should verify, start heartbeat, build mapping, run detection, and stop heartbeat in finally."""
+    hb_instance = mock_heartbeat_cls.return_value
+    with pytest.raises(InterruptedError):
+        main()
+    mock_verify.assert_called_once()
+    hb_instance.start.assert_called_once()
+    mock_build.assert_called_once()
+    mock_start.assert_called_once()
+    hb_instance.stop.assert_called_once()
 
 
 if __name__ == "__main__":
