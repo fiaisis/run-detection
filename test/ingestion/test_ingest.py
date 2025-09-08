@@ -38,6 +38,7 @@ TEST_DATA_PATH = Path("../test_data") if Path("../test_data").exists() else Path
                 raw_frames=23740,
                 good_frames=18992,
                 users="Liu,Andriotis,Smith,Hallam,Flewitt,Kabra",
+                additional_values={"focus_path": "test/test_data/e2e_data/1510111/ENGINX00241391.nxs"},
             ),
         ),
         (
