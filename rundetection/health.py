@@ -1,4 +1,5 @@
-"""Health utilities for the service.
+"""
+Health utilities for the service.
 
 This module provides basic health functionality including a simple heartbeat
 mechanism that periodically writes a timestamp to a file on disk. This can be
@@ -15,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class Heartbeat:
-
-    """Background task that periodically touches a heartbeat file.
+    """
+    Background task that periodically touches a heartbeat file.
 
     The heartbeat writes the current timestamp to ``/tmp/heartbeat`` at a fixed
     interval. It runs in a daemon thread and can be started and stopped by the
@@ -25,9 +26,10 @@ class Heartbeat:
     Attributes:
         path: Filesystem path of the heartbeat file.
         interval: Seconds to wait between writes.
+
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Create a heartbeat with default path and interval."""
         self.path = Path("/tmp/heartbeat")  # noqa: S108
         self.interval = 5.0
@@ -35,14 +37,16 @@ class Heartbeat:
         self._thread = Thread(target=self._run, daemon=True, name="heartbeat")
 
     def start(self) -> None:
-        """Start the heartbeat thread.
+        """
+        Start the heartbeat thread.
 
         :return: None.
         """
         self._thread.start()
 
     def stop(self) -> None:
-        """Signal the heartbeat to stop and wait a short time for it to exit.
+        """
+        Signal the heartbeat to stop and wait a short time for it to exit.
 
         Uses a timeout to avoid blocking indefinitely if the thread cannot join.
 

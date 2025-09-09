@@ -245,11 +245,11 @@ def vesuvio_extract(job_request: JobRequest, _: Any) -> JobRequest:
     return job_request
 
 
-def enginx_extract(job_request: JobRequest, _Any) -> JobRequest:
+def enginx_extract(job_request: JobRequest, _: Any) -> JobRequest:
     """
     Extract additional metadata specific to the ENGINX instrument.
     :param job_request: JobRequest instance for which to extract additional metadata
-    :param _Any: Unused parameter
+    :param _: Unused parameter
     :return: JobRequest instance with updated additional metadata
     """
     job_request.additional_values["focus_path"] = str(job_request.filepath)

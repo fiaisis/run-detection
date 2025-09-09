@@ -54,7 +54,7 @@ def test_enginx_group_rule_invalid_value_raises(job_request):
 
 
 @pytest.mark.parametrize(
-    "run, expected_file",
+    ("run", "expected_file"),
     [
         (241391, "ENGINX00241391.nxs"),
         ("299080", "ENGINX00299080.nxs"),
@@ -78,7 +78,7 @@ def test_enginx_ceria_path_rule_finds_file(mock_map, run, expected_file, job_req
 
 
 @patch("rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_1"})
-def test_enginx_vanadium_path_rule_finds_file(_, job_request, monkeypatch):
+def test_enginx_vanadium_path_rule_finds_file(mock_map, job_request, monkeypatch):
     """Test that EnginxVanadiumPathRule sets the vanadium path when the file exists."""
     monkeypatch.setattr(EnginxBasePathRule, "_ROOT", Path("test/test_data/e2e_data/NDXENGINX/Instrument/data"))
     rule = EnginxVanadiumPathRule(241391)
@@ -101,7 +101,7 @@ def test_enginx_path_rule_not_found(job_request, monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "value, expected",
+    ("value", "expected"),
     [
         (123, "123"),
         ("abc123", "123"),
@@ -109,9 +109,11 @@ def test_enginx_path_rule_not_found(job_request, monkeypatch):
     ],
 )
 def test_coerce_run_parsing(value, expected):
+    """Test that run is parsed correctly."""
     assert EnginxBasePathRule._coerce_run(value) == expected
 
 
 def test_coerce_run_invalid_raises():
-    with pytest.raises(ValueError):
+    """Test that invalid run raises an exception."""
+    with pytest.raises(ValueError):  # noqa: PT011
         EnginxBasePathRule._coerce_run("no-digits")

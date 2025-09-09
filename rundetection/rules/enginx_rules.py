@@ -8,7 +8,7 @@ import os
 import re
 from functools import lru_cache
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Self
 
 import xmltodict
 
@@ -52,14 +52,19 @@ class EnginxBasePathRule(Rule[int | str]):
     path_key: str = "x_path"  # example: "x_path", would be ceria_path, etc.
 
     def verify(self, job_request: JobRequest) -> None:
+        """
+        Find the given ceria or vanadium file path and attach it to the job request.
+        :param job_request: The job request to add to
+        :return: None
+        """
         run = self._coerce_run(self._value)
 
         found = self._find_path(run)
         if found is not None:
             job_request.additional_values[self.path_key] = str(found)
-            logger.info(f"Found ceria run {run} at {found}")
+            logger.info(f"Found {self.path_key} run {run} at {found}")
         else:
-            logger.warning(f"Ceria run {run} not found")
+            logger.warning(f"{self.path_key} run {run} not found")
 
     @staticmethod
     def _coerce_run(value: int | str) -> str:
@@ -82,16 +87,17 @@ class EnginxBasePathRule(Rule[int | str]):
         # non-digit boundary, then any number of '0', then the run, then .nxs at end
         # Determine which cycle directory to search
         file_re = re.compile(rf"(?i)(?<!\d)0*{re.escape(run)}\.nxs$")
-
+        cycle_dir: Path | None
         try:
             cycle_str = build_enginx_run_number_cycle_map()[int(run)]
             cycle_dir = cls._ROOT / f"{cls._DIR_GLOB}{cycle_str}"
         except KeyError:
             cycle_dir = cls._latest_cycle_dir()
+        if cycle_dir is None:
+            return None
 
-        # Scan that directory for a matching file
         try:
-            with os.scandir(cycle_dir) as it:
+            with os.scandir(cycle_dir) as it:  # scandir is faster
                 for entry in it:
                     if file_re.search(entry.name):
                         return cycle_dir / entry.name
@@ -101,7 +107,7 @@ class EnginxBasePathRule(Rule[int | str]):
         return None
 
     @classmethod
-    def _latest_cycle_dir(cls: EnginxBasePathRule) -> Path | None:
+    def _latest_cycle_dir(cls: type[Self]) -> Path | None:
         try:
             dirs = [p for p in cls._ROOT.glob("cycle_*_*") if p.is_dir()]
         except OSError:
@@ -134,7 +140,7 @@ def build_enginx_run_number_cycle_map() -> dict[int, str]:
     logger.info("Building run number cycle map")
     mapping = {}
 
-    def _walk_node(node, journal_file):
+    def _walk_node(node: list[Any] | dict[str, Any], journal_file: str) -> None:
         if isinstance(node, dict):
             if "@name" in node:
                 with contextlib.suppress(ValueError):
