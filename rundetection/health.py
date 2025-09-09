@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class Heartbeat:
+
     """
     Background task that periodically touches a heartbeat file.
 
