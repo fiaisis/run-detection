@@ -8,12 +8,15 @@ import os
 import re
 from functools import lru_cache
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import xmltodict
 
 from rundetection.exceptions import RuleViolationError
-from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
+
+if TYPE_CHECKING:
+    from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
 
@@ -46,12 +49,10 @@ class EnginxBasePathRule(Rule[int | str]):
 
     _ROOT = Path("/archive/NDXENGINX/Instrument/data")
     _DIR_GLOB = "cycle_"
-    _MAX_WORKERS = 10  # This seems fine, recommended 8-32 for slow SMB shares
     path_key: str = "x_path"  # example: "x_path", would be ceria_path, etc.
 
     def verify(self, job_request: JobRequest) -> None:
-        run = self._coerce_run(self._value)  # e.g., "1234"
-        job_request.additional_values["ceria_run"] = run
+        run = self._coerce_run(self._value)
 
         found = self._find_path(run)
         if found is not None:
