@@ -36,6 +36,7 @@ def wait_until(predicate, timeout: float = 1.0, interval: float = 0.01) -> bool:
     deadline = time.time() + timeout
     while time.time() < deadline:
         if predicate():
+            time.sleep(0.4)
             return True
         time.sleep(interval)
     return False
