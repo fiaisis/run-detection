@@ -14,7 +14,6 @@ if typing.TYPE_CHECKING:
 # splitting this class would be worse than this disable
 @dataclasses.dataclass
 class JobRequest:
-
     """
     JobRequest represents an autoreduction job within FIA. It should contain all necessary metadata to trigger the
     reduction

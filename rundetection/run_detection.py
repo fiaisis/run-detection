@@ -14,7 +14,9 @@ from queue import SimpleQueue
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials  # type: ignore
 
 from rundetection.exceptions import ReductionMetadataError
+from rundetection.health import Heartbeat
 from rundetection.ingestion.ingest import ingest
+from rundetection.rules.enginx_rules import build_enginx_run_number_cycle_map
 from rundetection.specifications import InstrumentSpecification
 
 if typing.TYPE_CHECKING:
@@ -136,16 +138,6 @@ def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
             channel.basic_publish(EGRESS_QUEUE_NAME, "", detected_run.to_json_string().encode())
 
 
-def write_readiness_probe_file() -> None:
-    """
-    Write the file with the timestamp for the readinessprobe
-    :return: None.
-    """
-    path = Path("/tmp/heartbeat")  # noqa: S108
-    with path.open("w", encoding="utf-8") as file:
-        file.write(time.strftime("%Y-%m-%d %H:%M:%S"))
-
-
 def start_run_detection() -> None:
     """
     Start the producer and consumer in a loop.
@@ -161,7 +153,6 @@ def start_run_detection() -> None:
         while True:
             process_messages(consumer_channel, notification_queue)
             process_notifications(notification_queue)
-            write_readiness_probe_file()
             time.sleep(0.1)
     except Exception:
         logger.exception("Uncaught error occurred in main loop. Restarting in 30 seconds...")
@@ -177,13 +168,27 @@ def verify_archive_access() -> None:
         logger.error("The archive has not been mounted correctly, and cannot be accessed.")
 
 
+def pre_build_enginx_cycle_mapping() -> None:
+    """
+    Make an initial call to the enginx run_number_cycle_map to ensure it is cached ahead of time.
+    :return: None
+    """
+    build_enginx_run_number_cycle_map()
+
+
 def main() -> None:
     """
     Entry point for run detection
     :return: None.
     """
     verify_archive_access()
-    start_run_detection()
+    heart_beat = Heartbeat()
+    heart_beat.start()
+    build_enginx_run_number_cycle_map()
+    try:
+        start_run_detection()
+    finally:
+        heart_beat.stop()
 
 
 if __name__ == "__main__":

@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NXroot NeXus_version="4.3.0" XML_version="mxml"
+        file_name="c:\data\journal_20_2.xml"
+        xmlns="http://definition.nexusformat.org/schema/3.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://definition.nexusformat.org/schema/3.0"
+        file_time="2020-09-10T10:33:14+00:00">
+    <NXentry name="ENGINX00324667">
+        <title NAPItype="NX_CHAR[14]">Some Title</title>
+        <simulation_mode NAPItype="NX_CHAR[2]">NO</simulation_mode>
+        <user_name NAPItype="NX_CHAR[11]">UNSPECIFIED</user_name>
+        <local_contact NAPItype="NX_CHAR[11]">UNSPECIFIED</local_contact>
+        <user_institute NAPItype="NX_CHAR[11]">UNSPECIFIED</user_institute>
+        <experiment_identifier NAPItype="NX_CHAR[1]">0</experiment_identifier>
+        <instrument_name NAPItype="NX_CHAR[6]">ENGINX</instrument_name>
+        <run_number NAPItype="NX_INT32">324667
+        </run_number>
+        <sample_id NAPItype="NX_CHAR[2]">0
+        </sample_id>
+        <measurement_first_run NAPItype="NX_INT32">0
+        </measurement_first_run>
+        <measurement_id NAPItype="NX_CHAR[2]">0
+        </measurement_id>
+        <measurement_label NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_label>
+        <measurement_type NAPItype="NX_CHAR[2]">0
+        </measurement_type>
+        <measurement_subid NAPItype="NX_CHAR[2]">0
+        </measurement_subid>
+        <start_time NAPItype="NX_CHAR[19]">2020-09-10T10:33:00</start_time>
+        <end_time NAPItype="NX_CHAR[19]">2020-09-10T10:33:11</end_time>
+        <duration NAPItype="NX_INT64">11
+        </duration>
+        <proton_charge NAPItype="NX_FLOAT32">1.2
+        </proton_charge>
+        <raw_frames NAPItype="NX_UINT32">32
+        </raw_frames>
+        <good_frames NAPItype="NX_UINT32">32
+        </good_frames>
+        <number_periods NAPItype="NX_INT32">32
+        </number_periods>
+        <number_spectra NAPItype="NX_INT32">32
+        </number_spectra>
+        <number_detectors NAPItype="NX_INT32">32
+        </number_detectors>
+        <number_time_regimes NAPItype="NX_INT32">32
+        </number_time_regimes>
+        <frame_sync NAPItype="NX_CHAR[3]">LOL</frame_sync>
+        <IXtime_regime name="time_regime_1">
+            <number_time_channels NAPItype="NX_INT32">12
+            </number_time_channels>
+            <time_channel_min NAPItype="NX_FLOAT32">9000.0000
+            </time_channel_min>
+            <time_channel_max NAPItype="NX_FLOAT32">999.0000
+            </time_channel_max>
+        </IXtime_regime>
+        <IXtime_regime name="time_regime_2">
+            <number_time_channels NAPItype="NX_INT32">402
+            </number_time_channels>
+            <time_channel_min NAPItype="NX_FLOAT32">4200.0000
+            </time_channel_min>
+            <time_channel_max NAPItype="NX_FLOAT32">4100.0000
+            </time_channel_max>
+        </IXtime_regime>
+        <icp_version NAPItype="NX_CHAR[79]">Super Secret ICP Version</icp_version>
+        <detector_table_file NAPItype="NX_CHAR[97]">wow a transdet table</detector_table_file>
+        <spectra_table_file NAPItype="NX_CHAR[91]">wow a transdet spectra</spectra_table_file>
+        <wiring_table_file NAPItype="NX_CHAR[83]">ahhhh wireeee</wiring_table_file>
+        <monitor_spectrum NAPItype="NX_INT32">12
+        </monitor_spectrum>
+        <monitor_sum NAPItype="NX_UINT32">3
+        </monitor_sum>
+        <total_mevents NAPItype="NX_FLOAT32">1.23
+        </total_mevents>
+        <comment NAPItype="NX_CHAR[11]">UNSPECIFIED</comment>
+        <field_label NAPItype="NX_CHAR[11]">UNSPECIFIED</field_label>
+        <instrument_geometry NAPItype="NX_CHAR[11]">UNSPECIFIED</instrument_geometry>
+        <script_name NAPItype="NX_CHAR[2]">0
+        </script_name>
+        <sample_name NAPItype="NX_CHAR[2]">0
+        </sample_name>
+        <sample_orientation NAPItype="NX_CHAR[2]">0
+        </sample_orientation>
+        <temperature_label NAPItype="NX_CHAR[11]">UNSPECIFIED</temperature_label>
+        <npratio_average NAPItype="NX_FLOAT32">0.0000
+        </npratio_average>
+        <isis_cycle NAPItype="NX_CHAR[4]">20_2</isis_cycle>
+        <seci_config NAPItype="NX_CHAR[17]">based cyberman</seci_config>
+        <event_mode NAPItype="NX_FLOAT64">0.00000
+        </event_mode>
+        <IXselog name="selog">
+            <IXseblock name="0
+">
+                <current_value NAPItype="NX_CHAR[3]">gran</current_value>
+                <setpoint_value NAPItype="NX_CHAR[3]">nan</setpoint_value>
+                <average_value NAPItype="NX_CHAR[3]">man</average_value>
+            </IXseblock>
+        </IXselog>
+    </NXentry>
+    <NXentry name="ENGINX00241391">
+        <title NAPItype="NX_CHAR[14]">Sir</title>
+        <simulation_mode NAPItype="NX_CHAR[2]">YES</simulation_mode>
+        <user_name NAPItype="NX_CHAR[11]">UNS</user_name>
+        <local_contact NAPItype="NX_CHAR[11]">UNSPECIFIED</local_contact>
+        <user_institute NAPItype="NX_CHAR[11]">UNSPECIFIED</user_institute>
+        <experiment_identifier NAPItype="NX_CHAR[1]">0</experiment_identifier>
+        <instrument_name NAPItype="NX_CHAR[6]">ENGINX</instrument_name>
+        <run_number NAPItype="NX_INT32">2131
+        </run_number>
+        <sample_id NAPItype="NX_CHAR[2]">123
+        </sample_id>
+        <measurement_first_run NAPItype="NX_INT32">123
+        </measurement_first_run>
+        <measurement_id NAPItype="NX_CHAR[2]">123
+        </measurement_id>
+        <measurement_label NAPItype="NX_CHAR[11]">ECIFIED</measurement_label>
+        <measurement_type NAPItype="NX_CHAR[2]">1231
+        </measurement_type>
+        <measurement_subid NAPItype="NX_CHAR[2]">1231231
+        </measurement_subid>
+        <start_time NAPItype="NX_CHAR[19]">2020-09-10T10:33:22</start_time>
+        <end_time NAPItype="NX_CHAR[19]">2020-09-10T10:33:30</end_time>
+        <duration NAPItype="NX_INT64">1231
+        </duration>
+        <proton_charge NAPItype="NX_FLOAT32">0.432131234784
+        </proton_charge>
+        <raw_frames NAPItype="NX_UINT32">41231
+        </raw_frames>
+        <good_frames NAPItype="NX_UINT32">4534
+        </good_frames>
+        <number_periods NAPItype="NX_INT32">76575
+        </number_periods>
+        <number_spectra NAPItype="NX_INT32">342
+        </number_spectra>
+        <number_detectors NAPItype="NX_INT32">2342
+        </number_detectors>
+        <number_time_regimes NAPItype="NX_INT32">3242
+        </number_time_regimes>
+        <frame_sync NAPItype="NX_CHAR[16]">wow</frame_sync>
+        <IXtime_regime name="time_regime_1">
+            <number_time_channels NAPItype="NX_INT32">1321231
+            </number_time_channels>
+            <time_channel_min NAPItype="NX_FLOAT32">32131
+            </time_channel_min>
+            <time_channel_max NAPItype="NX_FLOAT32">464563
+            </time_channel_max>
+        </IXtime_regime>
+        <IXtime_regime name="time_regime_2">
+            <number_time_channels NAPItype="NX_INT32">2352
+            </number_time_channels>
+            <time_channel_min NAPItype="NX_FLOAT32">603400.0000
+            </time_channel_min>
+            <time_channel_max NAPItype="NX_FLOAT32">4604320.0000
+            </time_channel_max>
+        </IXtime_regime>
+        <icp_version NAPItype="NX_CHAR[79]">SMi</icp_version>
+        <detector_table_file NAPItype="NX_CHAR[97]">The quick brown fox</detector_table_file>
+        <spectra_table_file NAPItype="NX_CHAR[91]">jumps over the</spectra_table_file>
+        <wiring_table_file NAPItype="NX_CHAR[83]">lazy dog</wiring_table_file>
+        <monitor_spectrum NAPItype="NX_INT32">3422
+        </monitor_spectrum>
+        <monitor_sum NAPItype="NX_UINT32">342
+        </monitor_sum>
+        <total_mevents NAPItype="NX_FLOAT32">4234.1231
+        </total_mevents>
+        <comment NAPItype="NX_CHAR[11]">UNSPECIFIED</comment>
+        <field_label NAPItype="NX_CHAR[11]">UNSPECIFIED</field_label>
+        <instrument_geometry NAPItype="NX_CHAR[11]">UNSPECIFIED</instrument_geometry>
+        <script_name NAPItype="NX_CHAR[2]">1
+        </script_name>
+        <sample_name NAPItype="NX_CHAR[2]">1
+        </sample_name>
+        <sample_orientation NAPItype="NX_CHAR[2]">2
+        </sample_orientation>
+        <temperature_label NAPItype="NX_CHAR[11]">UNSPECIFIED</temperature_label>
+        <npratio_average NAPItype="NX_FLOAT32">31.0000
+        </npratio_average>
+        <isis_cycle NAPItype="NX_CHAR[4]">20_1</isis_cycle>
+        <seci_config NAPItype="NX_CHAR[17]">Based cyberman</seci_config>
+        <event_mode NAPItype="NX_FLOAT64">0.2300000
+        </event_mode>
+        <IXselog name="selog">
+            <IXseblock name="0
+">
+                <current_value NAPItype="NX_CHAR[3]">lol</current_value>
+                <setpoint_value NAPItype="NX_CHAR[3]">wtf</setpoint_value>
+                <average_value NAPItype="NX_CHAR[3]">m8</average_value>
+            </IXseblock>
+        </IXselog>
+    </NXentry>
+    <NXentry name="ENGINX00299080">
+        <title NAPItype="NX_CHAR[15]">Hello world</title>
+        <simulation_mode NAPItype="NX_CHAR[2]">NO</simulation_mode>
+        <user_name NAPItype="NX_CHAR[9]">kdslfs</user_name>
+        <local_contact NAPItype="NX_CHAR[11]">UNSPECIFIED</local_contact>
+        <user_institute NAPItype="NX_CHAR[11]">UNSPECIFIED</user_institute>
+        <experiment_identifier NAPItype="NX_CHAR[7]">21231</experiment_identifier>
+        <instrument_name NAPItype="NX_CHAR[6]">ENGINX</instrument_name>
+        <run_number NAPItype="NX_INT32">31231
+        </run_number>
+        <sample_id NAPItype="NX_CHAR[2]">321
+        </sample_id>
+        <measurement_first_run NAPItype="NX_INT32">31231
+        </measurement_first_run>
+        <measurement_id NAPItype="NX_CHAR[2]">31231
+        </measurement_id>
+        <measurement_label NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_label>
+        <measurement_type NAPItype="NX_CHAR[2]">0
+        </measurement_type>
+        <measurement_subid NAPItype="NX_CHAR[2]">0
+        </measurement_subid>
+        <start_time NAPItype="NX_CHAR[19]">2020-11-10T14:14:06</start_time>
+        <end_time NAPItype="NX_CHAR[19]">2020-11-10T14:14:12</end_time>
+        <duration NAPItype="NX_INT64">32131
+        </duration>
+        <proton_charge NAPItype="NX_FLOAT32">0.170923
+        </proton_charge>
+        <raw_frames NAPItype="NX_UINT32">231231
+        </raw_frames>
+        <good_frames NAPItype="NX_UINT32">31231
+        </good_frames>
+        <number_periods NAPItype="NX_INT32">3213
+        </number_periods>
+        <number_spectra NAPItype="NX_INT32">543
+        </number_spectra>
+        <number_detectors NAPItype="NX_INT32">523
+        </number_detectors>
+        <number_time_regimes NAPItype="NX_INT32">2
+        </number_time_regimes>
+        <frame_sync NAPItype="NX_CHAR[3]">Sok</frame_sync>
+        <IXtime_regime name="time_regime_1">
+            <number_time_channels NAPItype="NX_INT32">342342
+            </number_time_channels>
+            <time_channel_min NAPItype="NX_FLOAT32">432000.0000
+            </time_channel_min>
+            <time_channel_max NAPItype="NX_FLOAT32">43299.0000
+            </time_channel_max>
+        </IXtime_regime>
+        <IXtime_regime name="time_regime_2">
+            <number_time_channels NAPItype="NX_INT32">423420
+            </number_time_channels>
+            <time_channel_min NAPItype="NX_FLOAT32">6043200.0000
+            </time_channel_min>
+            <time_channel_max NAPItype="NX_FLOAT32">4604300.0000
+            </time_channel_max>
+        </IXtime_regime>
+        <icp_version NAPItype="NX_CHAR[79]">332sdasdasd</icp_version>
+        <detector_table_file NAPItype="NX_CHAR[97]">dsada</detector_table_file>
+        <spectra_table_file NAPItype="NX_CHAR[91]">sdada</spectra_table_file>
+        <wiring_table_file NAPItype="NX_CHAR[83]">sdada</wiring_table_file>
+        <monitor_spectrum NAPItype="NX_INT32">23423
+        </monitor_spectrum>
+        <monitor_sum NAPItype="NX_UINT32">4232
+        </monitor_sum>
+        <total_mevents NAPItype="NX_FLOAT32">234.1231
+        </total_mevents>
+        <comment NAPItype="NX_CHAR[11]">UNSPECIFIED</comment>
+        <field_label NAPItype="NX_CHAR[11]">UNSPECIFIED</field_label>
+        <instrument_geometry NAPItype="NX_CHAR[11]">UNSPECIFIED</instrument_geometry>
+        <script_name NAPItype="NX_CHAR[2]">0
+        </script_name>
+        <sample_name NAPItype="NX_CHAR[2]">0
+        </sample_name>
+        <sample_orientation NAPItype="NX_CHAR[2]">0
+        </sample_orientation>
+        <temperature_label NAPItype="NX_CHAR[11]">UNSPECIFIED</temperature_label>
+        <npratio_average NAPItype="NX_FLOAT32">3.1415926
+        </npratio_average>
+        <isis_cycle NAPItype="NX_CHAR[4]">20_2</isis_cycle>
+        <seci_config NAPItype="NX_CHAR[17]">based cyberman</seci_config>
+        <event_mode NAPItype="NX_FLOAT64">323100000
+        </event_mode>
+        <IXselog name="selog">
+            <IXseblock name="0
+">
+                <current_value NAPItype="NX_CHAR[3]">kjl</current_value>
+                <setpoint_value NAPItype="NX_CHAR[3]">Nadsa</setpoint_value>
+                <average_value NAPItype="NX_CHAR[3]">Nasda</average_value>
+            </IXseblock>
+        </IXselog>
+    </NXentry>
+</NXroot>
