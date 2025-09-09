@@ -61,7 +61,7 @@ def test_enginx_group_rule_invalid_value_raises(job_request):
     ],
 )
 @patch(
-    "rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_1", 299080: "20_01"}
+    "rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_1", 299080: "20_1"}
 )
 def test_enginx_ceria_path_rule_finds_file(mock_map, run, expected_file, job_request, monkeypatch):
     """Test that EnginxCeriaPathRule sets ceria_run and ceria_path when file exists."""
