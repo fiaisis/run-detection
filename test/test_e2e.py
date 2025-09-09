@@ -491,6 +491,7 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                     "additional_values": {
                         "vanadium_path": "/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00241391.nxs",
                         "ceria_path": "/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00241391.nxs",
+                        "focus_path": "/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00299080.nxs",
                         "group": "BOTH",
                     },
                 },
