@@ -53,6 +53,7 @@ class EnginxBasePathRule(Rule[int | str]):
 
     def verify(self, job_request: JobRequest) -> None:
         run = self._coerce_run(self._value)
+        logger.info(f"Looking for run {run}")
 
         found = self._find_path(run)
         if found is not None:
