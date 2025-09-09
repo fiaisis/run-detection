@@ -53,7 +53,6 @@ class EnginxBasePathRule(Rule[int | str]):
 
     def verify(self, job_request: JobRequest) -> None:
         run = self._coerce_run(self._value)
-        logger.info(f"Looking for run {run}")
 
         found = self._find_path(run)
         if found is not None:
@@ -153,5 +152,5 @@ def build_enginx_run_number_cycle_map() -> dict[int, str]:
         with path.open() as journal:
             journal_dict = xmltodict.parse(journal.read())
             _walk_node(journal_dict, path.stem)
-    logger.info("Mapping complete. %s", str(mapping))
+    logger.info("Mapping complete")
     return mapping

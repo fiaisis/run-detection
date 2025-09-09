@@ -475,14 +475,14 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
         ),
         (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
         (
-            ["/archive/NDXENGINX/Instrument/data/cycle_20_01/ENGINX00299080.nxs"],
+            ["/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00299080.nxs"],
             [
                 {
                     "run_number": 299080,
                     "instrument": "ENGINX",
                     "experiment_title": "KangWang Al composite d0 sample B1 Axial B2 Rad Hoop 4x4x4",
                     "experiment_number": "1810794",
-                    "filepath": "/archive/NDXENGINX/Instrument/data/cycle_20_01/ENGINX00299080.nxs",
+                    "filepath": "/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00299080.nxs",
                     "run_start": "2018-11-14T15:50:19",
                     "run_end": "2018-11-14T16:54:23",
                     "raw_frames": 95760,

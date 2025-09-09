@@ -77,7 +77,7 @@ def test_enginx_ceria_path_rule_finds_file(mock_map, run, expected_file, job_req
     # path should end with expected_file
     ceria_path = Path(job_request.additional_values["ceria_path"])  # type: ignore[index]
     assert ceria_path.name == expected_file
-    assert ceria_path.parent.name == "cycle_20_01"
+    assert ceria_path.parent.name == "cycle_20_1"
 
 
 @patch("rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_01"})
