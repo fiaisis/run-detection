@@ -85,8 +85,6 @@ def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -
     :param notification_queue: The notification queue to update
     :return: None.
     """
-    start = time.perf_counter()
-
     logger.info("Proccessing message: %s", message)
     data_path = Path(message)
     run = ingest(data_path)
@@ -99,8 +97,6 @@ def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -
             notification_queue.put(request)
     else:
         logger.info("Specification not met, skipping run: %s", run)
-    elapsed = time.perf_counter() - start
-    logger.info("Processed message in %.3f seconds: %s", elapsed, message)
 
 
 def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[JobRequest]) -> None:
