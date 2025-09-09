@@ -9,7 +9,6 @@ T = TypeVar("T")
 
 
 class Rule(Generic[T], ABC):
-
     """
     Abstract Rule, implement to define a rule.
 
@@ -49,5 +48,4 @@ class Rule(Generic[T], ABC):
 
 
 class MissingRuleError(Exception):
-
     """When a Rule concretion is searched for but does not exist."""

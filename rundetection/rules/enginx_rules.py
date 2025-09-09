@@ -87,7 +87,6 @@ class EnginxBasePathRule(Rule[int | str]):
           foo991234.nxs        ✗ (blocked by non-digit boundary)
         """
         # non-digit boundary, then any number of '0', then the run, then .nxs at end
-        # Determine which cycle directory to search
         file_re = re.compile(rf"(?i)(?<!\d)0*{re.escape(run)}\.nxs$")
         cycle_dir: Path | None
         try:

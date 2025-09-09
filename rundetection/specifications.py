@@ -23,7 +23,6 @@ SPEC_REQUEST_TIMEOUT_MINS = 10
 
 
 class InstrumentSpecification:
-
     """
     The instrument specification loads the rules from the relevant specification json file
     and allows verification of the rules given some nexus metadata.

@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 class EnabledRule(Rule[bool]):
-
     """
     Rule for the enabled setting in specifications.
 
@@ -36,7 +35,6 @@ class EnabledRule(Rule[bool]):
 
 
 class MolSpecStitchRule(Rule[bool]):
-
     """Enable Tosca, Osiris, and Iris Run stitching."""
 
     def __init__(self, value: bool) -> None:

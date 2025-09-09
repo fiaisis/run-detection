@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class MariStitchRule(Rule[bool]):
-
     """The MariStitchRule is the rule that applies, dependent on the other rules running first. This runs last."""
 
     def __init__(self, value: bool) -> None:
@@ -63,7 +62,6 @@ class MariStitchRule(Rule[bool]):
 
 
 class MariMaskFileRule(Rule[str]):
-
     """Add the permalink of the maskfile to the additional outputs."""
 
     def verify(self, job_request: JobRequest) -> None:
@@ -79,7 +77,6 @@ class MariMaskFileRule(Rule[str]):
 
 
 class MariWBVANRule(Rule[int]):
-
     """
     Insert the cycles wbvan number into the script.
 

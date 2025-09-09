@@ -30,7 +30,6 @@ SANS_FILES: list[SansFileData] | None = None
 
 @dataclass
 class SansFileData:
-
     """
     Data class representing a SANS file with its metadata.
 
@@ -70,7 +69,6 @@ class SansFileData:
 
 
 class SansFileError(Exception):
-
     """
     Exception raised for errors related to SANS files.
 
@@ -230,7 +228,6 @@ def _find_file_in_journal_by_title_and_type(title: str, file_types: set[str]) ->
 
 
 class SansUserFile(Rule[str]):
-
     """
     Rule for handling SANS user file configuration.
 
@@ -267,7 +264,6 @@ def _clean_up_job_request(job_request: JobRequest) -> None:
 
 
 class SansScatterTransFiles(Rule[bool]):
-
     """
     Rule for handling SANS scatter and transmission files.
 
@@ -344,7 +340,6 @@ class SansScatterTransFiles(Rule[bool]):
 
 
 class SansCanFiles(Rule[bool]):
-
     """
     Rule for handling SANS can (background) files.
 
@@ -415,7 +410,6 @@ class SansCanFiles(Rule[bool]):
 
 
 class SansSliceWavs(Rule[str]):
-
     """Rule that enables users to set the SliceWavs for each script."""
 
     def verify(self, job_request: JobRequest) -> None:
@@ -428,7 +422,6 @@ class SansSliceWavs(Rule[str]):
 
 
 class SansPhiLimits(Rule[str]):
-
     """Rule that enables users to set the PhiLimits for each script."""
 
     def verify(self, job_request: JobRequest) -> None:

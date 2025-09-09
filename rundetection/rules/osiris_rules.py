@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class OsirisReductionModeRule(Rule[bool]):
-
     """Determines the type of reduction to produce (spectroscopy or diffraction)."""
 
     # The spec phase tuples are (<phase6>, <phase10>) for the next 2 arrays Based on the PDF available here:
@@ -117,7 +116,6 @@ class OsirisReductionModeRule(Rule[bool]):
 
 
 class OsirisDefaultSpectroscopy(Rule[bool]):
-
     """
     Rule for setting default spectroscopy reduction settings.
 
@@ -137,7 +135,6 @@ class OsirisDefaultSpectroscopy(Rule[bool]):
 
 
 class OsirisDefaultGraniteAnalyser(Rule[bool]):
-
     """
     Rule for setting the default analyser to graphite.
 
@@ -155,7 +152,6 @@ class OsirisDefaultGraniteAnalyser(Rule[bool]):
 
 
 class OsirisReflectionCalibrationRule(Rule[dict[str, list[str]]]):
-
     """Determine the reflection and set calibration run number based on the reflection."""
 
     # This map is based on the Appendix 1 - Quasi / inelastic settings pdf. It is reduced as the values for

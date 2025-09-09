@@ -35,7 +35,6 @@ GRAPHITE_DATA = [
 
 
 class IrisReductionRule(Rule[bool]):
-
     """Determines the type of reduction to produce (spectroscopy or diffraction)."""
 
     @staticmethod
@@ -76,7 +75,6 @@ class IrisReductionRule(Rule[bool]):
 
 
 class IrisCalibrationRule(Rule[dict[str, str]]):
-
     """
     Set calibration run number based on the reflection.
 
