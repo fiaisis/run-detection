@@ -61,7 +61,7 @@ def test_enginx_group_rule_invalid_value_raises(job_request):
     ],
 )
 @patch(
-    "rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_01", 299080: "20_01"}
+    "rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_1", 299080: "20_01"}
 )
 def test_enginx_ceria_path_rule_finds_file(mock_map, run, expected_file, job_request, monkeypatch):
     """Test that EnginxCeriaPathRule sets ceria_run and ceria_path when file exists."""
@@ -71,16 +71,13 @@ def test_enginx_ceria_path_rule_finds_file(mock_map, run, expected_file, job_req
     rule = EnginxCeriaPathRule(run)
     rule.verify(job_request)
 
-    # ceria_run is coerced to a string of trailing digits
-    expected_run = EnginxBasePathRule._coerce_run(run)
-
     # path should end with expected_file
     ceria_path = Path(job_request.additional_values["ceria_path"])  # type: ignore[index]
     assert ceria_path.name == expected_file
     assert ceria_path.parent.name == "cycle_20_1"
 
 
-@patch("rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_01"})
+@patch("rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_1"})
 def test_enginx_vanadium_path_rule_finds_file(_, job_request, monkeypatch):
     """Test that EnginxVanadiumPathRule sets the vanadium path when the file exists."""
     monkeypatch.setattr(EnginxBasePathRule, "_ROOT", Path("test/test_data/e2e_data/NDXENGINX/Instrument/data"))
