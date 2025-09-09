@@ -152,5 +152,5 @@ def build_enginx_run_number_cycle_map() -> dict[int, str]:
         with path.open() as journal:
             journal_dict = xmltodict.parse(journal.read())
             _walk_node(journal_dict, path.stem)
-    logger.info("Mapping complete.")
+    logger.info("Mapping complete. %s", str(mapping))
     return mapping
