@@ -146,8 +146,11 @@ def build_enginx_run_number_cycle_map() -> dict[int, str]:
             for item in node:
                 _walk_node(item, journal_file)
 
+    logger.info("Reading journal files...")
     for path in Path("/archive/NDXENGINX/Instrument/logs/journal").glob("*.xml"):
+        logger.info("Reading journal file: %s", path)
         with path.open() as journal:
             journal_dict = xmltodict.parse(journal.read())
             _walk_node(journal_dict, path.stem)
+    logger.info("Mapping complete.")
     return mapping
