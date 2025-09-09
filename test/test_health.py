@@ -28,6 +28,7 @@ def heartbeat(tmp_path: Path) -> Generator[Heartbeat, Any, None]:
         # Ensure no background thread leaks if the test started it
         with contextlib.suppress(Exception):
             hb.stop()
+            hb.path.unlink()
 
 
 def wait_until(predicate, timeout: float = 1.0, interval: float = 0.01) -> bool:
