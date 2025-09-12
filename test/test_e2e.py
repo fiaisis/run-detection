@@ -105,6 +105,7 @@ def assert_run_in_recieved(run: Any, recieved: list[Any]):
 
 EXPECTED_MARI_WBVAN = get_specification_value("mari", "mariwbvan")
 EXPECTED_MARI_MASK = get_specification_value("mari", "marimaskfile")
+EXPECTED_MARI_GIT_SHA = get_specification_value("mari", "git_sha")
 EXPECTED_OSIRIS_MASK = get_specification_value("osiris", "osiriscalibfilesandreflection")
 EXPECTED_IRIS_MASK = get_specification_value("iris", "iriscalibration")
 EXPECTED_ENGINX_VANADIUM = get_specification_value("enginx", "enginxvanadiumrun")
@@ -142,6 +143,7 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                         "runno": 27031,
                         "mask_file_link": EXPECTED_MARI_MASK,
                         "wbvan": EXPECTED_MARI_WBVAN,
+                        "git_sha": EXPECTED_MARI_GIT_SHA,
                     },
                 },
                 {
@@ -165,6 +167,7 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                         "runno": 27030,
                         "mask_file_link": EXPECTED_MARI_MASK,
                         "wbvan": EXPECTED_MARI_WBVAN,
+                        "git_sha": EXPECTED_MARI_GIT_SHA,
                     },
                 },
                 {
@@ -188,6 +191,7 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                         "runno": [27031, 27030],
                         "mask_file_link": EXPECTED_MARI_MASK,
                         "wbvan": EXPECTED_MARI_WBVAN,
+                        "git_sha": EXPECTED_MARI_GIT_SHA,
                     },
                 },
                 {
@@ -211,6 +215,7 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                         "runno": 25581,
                         "mask_file_link": EXPECTED_MARI_MASK,
                         "wbvan": EXPECTED_MARI_WBVAN,
+                        "git_sha": EXPECTED_MARI_GIT_SHA,
                     },
                 },
             ],
@@ -475,22 +480,24 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
         ),
         (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
         (
-            ["/archive/NDXENGINX/Instrument/data/cycle_20_01/ENGINX00299080.nxs"],
+            ["/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00299080.nxs"],
             [
                 {
                     "run_number": 299080,
                     "instrument": "ENGINX",
                     "experiment_title": "KangWang Al composite d0 sample B1 Axial B2 Rad Hoop 4x4x4",
                     "experiment_number": "1810794",
-                    "filepath": "/archive/NDXENGINX/Instrument/data/cycle_20_01/ENGINX00299080.nxs",
+                    "filepath": "/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00299080.nxs",
                     "run_start": "2018-11-14T15:50:19",
                     "run_end": "2018-11-14T16:54:23",
                     "raw_frames": 95760,
                     "good_frames": 76485,
                     "users": "Garcia,Lee",
                     "additional_values": {
-                        "vanadium_run": 123,
-                        "ceria_run": 456,
+                        "vanadium_path": "/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00241391.nxs",
+                        "ceria_path": "/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00241391.nxs",
+                        "focus_path": "/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00299080.nxs",
+                        "group": "BOTH",
                     },
                 },
             ],

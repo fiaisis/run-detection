@@ -9,11 +9,15 @@ from rundetection.rules.common_rules import (
     EnabledRule,
     MolSpecStitchRule,
 )
-from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxVanadiumRunRule
+from rundetection.rules.enginx_rules import (
+    EnginxCeriaPathRule,
+    EnginxGroupRule,
+    EnginxVanadiumPathRule,
+)
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
-from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
+from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraphiteAnalyser,
     OsirisDefaultSpectroscopy,
@@ -53,6 +57,7 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("maristitch", True, MariStitchRule),
         ("marimaskfile", "foo", MariMaskFileRule),
         ("mariwbvan", 12345, MariWBVANRule),
+        ("git_sha", "abc1234567", MariGitShaRule),
         ("osiriscalibfilesandreflection", {"002": "00148587", "004": "00148587"}, OsirisReflectionCalibrationRule),
         ("osirisdefaultspectroscopy", True, OsirisDefaultSpectroscopy),
         ("osirisdefaultgraphiteanalyser", True, OsirisDefaultGraphiteAnalyser),
@@ -66,8 +71,9 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("iriscalibration", {"002": "00148587", "004": "00148587"}, IrisCalibrationRule),
         ("vesuvioipfilerule", "ip00001.par", VesuvioIPFileRule),
         ("vesuviovemptyrunsrule", "123-321", VesuvioEmptyRunsRule),
-        ("enginxvanadiumrun", 12345, EnginxVanadiumRunRule),
-        ("enginxceriarun", 34567, EnginxCeriaRunRule),
+        ("enginxvanadiumrun", 12345, EnginxVanadiumPathRule),
+        ("enginxceriarun", 34567, EnginxCeriaPathRule),
+        ("enginxgroup", "north", EnginxGroupRule),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
@@ -99,21 +105,21 @@ def test_enginx_rules_factory_returns_correct_rule_int_and_str():
     Test to ensure that the rule factory returns the correct Rule for Enginx rules when using either a str or int to
     create the rule from the specification.
     """
-    # Test EnginxVanadiumRunRule
+    # Test EnginxVanadiumPathRule
     rule = rule_factory("enginxvanadiumrun", 12345)
-    assert isinstance(rule, EnginxVanadiumRunRule)
+    assert isinstance(rule, EnginxVanadiumPathRule)
     assert rule._value == 12345  # noqa: PLR2004
     rule = rule_factory("enginxvanadiumrun", "12345")
-    assert isinstance(rule, EnginxVanadiumRunRule)
-    assert rule._value == 12345  # noqa: PLR2004
+    assert isinstance(rule, EnginxVanadiumPathRule)
+    assert rule._value == "12345"  # value remains str for Enginx rules
 
-    # Test EnginxCeriaRunRule
+    # Test EnginxCeriaPathRule
     rule = rule_factory("enginxceriarun", 34567)
-    assert isinstance(rule, EnginxCeriaRunRule)
+    assert isinstance(rule, EnginxCeriaPathRule)
     assert rule._value == 34567  # noqa: PLR2004
     rule = rule_factory("enginxceriarun", "34567")
-    assert isinstance(rule, EnginxCeriaRunRule)
-    assert rule._value == 34567  # noqa: PLR2004
+    assert isinstance(rule, EnginxCeriaPathRule)
+    assert rule._value == "34567"
 
 
 def test_raises_exception_for_missing_rule_class() -> None:
@@ -141,9 +147,13 @@ def test_raises_exception_for_incorrect_rule_value_type() -> None:
     with pytest.raises(ValueError):  # noqa: PT011
         rule_factory("mariwbvan", 3.3)
     with pytest.raises(ValueError):  # noqa: PT011
+        rule_factory("git_sha", 4)
+    with pytest.raises(ValueError):  # noqa: PT011
         rule_factory("enginxvanadiumrun", 3.3)
     with pytest.raises(ValueError):  # noqa: PT011
         rule_factory("enginxceriarun", 3.3)
+    with pytest.raises(ValueError):  # noqa: PT011
+        rule_factory("enginxgroup", 123)
 
 
 if __name__ == "__main__":

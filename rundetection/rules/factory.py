@@ -6,10 +6,14 @@ from rundetection.rules.common_rules import (
     EnabledRule,
     MolSpecStitchRule,
 )
-from rundetection.rules.enginx_rules import EnginxCeriaRunRule, EnginxVanadiumRunRule
+from rundetection.rules.enginx_rules import (
+    EnginxCeriaPathRule,
+    EnginxGroupRule,
+    EnginxVanadiumPathRule,
+)
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
-from rundetection.rules.mari_rules import MariMaskFileRule, MariStitchRule, MariWBVANRule
+from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
 from rundetection.rules.osiris_rules import (
     OsirisDefaultGraphiteAnalyser,
     OsirisDefaultSpectroscopy,
@@ -54,6 +58,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "mariwbvan":
             if isinstance(value, int | str):
                 return MariWBVANRule(int(value))
+        case "git_sha":
+            if isinstance(value, str):
+                return MariGitShaRule(value)
         case "osiriscalibfilesandreflection":
             if isinstance(value, dict):
                 return OsirisReflectionCalibrationRule(value)
@@ -95,10 +102,13 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
                 return VesuvioIPFileRule(value)
         case "enginxvanadiumrun":
             if isinstance(value, int | str):
-                return EnginxVanadiumRunRule(int(value))
+                return EnginxVanadiumPathRule(value)
         case "enginxceriarun":
             if isinstance(value, int | str):
-                return EnginxCeriaRunRule(int(value))
+                return EnginxCeriaPathRule(value)
+        case "enginxgroup":
+            if isinstance(value, str):
+                return EnginxGroupRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 

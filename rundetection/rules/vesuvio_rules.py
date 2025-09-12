@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class VesuvioEmptyRunsRule(Rule[str]):
-
     """Adds the empty runs numbers to JobRequest."""
 
     def verify(self, job_request: JobRequest) -> None:
@@ -22,7 +21,6 @@ class VesuvioEmptyRunsRule(Rule[str]):
 
 
 class VesuvioIPFileRule(Rule[str]):
-
     """Adds the ip_file to JobRequest."""
 
     def verify(self, job_request: JobRequest) -> None:
