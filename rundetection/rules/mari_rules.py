@@ -97,7 +97,6 @@ class MariWBVANRule(Rule[int]):
 
 
 class MariGitShaRule(Rule[str]):
-
     """Insert the cycles git_sha number into the script."""
 
     def verify(self, job_request: JobRequest) -> None:
