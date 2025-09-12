@@ -10,7 +10,7 @@ from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import MolSpecStitchRule
 from rundetection.rules.osiris_rules import (
-    OsirisDefaultGraniteAnalyser,
+    OsirisDefaultGraphiteAnalyser,
     OsirisDefaultSpectroscopy,
     OsirisReductionModeRule,
     OsirisReflectionCalibrationRule,
@@ -250,11 +250,11 @@ def test_verify_should_stitch(job_request: JobRequest) -> None:
     ("values_to_be_set", "set_values", "default_rule"),
     [
         (["spectroscopy_reduction", "diffraction_reduction"], ["true", "false"], OsirisDefaultSpectroscopy),
-        (["analyser"], ["graphite"], OsirisDefaultGraniteAnalyser),
+        (["analyser"], ["graphite"], OsirisDefaultGraphiteAnalyser),
     ],
 )
 def test_default_rules_true(values_to_be_set: list[str], set_values: list[str], default_rule: type[Rule]) -> None:
-    """Test defaults OsirisDefaultSpectroscopy, OsirisDefaultGraniteAnalyser, etc..."""
+    """Test defaults OsirisDefaultSpectroscopy, OsirisDefaultGraphiteAnalyser, etc..."""
     default_rule = default_rule(True)
     job_request = mock.MagicMock()
     default_rule.verify(job_request)
@@ -266,11 +266,11 @@ def test_default_rules_true(values_to_be_set: list[str], set_values: list[str], 
     ("values_to_be_set", "set_values", "default_rule"),
     [
         (["spectroscopy_reduction", "diffraction_reduction"], ["true", "false"], OsirisDefaultSpectroscopy),
-        (["analyser"], ["graphite"], OsirisDefaultGraniteAnalyser),
+        (["analyser"], ["graphite"], OsirisDefaultGraphiteAnalyser),
     ],
 )
 def test_default_rules_false(values_to_be_set: list[str], set_values: list[str], default_rule: type[Rule]) -> None:
-    """Test defaults OsirisDefaultSpectroscopy, OsirisDefaultGraniteAnalyser, etc..."""
+    """Test defaults OsirisDefaultSpectroscopy, OsirisDefaultGraphiteAnalyser, etc..."""
     default_rule = default_rule(False)
     job_request = mock.MagicMock()
     default_rule.verify(job_request)

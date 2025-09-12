@@ -65,12 +65,3 @@ class Heartbeat:
                 logger.debug("Heartbeat write failed", exc_info=True)
             # Use wait() so we can exit promptly
             self._stop.wait(self.interval)
-
-    def _write_readiness_probe_file(self) -> None:
-        """
-        Write/update the readiness probe file with the current timestamp.
-
-        :return: None.
-        """
-        with self.path.open("w", encoding="utf-8") as file:
-            file.write(time.strftime("%Y-%m-%d %H:%M:%S"))

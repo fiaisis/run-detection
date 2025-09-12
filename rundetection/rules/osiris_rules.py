@@ -134,7 +134,7 @@ class OsirisDefaultSpectroscopy(Rule[bool]):
             job_request.additional_values["diffraction_reduction"] = "false"
 
 
-class OsirisDefaultGraniteAnalyser(Rule[bool]):
+class OsirisDefaultGraphiteAnalyser(Rule[bool]):
     """
     Rule for setting the default analyser to graphite.
 
