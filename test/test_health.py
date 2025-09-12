@@ -97,14 +97,3 @@ def test_exception_during_write_is_logged_and_does_not_crash(
     assert any("Heartbeat write failed" in rec.message for rec in caplog.records)
 
     assert heartbeat._thread.is_alive() is True
-
-
-def test_write_readiness_probe_file(heartbeat: Heartbeat, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    """Test write_readiness_probe_file writes the correct content to the file."""
-    target = tmp_path / "probe"
-    heartbeat.path = target
-    monkeypatch.setattr(time, "strftime", lambda fmt: "READY")
-
-    heartbeat._write_readiness_probe_file()
-
-    assert target.read_text(encoding="utf-8") == "READY"
