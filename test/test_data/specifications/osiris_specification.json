@@ -3,6 +3,6 @@
   "osiriscalibfilesandreflection": {"002": "149784, 149785, 149786", "004": "149789, 149790"},
   "osirisreductionmode": false,
   "osirisdefaultspectroscopy": true,
-  "osirisdefaultgraniteanalyser": true,
+  "osirisdefaultgraphiteanalyser": true,
   "molspecstitch": true
 }
