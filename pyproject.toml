@@ -6,7 +6,7 @@ requires-python = ">= 3.11"
 dependencies = [
     "pika==1.3.2",
     "h5py==3.14.0",
-    "xmltodict==0.15.1",
+    "xmltodict==1.0.0",
     "requests==2.32.5"
 ]
 
@@ -19,20 +19,20 @@ run-detection = "rundetection.run_detection:main"
 
 [project.optional-dependencies]
 formatting = [
-    "ruff==0.12.12",
-    "mypy==1.17.1",
+    "ruff==0.13.0",
+    "mypy==1.18.1",
     "run-detection[test]",
-    "types-requests==2.32.4.20250809",
+    "types-requests==2.32.4.20250913",
     "types-xmltodict==0.15.0.20250907"
 ]
 
 test = [
     "pytest==8.4.2",
-    "pytest-cov==6.3.0",
+    "pytest-cov==7.0.0",
     "requests==2.32.5",
     "pytest-random-order==1.2.0",
     "fastapi[all]==0.116.1",
-    "pydantic==2.11.7",
+    "pydantic==2.11.9",
 ]
 
 dev = [
