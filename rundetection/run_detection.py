@@ -123,6 +123,10 @@ def process_messages(
             channel.basic_ack(method_frame.delivery_tag)
         except AttributeError:  # If the message frame or body is missing attributes required e.g. the delivery tag
             pass
+        except InterruptedError:
+            logger.info("Process interupted, nacking message %s", method_frame.delivery_tag)
+            failure_channel.basic_nack(method_frame.delivery_tag)
+            raise
         except Exception as exc:
             logger.exception("Problem processing message: %s", body, exc_info=exc)
             logger.info("Putting message on failure queue and acking message %s", method_frame.delivery_tag)
@@ -139,6 +143,10 @@ def process_messages(
             failure_channel.basic_ack(method_frame.delivery_tag)
         except AttributeError:  # If the message frame or body is missing attributes required e.g. the delivery tag
             pass
+        except InterruptedError:
+            logger.info("Process interupted, nacking message %s", method_frame.delivery_tag)
+            failure_channel.basic_nack(method_frame.delivery_tag)
+            raise
         except Exception:
             # Messages on this queue have already failed for unexpected reasons, so we can expect a broad range of
             # exceptions.
