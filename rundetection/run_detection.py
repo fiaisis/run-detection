@@ -125,24 +125,25 @@ def process_messages(
             pass
         except Exception as exc:
             logger.exception("Problem processing message: %s", body, exc_info=exc)
-            logger.info("Nacking message %s", method_frame.delivery_tag)
+            logger.info("Putting message on failure queue and acking message %s", method_frame.delivery_tag)
             channel.basic_ack(method_frame.delivery_tag)
             failure_queue.put(body.decode())
         break
 
-    logger.info("Processed all new messages. Now attempting to process previous failed messages")
-
     for method_frame, _, body in failure_channel.consume(FAILURE_QUEUE_NAME, inactivity_timeout=5):
         try:
             process_message(body.decode(), notification_queue)
-            logger.info("Acking message %s", method_frame.delivery_tag)
+            logger.info(
+                "Processed previous failed message: %s Acking message %ss", body.decode(), method_frame.delivery_tag
+            )
             failure_channel.basic_ack(method_frame.delivery_tag)
         except AttributeError:  # If the message frame or body is missing attributes required e.g. the delivery tag
             pass
         except Exception:
             # Messages on this queue have already failed for unexpected reasons, so we can expect a broad range of
             # exceptions.
-            logger.info("Problem processing failure message: %s", body)
+            logger.info("Problem processing failure message: %s", body.decode())
+            logger.info("Putting back onto failure queue and acking")
             failure_queue.put(body.decode())
             failure_channel.basic_ack(method_frame.delivery_tag)
 
