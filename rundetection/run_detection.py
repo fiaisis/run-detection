@@ -191,7 +191,7 @@ def start_run_detection() -> None:
     logger.info("Starting loop...")
     try:
         while True:
-            process_messages(consumer_channel, notification_queue, failure_queue)
+            process_messages(consumer_channel, failure_channel, notification_queue, failure_queue)
             process_notifications(notification_queue)
             notify_failures(failure_queue)
             time.sleep(0.1)
