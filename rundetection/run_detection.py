@@ -146,6 +146,7 @@ def start_run_detection() -> None:
     logger.info("Starting Run Detection")
     logger.info("Creating consumer...")
     consumer_channel = get_channel(INGRESS_QUEUE_NAME, INGRESS_QUEUE_NAME)
+    consumer_channel.basic_qos(prefetch_count=1)
     logger.info("Consumer created")
     notification_queue: SimpleQueue[JobRequest] = SimpleQueue()
     logger.info("Starting loop...")
