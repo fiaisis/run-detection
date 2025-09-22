@@ -136,6 +136,7 @@ def process_messages(
         try:
             process_message(body.decode(), notification_queue)
             logger.info("Acking message %s", method_frame.delivery_tag)
+            failure_channel.basic_ack(method_frame.delivery_tag)
         except AttributeError:  # If the message frame or body is missing attributes required e.g. the delivery tag
             pass
         except Exception:
@@ -143,8 +144,8 @@ def process_messages(
             # exceptions.
             logger.info("Problem processing failure message: %s", body)
             failure_queue.put(body.decode())
-        finally:
             failure_channel.basic_ack(method_frame.delivery_tag)
+
         break
 
 
