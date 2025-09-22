@@ -101,7 +101,10 @@ def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -
 
 
 def process_messages(
-    channel: BlockingChannel, notification_queue: SimpleQueue[JobRequest], failure_queue: SimpleQueue[str]
+    channel: BlockingChannel,
+    failure_channel: BlockingChannel,
+    notification_queue: SimpleQueue[JobRequest],
+    failure_queue: SimpleQueue[str],
 ) -> None:
     """
     Given a list of messages and the notification queue, process each message, adding those which meet specifications to
@@ -129,7 +132,7 @@ def process_messages(
 
     logger.info("Processed all new messages. Now attempting to process previous failed messages")
 
-    for method_frame, _, body in channel.consume(FAILURE_QUEUE_NAME, inactivity_timeout=5):
+    for method_frame, _, body in failure_channel.consume(FAILURE_QUEUE_NAME, inactivity_timeout=5):
         try:
             process_message(body.decode(), notification_queue)
             logger.info("Acking message %s", method_frame.delivery_tag)
@@ -139,7 +142,7 @@ def process_messages(
             logger.info("Problem processing failure message: %s", body)
             failure_queue.put(body.decode())
         finally:
-            channel.basic_ack(method_frame.delivery_tag)
+            failure_channel.basic_ack(method_frame.delivery_tag)
         break
 
 
@@ -180,6 +183,8 @@ def start_run_detection() -> None:
     logger.info("Creating consumer...")
     consumer_channel = get_channel(INGRESS_QUEUE_NAME, INGRESS_QUEUE_NAME)
     consumer_channel.basic_qos(prefetch_count=1)
+    failure_channel = get_channel(FAILURE_QUEUE_NAME, FAILURE_QUEUE_NAME)
+    failure_channel.basic_qos(prefetch_count=1)
     logger.info("Consumer created")
     notification_queue: SimpleQueue[JobRequest] = SimpleQueue()
     failure_queue: SimpleQueue[str] = SimpleQueue()
