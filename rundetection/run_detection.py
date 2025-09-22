@@ -39,6 +39,7 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 
 INGRESS_QUEUE_NAME = os.environ.get("INGRESS_QUEUE_NAME", "watched-files")
 EGRESS_QUEUE_NAME = os.environ.get("EGRESS_QUEUE_NAME", "scheduled-jobs")
+FAILURE_QUEUE_NAME = os.environ.get("FAILURE_QUEUE_NAME", "failed-watched-files")
 
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
@@ -99,7 +100,9 @@ def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -
         logger.info("Specification not met, skipping run: %s", run)
 
 
-def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[JobRequest]) -> None:
+def process_messages(
+    channel: BlockingChannel, notification_queue: SimpleQueue[JobRequest], failure_queue: SimpleQueue[str]
+) -> None:
     """
     Given a list of messages and the notification queue, process each message, adding those which meet specifications to
     the notification queue
@@ -120,7 +123,23 @@ def process_messages(channel: BlockingChannel, notification_queue: SimpleQueue[J
         except Exception as exc:
             logger.exception("Problem processing message: %s", body, exc_info=exc)
             logger.info("Nacking message %s", method_frame.delivery_tag)
-            channel.basic_nack(method_frame.delivery_tag)
+            channel.basic_ack(method_frame.delivery_tag)
+            failure_queue.put(body.decode())
+        break
+
+    logger.info("Processed all new messages. Now attempting to process previous failed messages")
+
+    for method_frame, _, body in channel.consume(FAILURE_QUEUE_NAME, inactivity_timeout=5):
+        try:
+            process_message(body.decode(), notification_queue)
+            logger.info("Acking message %s", method_frame.delivery_tag)
+        except Exception:
+            # Messages on this queue have already failed for unexpected reasons, so we can expect a broad range of
+            # exceptions.
+            logger.info("Problem processing failure message: %s", body)
+            failure_queue.put(body.decode())
+        finally:
+            channel.basic_ack(method_frame.delivery_tag)
         break
 
 
@@ -138,6 +157,20 @@ def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
             channel.basic_publish(EGRESS_QUEUE_NAME, "", detected_run.to_json_string().encode())
 
 
+def notify_failures(failure_queue: SimpleQueue[str]) -> None:
+    """
+    Produce Failure messages until the failure queue is empty
+    :param failure_queue: The failure Queue
+    :return: None
+    """
+    logger.info("Notifying failed-watched-files queue of messages failed to process")
+    while not failure_queue.empty():
+        message = failure_queue.get()
+        logger.info("Sending failure message for run: %s", message)
+        with producer() as channel:
+            channel.basic_publish("failed-runs", "", message.encode())
+
+
 def start_run_detection() -> None:
     """
     Start the producer and consumer in a loop.
@@ -149,11 +182,13 @@ def start_run_detection() -> None:
     consumer_channel.basic_qos(prefetch_count=1)
     logger.info("Consumer created")
     notification_queue: SimpleQueue[JobRequest] = SimpleQueue()
+    failure_queue: SimpleQueue[str] = SimpleQueue()
     logger.info("Starting loop...")
     try:
         while True:
-            process_messages(consumer_channel, notification_queue)
+            process_messages(consumer_channel, notification_queue, failure_queue)
             process_notifications(notification_queue)
+            notify_failures(failure_queue)
             time.sleep(0.1)
     except Exception:
         logger.exception("Uncaught error occurred in main loop. Restarting in 30 seconds...")
