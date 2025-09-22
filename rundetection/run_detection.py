@@ -178,8 +178,8 @@ def notify_failures(failure_queue: SimpleQueue[str]) -> None:
     :param failure_queue: The failure Queue
     :return: None
     """
-    logger.info("Notifying failed-watched-files queue of messages failed to process")
     while not failure_queue.empty():
+        logger.info("Notifying failed-watched-files queue of messages failed to process")
         message = failure_queue.get()
         logger.info("Sending failure message for run: %s", message)
         with producer() as channel:
