@@ -174,7 +174,7 @@ def notify_failures(failure_queue: SimpleQueue[str]) -> None:
         message = failure_queue.get()
         logger.info("Sending failure message for run: %s", message)
         with producer() as channel:
-            channel.basic_publish("failed-runs", "", message.encode())
+            channel.basic_publish(FAILURE_QUEUE_NAME, "", message.encode())
 
 
 def start_run_detection() -> None:
