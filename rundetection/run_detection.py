@@ -136,6 +136,8 @@ def process_messages(
         try:
             process_message(body.decode(), notification_queue)
             logger.info("Acking message %s", method_frame.delivery_tag)
+        except AttributeError:  # If the message frame or body is missing attributes required e.g. the delivery tag
+            pass
         except Exception:
             # Messages on this queue have already failed for unexpected reasons, so we can expect a broad range of
             # exceptions.
