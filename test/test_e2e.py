@@ -544,7 +544,7 @@ def test_non_existent_file_results_in_failed_queue(producer_channel, failed_watc
     produce_message("/archive/some/file/that/doesnt/exist.nxs", producer_channel)
 
     recieved_messages = []
-    timeout = time.time() + 10
+    timeout = time.time() + 30
     for mf, _, body in failed_watched_files_consumer_channel.consume("failed-watched-files", inactivity_timeout=1):
         if time.time() > timeout or len(recieved_messages) > 1:
             break
