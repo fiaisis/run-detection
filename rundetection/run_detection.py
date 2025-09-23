@@ -107,10 +107,32 @@ def process_messages(
     failure_queue: SimpleQueue[str],
 ) -> None:
     """
-    Given a list of messages and the notification queue, process each message, adding those which meet specifications to
-    the notification queue
-    :param channel: The channel for consuming from
-    :param notification_queue: The notification queue
+    Consume messages from the ingress and failure queues and enqueue valid notifications.
+
+    This function will attempt to consume at most one message from the ingress queue and at most one
+    message from the failure queue per invocation (it breaks after each consume loop iteration). For
+    each consumed message it will:
+    - Decode the body and call process_message to validate and build JobRequest(s).
+    - On success, ack the corresponding message on the queue and put resulting JobRequest(s) on
+      notification_queue (handled inside process_message).
+
+    Ingress queue error handling:
+    - ReductionMetadataError: log and ack the message (it cannot be processed), do not send to failure queue.
+    - AttributeError: ignore (e.g. missing delivery tag/body), do nothing.
+    - InterruptedError: log, nack the message on the failure_channel (to make it available again) and re-raise.
+    - Any other Exception: log, ack the message on the ingress channel, and put the decoded body onto failure_queue
+      for later notification and retry via the failure queue.
+
+    Failure queue processing:
+    - On success, ack the message on failure_channel.
+    - AttributeError: ignore (e.g. missing delivery tag/body), do nothing.
+    - InterruptedError: log, nack the message on failure_channel and re-raise.
+    - Any other Exception: log, requeue the decoded body to failure_queue and ack the failed message on failure_channel.
+
+    :param channel: BlockingChannel for consuming from the ingress queue (INGRESS_QUEUE_NAME).
+    :param failure_channel: BlockingChannel for consuming from the failure queue (FAILURE_QUEUE_NAME).
+    :param notification_queue: The queue to receive successfully built JobRequest notifications.
+    :param failure_queue: Local in-memory queue used to buffer failed message bodies for later publication.
     :return: None.
     """
     for method_frame, _, body in channel.consume(INGRESS_QUEUE_NAME, inactivity_timeout=5):
