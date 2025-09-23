@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 import typing
 from pathlib import Path
 
@@ -94,9 +95,12 @@ def get_specification_value(instrument: str, key: str) -> Any:
 def consume_all_messages(consumer_channel: BlockingChannel) -> list[dict[str, Any]]:
     """Consume all messages from the queue."""
     recieved_messages = []
+    timeout = time.time() + 60
     for mf, _, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=1):
-        if mf is None:
+        if time.time() > timeout:
             break
+        if mf is None:
+            continue
 
         consumer_channel.basic_ack(mf.delivery_tag)
         recieved_messages.append(json.loads(body.decode()))
