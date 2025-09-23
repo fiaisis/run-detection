@@ -37,6 +37,16 @@ def consumer_channel() -> BlockingChannel:
     return channel
 
 
+@pytest.fixture(scope="module")
+def failed_watched_files_consumer_channel() -> BlockingChannel:
+    """Return a consumer channel fixture."""
+    connection = BlockingConnection()
+    channel = connection.channel()
+    channel.exchange_declare("failed-watched-files", exchange_type="direct", durable=True)
+    channel.queue_declare("failed-watched-files", durable=True, arguments={"x-queue-type": "quorum"})
+    channel.queue_bind("failed-watched-files", "failed-watched-files", routing_key="")
+
+
 @pytest.fixture(autouse=True)
 def _purge_queues(producer_channel, consumer_channel):
     """Purge queues on setup and teardown."""
@@ -517,3 +527,21 @@ def test_e2e(producer_channel, consumer_channel, messages, expected_requests):
             assert_run_in_recieved(request, recieved_runs)
     else:
         assert not consume_all_messages(consumer_channel)
+
+
+def test_non_existent_file_results_in_failed_queue(
+    producer_channel, consumer_channel, failed_watched_files_consumer_channel
+):
+    """Test that a non-existent file results in a failed message being sent to the failed queue."""
+    produce_message("/archive/some/file/that/doesnt/exist.nxs", producer_channel)
+    recieved_runs = consume_all_messages(consumer_channel)
+    assert len(recieved_runs) == 0
+    recieved_messages = []
+    for mf, _, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=1):
+        if mf is None:
+            break
+
+        consumer_channel.basic_ack(mf.delivery_tag)
+        recieved_messages.append(json.loads(body.decode()))
+    assert "/archive/some/file/that/doesnt/exist.nxs" in recieved_messages
+    assert len(recieved_messages) == 1
