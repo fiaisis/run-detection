@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 import typing
 from pathlib import Path
 
@@ -34,6 +35,17 @@ def consumer_channel() -> BlockingChannel:
     channel.exchange_declare("scheduled-jobs", exchange_type="direct", durable=True)
     channel.queue_declare("scheduled-jobs", durable=True, arguments={"x-queue-type": "quorum"})
     channel.queue_bind("scheduled-jobs", "scheduled-jobs", routing_key="")
+    return channel
+
+
+@pytest.fixture(scope="module")
+def failed_watched_files_consumer_channel() -> BlockingChannel:
+    """Return a consumer channel fixture."""
+    connection = BlockingConnection()
+    channel = connection.channel()
+    channel.exchange_declare("failed-watched-files", exchange_type="direct", durable=True)
+    channel.queue_declare("failed-watched-files", durable=True, arguments={"x-queue-type": "quorum"})
+    channel.queue_bind("failed-watched-files", "failed-watched-files", routing_key="")
     return channel
 
 
@@ -81,12 +93,15 @@ def get_specification_value(instrument: str, key: str) -> Any:
     return spec[key]
 
 
-def consume_all_messages(consumer_channel: BlockingChannel) -> list[dict[str, Any]]:
+def consume_all_messages(consumer_channel: BlockingChannel, expected_message_count: int) -> list[dict[str, Any]]:
     """Consume all messages from the queue."""
     recieved_messages = []
+    timeout = time.time() + 60
     for mf, _, body in consumer_channel.consume("scheduled-jobs", inactivity_timeout=1):
-        if mf is None:
+        if len(recieved_messages) == expected_message_count or time.time() > timeout:
             break
+        if mf is None:
+            continue
 
         consumer_channel.basic_ack(mf.delivery_tag)
         recieved_messages.append(json.loads(body.decode()))
@@ -113,7 +128,7 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
 
 
 @pytest.mark.parametrize(
-    ("messages", "expected_requests"),
+    ("messages", "expected_requests", "expected_request_count"),
     [
         (
             [
@@ -219,6 +234,7 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                     },
                 },
             ],
+            4,
         ),
         (
             [
@@ -293,6 +309,7 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                     "additional_values": {"cycle_string": "cycle_19_4", "input_runs": [25234]},
                 },
             ],
+            5,
         ),
         (
             [
@@ -418,6 +435,7 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                     },
                 },
             ],
+            4,
         ),
         (
             ["/archive/NDXIRIS/Instrument/data/cycle_24_3/IRIS00103226.nxs"],
@@ -477,8 +495,9 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                     },
                 },
             ],
+            2,
         ),
-        (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], []),
+        (["/archive/NDXIMAT/Instrument/data/cycle_18_03/IMAT00004217.nxs"], [], 0),
         (
             ["/archive/NDXENGINX/Instrument/data/cycle_20_1/ENGINX00299080.nxs"],
             [
@@ -501,10 +520,11 @@ EXPECTED_ENGINX_CERIA = get_specification_value("enginx", "enginxceriarun")
                     },
                 },
             ],
+            1,
         ),
     ],
 )
-def test_e2e(producer_channel, consumer_channel, messages, expected_requests):
+def test_e2e(producer_channel, consumer_channel, messages, expected_requests, expected_request_count):
     """
     Test expected messages are consumed from the scheduled jobs queue
     When the given messages are sent to the watched-files queue.
@@ -512,8 +532,26 @@ def test_e2e(producer_channel, consumer_channel, messages, expected_requests):
     for message in messages:
         produce_message(message, producer_channel)
     if len(expected_requests) > 0:
-        recieved_runs = consume_all_messages(consumer_channel)
+        recieved_runs = consume_all_messages(consumer_channel, expected_request_count)
         for request in expected_requests:
             assert_run_in_recieved(request, recieved_runs)
     else:
-        assert not consume_all_messages(consumer_channel)
+        assert not consume_all_messages(consumer_channel, expected_request_count)
+
+
+def test_non_existent_file_results_in_failed_queue(producer_channel, failed_watched_files_consumer_channel):
+    """Test that a non-existent file results in a failed message being sent to the failed queue."""
+    produce_message("/archive/some/file/that/doesnt/exist.nxs", producer_channel)
+
+    recieved_messages = []
+    timeout = time.time() + 30
+    for mf, _, body in failed_watched_files_consumer_channel.consume("failed-watched-files", inactivity_timeout=1):
+        if time.time() > timeout or len(recieved_messages) > 1:
+            break
+        if mf is None:
+            continue
+
+        failed_watched_files_consumer_channel.basic_ack(mf.delivery_tag)
+        recieved_messages.append(body.decode())
+    assert "/archive/some/file/that/doesnt/exist.nxs" in recieved_messages
+    assert len(recieved_messages) == 1
