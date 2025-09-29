@@ -131,7 +131,7 @@ def test_mari_mask_rule(job_request):
 def test_mari_wbvan_rule_run_from_this_cycle(job_request):
     """
     Test that Mari WBVAN rule finds run from this cycle
-    
+
     :param job_request: job request fixture
     :param return: None.
     """
@@ -151,7 +151,7 @@ def test_mari_wbvan_rule_run_from_old_cycle_new_van_unfindable(job_request):
     """
     Test that MARI WBVAN rule cannot find a van from this run, but finds from
     an old cycle instead.
-    
+
     :param job_request: job request fixture
     :param return: None.
     """
@@ -176,7 +176,7 @@ def test_mari_wbvan_rule_run_from_old_cycle_new_van_unfindable(job_request):
 def test_mari_wbvan_rule_run_from_old_cycle_van_found(job_request):
     """
     Test that MARI WBVAN rule finds run from old cycle.
-    
+
     :param job_request: job request fixture
     :param return: None.
     """
@@ -201,7 +201,7 @@ def test_mari_wbvan_rule_run_from_old_cycle_van_found(job_request):
 def test_mari_wbvan_rule_run_from_old_cycle_van_found_with_spaces(job_request):
     """
     Test that MARI WBVAN rule finds run from old cycle, with spaces between characters.
-    
+
     :param job_request: job request fixture
     :param return: None.
     """
