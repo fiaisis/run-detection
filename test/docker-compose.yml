@@ -43,5 +43,6 @@ services:
       EGRESS_QUEUE_NAME: "scheduled-jobs"
       FIA_API_API_KEY: "shh"
       FIA_API_URL: http://fake-fia-api:80
+      JOURNAL_BASE_URL: http://fake-fia-api:80
     volumes:
       - ../test/test_data/e2e_data:/archive
