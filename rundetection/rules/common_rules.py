@@ -142,7 +142,7 @@ def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
 def grab_cycle_instrument_index(cycle: str, instrument: str) -> str:
     """
     Get the index of the instrument cycle.
-    
+
     :param cycle: the cycle in question
     :param instrument: the instrument on which the cycle ran
     """
