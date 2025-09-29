@@ -140,6 +140,12 @@ def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
 
 
 def grab_cycle_instrument_index(cycle: str, instrument: str) -> str:
+    """
+    Get the index of the instrument cycle.
+    
+    :param cycle: the cycle in question
+    :param instrument: the instrument on which the cycle ran
+    """
     _, cycle_year, cycle_num = cycle.split("_")
     base_url = os.environ.get("JOURNAL_BASE_URL", "http://data.isis.rl.ac.uk/")
     url = f"{base_url}/journals/ndx{instrument.lower()}/journal_{cycle_year}_{cycle_num}.xml"
