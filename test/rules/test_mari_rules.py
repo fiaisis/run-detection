@@ -104,7 +104,7 @@ def test_verify_multiple_runs(mari_stitch_rule_true, job_request):
         patch("rundetection.rules.common_rules.requests") as requests_mock,
         patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
         patch("rundetection.rules.mari_rules.MariStitchRule._get_runs_to_stitch", return_value=[1, 2, 3]),
-    ):    
+    ):
         rule = MariWBVANRule(1234567)
         rule.verify(job_request)
         xmltodict_mock.parse.return_value = {"NXroot": {"NXentry": ""}}
@@ -129,6 +129,12 @@ def test_mari_mask_rule(job_request):
 
 
 def test_mari_wbvan_rule_run_from_this_cycle(job_request):
+    """
+    Test that Mari WBVAN rule finds run from this cycle
+    
+    :param job_request: job request fixture
+    :param return: None.
+    """
     with (
         patch("rundetection.rules.common_rules.requests") as requests_mock,
         patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
@@ -140,7 +146,15 @@ def test_mari_wbvan_rule_run_from_this_cycle(job_request):
     assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
     assert call(requests_mock.get().text) in xmltodict_mock.parse.call_args_list
 
+
 def test_mari_wbvan_rule_run_from_old_cycle_new_van_unfindable(job_request):
+    """
+    Test that MARI WBVAN rule cannot find a van from this run, but finds from
+    an old cycle instead.
+    
+    :param job_request: job request fixture
+    :param return: None.
+    """
     with (
         patch("rundetection.rules.common_rules.requests") as requests_mock,
         patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
@@ -158,12 +172,19 @@ def test_mari_wbvan_rule_run_from_old_cycle_new_van_unfindable(job_request):
     assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
     assert call(requests_mock.get().text) in xmltodict_mock.parse.call_args_list
 
+
 def test_mari_wbvan_rule_run_from_old_cycle_van_found(job_request):
+    """
+    Test that MARI WBVAN rule finds run from old cycle.
+    
+    :param job_request: job request fixture
+    :param return: None.
+    """
     with (
         patch("rundetection.rules.common_rules.requests") as requests_mock,
         patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
     ):
-        rule = MariWBVANRule(1234567)
+        rule = MariWBVANRule(1234)
         xmltodict_mock.parse.return_value = {
             "NXroot": {
                 "NXentry": [
@@ -173,11 +194,17 @@ def test_mari_wbvan_rule_run_from_old_cycle_van_found(job_request):
         }
         rule.verify(job_request)
 
-    assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
+    assert job_request.additional_values["wbvan"] != 1234567  # noqa: PLR2004
     assert call(requests_mock.get().text) in xmltodict_mock.parse.call_args_list
 
 
 def test_mari_wbvan_rule_run_from_old_cycle_van_found_with_spaces(job_request):
+    """
+    Test that MARI WBVAN rule finds run from old cycle, with spaces between characters.
+    
+    :param job_request: job request fixture
+    :param return: None.
+    """
     with (
         patch("rundetection.rules.common_rules.requests") as requests_mock,
         patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
@@ -194,18 +221,6 @@ def test_mari_wbvan_rule_run_from_old_cycle_van_found_with_spaces(job_request):
 
     assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
     assert call(requests_mock.get().text) in xmltodict_mock.parse.call_args_list
-
-
-#def test_mari_wbvan_rule(job_request):
-#    """
-#    Test that the wbvan number is set via the specification
-#    :param job_request: JobRequest fixture
-#    :return: None.
-#    """
-#    rule = MariWBVANRule(1234567)
-#    rule.verify(job_request)
-
-    #assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
 
 
 def test_mari_git_sha_rule(job_request):

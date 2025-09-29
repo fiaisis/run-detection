@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import logging
-from copy import deepcopy
 import os
+from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -70,6 +70,14 @@ class MolSpecStitchRule(Rule[bool]):
         return False
 
     def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str, instrument: str) -> list[int]:
+        """
+        Get runs in order to stitch them together.
+
+        :param run_path: The path to the runs.
+        :param run_number: The run number for starting run.
+        :param run_title: The title of the first run.
+        :param instrument: Instrument that experiment runs occurred on.
+        """
         run_numbers = []
         while run_path.exists():
             logger.info("run path exists %s", run_path)
@@ -130,9 +138,9 @@ def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
     """
     return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)
 
+
 def grab_cycle_instrument_index(cycle: str, instrument: str) -> str:
     _, cycle_year, cycle_num = cycle.split("_")
-    base_url = os.environ.get("JOURNAL_BASE_URL",
-                              "http://data.isis.rl.ac.uk/")
+    base_url = os.environ.get("JOURNAL_BASE_URL", "http://data.isis.rl.ac.uk/")
     url = f"{base_url}/journals/ndx{instrument.lower()}/journal_{cycle_year}_{cycle_num}.xml"
     return requests.get(url, timeout=5).text

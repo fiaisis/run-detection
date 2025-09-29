@@ -3,6 +3,7 @@
 import logging
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 import xmltodict
 
@@ -88,6 +89,11 @@ class MariWBVANRule(Rule[int]):
     """
 
     def __init__(self, value: int):
+        """
+        Initialise cycle run information.
+
+        :param value: The value to associate with this instantiated Rule.
+        """
         super().__init__(value)
         self.cycle_run_info: dict[str, Any] | None = None
 
