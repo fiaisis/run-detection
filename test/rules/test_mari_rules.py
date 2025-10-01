@@ -188,7 +188,7 @@ def test_mari_wbvan_rule_run_from_old_cycle_van_found(job_request):
         xmltodict_mock.parse.return_value = {
             "NXroot": {
                 "NXentry": [
-                    {"run_number": {"#text": "1234567"}, "title": {"#text": '"white van" - Ei=30meV 50Hz Gd chopper'}}
+                    {"run_number": {"#text": "1234"}, "title": {"#text": '"white van" - Ei=30meV 50Hz Gd chopper'}}
                 ]
             }
         }
