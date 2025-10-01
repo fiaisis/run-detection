@@ -139,7 +139,7 @@ def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
     return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)
 
 
-#need a method that gets index from journal file, possibly get cycle number from path
+# need a method that gets index from journal file, possibly get cycle number from path
 
 
 def grab_cycle_instrument_index(cycle: str, instrument: str) -> str:
