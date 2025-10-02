@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <NXroot NeXus_version="4.3.0" XML_version="mxml"
+file_name="c:\data\journal_25_1.xml"
+xmlns="http://definition.nexusformat.org/schema/3.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://definition.nexusformat.org/schema/3.0"
+file_time="2025-04-22T13:02:20+00:00">
+	<NXentry name="MARI00027031">
+      <title NAPItype="NX_CHAR[38]">(Bi1-xYx)2O3 ; x=0.20 - Ei=130meV 400Hz Gd single - jaws=45x45 - T=900K</title>
+      <simulation_mode NAPItype="NX_CHAR[2]">NO</simulation_mode>
+      <user_name NAPItype="NX_CHAR[9]">Goel,Le,Mittal</user_name>
+      <local_contact NAPItype="NX_CHAR[11]">UNSPECIFIED</local_contact>
+      <user_institute NAPItype="NX_CHAR[11]">UNSPECIFIED</user_institute>
+      <experiment_identifier NAPItype="NX_CHAR[7]">1920321</experiment_identifier>
+      <instrument_name NAPItype="NX_CHAR[4]">MARI</instrument_name>
+      <run_number NAPItype="NX_INT32">       27031
+      </run_number>
+      <sample_id NAPItype="NX_CHAR[11]">UNSPECIFIED</sample_id>
+      <measurement_first_run NAPItype="NX_INT32">           0
+      </measurement_first_run>
+      <measurement_id NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_id>
+      <measurement_label NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_label>
+      <measurement_type NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_type>
+      <measurement_subid NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_subid>
+      <start_time NAPItype="NX_CHAR[19]">2020-02-24T06:56:13</start_time>
+      <end_time NAPItype="NX_CHAR[19]">2020-02-24T07:51:56</end_time>
+      <duration NAPItype="NX_INT64">                    5597
+      </duration>
+      <proton_charge NAPItype="NX_FLOAT32">    214.8739
+      </proton_charge>
+      <raw_frames NAPItype="NX_UINT32">      167036
+      </raw_frames>
+      <good_frames NAPItype="NX_UINT32">      133622
+      </good_frames>
+      <number_periods NAPItype="NX_INT32">           1
+      </number_periods>
+      <number_spectra NAPItype="NX_INT32">         922
+      </number_spectra>
+      <number_detectors NAPItype="NX_INT32">         922
+      </number_detectors>
+      <number_time_regimes NAPItype="NX_INT32">           2
+      </number_time_regimes>
+      <frame_sync NAPItype="NX_CHAR[4]">ISIS</frame_sync>
+      <IXtime_regime name="time_regime_1">
+        <number_time_channels NAPItype="NX_INT32">        9748
+        </number_time_channels>
+        <time_channel_min NAPItype="NX_FLOAT32">      5.0000
+        </time_channel_min>
+        <time_channel_max NAPItype="NX_FLOAT32">  19500.0000
+        </time_channel_max>
+      </IXtime_regime>
+      <IXtime_regime name="time_regime_2">
+        <number_time_channels NAPItype="NX_INT32">       59333
+        </number_time_channels>
+        <time_channel_min NAPItype="NX_FLOAT32">   1700.0000
+        </time_channel_min>
+        <time_channel_max NAPItype="NX_FLOAT32">  19500.0000
+        </time_channel_max>
+      </IXtime_regime>
+      <icp_version NAPItype="NX_CHAR[79]">SVN R5c1d0b29e98d5b3e92f8872fc9c739919b281011 (2024/07/22 14:45:25, $WCMIXED?Mi</icp_version>
+      <detector_table_file NAPItype="NX_CHAR[85]">C:/Instrument/Settings/config/NDXMARI/configurations/tables/detector_event_2019_2.nxs</detector_table_file>
+      <spectra_table_file NAPItype="NX_CHAR[84]">C:/Instrument/Settings/config/NDXMARI/configurations/tables/spectra_event_2019_2.dat</spectra_table_file>
+      <wiring_table_file NAPItype="NX_CHAR[83]">C:/Instrument/Settings/config/NDXMARI/configurations/tables/wiring_event_2025_1.dat</wiring_table_file>
+      <monitor_spectrum NAPItype="NX_INT32">           1
+      </monitor_spectrum>
+      <monitor_sum NAPItype="NX_UINT32">     2134420
+      </monitor_sum>
+      <total_mevents NAPItype="NX_FLOAT32">      3.3191
+      </total_mevents>
+      <comment NAPItype="NX_CHAR[11]">UNSPECIFIED</comment>
+      <field_label NAPItype="NX_CHAR[11]">UNSPECIFIED</field_label>
+      <instrument_geometry NAPItype="NX_CHAR[11]">UNSPECIFIED</instrument_geometry>
+      <script_name NAPItype="NX_CHAR[11]">UNSPECIFIED</script_name>
+      <sample_name NAPItype="NX_CHAR[11]">UNSPECIFIED</sample_name>
+      <sample_orientation NAPItype="NX_CHAR[11]">UNSPECIFIED</sample_orientation>
+      <temperature_label NAPItype="NX_CHAR[11]">UNSPECIFIED</temperature_label>
+      <npratio_average NAPItype="NX_FLOAT32">      0.0000
+      </npratio_average>
+      <isis_cycle NAPItype="NX_CHAR[4]">25_1</isis_cycle>
+      <seci_config NAPItype="NX_CHAR[16]">MARI_CCR_changer</seci_config>
+      <event_mode NAPItype="NX_FLOAT64">         0.87500
+      </event_mode>
+      <IXselog name="selog" />
+    </NXentry>
+  <NXentry name="MARI00027030">
+      <title NAPItype="NX_CHAR[44]">(Bi1-xYx)2O3 ; x=0.20 - Ei=130meV 400Hz Gd single - jaws=45x45 - T=900K</title>
+      <simulation_mode NAPItype="NX_CHAR[2]">NO</simulation_mode>
+      <user_name NAPItype="NX_CHAR[9]">Goel,Le,Mittal</user_name>
+      <local_contact NAPItype="NX_CHAR[11]">UNSPECIFIED</local_contact>
+      <user_institute NAPItype="NX_CHAR[11]">UNSPECIFIED</user_institute>
+      <experiment_identifier NAPItype="NX_CHAR[7]">1920321</experiment_identifier>
+      <instrument_name NAPItype="NX_CHAR[4]">MARI</instrument_name>
+      <run_number NAPItype="NX_INT32">       27030
+      </run_number>
+      <sample_id NAPItype="NX_CHAR[11]">UNSPECIFIED</sample_id>
+      <measurement_first_run NAPItype="NX_INT32">           0
+      </measurement_first_run>
+      <measurement_id NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_id>
+      <measurement_label NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_label>
+      <measurement_type NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_type>
+      <measurement_subid NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_subid>
+      <start_time NAPItype="NX_CHAR[19]">2020-02-24T06:00:15</start_time>
+      <end_time NAPItype="NX_CHAR[19]">2020-02-24T06:55:53</end_time>
+      <duration NAPItype="NX_INT64">                   30899
+      </duration>
+      <proton_charge NAPItype="NX_FLOAT32">   1200.0596
+      </proton_charge>
+      <raw_frames NAPItype="NX_UINT32">     166838
+      </raw_frames>
+      <good_frames NAPItype="NX_UINT32">     133470
+      </good_frames>
+      <number_periods NAPItype="NX_INT32">           1
+      </number_periods>
+      <number_spectra NAPItype="NX_INT32">         922
+      </number_spectra>
+      <number_detectors NAPItype="NX_INT32">         922
+      </number_detectors>
+      <number_time_regimes NAPItype="NX_INT32">           2
+      </number_time_regimes>
+      <frame_sync NAPItype="NX_CHAR[4]">ISIS</frame_sync>
+      <IXtime_regime name="time_regime_1">
+        <number_time_channels NAPItype="NX_INT32">        9748
+        </number_time_channels>
+        <time_channel_min NAPItype="NX_FLOAT32">      5.0000
+        </time_channel_min>
+        <time_channel_max NAPItype="NX_FLOAT32">  19500.0000
+        </time_channel_max>
+      </IXtime_regime>
+      <IXtime_regime name="time_regime_2">
+        <number_time_channels NAPItype="NX_INT32">       59333
+        </number_time_channels>
+        <time_channel_min NAPItype="NX_FLOAT32">   1700.0000
+        </time_channel_min>
+        <time_channel_max NAPItype="NX_FLOAT32">  19500.0000
+        </time_channel_max>
+      </IXtime_regime>
+      <icp_version NAPItype="NX_CHAR[79]">SVN R5c1d0b29e98d5b3e92f8872fc9c739919b281011 (2024/07/22 14:45:25, $WCMIXED?Mi</icp_version>
+      <detector_table_file NAPItype="NX_CHAR[85]">C:/Instrument/Settings/config/NDXMARI/configurations/tables/detector_event_2019_2.nxs</detector_table_file>
+      <spectra_table_file NAPItype="NX_CHAR[84]">C:/Instrument/Settings/config/NDXMARI/configurations/tables/spectra_event_2019_2.dat</spectra_table_file>
+      <wiring_table_file NAPItype="NX_CHAR[83]">C:/Instrument/Settings/config/NDXMARI/configurations/tables/wiring_event_2025_1.dat</wiring_table_file>
+      <monitor_spectrum NAPItype="NX_INT32">           1
+      </monitor_spectrum>
+      <monitor_sum NAPItype="NX_UINT32">    11909374
+      </monitor_sum>
+      <total_mevents NAPItype="NX_FLOAT32">     18.5280
+      </total_mevents>
+      <comment NAPItype="NX_CHAR[11]">UNSPECIFIED</comment>
+      <field_label NAPItype="NX_CHAR[11]">UNSPECIFIED</field_label>
+      <instrument_geometry NAPItype="NX_CHAR[11]">UNSPECIFIED</instrument_geometry>
+      <script_name NAPItype="NX_CHAR[11]">UNSPECIFIED</script_name>
+      <sample_name NAPItype="NX_CHAR[11]">UNSPECIFIED</sample_name>
+      <sample_orientation NAPItype="NX_CHAR[11]">UNSPECIFIED</sample_orientation>
+      <temperature_label NAPItype="NX_CHAR[11]">UNSPECIFIED</temperature_label>
+      <npratio_average NAPItype="NX_FLOAT32">      0.0000
+      </npratio_average>
+      <isis_cycle NAPItype="NX_CHAR[4]">25_1</isis_cycle>
+      <seci_config NAPItype="NX_CHAR[16]">MARI_CCR_changer</seci_config>
+      <event_mode NAPItype="NX_FLOAT64">         0.87500
+      </event_mode>
+      <IXselog name="selog" />
+    </NXentry>
+  <NXentry name="MARI00025581">
+      <title NAPItype="NX_CHAR[43]">Whitebeam - vanadium - detector tests - vacuum bad - HT on not on all LAB</title>
+      <simulation_mode NAPItype="NX_CHAR[2]">NO</simulation_mode>
+      <user_name NAPItype="NX_CHAR[9]">Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara</user_name>
+      <local_contact NAPItype="NX_CHAR[11]">UNSPECIFIED</local_contact>
+      <user_institute NAPItype="NX_CHAR[11]">UNSPECIFIED</user_institute>
+      <experiment_identifier NAPItype="NX_CHAR[7]">1820497</experiment_identifier>
+      <instrument_name NAPItype="NX_CHAR[4]">MARI</instrument_name>
+      <run_number NAPItype="NX_INT32">       25581
+      </run_number>
+      <sample_id NAPItype="NX_CHAR[11]">UNSPECIFIED</sample_id>
+      <measurement_first_run NAPItype="NX_INT32">           0
+      </measurement_first_run>
+      <measurement_id NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_id>
+      <measurement_label NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_label>
+      <measurement_type NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_type>
+      <measurement_subid NAPItype="NX_CHAR[11]">UNSPECIFIED</measurement_subid>
+      <start_time NAPItype="NX_CHAR[19]">2019-03-22T10:15:44</start_time>
+      <end_time NAPItype="NX_CHAR[19]">2019-03-22T10:18:26</end_time>
+      <duration NAPItype="NX_INT64">                   31266
+      </duration>
+      <proton_charge NAPItype="NX_FLOAT32">   1350.0632
+      </proton_charge>
+      <raw_frames NAPItype="NX_UINT32">     8067
+      </raw_frames>
+      <good_frames NAPItype="NX_UINT32">     6452
+      </good_frames>
+      <number_periods NAPItype="NX_INT32">           1
+      </number_periods>
+      <number_spectra NAPItype="NX_INT32">         922
+      </number_spectra>
+      <number_detectors NAPItype="NX_INT32">         922
+      </number_detectors>
+      <number_time_regimes NAPItype="NX_INT32">           2
+      </number_time_regimes>
+      <frame_sync NAPItype="NX_CHAR[4]">ISIS</frame_sync>
+      <IXtime_regime name="time_regime_1">
+        <number_time_channels NAPItype="NX_INT32">        9748
+        </number_time_channels>
+        <time_channel_min NAPItype="NX_FLOAT32">      5.0000
+        </time_channel_min>
+        <time_channel_max NAPItype="NX_FLOAT32">  19500.0000
+        </time_channel_max>
+      </IXtime_regime>
+      <IXtime_regime name="time_regime_2">
+        <number_time_channels NAPItype="NX_INT32">       59333
+        </number_time_channels>
+        <time_channel_min NAPItype="NX_FLOAT32">   1700.0000
+        </time_channel_min>
+        <time_channel_max NAPItype="NX_FLOAT32">  19500.0000
+        </time_channel_max>
+      </IXtime_regime>
+      <icp_version NAPItype="NX_CHAR[79]">SVN R5c1d0b29e98d5b3e92f8872fc9c739919b281011 (2024/07/22 14:45:25, $WCMIXED?Mi</icp_version>
+      <detector_table_file NAPItype="NX_CHAR[85]">C:/Instrument/Settings/config/NDXMARI/configurations/tables/detector_event_2019_2.nxs</detector_table_file>
+      <spectra_table_file NAPItype="NX_CHAR[84]">C:/Instrument/Settings/config/NDXMARI/configurations/tables/spectra_event_2019_2.dat</spectra_table_file>
+      <wiring_table_file NAPItype="NX_CHAR[83]">C:/Instrument/Settings/config/NDXMARI/configurations/tables/wiring_event_2025_1.dat</wiring_table_file>
+      <monitor_spectrum NAPItype="NX_INT32">           1
+      </monitor_spectrum>
+      <monitor_sum NAPItype="NX_UINT32">     8132763
+      </monitor_sum>
+      <total_mevents NAPItype="NX_FLOAT32">     14.2122
+      </total_mevents>
+      <comment NAPItype="NX_CHAR[11]">UNSPECIFIED</comment>
+      <field_label NAPItype="NX_CHAR[11]">UNSPECIFIED</field_label>
+      <instrument_geometry NAPItype="NX_CHAR[11]">UNSPECIFIED</instrument_geometry>
+      <script_name NAPItype="NX_CHAR[11]">UNSPECIFIED</script_name>
+      <sample_name NAPItype="NX_CHAR[11]">UNSPECIFIED</sample_name>
+      <sample_orientation NAPItype="NX_CHAR[11]">UNSPECIFIED</sample_orientation>
+      <temperature_label NAPItype="NX_CHAR[11]">UNSPECIFIED</temperature_label>
+      <npratio_average NAPItype="NX_FLOAT32">      0.0000
+      </npratio_average>
+      <isis_cycle NAPItype="NX_CHAR[4]">25_1</isis_cycle>
+      <seci_config NAPItype="NX_CHAR[16]">MARI_CCR_changer</seci_config>
+      <event_mode NAPItype="NX_FLOAT64">         0.87500
+      </event_mode>
+      <IXselog name="selog" />
+    </NXentry>
+</NXroot>
