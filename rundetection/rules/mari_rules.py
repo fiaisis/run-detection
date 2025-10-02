@@ -9,7 +9,9 @@ import xmltodict
 
 from rundetection.ingestion.ingest import get_run_title
 from rundetection.job_requests import JobRequest
-from rundetection.rules.common_rules import grab_cycle_instrument_index
+from rundetection.rules.common_rules import (
+    get_journal_from_file_based_on_run_file_archive_path,
+)
 from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)
@@ -97,7 +99,7 @@ class MariWBVANRule(Rule[int]):
         super().__init__(value)
         self.cycle_run_info: dict[str, Any] | None = None
 
-    def _get_run_numbers_from_cycle(self, cycle_string: str, instrument: str) -> list[str]:
+    def _get_run_numbers_from_cycle(self, jobrequest: JobRequest) -> list[str]:
         """
         Find the run numbers from this current cycle.
         :param cycle_string: str, the cycle this file belongs to
@@ -105,11 +107,11 @@ class MariWBVANRule(Rule[int]):
         :return: list of run numbers as strings
         """
         if self.cycle_run_info is None:
-            cycle_xml = grab_cycle_instrument_index(cycle_string, instrument)
+            cycle_xml = get_journal_from_file_based_on_run_file_archive_path(jobrequest.filepath)
             self.cycle_run_info = xmltodict.parse(cycle_xml)
         return [run_info["run_number"]["#text"] for run_info in self.cycle_run_info["NXroot"]["NXentry"]]
 
-    def _get_run_numbers_and_titles(self, cycle_string: str, instrument: str) -> list[tuple[str, str]]:
+    def _get_run_numbers_and_titles(self, jobrequest: JobRequest) -> list[tuple[str, str]]:
         """
         Find the run numbers and titles from this current cycle.
         :param cycle_string: str, the cycle this file belongs to
@@ -117,7 +119,7 @@ class MariWBVANRule(Rule[int]):
         :return: list of tuples with run numbers as strings and then titles as strings.
         """
         if self.cycle_run_info is None:
-            cycle_xml = grab_cycle_instrument_index(cycle_string, instrument)
+            cycle_xml = get_journal_from_file_based_on_run_file_archive_path(jobrequest.filepath)
             self.cycle_run_info = xmltodict.parse(cycle_xml)
         return [
             (run_info["run_number"]["#text"], run_info["title"]["#text"])
@@ -130,9 +132,7 @@ class MariWBVANRule(Rule[int]):
         :param job_request: The job_request for this cycle
         :return: the run number as an int or return None
         """
-        runs_this_cycle = self._get_run_numbers_and_titles(
-            job_request.additional_values["cycle_string"], job_request.instrument
-        )
+        runs_this_cycle = self._get_run_numbers_and_titles(job_request)
         for run_number, title in reversed(runs_this_cycle):
             if (
                 "van" in title.lower()
@@ -149,9 +149,7 @@ class MariWBVANRule(Rule[int]):
         :param job_request: JobRequest, the job request for this run
         :return: True if run number present in cycle, else false.
         """
-        run_numbers = self._get_run_numbers_from_cycle(
-            job_request.additional_values["cycle_string"], job_request.instrument
-        )
+        run_numbers = self._get_run_numbers_from_cycle(job_request)
         return run_number in run_numbers
 
     def verify(self, job_request: JobRequest) -> None:
