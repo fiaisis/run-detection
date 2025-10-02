@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 import logging
-import os
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING
-
-import requests
 
 from rundetection.ingestion.ingest import get_run_title
 from rundetection.rules.rule import Rule
@@ -139,17 +136,13 @@ def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
     return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)
 
 
-# need a method that gets index from journal file, possibly get cycle number from path
-
-
-def grab_cycle_instrument_index(cycle: str, instrument: str) -> str:
+def get_journal_from_file_based_on_run_file_archive_path(archive_path: Path):
     """
-    Get the index of the instrument cycle.
+    Get the jounral raw text, in order to parse run information.
 
-    :param cycle: the cycle in question
-    :param instrument: the instrument on which the cycle ran
+    :param archive_path: Path object to the jounral of run information.
     """
-    _, cycle_year, cycle_num = cycle.split("_")
-    base_url = os.environ.get("JOURNAL_BASE_URL", "http://data.isis.rl.ac.uk/")
-    url = f"{base_url}/journals/ndx{instrument.lower()}/journal_{cycle_year}_{cycle_num}.xml"
-    return requests.get(url, timeout=5).text
+    cycle_year, cycle_num = str(archive_path.parent).split("_")[-2:-1]
+    root_path = archive_path.parent.parent.parent
+    journal_path = root_path + "logs" + "journal" + f"journal_{cycle_year}_{cycle_num}.xml"
+    return journal_path.read_text()
