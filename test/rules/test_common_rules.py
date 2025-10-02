@@ -103,7 +103,7 @@ def test_get_journal_from_file_based_on_run_file_archive_path(job_request) -> No
     Returns: None
 
     """
-    assert os.getcwd() == 0
+    #assert os.getcwd() == 0
     job_request.filepath = Path("/home/runner/work/run-detection/test/test_data/e2e_data/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs")
     first_line = '<?xml version="1.0" encoding="UTF-8"?>'
 
