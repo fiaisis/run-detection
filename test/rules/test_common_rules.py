@@ -104,7 +104,7 @@ def test_get_journal_from_file_based_on_run_file_archive_path(job_request) -> No
 
     """
     assert os.getcwd() == 0
-    job_request.filepath = Path("../test_data/e2e_data/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs")
+    job_request.filepath = Path("/home/runner/work/run-detection/test/test_data/e2e_data/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs")
     first_line = '<?xml version="1.0" encoding="UTF-8"?>'
 
     assert first_line in get_journal_from_file_based_on_run_file_archive_path(job_request)
