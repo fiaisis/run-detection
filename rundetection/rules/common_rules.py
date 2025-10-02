@@ -136,7 +136,7 @@ def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
     return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)
 
 
-def get_journal_from_file_based_on_run_file_archive_path(jobrequest: JobRequest):
+def get_journal_from_file_based_on_run_file_archive_path(jobrequest: JobRequest) -> str:
     """
     Get the jounral raw text, in order to parse run information.
 
