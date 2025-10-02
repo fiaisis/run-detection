@@ -107,7 +107,7 @@ class MariWBVANRule(Rule[int]):
         :return: list of run numbers as strings
         """
         if self.cycle_run_info is None:
-            cycle_xml = get_journal_from_file_based_on_run_file_archive_path(jobrequest.filepath)
+            cycle_xml = get_journal_from_file_based_on_run_file_archive_path(jobrequest)
             self.cycle_run_info = xmltodict.parse(cycle_xml)
         return [run_info["run_number"]["#text"] for run_info in self.cycle_run_info["NXroot"]["NXentry"]]
 
@@ -119,7 +119,7 @@ class MariWBVANRule(Rule[int]):
         :return: list of tuples with run numbers as strings and then titles as strings.
         """
         if self.cycle_run_info is None:
-            cycle_xml = get_journal_from_file_based_on_run_file_archive_path(jobrequest.filepath)
+            cycle_xml = get_journal_from_file_based_on_run_file_archive_path(jobrequest)
             self.cycle_run_info = xmltodict.parse(cycle_xml)
         return [
             (run_info["run_number"]["#text"], run_info["title"]["#text"])
