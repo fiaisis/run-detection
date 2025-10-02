@@ -136,13 +136,14 @@ def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
     return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)
 
 
-def get_journal_from_file_based_on_run_file_archive_path(archive_path: Path):
+def get_journal_from_file_based_on_run_file_archive_path(jobrequest: JobRequest):
     """
     Get the jounral raw text, in order to parse run information.
 
     :param archive_path: Path object to the jounral of run information.
     """
-    cycle_year, cycle_num = str(archive_path.parent).split("_")[-2:-1]
-    root_path = archive_path.parent.parent.parent
-    journal_path = root_path + "logs" + "journal" + f"journal_{cycle_year}_{cycle_num}.xml"
+    cycle_year, cycle_num = str(jobrequest.filepath.parent.name).split("_")[-2:]
+    # Go from /archive/NDXMARI/Instrument/data/cycle_25_1/MAR012345.nxs to /archive/NDXMARI/Instrument, allowing us to then navigate to the appropriate journal at /archive/NDXMARI/Instrument/logs/journal/journal_25_1.xml
+    root_path = jobrequest.filepath.parent.parent.parent
+    journal_path = root_path / Path(f"logs/journal/journal_{cycle_year}_{cycle_num}.xml")
     return journal_path.read_text()
