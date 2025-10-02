@@ -134,10 +134,11 @@ def test_mari_wbvan_rule_run_from_this_cycle(job_request):
     :param return: None.
     """
     with (
-        patch("rundetection.rules.mari_rules.get_journal_from_file_based_on_run_file_archive_path") as get_journal_from_file_based_on_run_file_archive_path_mock,
+        patch(
+            "rundetection.rules.mari_rules.get_journal_from_file_based_on_run_file_archive_path"
+        ) as get_journal_from_file_based_on_run_file_archive_path_mock,
         patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
     ):
-
         rule = MariWBVANRule(1234567)
         xmltodict_mock.parse.return_value = {"NXroot": {"NXentry": ""}}
         rule.verify(job_request)

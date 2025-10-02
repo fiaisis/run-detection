@@ -8,8 +8,8 @@ import pytest
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import (
     EnabledRule,
-    is_y_within_5_percent_of_x,
     get_journal_from_file_based_on_run_file_archive_path,
+    is_y_within_5_percent_of_x,
 )
 from rundetection.rules.sans_rules import SansPhiLimits, SansSliceWavs
 
@@ -97,7 +97,8 @@ def test_sans_phi_limit_rule_when_not_enabled(job_request) -> None:
 
 def test_get_journal_from_file_based_on_run_file_archive_path(job_request) -> None:
     """
-
+    Test that we can get the journal path from the nexus file path.
+    :param job_request: a job request object
     Returns: None
 
     """
