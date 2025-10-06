@@ -8,6 +8,7 @@ import pytest
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.common_rules import (
     EnabledRule,
+    get_journal_from_file_based_on_run_file_archive_path,
     is_y_within_5_percent_of_x,
 )
 from rundetection.rules.sans_rules import SansPhiLimits, SansSliceWavs
@@ -92,6 +93,19 @@ def test_sans_phi_limit_rule_when_not_enabled(job_request) -> None:
     rule = SansPhiLimits("[(1.0, 2.0), (3.0, 4.0)]")
     rule.verify(job_request)
     assert job_request.additional_values["phi_limits"] == "[(1.0, 2.0), (3.0, 4.0)]"
+
+
+def test_get_journal_from_file_based_on_run_file_archive_path(job_request) -> None:
+    """
+    Test that we can get the journal path from the nexus file path.
+    :param job_request: a job request object
+    Returns: None
+
+    """
+    job_request.filepath = Path("test/test_data/e2e_data/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs")
+    first_line = '<?xml version="1.0" encoding="UTF-8"?>'
+
+    assert first_line in get_journal_from_file_based_on_run_file_archive_path(job_request)
 
 
 if __name__ == "__main__":

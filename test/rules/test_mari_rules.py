@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pytest
 
@@ -26,9 +26,9 @@ def job_request():
     """
     return JobRequest(
         run_number=100,
-        filepath=Path("/archive/100/MARI100.nxs"),
+        filepath=Path("test/test_data/e2e_data/NDXMAR/Instrument/data/cycle_22_04/MAR25581.nxs"),
         experiment_title="Test experiment",
-        additional_values={},
+        additional_values={"cycle_string": "cycle_24_5"},
         additional_requests=[],
         raw_frames=3,
         good_frames=0,
@@ -87,7 +87,7 @@ def test_verify_with_single_run(mari_stitch_rule_true, job_request):
 
 
 @pytest.mark.usefixtures("_working_directory_fix")
-def test_verify_multiple_runs(mari_stitch_rule_true, job_request):
+def test_verify_multiple_runs(mari_stitch_rule_true, job_request, tmp_path):
     """
     Test additional requests are included with other rules applied
     :param mari_stitch_rule_true: rule fixture
@@ -100,7 +100,13 @@ def test_verify_multiple_runs(mari_stitch_rule_true, job_request):
     rule.verify(job_request)
     rule = MariGitShaRule("abc1234567")
     rule.verify(job_request)
-    with patch("rundetection.rules.mari_rules.MariStitchRule._get_runs_to_stitch", return_value=[1, 2, 3]):
+    with (
+        patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
+        patch("rundetection.rules.mari_rules.MariStitchRule._get_runs_to_stitch", return_value=[1, 2, 3]),
+    ):
+        rule = MariWBVANRule(1234567)
+        rule.verify(job_request)
+        xmltodict_mock.parse.return_value = {"NXroot": {"NXentry": ""}}
         mari_stitch_rule_true.verify(job_request)
 
     assert len(job_request.additional_requests) == 1
@@ -120,14 +126,67 @@ def test_mari_mask_rule(job_request):
     assert job_request.additional_values["mask_file_link"] == "some link"
 
 
-def test_mari_wbvan_rule(job_request):
+def test_mari_wbvan_rule_run_from_this_cycle(job_request):
     """
-    Test that the wbvan number is set via the specification
-    :param job_request: JobRequest fixture
-    :return: None.
+    Test that Mari WBVAN rule finds run from this cycle
+
+    :param job_request: job request fixture
+    :param return: None.
     """
-    rule = MariWBVANRule(1234567)
-    rule.verify(job_request)
+    with (
+        patch(
+            "rundetection.rules.mari_rules.get_journal_from_file_based_on_run_file_archive_path"
+        ) as get_journal_from_file_based_on_run_file_archive_path_mock,
+        patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
+    ):
+        rule = MariWBVANRule(1234567)
+        xmltodict_mock.parse.return_value = {"NXroot": {"NXentry": ""}}
+        rule.verify(job_request)
+
+    assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
+    assert call(get_journal_from_file_based_on_run_file_archive_path_mock()) in xmltodict_mock.parse.call_args_list
+
+
+def test_get_run_numbers_and_titles_when_cycle_info_none(job_request):
+    """
+    Test that _get_run_numbers_and_titles finds run numbers and titles
+    Args:
+        job_request: Job request fixture
+
+    Returns: None
+    """
+    with (
+        patch(
+            "rundetection.rules.mari_rules.get_journal_from_file_based_on_run_file_archive_path"
+        ) as get_journal_from_file_based_on_run_file_archive_path_mock,
+        patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
+    ):
+        rule = MariWBVANRule(1234567)
+        xmltodict_mock.parse.return_value = {"NXroot": {"NXentry": ""}}
+        rule._get_run_numbers_and_titles(job_request)
+
+    assert call(get_journal_from_file_based_on_run_file_archive_path_mock()) in xmltodict_mock.parse.call_args_list
+
+
+def test_mari_wbvan_rule_run_from_this_cycle_van_found_with_spaces(job_request):
+    """
+    Test that MARI WBVAN rule finds run from old cycle, with spaces between characters.
+
+    :param job_request: job request fixture
+    :param return: None.
+    """
+    with (
+        patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
+    ):
+        rule = MariWBVANRule(1234567)
+        xmltodict_mock.parse.return_value = {
+            "NXroot": {
+                "NXentry": [
+                    {"run_number": {"#text": "1234567"}, "title": {"#text": '"white van" - Ei=30 meV 50 Hz Gd chopper'}}
+                ]
+            }
+        }
+        rule.verify(job_request)
 
     assert job_request.additional_values["wbvan"] == 1234567  # noqa: PLR2004
 
