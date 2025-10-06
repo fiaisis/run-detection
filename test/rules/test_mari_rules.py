@@ -147,6 +147,27 @@ def test_mari_wbvan_rule_run_from_this_cycle(job_request):
     assert call(get_journal_from_file_based_on_run_file_archive_path_mock()) in xmltodict_mock.parse.call_args_list
 
 
+def test_get_run_numbers_and_titles_when_cycle_info_none(job_request):
+    """
+    Test that _get_run_numbers_and_titles finds run numbers and titles
+    Args:
+        job_request: Job request fixture
+
+    Returns: None
+    """
+    with (
+        patch(
+            "rundetection.rules.mari_rules.get_journal_from_file_based_on_run_file_archive_path"
+        ) as get_journal_from_file_based_on_run_file_archive_path_mock,
+        patch("rundetection.rules.mari_rules.xmltodict") as xmltodict_mock,
+    ):
+        rule = MariWBVANRule(1234567)
+        xmltodict_mock.parse.return_value = {"NXroot": {"NXentry": ""}}
+        rule._get_run_numbers_and_titles(job_request)
+
+    assert call(get_journal_from_file_based_on_run_file_archive_path_mock()) in xmltodict_mock.parse.call_args_list
+
+
 def test_mari_wbvan_rule_run_from_this_cycle_van_found_with_spaces(job_request):
     """
     Test that MARI WBVAN rule finds run from old cycle, with spaces between characters.
