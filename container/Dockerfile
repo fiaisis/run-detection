@@ -1,4 +1,4 @@
-FROM python:3.13-slim@sha256:58c30f5bfaa718b5803a53393190b9c68bd517c44c6c94c1b6c8c172bcfad040
+FROM python:3.14-slim@sha256:94ce8aa707ac74c5469ebca60581cca0743af23f4dd2eb885bee3c13db563b7c
 
 # Install run-detection to the container
 ADD . .
