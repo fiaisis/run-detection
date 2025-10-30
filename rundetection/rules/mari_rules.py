@@ -3,9 +3,15 @@
 import logging
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
+
+import xmltodict
 
 from rundetection.ingestion.ingest import get_run_title
 from rundetection.job_requests import JobRequest
+from rundetection.rules.common_rules import (
+    get_journal_from_file_based_on_run_file_archive_path,
+)
 from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)
@@ -84,16 +90,84 @@ class MariWBVANRule(Rule[int]):
     This value is manually calculated by the MARI instrument scientist once per cycle.
     """
 
+    def __init__(self, value: int):
+        """
+        Initialise cycle run information.
+
+        :param value: The value to associate with this instantiated Rule.
+        """
+        super().__init__(value)
+        self.cycle_run_info: dict[str, Any] | None = None
+
+    def _get_run_numbers_from_cycle(self, jobrequest: JobRequest) -> list[str]:
+        """
+        Find the run numbers from this current cycle.
+        :param cycle_string: str, the cycle this file belongs to
+        :param instrument: str, the name of the instrument
+        :return: list of run numbers as strings
+        """
+        if self.cycle_run_info is None:
+            cycle_xml = get_journal_from_file_based_on_run_file_archive_path(jobrequest)
+            self.cycle_run_info = xmltodict.parse(cycle_xml)
+        return [run_info["run_number"]["#text"] for run_info in self.cycle_run_info["NXroot"]["NXentry"]]
+
+    def _get_run_numbers_and_titles(self, jobrequest: JobRequest) -> list[tuple[str, str]]:
+        """
+        Find the run numbers and titles from this current cycle.
+        :param cycle_string: str, the cycle this file belongs to
+        :param instrument: str, the name of the instrument
+        :return: list of tuples with run numbers as strings and then titles as strings.
+        """
+        if self.cycle_run_info is None:
+            cycle_xml = get_journal_from_file_based_on_run_file_archive_path(jobrequest)
+            self.cycle_run_info = xmltodict.parse(cycle_xml)
+        return [
+            (run_info["run_number"]["#text"], run_info["title"]["#text"])
+            for run_info in self.cycle_run_info["NXroot"]["NXentry"]
+        ]
+
+    def _find_wbvan_run_number_from_cycle(self, job_request: JobRequest) -> int | None:
+        """
+        Find the WbVAN for this cycle and return it or None if not found.
+        :param job_request: The job_request for this cycle
+        :return: the run number as an int or return None
+        """
+        runs_this_cycle = self._get_run_numbers_and_titles(job_request)
+        for run_number, title in reversed(runs_this_cycle):
+            if (
+                "van" in title.lower()
+                and "30mev" in title.lower().replace(" ", "")
+                and "50hz" in title.lower().replace(" ", "")
+            ):
+                return int(run_number)
+        return None
+
+    def _run_number_in_cycle(self, run_number: str, job_request: JobRequest) -> bool:
+        """
+        Find the run number from this cycle and return if it is present
+        :param run_number: str, the run number to find
+        :param job_request: JobRequest, the job request for this run
+        :return: True if run number present in cycle, else false.
+        """
+        run_numbers = self._get_run_numbers_from_cycle(job_request)
+        return run_number in run_numbers
+
     def verify(self, job_request: JobRequest) -> None:
         """
-        Verify the rule against the job request.
-
-        Adds the wbvan number to the additional values.
-
-        :param job_request: The job request to verify.
-        :return: None.
+        Verify this rule and check whether we should use the defined value
+        :param job_request: JobRequest, the job that was requested
+        :return: None
         """
-        job_request.additional_values["wbvan"] = self._value
+        wbvan: int | None = self._value
+        # If the run number is not from this cycle then we should try to find the most recent vanadium file from this
+        # cycle.
+        if not self._run_number_in_cycle(str(wbvan), job_request):
+            wbvan = self._find_wbvan_run_number_from_cycle(job_request)
+            if wbvan is None:
+                # If wbvan cannot be found still, give up and use the defaulted value.
+                wbvan = self._value
+
+        job_request.additional_values["wbvan"] = wbvan
 
 
 class MariGitShaRule(Rule[str]):
