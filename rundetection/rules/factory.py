@@ -11,6 +11,7 @@ from rundetection.rules.enginx_rules import (
     EnginxGroupRule,
     EnginxVanadiumPathRule,
 )
+from rundetection.rules.imat_rules import IMATFindImagesRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
@@ -109,6 +110,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "enginxgroup":
             if isinstance(value, str):
                 return EnginxGroupRule(value)
+        case "imatfindimages":
+            if isinstance(value, bool):
+                return IMATFindImagesRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 
