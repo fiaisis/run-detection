@@ -33,6 +33,7 @@ from rundetection.rules.sans_rules import (
     SansUserFile,
 )
 from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule
+from rundetection.rules.imat_rules import IMATFindImagesRule
 
 
 def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
@@ -74,7 +75,8 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("enginxvanadiumrun", 12345, EnginxVanadiumPathRule),
         ("enginxceriarun", 34567, EnginxCeriaPathRule),
         ("enginxgroup", "north", EnginxGroupRule),
-    ],
+        ("imatfindimages", True, IMATFindImagesRule),
+    ]
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
     """
