@@ -6,6 +6,7 @@ import tempfile
 
 from rundetection.job_requests import JobRequest
 from rundetection.rules.imat_rules import IMATFindImagesRule
+from rundetection.exceptions import RuleViolationError
 
 
 @pytest.fixture
@@ -31,6 +32,7 @@ def job_request():
 
 
 def test_imat_find_images_success(job_request):
+    """Test imat rules can find images successfully"""
     with tempfile.TemporaryDirectory() as tmpdirname:
         # Setup
         os.environ["IMAT_DIR"] = tmpdirname
@@ -46,13 +48,15 @@ def test_imat_find_images_success(job_request):
 
 
 def test_imat_find_images_failure(job_request):
+    """Test imat rules act's correctly when it fails to find"""
     with tempfile.TemporaryDirectory() as tmpdirname:
         # Setup
         os.environ["IMAT_DIR"] = tmpdirname
 
         # Test
-        rule = IMATFindImagesRule(True)
-        rule.verify(job_request)
+        with pytest.raises(RuleViolationError):
+            rule = IMATFindImagesRule(True)
+            rule.verify(job_request)
 
         # Assertions
         assert len(job_request.additional_values) == 0
