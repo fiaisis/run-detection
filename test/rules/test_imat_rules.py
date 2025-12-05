@@ -1,14 +1,14 @@
 """Tests for IMAT's rules"""
 
+import os
+import tempfile
 from pathlib import Path
 
-import os
 import pytest
-import tempfile
 
+from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
 from rundetection.rules.imat_rules import IMATFindImagesRule
-from rundetection.exceptions import RuleViolationError
 
 
 @pytest.fixture

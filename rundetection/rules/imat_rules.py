@@ -5,11 +5,10 @@ from __future__ import annotations
 import logging
 import os
 import typing
-
 from pathlib import Path
 
-from rundetection.rules.rule import Rule
 from rundetection.exceptions import RuleViolationError
+from rundetection.rules.rule import Rule
 
 if typing.TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
@@ -35,5 +34,6 @@ class IMATFindImagesRule(Rule[bool]):
             job_request.additional_values["images_dir"] = str(imat_dir_path)
         else:
             logger.error("Images dir could not be found for experiment number: %s", job_request.experiment_number)
-            raise RuleViolationError("Images dir could not be found for experiment number: %s",
-                                     job_request.experiment_number)
+            raise RuleViolationError(
+                "Images dir could not be found for experiment number: %s", job_request.experiment_number
+            )
