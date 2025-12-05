@@ -1,3 +1,5 @@
+"""Tests for IMAT's rules"""
+
 from pathlib import Path
 
 import os
@@ -54,8 +56,8 @@ def test_imat_find_images_failure(job_request):
         os.environ["IMAT_DIR"] = tmpdirname
 
         # Test
+        rule = IMATFindImagesRule(True)
         with pytest.raises(RuleViolationError):
-            rule = IMATFindImagesRule(True)
             rule.verify(job_request)
 
         # Assertions
