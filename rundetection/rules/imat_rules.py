@@ -32,6 +32,7 @@ class IMATFindImagesRule(Rule[bool]):
         imat_dir_path = Path(imat_root_dir) / f"RB{job_request.experiment_number}"
         if imat_dir_path.exists():
             job_request.additional_values["images_dir"] = str(imat_dir_path)
+            job_request.additional_values["runno"] = job_request.run_number
         else:
             logger.error("Images dir could not be found for experiment number: %s", job_request.experiment_number)
             raise RuleViolationError(
