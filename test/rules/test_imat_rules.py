@@ -45,9 +45,9 @@ def test_imat_find_images_success(job_request):
         rule.verify(job_request)
 
         # Assertions
-        assert len(job_request.additional_values) == 2
+        assert len(job_request.additional_values) == 2 # noqa: PLR2004
         assert job_request.additional_values["images_dir"] == tmpdirname + "/RB12345"
-        assert job_request.additional_values["runno"] == 100
+        assert job_request.additional_values["runno"] == 100 # noqa: PLR2004
 
 
 def test_imat_find_images_failure(job_request):
