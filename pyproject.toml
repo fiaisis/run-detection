@@ -90,3 +90,4 @@ ignore = [
 
 [tool.ruff.lint.pylint]
 max-args = 10
+
