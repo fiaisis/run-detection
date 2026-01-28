@@ -29,7 +29,7 @@ from rundetection.rules.sans_rules import (
     SansSliceWavs,
     SansUserFile,
 )
-from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule
+from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule, VesuvioSumRunsRule
 
 
 def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912, PLR0915
@@ -101,6 +101,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "vesuvioipfilerule":
             if isinstance(value, str):
                 return VesuvioIPFileRule(value)
+        case "vesuviosumruns":
+            if isinstance(value, bool):
+                return VesuvioSumRunsRule(value)
         case "enginxvanadiumrun":
             if isinstance(value, int | str):
                 return EnginxVanadiumPathRule(value)
