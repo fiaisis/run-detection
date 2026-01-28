@@ -1,9 +1,10 @@
 """Vesuvio Rules."""
 
 import logging
-
+from copy import deepcopy
 from pathlib import Path
 
+from rundetection.ingestion.ingest import get_run_title
 from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
 
@@ -57,10 +58,7 @@ class VesuvioSumRunsRule(Rule[bool]):
         :return: (bool) True if similar False otherwise.
         """
         logger.info("Comparing titles %s and %s", title, other_title)
-        if title == other_title:
-            return True
-        # Allow some slight variations if needed, but for now exact match is safer
-        return False
+        return title == other_title
 
     def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str) -> list[int]:
         """
@@ -70,7 +68,6 @@ class VesuvioSumRunsRule(Rule[bool]):
         :param run_number: The run number for starting run.
         :param run_title: The title of the first run.
         """
-        from rundetection.ingestion.ingest import get_run_title
         run_numbers = []
         while run_path.exists():
             if not self._is_title_similar(get_run_title(run_path), run_title):
@@ -91,7 +88,6 @@ class VesuvioSumRunsRule(Rule[bool]):
         if not self._value:
             return
 
-        from copy import deepcopy
         logger.info("Checking stitch conditions for VESUVIO run %s", job_request.filepath)
         
         run_numbers = self._get_runs_to_stitch(
