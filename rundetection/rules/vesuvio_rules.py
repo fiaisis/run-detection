@@ -89,11 +89,9 @@ class VesuvioSumRunsRule(Rule[bool]):
             return
 
         logger.info("Checking stitch conditions for VESUVIO run %s", job_request.filepath)
-        
+
         run_numbers = self._get_runs_to_stitch(
-            job_request.filepath,
-            job_request.run_number,
-            job_request.experiment_title
+            job_request.filepath, job_request.run_number, job_request.experiment_title
         )
 
         if len(run_numbers) > 1:
@@ -101,11 +99,11 @@ class VesuvioSumRunsRule(Rule[bool]):
             # Use the range/list of runs for runno
             additional_request.additional_values["runno"] = run_numbers
             additional_request.additional_values["sum_runs"] = True
-            
+
             # Ensure other vesuvio rules values are preserved
             if "ip_file" in job_request.additional_values:
                 additional_request.additional_values["ip_file"] = job_request.additional_values["ip_file"]
             if "empty_runs" in job_request.additional_values:
                 additional_request.additional_values["empty_runs"] = job_request.additional_values["empty_runs"]
-                
+
             job_request.additional_requests.append(additional_request)
