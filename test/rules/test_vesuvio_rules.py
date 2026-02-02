@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule
+from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule, VesuvioDiffIPFileRule
 
 
 @pytest.fixture(autouse=True)
@@ -61,3 +61,15 @@ def test_vesuvio_ip_file_rule(job_request):
     rule.verify(job_request)
 
     assert job_request.additional_values["ip_file"] == "IP0001.par"
+
+
+def test_vesuvio_diff_ip_file_rule(job_request):
+    """
+    Test that the diffraction IP file is set via the specification
+    :param job_request: JobRequest fixture
+    :return: None.
+    """
+    rule = VesuvioDiffIPFileRule("IP0001.par")
+    rule.verify(job_request)
+
+    assert job_request.additional_values["diff_ip_file"] == "IP0001.par"
