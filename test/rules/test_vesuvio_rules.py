@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule, VesuvioDiffIPFileRule
+from rundetection.rules.vesuvio_rules import VesuvioDiffIPFileRule, VesuvioEmptyRunsRule, VesuvioIPFileRule
 
 
 @pytest.fixture(autouse=True)
