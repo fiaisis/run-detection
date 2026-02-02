@@ -33,7 +33,7 @@ from rundetection.rules.sans_rules import (
     SansSliceWavs,
     SansUserFile,
 )
-from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule, VesuvioDiffIPFileRule
+from rundetection.rules.vesuvio_rules import VesuvioDiffIPFileRule, VesuvioEmptyRunsRule, VesuvioIPFileRule
 
 
 def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
