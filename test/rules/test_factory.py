@@ -33,7 +33,7 @@ from rundetection.rules.sans_rules import (
     SansSliceWavs,
     SansUserFile,
 )
-from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule
+from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule, VesuvioSumRunsRule
 
 
 def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
@@ -72,6 +72,7 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("iriscalibration", {"002": "00148587", "004": "00148587"}, IrisCalibrationRule),
         ("vesuvioipfilerule", "ip00001.par", VesuvioIPFileRule),
         ("vesuviovemptyrunsrule", "123-321", VesuvioEmptyRunsRule),
+        ("vesuviosumruns", True, VesuvioSumRunsRule),
         ("enginxvanadiumrun", 12345, EnginxVanadiumPathRule),
         ("enginxceriarun", 34567, EnginxCeriaPathRule),
         ("enginxgroup", "north", EnginxGroupRule),
