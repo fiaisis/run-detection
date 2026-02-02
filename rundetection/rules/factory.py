@@ -29,7 +29,12 @@ from rundetection.rules.sans_rules import (
     SansSliceWavs,
     SansUserFile,
 )
-from rundetection.rules.vesuvio_rules import VesuvioDiffIPFileRule, VesuvioEmptyRunsRule, VesuvioIPFileRule, VesuvioSumRunsRule
+from rundetection.rules.vesuvio_rules import (
+    VesuvioDiffIPFileRule,
+    VesuvioEmptyRunsRule,
+    VesuvioIPFileRule,
+    VesuvioSumRunsRule,
+)
 
 
 def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912, PLR0915

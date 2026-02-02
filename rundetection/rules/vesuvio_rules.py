@@ -46,6 +46,7 @@ class VesuvioDiffIPFileRule(Rule[str]):
         """
         job_request.additional_values["diff_ip_file"] = self._value
 
+
 class VesuvioSumRunsRule(Rule[bool]):
     """Groups multiple VESUVIO runs with the same title for summation."""
 

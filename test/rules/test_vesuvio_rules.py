@@ -10,7 +10,12 @@ from unittest.mock import patch
 import pytest
 
 from rundetection.ingestion.ingest import JobRequest
-from rundetection.rules.vesuvio_rules import VesuvioDiffIPFileRule, VesuvioEmptyRunsRule, VesuvioIPFileRule, VesuvioSumRunsRule
+from rundetection.rules.vesuvio_rules import (
+    VesuvioDiffIPFileRule,
+    VesuvioEmptyRunsRule,
+    VesuvioIPFileRule,
+    VesuvioSumRunsRule,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -77,6 +82,8 @@ def test_vesuvio_diff_ip_file_rule(job_request):
     rule.verify(job_request)
 
     assert job_request.additional_values["diff_ip_file"] == "IP0001.par"
+
+
 def test_vesuvio_sum_runs_rule(job_request):
     """Test that multiple runs with the same title are correctly grouped."""
     temp_dir = tempfile.mkdtemp()
