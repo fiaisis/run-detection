@@ -110,7 +110,6 @@ def test_vesuvio_sum_runs_rule(job_request):
             assert additional_request.additional_values["ip_file"] == "IP0001.par"
             assert additional_request.additional_values["empty_runs"] == "123-132"
 
-
     finally:
         shutil.rmtree(temp_dir)
 
