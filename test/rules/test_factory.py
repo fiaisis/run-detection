@@ -33,7 +33,7 @@ from rundetection.rules.sans_rules import (
     SansSliceWavs,
     SansUserFile,
 )
-from rundetection.rules.vesuvio_rules import VesuvioDiffIPFileRule, VesuvioEmptyRunsRule, VesuvioIPFileRule
+from rundetection.rules.vesuvio_rules import VesuvioDiffIPFileRule, VesuvioEmptyRunsRule, VesuvioIPFileRule, VesuvioSumRunsRule
 
 
 def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
@@ -73,6 +73,7 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("vesuvioipfilerule", "ip00001.par", VesuvioIPFileRule),
         ("vesuviodiffipfilerule", "ip00001.par", VesuvioDiffIPFileRule),
         ("vesuviovemptyrunsrule", "123-321", VesuvioEmptyRunsRule),
+        ("vesuviosumruns", True, VesuvioSumRunsRule),
         ("enginxvanadiumrun", 12345, EnginxVanadiumPathRule),
         ("enginxceriarun", 34567, EnginxCeriaPathRule),
         ("enginxgroup", "north", EnginxGroupRule),
