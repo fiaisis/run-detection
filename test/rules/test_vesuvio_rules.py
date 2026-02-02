@@ -106,6 +106,12 @@ def test_vesuvio_sum_runs_rule(job_request):
                 return runs.get(run_num, "Unknown")
             return "Unknown"
 
+        rule = VesuvioEmptyRunsRule("123-132")
+        rule.verify(job_request)
+        rule = VesuvioIPFileRule("IP0001.par")
+        rule.verify(job_request)
+        rule = VesuvioDiffIPFileRule("IP0001.par")
+        rule.verify(job_request)
         rule = VesuvioSumRunsRule(True)
 
         # update job_request for this test
@@ -120,6 +126,9 @@ def test_vesuvio_sum_runs_rule(job_request):
             additional_request = job_request.additional_requests[0]
             assert additional_request.additional_values["runno"] == [55956, 55957, 55958]
             assert additional_request.additional_values["sum_runs"] is True
+            assert additional_request.additional_values["ip_file"] == "IP0001.par"
+            assert additional_request.additional_values["empty_runs"] == "123-132"
+            assert additional_request.additional_values["diff_ip_file"] == "IP0001.par"
 
     finally:
         shutil.rmtree(temp_dir)
