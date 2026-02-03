@@ -35,6 +35,18 @@ class VesuvioIPFileRule(Rule[str]):
         job_request.additional_values["ip_file"] = self._value
 
 
+class VesuvioDiffIPFileRule(Rule[str]):
+    """Adds the diff_ip_file to JobRequest."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Add the diffraction IP file to the job request's additional values.
+
+        :param job_request: The job request to update with the diffraction IP file.
+        """
+        job_request.additional_values["diff_ip_file"] = self._value
+
+
 class VesuvioSumRunsRule(Rule[bool]):
     """Groups multiple VESUVIO runs with the same title for summation."""
 
@@ -105,5 +117,7 @@ class VesuvioSumRunsRule(Rule[bool]):
                 additional_request.additional_values["ip_file"] = job_request.additional_values["ip_file"]
             if "empty_runs" in job_request.additional_values:
                 additional_request.additional_values["empty_runs"] = job_request.additional_values["empty_runs"]
+            if "diff_ip_file" in job_request.additional_values:
+                additional_request.additional_values["diff_ip_file"] = job_request.additional_values["diff_ip_file"]
 
             job_request.additional_requests.append(additional_request)
