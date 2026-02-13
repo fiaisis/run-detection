@@ -55,7 +55,7 @@ def test_writes_file_and_updates_periodically(heartbeat: Heartbeat, monkeypatch:
 
     heartbeat.start()
 
-    assert wait_until(heartbeat.path.exists())
+    assert wait_until(lambda: heartbeat.path.exists())
     assert heartbeat.path.read_text(encoding="utf-8") == "STAMP1"
 
     monkeypatch.setattr(time, "strftime", lambda fmt: "STAMP2")
@@ -66,7 +66,7 @@ def test_stop_prevents_further_writes(heartbeat: Heartbeat, monkeypatch: pytest.
     """Test that stopping the heartbeat prevents further writes to the heartbeat file."""
     monkeypatch.setattr(time, "strftime", lambda fmt: "BEFORE")
     heartbeat.start()
-    assert wait_until(heartbeat.path.exists())
+    assert wait_until(lambda: heartbeat.path.exists())
     assert heartbeat.path.read_text(encoding="utf-8") == "BEFORE"
 
     heartbeat.stop()
