@@ -17,10 +17,26 @@ logger = logging.getLogger(__name__)
 
 
 def check_file(path: Path, run_number: str) -> bool:
+    """
+    Check if a file matches the run number.
+
+    :param path: The path to the file.
+    :param run_number: The run number to check for.
+    :return: True if it is a file and the run number is in the name.
+    """
     return path.is_file() and run_number in path.name
 
 
 def check_dir(path: Path, run_number: str) -> Path | None:
+    """
+    Check a directory for the IMAT image structure.
+
+    This looks for a file containing the run number and a directory named 'Tomo'.
+
+    :param path: The path to the experiment directory.
+    :param run_number: The run number to check for.
+    :return: The path to the Tomo directory if found, otherwise None.
+    """
     tomo = None
     file_found = False
     for child in path.iterdir():

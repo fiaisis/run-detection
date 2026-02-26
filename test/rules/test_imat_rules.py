@@ -10,6 +10,9 @@ from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
 from rundetection.rules.imat_rules import IMATFindImagesRule
 
+EXPECTED_ADDITIONAL_VALUES_LEN = 2
+RUN_NUMBER = 100
+
 
 @pytest.fixture
 def job_request():
@@ -50,9 +53,9 @@ def test_imat_find_images_success(job_request):
         rule.verify(job_request)
 
         # Assertions
-        assert len(job_request.additional_values) == 2
+        assert len(job_request.additional_values) == EXPECTED_ADDITIONAL_VALUES_LEN
         assert job_request.additional_values["images_dir"] == str(tomo_dir)
-        assert job_request.additional_values["runno"] == 100
+        assert job_request.additional_values["runno"] == RUN_NUMBER
 
 
 def test_imat_find_images_tomo_first(job_request):
