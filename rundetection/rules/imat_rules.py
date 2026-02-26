@@ -16,6 +16,32 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def check_file(path: Path, run_number: str) -> bool:
+    return path.is_file() and run_number in path.name
+
+
+def check_dir(path: Path, run_number: str) -> Path | None:
+    tomo = None
+    file_found = False
+    for child in path.iterdir():
+        is_file = check_file(child, run_number)
+        if is_file:
+            # File found
+            if tomo is not None:
+                # Tomo is already known
+                return tomo
+            if not file_found and tomo is None:
+                # Wait until we find the Tomo folder
+                file_found = True
+        if child.is_dir() and child.name == "Tomo":
+            # Found a potential Tomo dir
+            tomo = path / child
+            if file_found:
+                # Tomo and file found, now return
+                return tomo
+    return None
+
+
 class IMATFindImagesRule(Rule[bool]):
     """Finds the IMAT image files"""
 
@@ -30,7 +56,15 @@ class IMATFindImagesRule(Rule[bool]):
         imat_root_dir = os.environ.get("IMAT_DIR", "/imat")
 
         imat_dir_path = Path(imat_root_dir) / f"RB{job_request.experiment_number}"
-        if imat_dir_path.exists():
+
+        if imat_dir_path.exists() and imat_dir_path.is_dir():
+            # Find file with run number in it, often ending with .csv, then search for a dir in the same directory as it
+            # called Tomo.
+            imat_dir_path = check_dir(imat_dir_path, str(job_request.run_number))
+        else:
+            imat_dir_path = None
+
+        if imat_dir_path is not None and imat_dir_path.exists():
             job_request.additional_values["images_dir"] = str(imat_dir_path)
             job_request.additional_values["runno"] = job_request.run_number
         else:
