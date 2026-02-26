@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def check_file(path: Path, run_number: str) -> bool:
+def check_file_is_correct_for_run_number(path: Path, run_number: str) -> bool:
     """
     Check if a file matches the run number.
 
@@ -27,7 +27,7 @@ def check_file(path: Path, run_number: str) -> bool:
     return path.is_file() and run_number in path.name
 
 
-def check_dir(path: Path, run_number: str) -> Path | None:
+def find_correct_tomo_dir(path: Path, run_number: str) -> Path | None:
     """
     Check a directory for the IMAT image structure.
 
@@ -40,7 +40,7 @@ def check_dir(path: Path, run_number: str) -> Path | None:
     tomo = None
     file_found = False
     for child in path.iterdir():
-        is_file = check_file(child, run_number)
+        is_file = check_file_is_correct_for_run_number(child, run_number)
         if is_file:
             # File found
             if tomo is not None:
@@ -77,7 +77,7 @@ class IMATFindImagesRule(Rule[bool]):
         if exp_dir_path.exists() and exp_dir_path.is_dir():
             # Find file with run number in it, often ending with .csv, then search for a dir in the same directory as it
             # called Tomo.
-            imat_dir_path = check_dir(exp_dir_path, str(job_request.run_number))
+            imat_dir_path = find_correct_tomo_dir(exp_dir_path, str(job_request.run_number))
 
         if imat_dir_path is not None and imat_dir_path.exists():
             job_request.additional_values["images_dir"] = str(imat_dir_path)
