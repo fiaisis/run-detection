@@ -71,14 +71,13 @@ class IMATFindImagesRule(Rule[bool]):
         # Assume that the imat directory is loaded.
         imat_root_dir = os.environ.get("IMAT_DIR", "/imat")
 
-        imat_dir_path = Path(imat_root_dir) / f"RB{job_request.experiment_number}"
+        exp_dir_path = Path(imat_root_dir) / f"RB{job_request.experiment_number}"
+        imat_dir_path: Path | None = None
 
-        if imat_dir_path.exists() and imat_dir_path.is_dir():
+        if exp_dir_path.exists() and exp_dir_path.is_dir():
             # Find file with run number in it, often ending with .csv, then search for a dir in the same directory as it
             # called Tomo.
-            imat_dir_path = check_dir(imat_dir_path, str(job_request.run_number))
-        else:
-            imat_dir_path = None
+            imat_dir_path = check_dir(exp_dir_path, str(job_request.run_number))
 
         if imat_dir_path is not None and imat_dir_path.exists():
             job_request.additional_values["images_dir"] = str(imat_dir_path)
