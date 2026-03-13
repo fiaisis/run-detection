@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
 
       - name: Build run-detection Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           file: ./container/Dockerfile
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/rundetection:${{ github.sha }}
