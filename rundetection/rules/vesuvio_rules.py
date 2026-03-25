@@ -3,12 +3,45 @@
 import logging
 from copy import deepcopy
 from pathlib import Path
+import time
+
+import requests
 
 from rundetection.ingestion.ingest import get_run_title
 from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
 
 logger = logging.getLogger(__name__)
+
+
+def get_file_from_request(url: str, path: str) -> None:
+    """
+    write the file from the url to the given path, retrying at most 3 times
+    :param url: the url to get
+    :param path: the path to write to
+    :return: None
+    """
+    success = False
+    attempts = 0
+    wait_time_seconds = 15
+    while attempts < 3:
+        print(f"Attempting to get resource {url}", flush=True)
+        response = requests.get(url)
+        if not response.ok:
+            print(f"Failed to get resource from: {url}", flush=True)
+            print(f"Waiting {wait_time_seconds}...", flush=True)
+            time.sleep(wait_time_seconds)
+            attempts += 1
+            wait_time_seconds *= 3
+        else:
+            with open(path, "w+") as fle:
+                fle.write(response.text)
+            success = True
+            print("Successfully obtained resource")
+            break
+
+    if not success:
+        raise RuntimeError(f"Reduction not possible with missing resource {url}")
 
 
 class VesuvioEmptyRunsRule(Rule[str]):
@@ -121,3 +154,7 @@ class VesuvioSumRunsRule(Rule[bool]):
                 additional_request.additional_values["diff_ip_file"] = job_request.additional_values["diff_ip_file"]
 
             job_request.additional_requests.append(additional_request)
+
+
+class VesuvioFileAcquisitionRule(Rule[str]):
+    """"""
