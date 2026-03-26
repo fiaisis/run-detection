@@ -5,7 +5,7 @@ import re
 import shutil
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
@@ -15,6 +15,7 @@ from rundetection.rules.vesuvio_rules import (
     VesuvioEmptyRunsRule,
     VesuvioIPFileRule,
     VesuvioSumRunsRule,
+    get_file_from_request,
 )
 
 
@@ -139,3 +140,95 @@ def test_vesuvio_sum_runs_rule_disabled(job_request):
     rule = VesuvioSumRunsRule(False)
     rule.verify(job_request)
     assert len(job_request.additional_requests) == 0
+
+
+# ---------------------------------------------------------------------------
+# get_file_from_request tests
+# ---------------------------------------------------------------------------
+
+
+def test_get_file_from_request_success_on_first_attempt(tmp_path):
+    """
+    When the HTTP response is OK on the first attempt the content should be
+    written to the given path and no exception should be raised.
+    """
+    output_file = tmp_path / "output.txt"
+
+    mock_response = MagicMock()
+    mock_response.ok = True
+    mock_response.text = "file content"
+
+    with patch("rundetection.rules.vesuvio_rules.requests.get", return_value=mock_response) as mock_get, patch(
+        "rundetection.rules.vesuvio_rules.time.sleep"
+    ) as mock_sleep:
+        get_file_from_request("http://example.com/file", str(output_file))
+
+    mock_get.assert_called_once_with("http://example.com/file", timeout=10)
+    mock_sleep.assert_not_called()
+    assert output_file.read_text() == "file content"
+
+
+def test_get_file_from_request_success_after_retries(tmp_path):
+    """
+    When the first two responses are not OK but the third succeeds, the file
+    should still be written and sleep should have been called twice with the
+    correct exponentially increasing wait times (15 s then 45 s).
+    """
+    output_file = tmp_path / "output.txt"
+
+    fail_response = MagicMock()
+    fail_response.ok = False
+
+    ok_response = MagicMock()
+    ok_response.ok = True
+    ok_response.text = "success content"
+
+    with patch(
+        "rundetection.rules.vesuvio_rules.requests.get",
+        side_effect=[fail_response, fail_response, ok_response],
+    ) as mock_get, patch("rundetection.rules.vesuvio_rules.time.sleep") as mock_sleep:
+        get_file_from_request("http://example.com/file", str(output_file))
+
+    assert mock_get.call_count == 3
+    assert mock_sleep.call_args_list == [call(15), call(45)]
+    assert output_file.read_text() == "success content"
+
+
+def test_get_file_from_request_raises_after_all_attempts_fail(tmp_path):
+    """
+    When all three attempts return a non-OK response a RuntimeError should be
+    raised and the output file should not be created.
+    """
+    output_file = tmp_path / "output.txt"
+
+    fail_response = MagicMock()
+    fail_response.ok = False
+
+    with patch(
+        "rundetection.rules.vesuvio_rules.requests.get",
+        return_value=fail_response,
+    ) as mock_get, patch("rundetection.rules.vesuvio_rules.time.sleep"):
+        with pytest.raises(RuntimeError, match="Reduction not possible with missing resource"):
+            get_file_from_request("http://example.com/file", str(output_file))
+
+    assert mock_get.call_count == 3
+    assert not output_file.exists()
+
+
+def test_get_file_from_request_sleep_not_called_on_immediate_success(tmp_path):
+    """
+    Confirm that time.sleep is never called when the very first request
+    succeeds, i.e. no unnecessary delay is introduced.
+    """
+    output_file = tmp_path / "output.txt"
+
+    ok_response = MagicMock()
+    ok_response.ok = True
+    ok_response.text = ""
+
+    with patch("rundetection.rules.vesuvio_rules.requests.get", return_value=ok_response), patch(
+        "rundetection.rules.vesuvio_rules.time.sleep"
+    ) as mock_sleep:
+        get_file_from_request("http://example.com/file", str(output_file))
+
+    mock_sleep.assert_not_called()
