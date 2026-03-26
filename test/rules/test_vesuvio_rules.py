@@ -158,9 +158,10 @@ def test_get_file_from_request_success_on_first_attempt(tmp_path):
     mock_response.ok = True
     mock_response.text = "file content"
 
-    with patch("rundetection.rules.vesuvio_rules.requests.get", return_value=mock_response) as mock_get, patch(
-        "rundetection.rules.vesuvio_rules.time.sleep"
-    ) as mock_sleep:
+    with (
+        patch("rundetection.rules.vesuvio_rules.requests.get", return_value=mock_response) as mock_get,
+        patch("rundetection.rules.vesuvio_rules.time.sleep") as mock_sleep,
+    ):
         get_file_from_request("http://example.com/file", str(output_file))
 
     mock_get.assert_called_once_with("http://example.com/file", timeout=10)
@@ -183,10 +184,13 @@ def test_get_file_from_request_success_after_retries(tmp_path):
     ok_response.ok = True
     ok_response.text = "success content"
 
-    with patch(
-        "rundetection.rules.vesuvio_rules.requests.get",
-        side_effect=[fail_response, fail_response, ok_response],
-    ) as mock_get, patch("rundetection.rules.vesuvio_rules.time.sleep") as mock_sleep:
+    with (
+        patch(
+            "rundetection.rules.vesuvio_rules.requests.get",
+            side_effect=[fail_response, fail_response, ok_response],
+        ) as mock_get,
+        patch("rundetection.rules.vesuvio_rules.time.sleep") as mock_sleep,
+    ):
         get_file_from_request("http://example.com/file", str(output_file))
 
     expected_call_count = 3
@@ -205,14 +209,16 @@ def test_get_file_from_request_raises_after_all_attempts_fail(tmp_path):
     fail_response = MagicMock()
     fail_response.ok = False
 
-    with patch(
-        "rundetection.rules.vesuvio_rules.requests.get",
-        return_value=fail_response,
-    ) as mock_get, patch("rundetection.rules.vesuvio_rules.time.sleep"), pytest.raises(
-        RuntimeError, match="Reduction not possible with missing resource"
+    with (
+        patch(
+            "rundetection.rules.vesuvio_rules.requests.get",
+            return_value=fail_response,
+        ) as mock_get,
+        patch("rundetection.rules.vesuvio_rules.time.sleep"),
+        pytest.raises(RuntimeError, match="Reduction not possible with missing resource"),
     ):
         get_file_from_request("http://example.com/file", str(output_file))
-    
+
     expected_call_count = 3
     assert mock_get.call_count == expected_call_count
     assert not output_file.exists()
@@ -229,9 +235,10 @@ def test_get_file_from_request_sleep_not_called_on_immediate_success(tmp_path):
     ok_response.ok = True
     ok_response.text = ""
 
-    with patch("rundetection.rules.vesuvio_rules.requests.get", return_value=ok_response), patch(
-        "rundetection.rules.vesuvio_rules.time.sleep"
-    ) as mock_sleep:
+    with (
+        patch("rundetection.rules.vesuvio_rules.requests.get", return_value=ok_response),
+        patch("rundetection.rules.vesuvio_rules.time.sleep") as mock_sleep,
+    ):
         get_file_from_request("http://example.com/file", str(output_file))
 
     mock_sleep.assert_not_called()
