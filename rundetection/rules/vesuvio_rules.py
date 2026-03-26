@@ -24,9 +24,10 @@ def get_file_from_request(url: str, path: str) -> None:
     success = False
     attempts = 0
     wait_time_seconds = 15
-    while attempts < 3:
+    attempts_max = 3
+    while attempts < attempts_max:
         logger.info(f"Attempting to get resource {url}", flush=True)
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         if not response.ok:
             logger.info(f"Failed to get resource from: {url}", flush=True)
             logger.info(f"Waiting {wait_time_seconds}...", flush=True)
@@ -154,7 +155,3 @@ class VesuvioSumRunsRule(Rule[bool]):
                 additional_request.additional_values["diff_ip_file"] = job_request.additional_values["diff_ip_file"]
 
             job_request.additional_requests.append(additional_request)
-
-
-class VesuvioFileAcquisitionRule(Rule[str]):
-    """"""
