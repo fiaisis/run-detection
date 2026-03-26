@@ -1,9 +1,9 @@
 """Vesuvio Rules."""
 
 import logging
+import time
 from copy import deepcopy
 from pathlib import Path
-import time
 
 import requests
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def get_file_from_request(url: str, path: str) -> None:
     """
-    write the file from the url to the given path, retrying at most 3 times
+    Write the file from the url to the given path, retrying at most 3 times
     :param url: the url to get
     :param path: the path to write to
     :return: None
