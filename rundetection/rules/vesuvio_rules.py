@@ -25,6 +25,7 @@ def get_file_from_request(url: str, path: str) -> None:
     attempts = 0
     wait_time_seconds = 15
     attempts_max = 3
+    path_obj = Path(path)
     while attempts < attempts_max:
         logger.info(f"Attempting to get resource {url}")
         response = requests.get(url, timeout=10)
@@ -35,7 +36,7 @@ def get_file_from_request(url: str, path: str) -> None:
             attempts += 1
             wait_time_seconds *= 3
         else:
-            with Path.open(path, "w+") as fle:
+            with Path.open(path_obj, mode="w+") as fle:
                 fle.write(response.text)
             success = True
             logger.info("Successfully obtained resource")
