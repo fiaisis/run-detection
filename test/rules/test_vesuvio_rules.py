@@ -189,7 +189,8 @@ def test_get_file_from_request_success_after_retries(tmp_path):
     ) as mock_get, patch("rundetection.rules.vesuvio_rules.time.sleep") as mock_sleep:
         get_file_from_request("http://example.com/file", str(output_file))
 
-    assert mock_get.call_count == 3
+    expected_call_count = 3
+    assert mock_get.call_count == expected_call_count
     assert mock_sleep.call_args_list == [call(15), call(45)]
     assert output_file.read_text() == "success content"
 
@@ -207,9 +208,10 @@ def test_get_file_from_request_raises_after_all_attempts_fail(tmp_path):
     with patch(
         "rundetection.rules.vesuvio_rules.requests.get",
         return_value=fail_response,
-    ) as mock_get, patch("rundetection.rules.vesuvio_rules.time.sleep"):
-        with pytest.raises(RuntimeError, match="Reduction not possible with missing resource"):
-            get_file_from_request("http://example.com/file", str(output_file))
+    ) as mock_get, patch("rundetection.rules.vesuvio_rules.time.sleep"), pytest.raises(
+        RuntimeError, match="Reduction not possible with missing resource"
+    ):
+        get_file_from_request("http://example.com/file", str(output_file))
     
     expected_call_count = 3
     assert mock_get.call_count == expected_call_count
