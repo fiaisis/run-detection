@@ -35,7 +35,7 @@ def get_file_from_request(url: str, path: str) -> None:
             attempts += 1
             wait_time_seconds *= 3
         else:
-            with Path.open(path, 'w+') as fle:
+            with Path.open(path, "w+") as fle:
                 fle.write(response.text)
             success = True
             logger.info("Successfully obtained resource")
