@@ -19,15 +19,15 @@ run-detection = "rundetection.run_detection:main"
 
 [project.optional-dependencies]
 formatting = [
-    "ruff==0.15.9",
-    "mypy==1.20.0",
+    "ruff==0.15.10",
+    "mypy==1.20.1",
     "run-detection[test]",
-    "types-requests==2.33.0.20260402",
-    "types-xmltodict==1.0.1.20260113"
+    "types-requests==2.33.0.20260408",
+    "types-xmltodict==1.0.1.20260408"
 ]
 
 test = [
-    "pytest==9.0.2",
+    "pytest==9.0.3",
     "pytest-cov==7.1.0",
     "requests==2.33.1",
     "pytest-random-order==1.2.0",
