@@ -19,6 +19,8 @@ from rundetection.ingestion.ingest import ingest
 from rundetection.rules.enginx_rules import build_enginx_run_number_cycle_map
 from rundetection.specifications import InstrumentSpecification
 
+
+
 if typing.TYPE_CHECKING:
     from collections.abc import Generator
     from typing import Any
@@ -40,7 +42,7 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 INGRESS_QUEUE_NAME = os.environ.get("INGRESS_QUEUE_NAME", "watched-files")
 EGRESS_QUEUE_NAME = os.environ.get("EGRESS_QUEUE_NAME", "scheduled-jobs")
 FAILURE_QUEUE_NAME = os.environ.get("FAILURE_QUEUE_NAME", "failed-watched-files")
-
+ARCHIVE_ROOT = os.environ.get("ARCHIVE_ROOT", "/archive")
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
     """
