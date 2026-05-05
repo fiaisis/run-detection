@@ -40,6 +40,7 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 INGRESS_QUEUE_NAME = os.environ.get("INGRESS_QUEUE_NAME", "watched-files")
 EGRESS_QUEUE_NAME = os.environ.get("EGRESS_QUEUE_NAME", "scheduled-jobs")
 FAILURE_QUEUE_NAME = os.environ.get("FAILURE_QUEUE_NAME", "failed-watched-files")
+ARCHIVE_ROOT = os.environ.get("ARCHIVE_ROOT", "/archive")
 
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:

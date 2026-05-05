@@ -8,10 +8,12 @@ import pytest
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.enginx_rules import (
+    ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY,
     EnginxBasePathRule,
     EnginxCeriaPathRule,
     EnginxGroupRule,
     EnginxVanadiumPathRule,
+    build_enginx_run_number_cycle_map,
 )
 
 
@@ -117,3 +119,55 @@ def test_coerce_run_invalid_raises():
     """Test that invalid run raises an exception."""
     with pytest.raises(ValueError):  # noqa: PT011
         EnginxBasePathRule._coerce_run("no-digits")
+
+
+@patch("rundetection.rules.enginx_rules.cache_set_json")
+@patch("rundetection.rules.enginx_rules.cache_get_json", return_value={"241391": "20_1"})
+def test_build_enginx_run_number_cycle_map_uses_cached_mapping(mock_cache_get, mock_cache_set):
+    """Cached JSON mapping is returned with run numbers coerced back to ints."""
+    assert build_enginx_run_number_cycle_map() == {241391: "20_1"}
+    mock_cache_get.assert_called_once_with(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY)
+    mock_cache_set.assert_not_called()
+
+
+@patch("rundetection.rules.enginx_rules.cache_set_json")
+@patch("rundetection.rules.enginx_rules.cache_get_json", return_value=None)
+def test_build_enginx_run_number_cycle_map_reads_journals_and_populates_cache(
+    mock_cache_get,
+    mock_cache_set,
+    monkeypatch,
+):
+    """A cache miss reads journal files and stores the parsed mapping."""
+    monkeypatch.setenv(
+        "ENGINX_JOURNAL_DIR",
+        "test/test_data/e2e_data/NDXENGINX/Instrument/logs/journal",
+    )
+    monkeypatch.setenv("ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS", "123")
+
+    mapping = build_enginx_run_number_cycle_map()
+
+    assert mapping[241391] == "20_1"
+    assert mapping[299080] == "20_1"
+    mock_cache_get.assert_called_once_with(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY)
+    mock_cache_set.assert_called_once_with(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY, mapping, 123)
+
+
+@patch("rundetection.rules.enginx_rules.cache_set_json")
+@patch("rundetection.rules.enginx_rules.cache_get_json")
+def test_build_enginx_run_number_cycle_map_skips_cache_when_ttl_disabled(
+    mock_cache_get,
+    mock_cache_set,
+    monkeypatch,
+):
+    """A non-positive TTL disables the Valkey read/write path."""
+    monkeypatch.setenv(
+        "ENGINX_JOURNAL_DIR",
+        "test/test_data/e2e_data/NDXENGINX/Instrument/logs/journal",
+    )
+    monkeypatch.setenv("ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS", "0")
+
+    mapping = build_enginx_run_number_cycle_map()
+
+    assert mapping[241391] == "20_1"
+    mock_cache_get.assert_not_called()
+    mock_cache_set.assert_not_called()

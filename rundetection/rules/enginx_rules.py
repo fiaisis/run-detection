@@ -6,12 +6,12 @@ import contextlib
 import logging
 import os
 import re
-from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self
 
 import xmltodict
 
+from rundetection.cache import cache_get_json, cache_set_json
 from rundetection.exceptions import RuleViolationError
 from rundetection.rules.rule import Rule
 
@@ -19,6 +19,9 @@ if TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
+
+ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY = "run_detection:enginx:run_number_cycle_map"
+ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS = 60 * 60
 
 
 class EnginxGroupRule(Rule[str]):
@@ -129,21 +132,49 @@ class EnginxVanadiumPathRule(EnginxBasePathRule):
     path_key: str = "vanadium_path"
 
 
-@lru_cache(maxsize=1)
-def build_enginx_run_number_cycle_map() -> dict[int, str]:
-    """
-    Generate a mapping of run numbers to cycle strings based on the journal files.
-    For example. mapping[242666] -> "15_1"
-    :return: A dict[int, str] mapping run numbers to cycle strings.
-    """
+def _enginx_journal_dir() -> Path:
+    configured_path = os.environ.get("ENGINX_JOURNAL_DIR")
+    if configured_path:
+        return Path(configured_path)
+    return Path(os.environ.get("ARCHIVE_ROOT", "/archive")) / "NDXENGINX" / "Instrument" / "logs" / "journal"
+
+
+def _enginx_run_number_cycle_map_cache_ttl_seconds() -> int:
+    configured_ttl = os.environ.get("ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS")
+    if configured_ttl is None:
+        return ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS
+    try:
+        return int(configured_ttl)
+    except ValueError:
+        logger.warning("Invalid ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS value: %s", configured_ttl)
+        return ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS
+
+
+def _coerce_run_number_cycle_map(value: Any) -> dict[int, str] | None:
+    if not isinstance(value, dict):
+        return None
+
+    mapping: dict[int, str] = {}
+    for run_number, cycle in value.items():
+        if not isinstance(cycle, str):
+            return None
+        try:
+            mapping[int(run_number)] = cycle
+        except (TypeError, ValueError):
+            return None
+    return mapping
+
+
+def _read_enginx_run_number_cycle_map(journal_dir: Path) -> dict[int, str]:
     logger.info("Building run number cycle map")
-    mapping = {}
+    mapping: dict[int, str] = {}
 
     def _walk_node(node: list[Any] | dict[str, Any], journal_file: str) -> None:
         if isinstance(node, dict):
-            if "@name" in node:
+            entry_name = node.get("@name")
+            if isinstance(entry_name, str) and entry_name.upper().startswith("ENGINX"):
                 with contextlib.suppress(ValueError):
-                    mapping[int(node["@name"][6:])] = journal_file[8:]
+                    mapping[int(entry_name[6:])] = journal_file.removeprefix("journal_")
                 return
             for v in node.values():
                 _walk_node(v, journal_file)
@@ -151,11 +182,30 @@ def build_enginx_run_number_cycle_map() -> dict[int, str]:
             for item in node:
                 _walk_node(item, journal_file)
 
-    logger.info("Reading journal files...")
-    for path in Path("/archive/NDXENGINX/Instrument/logs/journal").glob("*.xml"):
+    logger.info("Reading journal files from %s", journal_dir)
+    for path in journal_dir.glob("*.xml"):
         logger.info("Reading journal file: %s", path)
         with path.open() as journal:
             journal_dict = xmltodict.parse(journal.read())
             _walk_node(journal_dict, path.stem)
     logger.info("Mapping complete")
+    return mapping
+
+
+def build_enginx_run_number_cycle_map() -> dict[int, str]:
+    """
+    Generate a mapping of run numbers to cycle strings based on the journal files.
+    For example. mapping[242666] -> "15_1"
+    :return: A dict[int, str] mapping run numbers to cycle strings.
+    """
+    ttl_seconds = _enginx_run_number_cycle_map_cache_ttl_seconds()
+    if ttl_seconds > 0:
+        cached_mapping = _coerce_run_number_cycle_map(cache_get_json(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY))
+        if cached_mapping is not None:
+            logger.info("Using cached EnginX run number cycle map")
+            return cached_mapping
+
+    mapping = _read_enginx_run_number_cycle_map(_enginx_journal_dir())
+    if ttl_seconds > 0:
+        cache_set_json(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY, mapping, ttl_seconds)
     return mapping
