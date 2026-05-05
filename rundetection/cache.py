@@ -80,7 +80,7 @@ def cache_get_json(key: str) -> Any | None:
         return None
     if raw is None:
         return None
-    if isinstance(raw, (bytes, bytearray)):
+    if isinstance(raw, bytes | bytearray):
         raw_text = raw.decode("utf-8")
     elif isinstance(raw, str):
         raw_text = raw
