@@ -67,6 +67,14 @@ class MolSpecStitchRule(Rule[bool]):
         return False
 
     def _get_runs_to_stitch(self, run_path: Path, run_number: int, run_title: str, instrument: str) -> list[int]:
+        """
+        Get runs in order to stitch them together.
+
+        :param run_path: The path to the runs.
+        :param run_number: The run number for starting run.
+        :param run_title: The title of the first run.
+        :param instrument: Instrument that experiment runs occurred on.
+        """
         run_numbers = []
         while run_path.exists():
             logger.info("run path exists %s", run_path)
@@ -126,3 +134,17 @@ def is_y_within_5_percent_of_x(x: int | float, y: int | float) -> bool:
     :return: True if y is within 5% of x.
     """
     return (y * 0.95 <= x <= y * 1.05) if y >= 0 else (y * 0.95 >= x >= y * 1.05)
+
+
+def get_journal_from_file_based_on_run_file_archive_path(jobrequest: JobRequest) -> str:
+    """
+    Get the jounral raw text, in order to parse run information.
+
+    :param archive_path: Path object to the jounral of run information.
+    """
+    cycle_year, cycle_num = str(jobrequest.filepath.parent.name).split("_")[-2:]
+    # Go from /archive/NDXMARI/Instrument/data/cycle_25_1/MAR012345.nxs to /archive/NDXMARI/Instrument, allowing us to
+    # then navigate to the appropriate journal at /archive/NDXMARI/Instrument/logs/journal/journal_25_1.xml
+    root_path = jobrequest.filepath.parent.parent.parent
+    journal_path = root_path / Path(f"logs/journal/journal_{cycle_year}_{cycle_num}.xml")
+    return journal_path.read_text()

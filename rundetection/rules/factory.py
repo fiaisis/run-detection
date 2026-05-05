@@ -11,6 +11,7 @@ from rundetection.rules.enginx_rules import (
     EnginxGroupRule,
     EnginxVanadiumPathRule,
 )
+from rundetection.rules.imat_rules import IMATFindImagesRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
@@ -28,7 +29,12 @@ from rundetection.rules.sans_rules import (
     SansSliceWavs,
     SansUserFile,
 )
-from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule
+from rundetection.rules.vesuvio_rules import (
+    VesuvioDiffIPFileRule,
+    VesuvioEmptyRunsRule,
+    VesuvioIPFileRule,
+    VesuvioSumRunsRule,
+)
 
 
 def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912, PLR0915
@@ -100,6 +106,12 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "vesuvioipfilerule":
             if isinstance(value, str):
                 return VesuvioIPFileRule(value)
+        case "vesuviodiffipfilerule":
+            if isinstance(value, str):
+                return VesuvioDiffIPFileRule(value)
+        case "vesuviosumruns":
+            if isinstance(value, bool):
+                return VesuvioSumRunsRule(value)
         case "enginxvanadiumrun":
             if isinstance(value, int | str):
                 return EnginxVanadiumPathRule(value)
@@ -109,6 +121,9 @@ def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0
         case "enginxgroup":
             if isinstance(value, str):
                 return EnginxGroupRule(value)
+        case "imatfindimages":
+            if isinstance(value, bool):
+                return IMATFindImagesRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 

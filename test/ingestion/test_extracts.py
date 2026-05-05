@@ -30,7 +30,7 @@ def job_request():
         run_number=12345,
         instrument="instrument",
         experiment_title="experiment title",
-        filepath=Path("./25581.nxs"),
+        filepath=Path("./cycle_24_5/25581.nxs"),
         experiment_number="experiment number",
         raw_frames=0,
         good_frames=0,

@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6.0.2
 
       - name: Build run-detection Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           file: ./container/Dockerfile
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/rundetection:${{ github.sha }}
@@ -35,7 +35,7 @@ jobs:
         if: failure()
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: failure()
         with:
           sarif_file: trivy-results.sarif

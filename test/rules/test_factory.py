@@ -15,6 +15,7 @@ from rundetection.rules.enginx_rules import (
     EnginxVanadiumPathRule,
 )
 from rundetection.rules.factory import rule_factory
+from rundetection.rules.imat_rules import IMATFindImagesRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
@@ -32,7 +33,12 @@ from rundetection.rules.sans_rules import (
     SansSliceWavs,
     SansUserFile,
 )
-from rundetection.rules.vesuvio_rules import VesuvioEmptyRunsRule, VesuvioIPFileRule
+from rundetection.rules.vesuvio_rules import (
+    VesuvioDiffIPFileRule,
+    VesuvioEmptyRunsRule,
+    VesuvioIPFileRule,
+    VesuvioSumRunsRule,
+)
 
 
 def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
@@ -70,10 +76,13 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("irisreduction", True, IrisReductionRule),
         ("iriscalibration", {"002": "00148587", "004": "00148587"}, IrisCalibrationRule),
         ("vesuvioipfilerule", "ip00001.par", VesuvioIPFileRule),
+        ("vesuviodiffipfilerule", "ip00001.par", VesuvioDiffIPFileRule),
         ("vesuviovemptyrunsrule", "123-321", VesuvioEmptyRunsRule),
+        ("vesuviosumruns", True, VesuvioSumRunsRule),
         ("enginxvanadiumrun", 12345, EnginxVanadiumPathRule),
         ("enginxceriarun", 34567, EnginxCeriaPathRule),
         ("enginxgroup", "north", EnginxGroupRule),
+        ("imatfindimages", True, IMATFindImagesRule),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):

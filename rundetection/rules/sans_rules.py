@@ -85,7 +85,7 @@ def _grab_cycle_instrument_index(cycle: str, instrument: str) -> str:
 
 
 def _create_sans_file_data(title: str, run_number: str) -> SansFileData:
-    return SansFileData(title=title, type=title.split("_")[-1], run_number=run_number)
+    return SansFileData(title=title, type=title.rsplit("_", maxsplit=1)[-1], run_number=run_number)
 
 
 def _create_list_of_files(job_request: JobRequest) -> list[SansFileData]:
