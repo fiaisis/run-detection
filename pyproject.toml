@@ -40,6 +40,12 @@ dev = [
 ]
 
 
+all = [
+    "run-detection[formatting]",
+    "run-detection[test]",
+    "run-detection[dev]",
+]
+
 [tool.setuptools]
 packages = ["rundetection", "rundetection.rules", "rundetection.ingestion"]
 
