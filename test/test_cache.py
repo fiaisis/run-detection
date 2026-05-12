@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from unittest.mock import MagicMock, patch
 
 import pytest
 from valkey.exceptions import ValkeyError
 
-from rundetection.cache import _valkey_state, cache_get_json, cache_set_json, get_valkey_client
+from rundetection.cache import _disable_cache, _valkey_state, cache_get_json, cache_set_json, get_valkey_client
 
 
 @pytest.fixture(autouse=True)
@@ -36,13 +37,16 @@ def test_get_valkey_client_uses_configured_url():
     )
 
 
-def test_get_valkey_client_disables_cache_after_connection_error():
+def test_get_valkey_client_disables_cache_after_connection_error(caplog: pytest.LogCaptureFixture):
     """A connection error disables further Valkey client creation attempts."""
+    caplog.set_level(logging.WARNING)
+
     with patch("rundetection.cache.Valkey.from_url", side_effect=ValkeyError("boom")) as mock_from_url:
         assert get_valkey_client() is None
         assert get_valkey_client() is None
 
     mock_from_url.assert_called_once()
+    assert [record.message for record in caplog.records] == ["Valkey cache disabled: boom"]
 
 
 def test_cache_get_json_returns_parsed_payload():
@@ -54,8 +58,9 @@ def test_cache_get_json_returns_parsed_payload():
         assert cache_get_json("key") == {"answer": 42}
 
 
-def test_cache_get_json_disables_cache_on_valkey_error():
+def test_cache_get_json_disables_cache_on_valkey_error(caplog: pytest.LogCaptureFixture):
     """Valkey read errors disable the shared cache."""
+    caplog.set_level(logging.ERROR)
     mock_client = MagicMock()
     mock_client.get.side_effect = ValkeyError("boom")
 
@@ -66,6 +71,34 @@ def test_cache_get_json_disables_cache_on_valkey_error():
         assert cache_get_json("key") is None
 
     mock_disable.assert_called_once()
+    assert "Failed to retrieve JSON from Valkey cache for key: key" in caplog.text
+
+
+def test_disable_cache_closes_existing_client():
+    """Disabling the cache closes and releases an existing Valkey client."""
+    state = _valkey_state()
+    mock_client = MagicMock()
+    state.client = mock_client
+
+    _disable_cache(ValkeyError("boom"))
+
+    assert state.disabled is True
+    assert state.client is None
+    mock_client.close.assert_called_once()
+
+
+def test_disable_cache_suppresses_client_close_errors():
+    """Client cleanup failures should not escape the cache disable path."""
+    state = _valkey_state()
+    mock_client = MagicMock()
+    mock_client.close.side_effect = RuntimeError("close failed")
+    state.client = mock_client
+
+    _disable_cache(ValkeyError("boom"))
+
+    assert state.disabled is True
+    assert state.client is None
+    mock_client.close.assert_called_once()
 
 
 def test_cache_set_json_sets_payload_with_ttl():
@@ -76,6 +109,23 @@ def test_cache_set_json_sets_payload_with_ttl():
         cache_set_json("key", {"answer": 42}, 60)
 
     mock_client.setex.assert_called_once_with("key", 60, '{"answer": 42}')
+
+
+def test_cache_set_json_logs_and_disables_cache_on_valkey_error(caplog: pytest.LogCaptureFixture):
+    """Valkey write errors are logged with key context before graceful
+    fallback."""
+    caplog.set_level(logging.ERROR)
+    mock_client = MagicMock()
+    mock_client.setex.side_effect = ValkeyError("boom")
+
+    with (
+        patch("rundetection.cache.get_valkey_client", return_value=mock_client),
+        patch("rundetection.cache._disable_cache") as mock_disable,
+    ):
+        cache_set_json("key", {"answer": 42}, 60)
+
+    mock_disable.assert_called_once()
+    assert "Failed to store JSON in Valkey cache for key: key" in caplog.text
 
 
 def test_cache_set_json_ignores_non_positive_ttl():

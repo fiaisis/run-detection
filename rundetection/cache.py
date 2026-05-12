@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import os
@@ -40,15 +41,13 @@ def _create_client() -> Valkey:
 
 
 def get_valkey_client() -> Valkey | None:
-    """
-    Get or create a shared Valkey client.
+    """Get or create a shared Valkey client.
 
-    The client is created lazily. If Valkey is unavailable, future calls return
-    None without repeatedly attempting a connection.
+    The client is created lazily. If Valkey is unavailable, future calls
+    return None without repeatedly attempting a connection.
     """
     state = _valkey_state()
     if state.disabled:
-        logger.warning("Valkey cache disabled: previous connection error")
         return None
     if state.client is None:
         try:
@@ -64,6 +63,11 @@ def _disable_cache(exc: Exception) -> None:
     state = _valkey_state()
     if not state.disabled:
         state.disabled = True
+        client = state.client
+        state.client = None
+        if client is not None:
+            with contextlib.suppress(Exception):
+                client.close()
         logger.warning("Valkey cache disabled: %s", exc)
 
 
@@ -76,7 +80,7 @@ def cache_get_json(key: str) -> Any | None:
         raw = client.get(key)
     except ValkeyError as exc:
         _disable_cache(exc)
-        logger.exception("Failed to retrieve JSON from Valkey cache", exc_info=exc)
+        logger.exception("Failed to retrieve JSON from Valkey cache for key: %s", key)
         return None
     if raw is None:
         return None
@@ -108,3 +112,4 @@ def cache_set_json(key: str, value: Any, ttl_seconds: int) -> None:
         client.setex(key, ttl_seconds, payload)
     except ValkeyError as exc:
         _disable_cache(exc)
+        logger.exception("Failed to store JSON in Valkey cache for key: %s", key)

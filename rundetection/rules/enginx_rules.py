@@ -22,19 +22,21 @@ logger = logging.getLogger(__name__)
 
 ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY = "run_detection:enginx:run_number_cycle_map"
 ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS = 60 * 60
+_ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE: dict[Path, tuple[tuple[int, str], ...]] = {}
 
 
 class EnginxGroupRule(Rule[str]):
-    """Insert the group type into the JobRequest"""
+    """Insert the group type into the JobRequest."""
 
     def verify(self, job_request: JobRequest) -> None:
-        """
-        Verify the rule against the job request.
+        """Verify the rule against the job request.
 
-        Adds the group type to the additional values after validating it against a list of valid group types.
+        Adds the group type to the additional values after validating it
+        against a list of valid group types.
 
         :param job_request: The job request to verify.
-        :raises RuleViolationError: If the group type is not in the list of valid groups.
+        :raises RuleViolationError: If the group type is not in the list
+            of valid groups.
         :return: None.
         """
         group = self._value
@@ -48,15 +50,16 @@ class EnginxGroupRule(Rule[str]):
 
 
 class EnginxBasePathRule(Rule[int | str]):
-    """Base rule for resolving nexus file paths in the archive"""
+    """Base rule for resolving nexus file paths in the archive."""
 
     _ROOT = Path("/archive/NDXENGINX/Instrument/data")
     _DIR_GLOB = "cycle_"
     path_key: str = "x_path"  # example: "x_path", would be ceria_path, etc.
 
     def verify(self, job_request: JobRequest) -> None:
-        """
-        Find the given ceria or vanadium file path and attach it to the job request.
+        """Find the given ceria or vanadium file path and attach it to the job
+        request.
+
         :param job_request: The job request to add to
         :return: None
         """
@@ -80,12 +83,13 @@ class EnginxBasePathRule(Rule[int | str]):
 
     @classmethod
     def _find_path(cls, run: str) -> Path | None:
-        """
-        Find a file ending with '0*{run}.nxs' (case-insensitive), where the digit
-        sequence is not preceded by another digit. Examples:
-          ENGINX1234.nxs       ✓
-          ENGINX0001234.nxs    ✓
-          foo991234.nxs        ✗ (blocked by non-digit boundary)
+        """Find a file ending with '0*{run}.nxs' (case-insensitive), where the
+        digit sequence is not preceded by another digit.
+
+        Examples:
+        ENGINX1234.nxs       ✓
+        ENGINX0001234.nxs    ✓
+        foo991234.nxs        ✗ (blocked by non-digit boundary)
         """
         # non-digit boundary, then any number of '0', then the run, then .nxs at end
         file_re = re.compile(rf"(?i)(?<!\d)0*{re.escape(run)}\.nxs$")
@@ -127,7 +131,8 @@ class EnginxCeriaPathRule(EnginxBasePathRule):
 
 
 class EnginxVanadiumPathRule(EnginxBasePathRule):
-    """Resolve and attach the Vanadium calibration file path for an EnginX run."""
+    """Resolve and attach the Vanadium calibration file path for an EnginX
+    run."""
 
     path_key: str = "vanadium_path"
 
@@ -183,29 +188,59 @@ def _read_enginx_run_number_cycle_map(journal_dir: Path) -> dict[int, str]:
                 _walk_node(item, journal_file)
 
     logger.info("Reading journal files from %s", journal_dir)
-    for path in journal_dir.glob("*.xml"):
+    if not journal_dir.exists():
+        logger.warning("EnginX journal directory does not exist: %s", journal_dir)
+        return mapping
+    if not journal_dir.is_dir():
+        logger.warning("EnginX journal path is not a directory: %s", journal_dir)
+        return mapping
+
+    journal_files = list(journal_dir.glob("*.xml"))
+    if not journal_files:
+        logger.warning("No EnginX journal XML files found in %s", journal_dir)
+        return mapping
+
+    for path in journal_files:
         logger.info("Reading journal file: %s", path)
         with path.open() as journal:
             journal_dict = xmltodict.parse(journal.read())
             _walk_node(journal_dict, path.stem)
+    if not mapping:
+        logger.warning("No EnginX runs found in journal XML files from %s", journal_dir)
     logger.info("Mapping complete")
     return mapping
 
 
+def _cached_enginx_run_number_cycle_map(journal_dir: Path) -> tuple[tuple[int, str], ...]:
+    """Return a memoized run/cycle mapping read from EnginX journal files."""
+    if journal_dir not in _ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE:
+        mapping = _read_enginx_run_number_cycle_map(journal_dir)
+        if mapping:
+            _ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE[journal_dir] = tuple(mapping.items())
+        return tuple(mapping.items())
+    return _ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE[journal_dir]
+
+
+def _clear_enginx_run_number_cycle_map_cache() -> None:
+    """Clear the memoized EnginX journal mapping."""
+    _ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE.clear()
+
+
 def build_enginx_run_number_cycle_map() -> dict[int, str]:
-    """
-    Generate a mapping of run numbers to cycle strings based on the journal files.
+    """Generate a mapping of run numbers to cycle strings based on the journal
+    files.
+
     For example. mapping[242666] -> "15_1"
     :return: A dict[int, str] mapping run numbers to cycle strings.
     """
     ttl_seconds = _enginx_run_number_cycle_map_cache_ttl_seconds()
     if ttl_seconds > 0:
         cached_mapping = _coerce_run_number_cycle_map(cache_get_json(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY))
-        if cached_mapping is not None:
+        if cached_mapping:
             logger.info("Using cached EnginX run number cycle map")
             return cached_mapping
 
-    mapping = _read_enginx_run_number_cycle_map(_enginx_journal_dir())
-    if ttl_seconds > 0:
+    mapping = dict(_cached_enginx_run_number_cycle_map(_enginx_journal_dir()))
+    if ttl_seconds > 0 and mapping:
         cache_set_json(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY, mapping, ttl_seconds)
     return mapping

@@ -40,16 +40,12 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 INGRESS_QUEUE_NAME = os.environ.get("INGRESS_QUEUE_NAME", "watched-files")
 EGRESS_QUEUE_NAME = os.environ.get("EGRESS_QUEUE_NAME", "scheduled-jobs")
 FAILURE_QUEUE_NAME = os.environ.get("FAILURE_QUEUE_NAME", "failed-watched-files")
-ARCHIVE_ROOT = os.environ.get("ARCHIVE_ROOT", "/archive")
 
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
-    """
-    Given an exchange and queue name, return a blocking channel to the exchange and queue
-    :param exchange_name: The exchange name
-    :param queue_name: The queue name
-    :return: The Blocking Channel.
-    """
+    """Given an exchange and queue name, return a blocking channel to the
+    exchange and queue :param exchange_name: The exchange name :param
+    queue_name: The queue name :return: The Blocking Channel."""
     credentials = PlainCredentials(
         username=os.environ.get("QUEUE_USER", "guest"), password=os.environ.get("QUEUE_PASSWORD", "guest")
     )
@@ -66,10 +62,8 @@ def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
 
 @contextmanager
 def producer() -> Generator[BlockingChannel | BlockingChannel, Any, None]:
-    """
-    Return a context managed pika producer channel
-    :return: BlockingChannel.
-    """
+    """Return a context managed pika producer channel :return:
+    BlockingChannel."""
     logger.info("Creating producer...")
     channel = get_channel("scheduled-jobs", "scheduled-jobs")
     yield channel
@@ -80,9 +74,10 @@ def producer() -> Generator[BlockingChannel | BlockingChannel, Any, None]:
 
 
 def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -> None:
-    """
-    Process the incoming message. If the message should result in an upstream notification, it will put the message on
-    the given notification queue
+    """Process the incoming message.
+
+    If the message should result in an upstream notification, it will
+    put the message on the given notification queue
     :param message: The message to process
     :param notification_queue: The notification queue to update
     :return: None.
@@ -107,8 +102,8 @@ def process_messages(
     notification_queue: SimpleQueue[JobRequest],
     failure_queue: SimpleQueue[str],
 ) -> None:
-    """
-    Consume messages from the ingress and failure queues and enqueue valid notifications.
+    """Consume messages from the ingress and failure queues and enqueue valid
+    notifications.
 
     This function will attempt to consume at most one message from the ingress queue and at most one
     message from the failure queue per invocation (it breaks after each consume loop iteration). For
@@ -182,11 +177,8 @@ def process_messages(
 
 
 def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
-    """
-    Produce messages until the notification queue is empty
-    :param notification_queue: The notification queue
-    :return: None.
-    """
+    """Produce messages until the notification queue is empty :param
+    notification_queue: The notification queue :return: None."""
     while not notification_queue.empty():
         detected_run = notification_queue.get()
         logger.info("Sending notification for run: %s", detected_run.run_number)
@@ -196,11 +188,8 @@ def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
 
 
 def notify_failures(failure_queue: SimpleQueue[str]) -> None:
-    """
-    Produce Failure messages until the failure queue is empty
-    :param failure_queue: The failure Queue
-    :return: None
-    """
+    """Produce Failure messages until the failure queue is empty :param
+    failure_queue: The failure Queue :return: None."""
     while not failure_queue.empty():
         logger.info("Notifying failed-watched-files queue of messages failed to process")
         message = failure_queue.get()
@@ -210,8 +199,8 @@ def notify_failures(failure_queue: SimpleQueue[str]) -> None:
 
 
 def start_run_detection() -> None:
-    """
-    Start the producer and consumer in a loop.
+    """Start the producer and consumer in a loop.
+
     :return: None.
     """
     logger.info("Starting Run Detection")
@@ -245,18 +234,16 @@ def verify_archive_access() -> None:
 
 
 def pre_build_enginx_cycle_mapping() -> None:
-    """
-    Make an initial call to the enginx run_number_cycle_map to ensure it is cached ahead of time.
+    """Make an initial call to the enginx run_number_cycle_map to ensure it is
+    cached ahead of time.
+
     :return: None
     """
     build_enginx_run_number_cycle_map()
 
 
 def main() -> None:
-    """
-    Entry point for run detection
-    :return: None.
-    """
+    """Entry point for run detection :return: None."""
     verify_archive_access()
     heart_beat = Heartbeat()
     heart_beat.start()
