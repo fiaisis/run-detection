@@ -165,10 +165,11 @@ def process_messages(
             logger.info("Process interupted, nacking message %s", method_frame.delivery_tag)
             failure_channel.basic_nack(method_frame.delivery_tag)
             raise
-        except Exception:
+        except Exception as exc:
             # Messages on this queue have already failed for unexpected reasons, so we can expect a broad range of
             # exceptions.
             logger.info("Problem processing failure message: %s", body.decode())
+            logger.exception("Exception was", exc_info=exc)
             logger.info("Putting back onto failure queue and acking")
             failure_queue.put(body.decode())
             failure_channel.basic_ack(method_frame.delivery_tag)
