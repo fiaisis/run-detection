@@ -41,7 +41,8 @@ def _create_client() -> Valkey:
 
 
 def get_valkey_client() -> Valkey | None:
-    """Get or create a shared Valkey client.
+    """
+    Get or create a shared Valkey client.
 
     The client is created lazily. If Valkey is unavailable, future calls
     return None without repeatedly attempting a connection.

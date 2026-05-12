@@ -112,8 +112,10 @@ def test_cache_set_json_sets_payload_with_ttl():
 
 
 def test_cache_set_json_logs_and_disables_cache_on_valkey_error(caplog: pytest.LogCaptureFixture):
-    """Valkey write errors are logged with key context before graceful
-    fallback."""
+    """
+    Valkey write errors are logged with key context before graceful
+    fallback.
+    """
     caplog.set_level(logging.ERROR)
     mock_client = MagicMock()
     mock_client.setex.side_effect = ValkeyError("boom")
