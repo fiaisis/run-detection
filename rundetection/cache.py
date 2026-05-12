@@ -8,7 +8,7 @@ import logging
 import os
 from dataclasses import dataclass
 from functools import cache
-from typing import Any
+from typing import Any, Protocol, cast
 
 from valkey import Valkey
 from valkey.exceptions import ValkeyError
@@ -22,6 +22,10 @@ DEFAULT_VALKEY_URL = "redis://valkey.valkey.svc.cluster.local:6379/0"
 class _ValkeyState:
     client: Valkey | None = None
     disabled: bool = False
+
+
+class _Closable(Protocol):
+    def close(self) -> None: ...
 
 
 @cache
@@ -41,8 +45,7 @@ def _create_client() -> Valkey:
 
 
 def get_valkey_client() -> Valkey | None:
-    """
-    Get or create a shared Valkey client.
+    """Get or create a shared Valkey client.
 
     The client is created lazily. If Valkey is unavailable, future calls
     return None without repeatedly attempting a connection.
@@ -68,7 +71,7 @@ def _disable_cache(exc: Exception) -> None:
         state.client = None
         if client is not None:
             with contextlib.suppress(Exception):
-                client.close()
+                cast(_Closable, client).close()
         logger.warning("Valkey cache disabled: %s", exc)
 
 
