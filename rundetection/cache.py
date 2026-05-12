@@ -45,7 +45,8 @@ def _create_client() -> Valkey:
 
 
 def get_valkey_client() -> Valkey | None:
-    """Get or create a shared Valkey client.
+    """
+    Get or create a shared Valkey client.
 
     The client is created lazily. If Valkey is unavailable, future calls
     return None without repeatedly attempting a connection.
@@ -71,7 +72,7 @@ def _disable_cache(exc: Exception) -> None:
         state.client = None
         if client is not None:
             with contextlib.suppress(Exception):
-                cast(_Closable, client).close()
+                cast("_Closable", client).close()
         logger.warning("Valkey cache disabled: %s", exc)
 
 
