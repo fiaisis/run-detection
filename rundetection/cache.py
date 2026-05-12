@@ -71,7 +71,7 @@ def _disable_cache(exc: Exception) -> None:
         state.client = None
         if client is not None:
             with contextlib.suppress(Exception):
-                cast(_Closable, client).close()
+                cast("_Closable", client).close()
         logger.warning("Valkey cache disabled: %s", exc)
 
 
