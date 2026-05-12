@@ -40,7 +40,8 @@ class EnginxGroupRule(Rule[str]):
     """Insert the group type into the JobRequest."""
 
     def verify(self, job_request: JobRequest) -> None:
-        """Verify the rule against the job request.
+        """
+        Verify the rule against the job request.
 
         Adds the group type to the additional values after validating it
         against a list of valid group types.
@@ -68,7 +69,8 @@ class EnginxBasePathRule(Rule[int | str]):
     path_key: str = "x_path"  # example: "x_path", would be ceria_path, etc.
 
     def verify(self, job_request: JobRequest) -> None:
-        """Find the given ceria or vanadium file path and attach it to the job
+        """
+        Find the given ceria or vanadium file path and attach it to the job
         request.
 
         :param job_request: The job request to add to
@@ -94,13 +96,15 @@ class EnginxBasePathRule(Rule[int | str]):
 
     @classmethod
     def _find_path(cls, run: str) -> Path | None:
-        """Find a file ending with '0*{run}.nxs' (case-insensitive), where the
+        """
+        Find a file ending with '0*{run}.nxs' (case-insensitive), where the
         digit sequence is not preceded by another digit.
 
         Examples:
         ENGINX1234.nxs       ✓
         ENGINX0001234.nxs    ✓
         foo991234.nxs        ✗ (blocked by non-digit boundary)
+
         """
         # non-digit boundary, then any number of '0', then the run, then .nxs at end
         file_re = re.compile(rf"(?i)(?<!\d)0*{re.escape(run)}\.nxs$")
@@ -142,8 +146,10 @@ class EnginxCeriaPathRule(EnginxBasePathRule):
 
 
 class EnginxVanadiumPathRule(EnginxBasePathRule):
-    """Resolve and attach the Vanadium calibration file path for an EnginX
-    run."""
+    """
+    Resolve and attach the Vanadium calibration file path for an EnginX
+    run.
+    """
 
     path_key: str = "vanadium_path"
 
@@ -239,8 +245,10 @@ def _read_enginx_run_number_cycle_map(journal_dir: Path) -> dict[int, str]:
 
 
 def _cached_enginx_run_number_cycle_map(journal_dir: Path, ttl_seconds: int) -> tuple[tuple[int, str], ...]:
-    """Return a TTL-limited run/cycle mapping read from EnginX journal
-    files."""
+    """
+    Return a TTL-limited run/cycle mapping read from EnginX journal
+    files.
+    """
     now = time.monotonic()
     cached = _ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE.get(journal_dir)
     if cached is not None and cached.expires_at > now:
@@ -264,7 +272,8 @@ def _clear_enginx_run_number_cycle_map_cache() -> None:
 
 
 def build_enginx_run_number_cycle_map() -> dict[int, str]:
-    """Generate a mapping of run numbers to cycle strings based on the journal
+    """
+    Generate a mapping of run numbers to cycle strings based on the journal
     files.
 
     For example. mapping[242666] -> "15_1"
