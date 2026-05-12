@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY = "run_detection:enginx:run_number_cycle_map"
 ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS = 60 * 60
+_ENGINX_RUN_NAME_PREFIX = "ENGINX"
 _ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE: dict[Path, tuple[tuple[int, str], ...]] = {}
 
 
@@ -170,41 +171,57 @@ def _coerce_run_number_cycle_map(value: Any) -> dict[int, str] | None:
     return mapping
 
 
-def _read_enginx_run_number_cycle_map(journal_dir: Path) -> dict[int, str]:
-    logger.info("Building run number cycle map")
-    mapping: dict[int, str] = {}
+def _add_enginx_run_to_cycle_map(mapping: dict[int, str], entry_name: Any, journal_file: str) -> bool:
+    if not isinstance(entry_name, str):
+        return False
+    if not entry_name.upper().startswith(_ENGINX_RUN_NAME_PREFIX):
+        return False
 
-    def _walk_node(node: list[Any] | dict[str, Any], journal_file: str) -> None:
-        if isinstance(node, dict):
-            entry_name = node.get("@name")
-            if isinstance(entry_name, str) and entry_name.upper().startswith("ENGINX"):
-                with contextlib.suppress(ValueError):
-                    mapping[int(entry_name[6:])] = journal_file.removeprefix("journal_")
-                return
-            for v in node.values():
-                _walk_node(v, journal_file)
-        elif isinstance(node, list):
-            for item in node:
-                _walk_node(item, journal_file)
+    with contextlib.suppress(ValueError):
+        mapping[int(entry_name[len(_ENGINX_RUN_NAME_PREFIX) :])] = journal_file.removeprefix("journal_")
+    return True
 
+
+def _walk_enginx_journal_node(node: Any, journal_file: str, mapping: dict[int, str]) -> None:
+    if isinstance(node, dict):
+        if _add_enginx_run_to_cycle_map(mapping, node.get("@name"), journal_file):
+            return
+        for value in node.values():
+            _walk_enginx_journal_node(value, journal_file, mapping)
+    elif isinstance(node, list):
+        for item in node:
+            _walk_enginx_journal_node(item, journal_file, mapping)
+
+
+def _enginx_journal_files(journal_dir: Path) -> list[Path] | None:
     logger.info("Reading journal files from %s", journal_dir)
     if not journal_dir.exists():
         logger.warning("EnginX journal directory does not exist: %s", journal_dir)
-        return mapping
+        return None
     if not journal_dir.is_dir():
         logger.warning("EnginX journal path is not a directory: %s", journal_dir)
-        return mapping
+        return None
 
     journal_files = list(journal_dir.glob("*.xml"))
     if not journal_files:
         logger.warning("No EnginX journal XML files found in %s", journal_dir)
+        return None
+    return journal_files
+
+
+def _read_enginx_run_number_cycle_map(journal_dir: Path) -> dict[int, str]:
+    logger.info("Building run number cycle map")
+    mapping: dict[int, str] = {}
+
+    journal_files = _enginx_journal_files(journal_dir)
+    if journal_files is None:
         return mapping
 
     for path in journal_files:
         logger.info("Reading journal file: %s", path)
         with path.open() as journal:
             journal_dict = xmltodict.parse(journal.read())
-            _walk_node(journal_dict, path.stem)
+            _walk_enginx_journal_node(journal_dict, path.stem, mapping)
     if not mapping:
         logger.warning("No EnginX runs found in journal XML files from %s", journal_dir)
     logger.info("Mapping complete")

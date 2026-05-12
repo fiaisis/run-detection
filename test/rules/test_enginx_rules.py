@@ -19,6 +19,8 @@ from rundetection.rules.enginx_rules import (
     build_enginx_run_number_cycle_map,
 )
 
+REPEATED_BUILD_CALL_COUNT = 2
+
 
 @pytest.fixture
 def job_request():
@@ -244,8 +246,8 @@ def test_build_enginx_run_number_cycle_map_does_not_cache_empty_mapping(
         assert build_enginx_run_number_cycle_map() == {}
         assert build_enginx_run_number_cycle_map() == {}
 
-    assert mock_read.call_count == 2
-    assert mock_cache_get.call_count == 2
+    assert mock_read.call_count == REPEATED_BUILD_CALL_COUNT
+    assert mock_cache_get.call_count == REPEATED_BUILD_CALL_COUNT
     mock_cache_set.assert_not_called()
 
 
@@ -300,5 +302,5 @@ def test_build_enginx_run_number_cycle_map_memoizes_journal_reads_after_valkey_m
         assert build_enginx_run_number_cycle_map()[241391] == "20_1"
 
     mock_read.assert_called_once()
-    assert mock_cache_get.call_count == 2
-    assert mock_cache_set.call_count == 2
+    assert mock_cache_get.call_count == REPEATED_BUILD_CALL_COUNT
+    assert mock_cache_set.call_count == REPEATED_BUILD_CALL_COUNT
