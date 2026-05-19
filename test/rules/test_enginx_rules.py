@@ -9,7 +9,7 @@ import pytest
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.enginx_rules import (
-    ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY,
+    ENGINX_CACHE_KEY,
     EnginxBasePathRule,
     EnginxCeriaPathRule,
     EnginxGroupRule,
@@ -151,7 +151,7 @@ def test_build_enginx_run_number_cycle_map_uses_cached_mapping(mock_cache_get, m
     ints.
     """
     assert build_enginx_run_number_cycle_map() == {241391: "20_1"}
-    mock_cache_get.assert_called_once_with(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY)
+    mock_cache_get.assert_called_once_with(ENGINX_CACHE_KEY)
     mock_cache_set.assert_not_called()
 
 
@@ -173,8 +173,8 @@ def test_build_enginx_run_number_cycle_map_reads_journals_and_populates_cache(
 
     assert mapping[241391] == "20_1"
     assert mapping[299080] == "20_1"
-    mock_cache_get.assert_called_once_with(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY)
-    mock_cache_set.assert_called_once_with(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY, mapping, 123)
+    mock_cache_get.assert_called_once_with(ENGINX_CACHE_KEY)
+    mock_cache_set.assert_called_once_with(ENGINX_CACHE_KEY, mapping, 123)
 
 
 @patch("rundetection.rules.enginx_rules.cache_set_json")

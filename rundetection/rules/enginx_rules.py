@@ -22,18 +22,18 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY = "run_detection:enginx:run_number_cycle_map"
-ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS = 60 * 60
-_ENGINX_RUN_NAME_PREFIX = "ENGINX"
+ENGINX_CACHE_KEY = "run_detection:enginx:run_number_cycle_map"
+ENGINX_CACHE_TTL_SECONDS = 60 * 60
+ENGINX_PREFIX = "ENGINX"
 
 
 @dataclass(slots=True)
-class _EnginxRunNumberCycleMapCacheEntry:
+class EnginxCacheEntry:
     items: tuple[tuple[int, str], ...]
     expires_at: float
 
 
-_ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE: dict[Path, _EnginxRunNumberCycleMapCacheEntry] = {}
+ENGINX_CACHE: dict[Path, EnginxCacheEntry] = {}
 
 
 class EnginxGroupRule(Rule[str]):
@@ -164,12 +164,12 @@ def _enginx_journal_dir() -> Path:
 def _enginx_run_number_cycle_map_cache_ttl_seconds() -> int:
     configured_ttl = os.environ.get("ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS")
     if configured_ttl is None:
-        return ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS
+        return ENGINX_CACHE_TTL_SECONDS
     try:
         return int(configured_ttl)
     except ValueError:
         logger.warning("Invalid ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS value: %s", configured_ttl)
-        return ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_TTL_SECONDS
+        return ENGINX_CACHE_TTL_SECONDS
 
 
 def _coerce_run_number_cycle_map(value: Any) -> dict[int, str] | None:
@@ -190,11 +190,11 @@ def _coerce_run_number_cycle_map(value: Any) -> dict[int, str] | None:
 def _add_enginx_run_to_cycle_map(mapping: dict[int, str], entry_name: Any, journal_file: str) -> bool:
     if not isinstance(entry_name, str):
         return False
-    if not entry_name.upper().startswith(_ENGINX_RUN_NAME_PREFIX):
+    if not entry_name.upper().startswith(ENGINX_PREFIX):
         return False
 
     with contextlib.suppress(ValueError):
-        mapping[int(entry_name[len(_ENGINX_RUN_NAME_PREFIX) :])] = journal_file.removeprefix("journal_")
+        mapping[int(entry_name[len(ENGINX_PREFIX) :])] = journal_file.removeprefix("journal_")
     return True
 
 
@@ -250,25 +250,25 @@ def _cached_enginx_run_number_cycle_map(journal_dir: Path, ttl_seconds: int) -> 
     files.
     """
     now = time.monotonic()
-    cached = _ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE.get(journal_dir)
+    cached = ENGINX_CACHE.get(journal_dir)
     if cached is not None and cached.expires_at > now:
         return cached.items
 
     mapping = _read_enginx_run_number_cycle_map(journal_dir)
     items = tuple(mapping.items())
     if mapping and ttl_seconds > 0:
-        _ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE[journal_dir] = _EnginxRunNumberCycleMapCacheEntry(
+        ENGINX_CACHE[journal_dir] = EnginxCacheEntry(
             items=items,
             expires_at=now + ttl_seconds,
         )
     else:
-        _ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE.pop(journal_dir, None)
+        ENGINX_CACHE.pop(journal_dir, None)
     return items
 
 
 def _clear_enginx_run_number_cycle_map_cache() -> None:
     """Clear the memoized EnginX journal mapping."""
-    _ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE.clear()
+    ENGINX_CACHE.clear()
 
 
 def build_enginx_run_number_cycle_map() -> dict[int, str]:
@@ -277,16 +277,17 @@ def build_enginx_run_number_cycle_map() -> dict[int, str]:
     files.
 
     For example. mapping[242666] -> "15_1"
+
     :return: A dict[int, str] mapping run numbers to cycle strings.
     """
     ttl_seconds = _enginx_run_number_cycle_map_cache_ttl_seconds()
     if ttl_seconds > 0:
-        cached_mapping = _coerce_run_number_cycle_map(cache_get_json(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY))
+        cached_mapping = _coerce_run_number_cycle_map(cache_get_json(ENGINX_CACHE_KEY))
         if cached_mapping:
             logger.info("Using cached EnginX run number cycle map")
             return cached_mapping
 
     mapping = dict(_cached_enginx_run_number_cycle_map(_enginx_journal_dir(), ttl_seconds))
     if ttl_seconds > 0 and mapping:
-        cache_set_json(ENGINX_RUN_NUMBER_CYCLE_MAP_CACHE_KEY, mapping, ttl_seconds)
+        cache_set_json(ENGINX_CACHE_KEY, mapping, ttl_seconds)
     return mapping
