@@ -24,7 +24,10 @@ REPEATED_BUILD_CALL_COUNT = 2
 
 @pytest.fixture
 def job_request():
-    """Job request fixture :return: job request."""
+    """
+    Job request fixture
+    :return: job request.
+    """
     return JobRequest(
         run_number=100,
         filepath=Path("/archive/100/ENGINX100.nxs"),
@@ -50,10 +53,7 @@ def reset_enginx_run_number_cycle_map_cache():
 
 
 def test_enginx_group_rule_valid_values(job_request):
-    """
-    Test that valid group values are accepted and set in
-    additional_values.
-    """
+    """Test that valid group values are accepted and set in additional_values."""
     valid_groups = ["both", "north", "south", "cropped", "custom", "texture20", "texture30"]
     for group in valid_groups:
         jr = job_request
@@ -79,10 +79,7 @@ def test_enginx_group_rule_invalid_value_raises(job_request):
     "rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_1", 299080: "20_1"}
 )
 def test_enginx_ceria_path_rule_finds_file(mock_map, run, expected_file, job_request, monkeypatch):
-    """
-    Test that EnginxCeriaPathRule sets ceria_run and ceria_path when file
-    exists.
-    """
+    """Test that EnginxCeriaPathRule sets ceria_run and ceria_path when file exists."""
     # Point the root to test data
     monkeypatch.setattr(EnginxBasePathRule, "_ROOT", Path("test/test_data/e2e_data/NDXENGINX/Instrument/data"))
 
@@ -97,10 +94,7 @@ def test_enginx_ceria_path_rule_finds_file(mock_map, run, expected_file, job_req
 
 @patch("rundetection.rules.enginx_rules.build_enginx_run_number_cycle_map", return_value={241391: "20_1"})
 def test_enginx_vanadium_path_rule_finds_file(mock_map, job_request, monkeypatch):
-    """
-    Test that EnginxVanadiumPathRule sets the vanadium path when the file
-    exists.
-    """
+    """Test that EnginxVanadiumPathRule sets the vanadium path when the file exists."""
     monkeypatch.setattr(EnginxBasePathRule, "_ROOT", Path("test/test_data/e2e_data/NDXENGINX/Instrument/data"))
     rule = EnginxVanadiumPathRule(241391)
     rule.verify(job_request)
@@ -109,10 +103,7 @@ def test_enginx_vanadium_path_rule_finds_file(mock_map, job_request, monkeypatch
 
 
 def test_enginx_path_rule_not_found(job_request, monkeypatch):
-    """
-    If run cannot be found, no exception and no path_key set, but ceria_run
-    still set.
-    """
+    """If run cannot be found, no exception and no path_key set, but ceria_run still set."""
     # Ensure latest cycle dir points to test data but run is missing
     monkeypatch.setattr(EnginxBasePathRule, "_ROOT", Path("test/test_data/e2e_data/NDXENGINX/Instrument/data"))
 

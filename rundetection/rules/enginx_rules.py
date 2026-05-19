@@ -43,12 +43,10 @@ class EnginxGroupRule(Rule[str]):
         """
         Verify the rule against the job request.
 
-        Adds the group type to the additional values after validating it
-        against a list of valid group types.
+        Adds the group type to the additional values after validating it against a list of valid group types.
 
         :param job_request: The job request to verify.
-        :raises RuleViolationError: If the group type is not in the list
-            of valid groups.
+        :raises RuleViolationError: If the group type is not in the list of valid groups.
         :return: None.
         """
         group = self._value
@@ -70,9 +68,7 @@ class EnginxBasePathRule(Rule[int | str]):
 
     def verify(self, job_request: JobRequest) -> None:
         """
-        Find the given ceria or vanadium file path and attach it to the job
-        request.
-
+        Find the given ceria or vanadium file path and attach it to the job request.
         :param job_request: The job request to add to
         :return: None
         """
@@ -97,14 +93,11 @@ class EnginxBasePathRule(Rule[int | str]):
     @classmethod
     def _find_path(cls, run: str) -> Path | None:
         """
-        Find a file ending with '0*{run}.nxs' (case-insensitive), where the
-        digit sequence is not preceded by another digit.
-
-        Examples:
-        ENGINX1234.nxs       ✓
-        ENGINX0001234.nxs    ✓
-        foo991234.nxs        ✗ (blocked by non-digit boundary)
-
+        Find a file ending with '0*{run}.nxs' (case-insensitive), where the digit
+        sequence is not preceded by another digit. Examples:
+          ENGINX1234.nxs       ✓
+          ENGINX0001234.nxs    ✓
+          foo991234.nxs        ✗ (blocked by non-digit boundary)
         """
         # non-digit boundary, then any number of '0', then the run, then .nxs at end
         file_re = re.compile(rf"(?i)(?<!\d)0*{re.escape(run)}\.nxs$")
@@ -146,10 +139,7 @@ class EnginxCeriaPathRule(EnginxBasePathRule):
 
 
 class EnginxVanadiumPathRule(EnginxBasePathRule):
-    """
-    Resolve and attach the Vanadium calibration file path for an EnginX
-    run.
-    """
+    """Resolve and attach the Vanadium calibration file path for an EnginX run."""
 
     path_key: str = "vanadium_path"
 

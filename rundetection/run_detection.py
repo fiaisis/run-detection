@@ -44,9 +44,7 @@ FAILURE_QUEUE_NAME = os.environ.get("FAILURE_QUEUE_NAME", "failed-watched-files"
 
 def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
     """
-    Given an exchange and queue name, return a blocking channel to the
-    exchange and queue.
-
+    Given an exchange and queue name, return a blocking channel to the exchange and queue.
     :param exchange_name: The exchange name.
     :param queue_name: The queue name.
     :return: The Blocking Channel.
@@ -69,7 +67,6 @@ def get_channel(exchange_name: str, queue_name: str) -> BlockingChannel:
 def producer() -> Generator[BlockingChannel | BlockingChannel, Any, None]:
     """
     Return a context managed pika producer channel.
-
     :return: BlockingChannel.
     """
     logger.info("Creating producer...")
@@ -83,11 +80,8 @@ def producer() -> Generator[BlockingChannel | BlockingChannel, Any, None]:
 
 def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -> None:
     """
-    Process the incoming message.
-
-    If the message should result in an upstream notification, it will
-    put the message on the given notification queue.
-
+    Process the incoming message. If the message should result in an upstream notification, it will put the message on
+    the given notification queue.
     :param message: The message to process
     :param notification_queue: The notification queue to update
     :return: None.
@@ -113,8 +107,7 @@ def process_messages(
     failure_queue: SimpleQueue[str],
 ) -> None:
     """
-    Consume messages from the ingress and failure queues and enqueue valid
-    notifications.
+    Consume messages from the ingress and failure queues and enqueue valid notifications.
 
     This function will attempt to consume at most one message from the ingress queue and at most one
     message from the failure queue per invocation (it breaks after each consume loop iteration). For
@@ -191,7 +184,6 @@ def process_messages(
 def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
     """
     Produce messages until the notification queue is empty.
-
     :param notification_queue: The notification queue.
     :return: None.
     """
@@ -206,7 +198,6 @@ def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
 def notify_failures(failure_queue: SimpleQueue[str]) -> None:
     """
     Produce Failure messages until the failure queue is empty.
-
     :param failure_queue: The failure Queue.
     :return: None.
     """
@@ -221,7 +212,6 @@ def notify_failures(failure_queue: SimpleQueue[str]) -> None:
 def start_run_detection() -> None:
     """
     Start the producer and consumer in a loop.
-
     :return: None.
     """
     logger.info("Starting Run Detection")
@@ -256,9 +246,7 @@ def verify_archive_access() -> None:
 
 def pre_build_enginx_cycle_mapping() -> None:
     """
-    Make an initial call to the enginx run_number_cycle_map to ensure it is
-    cached ahead of time.
-
+    Make an initial call to the enginx run_number_cycle_map to ensure it is cached ahead of time.
     :return: None
     """
     build_enginx_run_number_cycle_map()
@@ -267,7 +255,6 @@ def pre_build_enginx_cycle_mapping() -> None:
 def main() -> None:
     """
     Entry point for run detection.
-
     :return: None.
     """
     verify_archive_access()
