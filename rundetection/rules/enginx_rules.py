@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import contextlib
 import logging
 import os
 import re
@@ -29,6 +28,8 @@ ENGINX_PREFIX = "ENGINX"
 
 @dataclass(slots=True)
 class EnginxCacheEntry:
+    """In-process EnginX journal cache entry."""
+
     items: tuple[tuple[int, str], ...]
     expires_at: float
 
@@ -183,8 +184,11 @@ def _add_enginx_run_to_cycle_map(mapping: dict[int, str], entry_name: Any, journ
     if not entry_name.upper().startswith(ENGINX_PREFIX):
         return False
 
-    with contextlib.suppress(ValueError):
-        mapping[int(entry_name[len(ENGINX_PREFIX) :])] = journal_file.removeprefix("journal_")
+    try:
+        run_number = int(entry_name[len(ENGINX_PREFIX) :])
+    except ValueError:
+        return False
+    mapping[run_number] = journal_file.removeprefix("journal_")
     return True
 
 
@@ -234,26 +238,28 @@ def _read_enginx_run_number_cycle_map(journal_dir: Path) -> dict[int, str]:
     return mapping
 
 
-def _cached_enginx_run_number_cycle_map(journal_dir: Path, ttl_seconds: int) -> tuple[tuple[int, str], ...]:
-    """
-    Return a TTL-limited run/cycle mapping read from EnginX journal
-    files.
-    """
-    now = time.monotonic()
+def _get_cached_enginx_run_number_cycle_map(journal_dir: Path, now: float) -> dict[int, str] | None:
     cached = ENGINX_CACHE.get(journal_dir)
     if cached is not None and cached.expires_at > now:
-        return cached.items
+        return dict(cached.items)
+    if cached is not None:
+        ENGINX_CACHE.pop(journal_dir, None)
+    return None
 
-    mapping = _read_enginx_run_number_cycle_map(journal_dir)
-    items = tuple(mapping.items())
+
+def _cache_enginx_run_number_cycle_map(
+    journal_dir: Path,
+    mapping: dict[int, str],
+    ttl_seconds: int,
+    now: float,
+) -> None:
     if mapping and ttl_seconds > 0:
         ENGINX_CACHE[journal_dir] = EnginxCacheEntry(
-            items=items,
+            items=tuple(mapping.items()),
             expires_at=now + ttl_seconds,
         )
     else:
         ENGINX_CACHE.pop(journal_dir, None)
-    return items
 
 
 def _clear_enginx_run_number_cycle_map_cache() -> None:
@@ -271,13 +277,22 @@ def build_enginx_run_number_cycle_map() -> dict[int, str]:
     :return: A dict[int, str] mapping run numbers to cycle strings.
     """
     ttl_seconds = _enginx_run_number_cycle_map_cache_ttl_seconds()
+    journal_dir = _enginx_journal_dir()
     if ttl_seconds > 0:
+        now = time.monotonic()
+        in_process_mapping = _get_cached_enginx_run_number_cycle_map(journal_dir, now)
+        if in_process_mapping:
+            return in_process_mapping
+
         cached_mapping = _coerce_run_number_cycle_map(cache_get_json(ENGINX_CACHE_KEY))
         if cached_mapping:
             logger.info("Using cached EnginX run number cycle map")
+            _cache_enginx_run_number_cycle_map(journal_dir, cached_mapping, ttl_seconds, now)
             return cached_mapping
 
-    mapping = dict(_cached_enginx_run_number_cycle_map(_enginx_journal_dir(), ttl_seconds))
+    mapping = _read_enginx_run_number_cycle_map(journal_dir)
+    if ttl_seconds > 0:
+        _cache_enginx_run_number_cycle_map(journal_dir, mapping, ttl_seconds, now)
     if ttl_seconds > 0 and mapping:
         cache_set_json(ENGINX_CACHE_KEY, mapping, ttl_seconds)
     return mapping

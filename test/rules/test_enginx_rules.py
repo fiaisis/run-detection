@@ -16,6 +16,7 @@ from rundetection.rules.enginx_rules import (
     EnginxVanadiumPathRule,
     _clear_enginx_run_number_cycle_map_cache,
     _read_enginx_run_number_cycle_map,
+    _walk_enginx_journal_node,
     build_enginx_run_number_cycle_map,
 )
 
@@ -132,6 +133,21 @@ def test_coerce_run_invalid_raises():
     """Test that invalid run raises an exception."""
     with pytest.raises(ValueError):  # noqa: PT011
         EnginxBasePathRule._coerce_run("no-digits")
+
+
+def test_walk_enginx_journal_node_continues_after_malformed_enginx_name():
+    """Malformed EnginX entry names should not hide valid nested runs."""
+    mapping: dict[int, str] = {}
+    node = {
+        "@name": "ENGINX",
+        "children": {
+            "@name": "ENGINX241391",
+        },
+    }
+
+    _walk_enginx_journal_node(node, "journal_20_1", mapping)
+
+    assert mapping == {241391: "20_1"}
 
 
 @patch("rundetection.rules.enginx_rules.cache_set_json")
@@ -286,12 +302,12 @@ def test_build_enginx_run_number_cycle_map_reads_journals_when_ttl_disabled(
 
 @patch("rundetection.rules.enginx_rules.cache_set_json")
 @patch("rundetection.rules.enginx_rules.cache_get_json", return_value=None)
-def test_build_enginx_run_number_cycle_map_memoizes_journal_reads_after_valkey_miss(
+def test_build_enginx_run_number_cycle_map_reuses_local_cache_after_valkey_miss(
     mock_cache_get,
     mock_cache_set,
     monkeypatch,
 ):
-    """Repeated Valkey misses reuse the in-process journal mapping."""
+    """Repeated calls reuse the in-process journal mapping before Valkey."""
     monkeypatch.setenv(
         "ENGINX_JOURNAL_DIR",
         "test/test_data/e2e_data/NDXENGINX/Instrument/logs/journal",
@@ -306,8 +322,8 @@ def test_build_enginx_run_number_cycle_map_memoizes_journal_reads_after_valkey_m
         assert build_enginx_run_number_cycle_map()[241391] == "20_1"
 
     mock_read.assert_called_once()
-    assert mock_cache_get.call_count == REPEATED_BUILD_CALL_COUNT
-    assert mock_cache_set.call_count == REPEATED_BUILD_CALL_COUNT
+    mock_cache_get.assert_called_once_with(ENGINX_CACHE_KEY)
+    mock_cache_set.assert_called_once()
 
 
 @patch("rundetection.rules.enginx_rules.cache_set_json")
