@@ -116,7 +116,9 @@ class IMATFindImagesRule(Rule[bool]):
 
         if "ngem" not in job_request.additional_values and "recon" not in job_request.additional_values:
             # We did not find either an IMAT or nGEM detector run.
-            logger.error("Images dir and nGEM run could not be found for experiment number: %s", job_request.experiment_number)
+            logger.error(
+                "Images dir and nGEM run could not be found for experiment number: %s", job_request.experiment_number
+            )
             raise RuleViolationError(
                 "Images dir and nGEM run could not be found for experiment number: %s", job_request.experiment_number
             )

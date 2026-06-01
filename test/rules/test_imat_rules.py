@@ -133,7 +133,7 @@ def test_imat_find_images_missing_tomo(job_request):
     with tempfile.TemporaryDirectory() as tmpdirname:
         # Setup
         os.environ["IMAT_DIR"] = tmpdirname
-        os.environ["NGEM_DIR"] = tmpdirname # Also set this to avoid loading nexus
+        os.environ["NGEM_DIR"] = tmpdirname  # Also set this to avoid loading nexus
         exp_dir = Path(tmpdirname).joinpath("RB12345")
         exp_dir.mkdir(parents=True, exist_ok=True)
         exp_dir.joinpath("run100.csv").touch()
@@ -180,6 +180,7 @@ def test_imat_find_images_failure(job_request):
 
         # Assertions
         assert len(job_request.additional_values) == 0
+
 
 def test_imat_find_images_ngem_success(job_request):
     """Test imat rules can find nGEM images successfully when Tomo is missing"""
