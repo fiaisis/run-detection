@@ -17,17 +17,6 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def check_file_is_correct_for_run_number(path: Path, run_number: str) -> bool:
-    """
-    Check if a file matches the run number.
-
-    :param path: The path to the file.
-    :param run_number: The run number to check for.
-    :return: True if it is a file and the run number is in the name.
-    """
-    return path.is_file() and run_number in path.name
-
-
 def find_correct_tomo_dir(path: Path, run_number: str) -> Path | None:
     """
     Check a directory for the IMAT image structure.
@@ -38,24 +27,15 @@ def find_correct_tomo_dir(path: Path, run_number: str) -> Path | None:
     :param run_number: The run number to check for.
     :return: The path to the Tomo directory if found, otherwise None.
     """
-    tomo = None
-    file_found = False
-    for child in path.iterdir():
-        is_file = check_file_is_correct_for_run_number(child, run_number)
-        if is_file:
-            # File found
-            if tomo is not None:
-                # Tomo is already known
-                return tomo
-            if not file_found and tomo is None:
-                # Wait until we find the Tomo folder
-                file_found = True
-        if child.is_dir() and child.name == "Tomo":
-            # Found a potential Tomo dir
-            tomo = path / child
-            if file_found:
-                # Tomo and file found, now return
-                return tomo
+    for root, _, files in path.walk(top_down=False):
+        for file in files:
+            if run_number in file:
+                # There are 2 known scenarios we are at the same level as Tomo, or in a directory one level lower.
+                possible_tomo = root.parent / "Tomo"
+                if root.parent.name == "Tomo":
+                    return root.parent
+                elif possible_tomo.exists():
+                    return possible_tomo
     return None
 
 
@@ -76,16 +56,7 @@ class IMATFindImagesRule(Rule[bool]):
         imat_dir_path: Path | None = None
 
         if exp_dir_path.exists() and exp_dir_path.is_dir():
-            # Find file with run number in it, often ending with .csv, then search for a dir in the same directory as it
-            # called Tomo.
             imat_dir_path = find_correct_tomo_dir(exp_dir_path, str(job_request.run_number))
-            if imat_dir_path is None:
-                # We haven't found it yet, search the expected path for the correct directory
-                for child in exp_dir_path.iterdir():
-                    if child.is_dir():
-                        imat_dir_path = find_correct_tomo_dir(child, str(job_request.run_number))
-                        if imat_dir_path is not None:
-                            break
 
         if imat_dir_path is not None and imat_dir_path.exists():
             job_request.additional_values["recon"] = "true"
