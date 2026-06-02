@@ -4,10 +4,10 @@ readme = "README.md"
 version = "0.0.1"
 requires-python = ">= 3.12"
 dependencies = [
-    "pika==1.4.0",
+    "pika==1.4.1",
     "h5py==3.16.0",
     "xmltodict==1.0.4",
-    "requests==2.33.1"
+    "requests==2.34.2"
 ]
 
 
@@ -19,19 +19,19 @@ run-detection = "rundetection.run_detection:main"
 
 [project.optional-dependencies]
 formatting = [
-    "ruff==0.15.12",
-    "mypy==2.0.0",
+    "ruff==0.15.15",
+    "mypy==2.1.0",
     "run-detection[test]",
-    "types-requests==2.33.0.20260508",
-    "types-xmltodict==1.0.1.20260508"
+    "types-requests==2.33.0.20260518",
+    "types-xmltodict==1.0.1.20260518"
 ]
 
 test = [
     "pytest==9.0.3",
     "pytest-cov==7.1.0",
-    "requests==2.33.1",
+    "requests==2.34.2",
     "pytest-random-order==1.2.0",
-    "fastapi[all]==0.136.1",
+    "fastapi[all]==0.136.3",
     "pydantic==2.13.4",
 ]
 
