@@ -7,7 +7,6 @@ import os
 import typing
 from pathlib import Path
 
-from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import load_h5py_dataset
 from rundetection.rules.rule import Rule
 
@@ -92,4 +91,3 @@ class INESFindNGEMorReduce(Rule[bool]):
             # It's not an ngem run, so we reduce it.
             job_request.additional_values["reduce"] = "true"
             job_request.additional_values["ngem"] = "false"
-
