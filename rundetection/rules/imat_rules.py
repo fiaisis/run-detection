@@ -96,7 +96,7 @@ class IMATFindImagesRule(Rule[bool]):
             # Given there is no Images, let's check for an nGEM run.
             # INES is temporary here and should be adjustable via env vars. Current technical limitation forces IMAT
             # data here.
-            ngem_dir = os.environ.get("NGEM_DIR", "/ngem/nGEM-INES")
+            ngem_dir = os.environ.get("IMAT_NGEM_DIR", "/ngem/nGEM-INES")
 
             # Grab the cycle from the .nxs file from the path /raw_data_1/run_cycle value in the form 26_1
             cycle_str = load_h5py_dataset(job_request.filepath).get("run_cycle")[0].decode("utf-8")
