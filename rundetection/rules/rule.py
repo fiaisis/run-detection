@@ -1,14 +1,12 @@
 """Module containing the abstract base Rule class and MissingRuleError."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 from rundetection.job_requests import JobRequest
 
-T = TypeVar("T")
 
-
-class Rule(Generic[T], ABC):
+class Rule[T](ABC):
     """
     Abstract Rule, implement to define a rule.
 
