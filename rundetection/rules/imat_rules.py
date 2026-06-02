@@ -34,7 +34,7 @@ def find_correct_tomo_dir(path: Path, run_number: str) -> Path | None:
                 possible_tomo = root.parent / "Tomo"
                 if root.parent.name == "Tomo":
                     return root.parent
-                elif possible_tomo.exists():
+                if possible_tomo.exists():
                     return possible_tomo
     return None
 
