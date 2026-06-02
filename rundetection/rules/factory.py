@@ -21,7 +21,7 @@ from rundetection.rules.osiris_rules import (
     OsirisReductionModeRule,
     OsirisReflectionCalibrationRule,
 )
-from rundetection.rules.rule import MissingRuleError, Rule, T
+from rundetection.rules.rule import MissingRuleError, Rule
 from rundetection.rules.sans_rules import (
     SansCanFiles,
     SansPhiLimits,
@@ -37,7 +37,7 @@ from rundetection.rules.vesuvio_rules import (
 )
 
 
-def rule_factory(key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912, PLR0915
+def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912, PLR0915
     """
     Return the rule implementation for the given rule key and value.
 
