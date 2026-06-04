@@ -15,6 +15,7 @@ from rundetection.rules.enginx_rules import (
     EnginxVanadiumPathRule,
 )
 from rundetection.rules.factory import rule_factory
+from rundetection.rules.gem_rules import GEMEmptyRunsRule, GEMSiliconeRunRule, GEMVanadiumRunRule
 from rundetection.rules.imat_rules import IMATFindImagesRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
@@ -83,6 +84,9 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("enginxceriarun", 34567, EnginxCeriaPathRule),
         ("enginxgroup", "north", EnginxGroupRule),
         ("imatfindimages", True, IMATFindImagesRule),
+        ("gemsiliconerun", True, GEMSiliconeRunRule),
+        ("gemvanadiumrun", True, GEMVanadiumRunRule),
+        ("gememptyruns", "123-321", GEMEmptyRunsRule),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):

@@ -35,6 +35,7 @@ from rundetection.rules.vesuvio_rules import (
     VesuvioIPFileRule,
     VesuvioSumRunsRule,
 )
+from rundetection.rules.gem_rules import GEMEmptyRunsRule, GEMSiliconeRunRule, GEMVanadiumRunRule
 
 
 def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912, PLR0915
@@ -124,6 +125,15 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
         case "imatfindimages":
             if isinstance(value, bool):
                 return IMATFindImagesRule(value)
+        case "gemsiliconerun":
+            if isinstance(value, bool):
+                return GEMSiliconeRunRule(value)
+        case "gemvanadiumrun":
+            if isinstance(value, bool):
+                return GEMVanadiumRunRule(value)
+        case "gememptyruns":
+            if isinstance(value, str):
+                return GEMEmptyRunsRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 
