@@ -44,7 +44,9 @@ def test_imat_find_images_success(job_request):
         exp_dir = Path(tmpdirname).joinpath("RB12345")
         exp_dir.mkdir(parents=True, exist_ok=True)
         # Create required structure: a file with run number and a Tomo dir
-        exp_dir.joinpath("run100.csv").touch()
+        data_dir = exp_dir.joinpath("data")
+        data_dir.mkdir()
+        data_dir.joinpath("run100.csv").touch()
         tomo_dir = exp_dir.joinpath("Tomo")
         tomo_dir.mkdir()
 
@@ -70,7 +72,10 @@ def test_imat_find_images_tomo_first(job_request):
         # We just ensure both exist.
         tomo_dir = exp_dir.joinpath("Tomo")
         tomo_dir.mkdir()
-        exp_dir.joinpath("z_run100.csv").touch()
+
+        data_dir = exp_dir.joinpath("data")
+        data_dir.mkdir()
+        data_dir.joinpath("z_run100.csv").touch()
 
         # Test
         rule = IMATFindImagesRule(True)
@@ -88,7 +93,9 @@ def test_imat_find_images_file_first(job_request):
         exp_dir = Path(tmpdirname).joinpath("RB12345")
         exp_dir.mkdir(parents=True, exist_ok=True)
 
-        exp_dir.joinpath("0_run100.csv").touch()
+        data_dir = exp_dir.joinpath("data")
+        data_dir.mkdir()
+        data_dir.joinpath("0_run100.csv").touch()
         tomo_dir = exp_dir.joinpath("Tomo")
         tomo_dir.mkdir()
 
@@ -107,7 +114,9 @@ def test_imat_find_images_missing_tomo(job_request):
         os.environ["IMAT_DIR"] = tmpdirname
         exp_dir = Path(tmpdirname).joinpath("RB12345")
         exp_dir.mkdir(parents=True, exist_ok=True)
-        exp_dir.joinpath("run100.csv").touch()
+        data_dir = exp_dir.joinpath("data")
+        data_dir.mkdir()
+        data_dir.joinpath("run100.csv").touch()
 
         # Test
         rule = IMATFindImagesRule(True)
