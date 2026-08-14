@@ -8,10 +8,13 @@ import pytest
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import JobRequest
 from rundetection.rules.enginx_rules import (
+    ENGINX_MAP_CACHE_KEY,
+    ENGINX_MAP_CACHE_TTL,
     EnginxBasePathRule,
     EnginxCeriaPathRule,
     EnginxGroupRule,
     EnginxVanadiumPathRule,
+    build_enginx_run_number_cycle_map,
 )
 
 
@@ -117,3 +120,59 @@ def test_coerce_run_invalid_raises():
     """Test that invalid run raises an exception."""
     with pytest.raises(ValueError):  # noqa: PT011
         EnginxBasePathRule._coerce_run("no-digits")
+
+
+def test_build_enginx_run_number_cycle_map_uses_cache():
+    """The EnginX run cycle map should be returned from Valkey when present."""
+    build_enginx_run_number_cycle_map.cache_clear()
+
+    with (
+        patch("rundetection.rules.enginx_rules.cache_get_json", return_value={"241391": "20_1"}) as cache_get,
+        patch("rundetection.rules.enginx_rules.cache_set_json") as cache_set,
+        patch("rundetection.rules.enginx_rules.ENGINX_JOURNAL_DIR") as journal_dir,
+    ):
+        mapping = build_enginx_run_number_cycle_map()
+
+    assert mapping == {241391: "20_1"}
+    cache_get.assert_called_once_with(ENGINX_MAP_CACHE_KEY)
+    cache_set.assert_not_called()
+    journal_dir.glob.assert_not_called()
+
+    build_enginx_run_number_cycle_map.cache_clear()
+
+
+def test_build_enginx_run_number_cycle_map_sets_cache(monkeypatch):
+    """The EnginX run cycle map should be cached after reading journals."""
+    build_enginx_run_number_cycle_map.cache_clear()
+    journal_dir = Path("test/test_data/e2e_data/NDXENGINX/Instrument/logs/journal")
+    monkeypatch.setattr("rundetection.rules.enginx_rules.ENGINX_JOURNAL_DIR", journal_dir)
+
+    with (
+        patch("rundetection.rules.enginx_rules.cache_get_json", return_value=None),
+        patch("rundetection.rules.enginx_rules.cache_set_json") as cache_set,
+    ):
+        mapping = build_enginx_run_number_cycle_map()
+
+    assert mapping[241391] == "20_1"
+    assert mapping[299080] == "20_1"
+    cache_set.assert_called_once_with(ENGINX_MAP_CACHE_KEY, mapping, ENGINX_MAP_CACHE_TTL)
+
+    build_enginx_run_number_cycle_map.cache_clear()
+
+
+def test_build_enginx_run_number_cycle_map_does_not_cache_empty_map(monkeypatch):
+    """An unavailable journal directory should not poison Valkey with an empty map."""
+    build_enginx_run_number_cycle_map.cache_clear()
+    empty_dir = Path("test/test_data/e2e_data/NDXENGINX/Instrument/logs/missing")
+    monkeypatch.setattr("rundetection.rules.enginx_rules.ENGINX_JOURNAL_DIR", empty_dir)
+
+    with (
+        patch("rundetection.rules.enginx_rules.cache_get_json", return_value=None),
+        patch("rundetection.rules.enginx_rules.cache_set_json") as cache_set,
+    ):
+        mapping = build_enginx_run_number_cycle_map()
+
+    assert mapping == {}
+    cache_set.assert_not_called()
+
+    build_enginx_run_number_cycle_map.cache_clear()
