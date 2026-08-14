@@ -139,8 +139,6 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
             return my_instrument_extract
         case _:
             return skip_extract
-
-
 ```
 
 After making these two changes, when a run for your instrument is detected, the new extraction function will be
@@ -176,9 +174,8 @@ Below is an example of adding a new rule. The example is unrealistic, but it sho
 2. Create the `Rule` implementation:
     ```python
     class SkipTitlesIncludingRule(Rule[List[str]]):
-  
-      def verify(self, job_request: JobRequest) -> None:
-          job_request.will_reduce =  any(word in run.experiment_title for word in self._value)
+        def verify(self, job_request: JobRequest) -> None:
+            job_request.will_reduce = any(word in run.experiment_title for word in self._value)
     ```
 3. Update the `RuleFactory`:
     ```python
@@ -202,5 +199,4 @@ Below is an example of adding a new rule. The example is unrealistic, but it sho
                     raise ValueError(f"Bad value: {value} in rule: {key}")
             case _:
                 raise MissingRuleError(f"Implementation of Rule: {key} does not exist.")
-
     ```
