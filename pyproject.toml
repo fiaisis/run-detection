@@ -19,7 +19,7 @@ run-detection = "rundetection.run_detection:main"
 
 [project.optional-dependencies]
 formatting = [
-    "ruff==0.16.2",
+    "ruff==0.16.3",
     "mypy==2.3.0",
     "run-detection[test]",
     "types-requests==2.33.0.20260712",
