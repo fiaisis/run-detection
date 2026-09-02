@@ -43,7 +43,7 @@ class GEMCalibrationMappingFileRule(Rule[str]):
 
         :param job_request: The job request to update with the calibration file.
         """
-        job_request.additional_values["calibration_mapping_file"] = self._value
+        job_request.additional_values["cal_mapping_file"] = self._value
 
 
 class GEMConfigFileRule(Rule[str]):
