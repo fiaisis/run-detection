@@ -1,12 +1,11 @@
-"Rules for GEM."
+"""Rules for GEM."""
 
 from __future__ import annotations
 
-import logging
-import os
-from pathlib import Path
+from typing import TYPE_CHECKING
 
-from rundetection.job_requests import JobRequest
+if TYPE_CHECKING:
+    from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
 
 
@@ -22,6 +21,7 @@ class GEMModeRule(Rule[str]):
         """
         job_request.additional_values["gem_mode"] = self._value
 
+
 class GEMInputModeRule(Rule[str]):
     """Rule to set the GEM input mode in the job request's additional values."""
 
@@ -33,6 +33,7 @@ class GEMInputModeRule(Rule[str]):
         :return: None.
         """
         job_request.additional_values["input_mode"] = self._value
+
 
 class GEMCalibrationMappingFileRule(Rule[str]):
     """Adds the calibration mapping file to JobRequest."""
@@ -63,7 +64,8 @@ class GEMVanNormRule(Rule[bool]):
 
     def verify(self, job_request: JobRequest) -> None:
         """
-        Verify the rule against the job request. Sets the GEM vanadium normalization flag in the job request's additional values.
+        Verify the rule against the job request.
+        Sets the GEM vanadium normalization flag in the job request's additional values.
 
         :param job_request: The job request to verify.
         :return: None.
@@ -76,7 +78,8 @@ class GEMDoAbsorbCorrectionsRule(Rule[bool]):
 
     def verify(self, job_request: JobRequest) -> None:
         """
-        Verify the rule against the job request. Sets the GEM absorb corrections flag in the job request's additional values.
+        Verify the rule against the job request.
+        Sets the GEM absorb corrections flag in the job request's additional values.
 
         :param job_request: The job request to verify.
         :return: None.
@@ -89,11 +92,10 @@ class GEMMultipleScatteringRule(Rule[bool]):
 
     def verify(self, job_request: JobRequest) -> None:
         """
-        Verify the rule against the job request. Sets the GEM multiple scattering flag in the job request's additional values.
+        Verify the rule against the job request.
+        Sets the GEM multiple scattering flag in the job request's additional values.
 
         :param job_request: The job request to verify.
         :return: None.
         """
         job_request.additional_values["multiple_scattering"] = self._value
-
-
