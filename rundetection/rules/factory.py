@@ -11,6 +11,15 @@ from rundetection.rules.enginx_rules import (
     EnginxGroupRule,
     EnginxVanadiumPathRule,
 )
+from rundetection.rules.gem_rules import (
+    GEMCalibrationMappingFileRule,
+    GEMConfigFileRule,
+    GEMDoAbsorbCorrectionsRule,
+    GEMInputModeRule,
+    GEMModeRule,
+    GEMMultipleScatteringRule,
+    GEMVanNormRule,
+)
 from rundetection.rules.imat_rules import IMATFindImagesRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
@@ -34,15 +43,6 @@ from rundetection.rules.vesuvio_rules import (
     VesuvioEmptyRunsRule,
     VesuvioIPFileRule,
     VesuvioSumRunsRule,
-)
-from rundetection.rules.gem_rules import (
-    GEMCalibrationMappingFileRule,
-    GEMConfigFileRule,
-    GEMInputModeRule,
-    GEMModeRule,
-    GEMVanNormRule,
-    GEMDoAbsorbCorrectionsRule,
-    GEMMultipleScatteringRule,
 )
 
 
@@ -137,7 +137,7 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
             if isinstance(value, str):
                 return GEMModeRule(value)
         case "geminputmode":
-            if isinstance(value, str): 
+            if isinstance(value, str):
                 return GEMInputModeRule(value)
         case "gemcalmappingfile":
             if isinstance(value, str):

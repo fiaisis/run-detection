@@ -16,13 +16,13 @@ from rundetection.rules.enginx_rules import (
 )
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.gem_rules import (
-    GEMModeRule,
-    GEMInputModeRule,
     GEMCalibrationMappingFileRule,
     GEMConfigFileRule,
-    GEMVanNormRule,
     GEMDoAbsorbCorrectionsRule,
-    GEMMultipleScatteringRule
+    GEMInputModeRule,
+    GEMModeRule,
+    GEMMultipleScatteringRule,
+    GEMVanNormRule,
 )
 from rundetection.rules.imat_rules import IMATFindImagesRule
 from rundetection.rules.inter_rules import InterStitchRule
