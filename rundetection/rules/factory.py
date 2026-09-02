@@ -35,7 +35,15 @@ from rundetection.rules.vesuvio_rules import (
     VesuvioIPFileRule,
     VesuvioSumRunsRule,
 )
-from rundetection.rules.gem_rules import GEMEmptyRunsRule, GEMSiliconeRunRule, GEMVanadiumRunRule
+from rundetection.rules.gem_rules import (
+    GEMCalibrationMappingFileRule,
+    GEMConfigFileRule,
+    GEMInputModeRule,
+    GEMModeRule,
+    GEMVanNormRule,
+    GEMDoAbsorbCorrectionsRule,
+    GEMMultipleScatteringRule,
+)
 
 
 def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, PLR0912, PLR0915
@@ -125,15 +133,27 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
         case "imatfindimages":
             if isinstance(value, bool):
                 return IMATFindImagesRule(value)
-        case "gemsiliconerun":
-            if isinstance(value, bool):
-                return GEMSiliconeRunRule(value)
-        case "gemvanadiumrun":
-            if isinstance(value, bool):
-                return GEMVanadiumRunRule(value)
-        case "gememptyruns":
+        case "gemmode":
             if isinstance(value, str):
-                return GEMEmptyRunsRule(value)
+                return GEMModeRule(value)
+        case "geminputmode":
+            if isinstance(value, str): 
+                return GEMInputModeRule(value)
+        case "gemcalibrationmappingfile":
+            if isinstance(value, str):
+                return GEMCalibrationMappingFileRule(value)
+        case "gemconfigfile":
+            if isinstance(value, str):
+                return GEMConfigFileRule(value)
+        case "gemvannorm":
+            if isinstance(value, bool):
+                return GEMVanNormRule(value)
+        case "gemdoabsorbcorrections":
+            if isinstance(value, bool):
+                return GEMDoAbsorbCorrectionsRule(value)
+        case "gemmultiplescattering":
+            if isinstance(value, bool):
+                return GEMMultipleScatteringRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 

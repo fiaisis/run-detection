@@ -9,62 +9,91 @@ from pathlib import Path
 from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
 
-logger = logging.getLogger(__name__)
 
-class GEMSiliconeRunRule(Rule[bool]):
-    """Rule to identify if a GEM run is a silicone run based on the presence of a specific file."""
+class GEMModeRule(Rule[str]):
+    """Rule to set the GEM mode in the job request's additional values."""
 
     def verify(self, job_request: JobRequest) -> None:
         """
-        Verify the rule against the job request. Checks for the presence of a specific file to determine if it's a silicone run.
+        Verify the rule against the job request. Sets the GEM mode in the job request's additional values.
 
         :param job_request: The job request to verify.
         :return: None.
         """
-        if not self._value:  # if the rule is set to false, skip
-            return
+        job_request.additional_values["gem_mode"] = self._value
 
-        # Assume that the gem directory is loaded.
-        gem_root_dir = os.environ.get("GEM_DIR", "/gem")
-        run_file_path = Path(gem_root_dir) / f"RB{job_request.experiment_number}" / f"GR{job_request.run_number}.nxs"
-
-        if run_file_path.exists():
-            job_request.additional_values["is_silicone_run"] = True
-        else:
-            job_request.additional_values["is_silicone_run"] = False
-
-
-class GEMVanadiumRunRule(Rule[bool]):
-    """Rule to identify if a GEM run is a vanadium run based on the presence of a specific file."""
+class GEMInputModeRule(Rule[str]):
+    """Rule to set the GEM input mode in the job request's additional values."""
 
     def verify(self, job_request: JobRequest) -> None:
         """
-        Verify the rule against the job request. Checks for the presence of a specific file to determine if it's a vanadium run.
+        Verify the rule against the job request. Sets the GEM input mode in the job request's additional values.
 
         :param job_request: The job request to verify.
         :return: None.
         """
-        if not self._value:  # if the rule is set to false, skip
-            return
+        job_request.additional_values["input_mode"] = self._value
 
-        # Assume that the gem directory is loaded.
-        gem_root_dir = os.environ.get("GEM_DIR", "/gem")
-        run_file_path = Path(gem_root_dir) / f"RB{job_request.experiment_number}" / f"GR{job_request.run_number}.nxs"
-
-        if run_file_path.exists():
-            job_request.additional_values["is_vanadium_run"] = True
-        else:
-            job_request.additional_values["is_vanadium_run"] = False
-
-
-class GEMEmptyRunsRule(Rule[str]):
-    """Adds the empty runs numbers to JobRequest."""
+class GEMCalibrationMappingFileRule(Rule[str]):
+    """Adds the calibration mapping file to JobRequest."""
 
     def verify(self, job_request: JobRequest) -> None:
         """
-        Add empty runs numbers to the job request's additional values.
+        Add the calibration mapping file to the job request's additional values.
 
-        :param job_request: The job request to update with empty runs.
+        :param job_request: The job request to update with the calibration file.
         """
-        job_request.additional_values["empty_runs"] = self._value
+        job_request.additional_values["calibration_mapping_file"] = self._value
+
+
+class GEMConfigFileRule(Rule[str]):
+    """Adds the config file to JobRequest."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Add the config file to the job request's additional values.
+
+        :param job_request: The job request to update with the config file.
+        """
+        job_request.additional_values["config_file"] = self._value
+
+
+class GEMVanNormRule(Rule[bool]):
+    """Rule to set the GEM vanadium normalization flag in the job request's additional values."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request. Sets the GEM vanadium normalization flag in the job request's additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["van_norm"] = self._value
+
+
+class GEMDoAbsorbCorrectionsRule(Rule[bool]):
+    """Rule to set the GEM absorb corrections flag in the job request's additional values."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request. Sets the GEM absorb corrections flag in the job request's additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["do_absorb_corrections"] = self._value
+
+
+class GEMMultipleScatteringRule(Rule[bool]):
+    """Rule to set the GEM multiple scattering flag in the job request's additional values."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request. Sets the GEM multiple scattering flag in the job request's additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["multiple_scattering"] = self._value
+
 
