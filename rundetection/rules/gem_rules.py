@@ -19,7 +19,7 @@ class GEMModeRule(Rule[str]):
         :param job_request: The job request to verify.
         :return: None.
         """
-        job_request.additional_values["gem_mode"] = self._value
+        job_request.additional_values["mode"] = self._value
 
 
 class GEMInputModeRule(Rule[str]):
