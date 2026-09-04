@@ -11,6 +11,14 @@ from rundetection.rules.enginx_rules import (
     EnginxGroupRule,
     EnginxVanadiumPathRule,
 )
+from rundetection.rules.gem_rules import (
+    GEMCalibrationMappingFileRule,
+    GEMDoAbsorbCorrectionsRule,
+    GEMInputModeRule,
+    GEMModeRule,
+    GEMMultipleScatteringRule,
+    GEMVanNormRule,
+)
 from rundetection.rules.imat_rules import IMATFindImagesRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
@@ -124,6 +132,24 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
         case "imatfindimages":
             if isinstance(value, bool):
                 return IMATFindImagesRule(value)
+        case "gemmode":
+            if isinstance(value, str):
+                return GEMModeRule(value)
+        case "geminputmode":
+            if isinstance(value, str):
+                return GEMInputModeRule(value)
+        case "gemcalmappingfile":
+            if isinstance(value, str):
+                return GEMCalibrationMappingFileRule(value)
+        case "gemvannorm":
+            if isinstance(value, bool):
+                return GEMVanNormRule(value)
+        case "gemdoabsorbcorrections":
+            if isinstance(value, bool):
+                return GEMDoAbsorbCorrectionsRule(value)
+        case "gemmultiplescattering":
+            if isinstance(value, bool):
+                return GEMMultipleScatteringRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 
