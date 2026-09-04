@@ -6,7 +6,6 @@ import pytest
 from rundetection.job_requests import JobRequest
 from rundetection.rules.gem_rules import (
     GEMCalibrationMappingFileRule,
-    GEMConfigFileRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,
     GEMModeRule,
@@ -56,13 +55,6 @@ def test_gem_calibration_mapping_file_rule(job_request):
     rule = GEMCalibrationMappingFileRule("Gem_Mapping_25_3.yaml")
     rule.verify(job_request)
     assert job_request.additional_values["cal_mapping_file"] == "Gem_Mapping_25_3.yaml"
-
-
-def test_gem_config_file_rule(job_request):
-    """Test for GEMConfigFileRule."""
-    rule = GEMConfigFileRule("Gem_config_25_3.yaml")
-    rule.verify(job_request)
-    assert job_request.additional_values["config_file"] == "Gem_config_25_3.yaml"
 
 
 def test_gem_van_norm_rule(job_request):

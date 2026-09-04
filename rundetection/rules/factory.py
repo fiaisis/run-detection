@@ -13,7 +13,6 @@ from rundetection.rules.enginx_rules import (
 )
 from rundetection.rules.gem_rules import (
     GEMCalibrationMappingFileRule,
-    GEMConfigFileRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,
     GEMModeRule,
@@ -142,9 +141,6 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
         case "gemcalmappingfile":
             if isinstance(value, str):
                 return GEMCalibrationMappingFileRule(value)
-        case "gemconfigfile":
-            if isinstance(value, str):
-                return GEMConfigFileRule(value)
         case "gemvannorm":
             if isinstance(value, bool):
                 return GEMVanNormRule(value)

@@ -17,7 +17,6 @@ from rundetection.rules.enginx_rules import (
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.gem_rules import (
     GEMCalibrationMappingFileRule,
-    GEMConfigFileRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,
     GEMModeRule,
@@ -92,7 +91,6 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("enginxceriarun", 34567, EnginxCeriaPathRule),
         ("enginxgroup", "north", EnginxGroupRule),
         ("imatfindimages", True, IMATFindImagesRule),
-        ("gemconfigfile", "Gem_config_25_3.yaml", GEMConfigFileRule),
         ("gemcalmappingfile", "Gem_Mapping_25_3.yaml", GEMCalibrationMappingFileRule),
         ("gemmode", "PDF", GEMModeRule),
         ("geminputmode", "Summed", GEMInputModeRule),

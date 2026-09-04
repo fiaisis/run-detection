@@ -47,18 +47,6 @@ class GEMCalibrationMappingFileRule(Rule[str]):
         job_request.additional_values["cal_mapping_file"] = self._value
 
 
-class GEMConfigFileRule(Rule[str]):
-    """Adds the config file to JobRequest."""
-
-    def verify(self, job_request: JobRequest) -> None:
-        """
-        Add the config file to the job request's additional values.
-
-        :param job_request: The job request to update with the config file.
-        """
-        job_request.additional_values["config_file"] = self._value
-
-
 class GEMVanNormRule(Rule[bool]):
     """Rule to set the GEM vanadium normalization flag in the job request's additional values."""
 
