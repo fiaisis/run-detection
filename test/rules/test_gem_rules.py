@@ -7,10 +7,13 @@ import pytest
 from rundetection.job_requests import JobRequest
 from rundetection.rules.gem_rules import (
     GEMCalibrationMappingFileRule,
+    GEMCycleRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,
     GEMModeRule,
     GEMMultipleScatteringRule,
+    GEMOffsetFileRule,
+    GEMReitveldPDFVanEmptyRunNumbersRule,
     GEMVanNormRule,
 )
 
@@ -77,3 +80,34 @@ def test_gem_multiple_scattering_rule(job_request):
     rule = GEMMultipleScatteringRule(True)
     rule.verify(job_request)
     assert job_request.additional_values["multiple_scattering"] is True
+
+
+def test_gem_offset_file_rule(job_request):
+    """Test for GEMOffsetFileRule."""
+    rule = GEMOffsetFileRule("offsets_2023_cycle231.cal")
+    rule.verify(job_request)
+    assert job_request.additional_values["offset_file"] == "offsets_2023_cycle231.cal"
+
+
+def test_gem_cycle_rule(job_request):
+    """Test for GEMCycleRule."""
+    rule = GEMCycleRule("cycle_24_5")
+    rule.verify(job_request)
+    assert job_request.additional_values["cycle_string"] == "cycle_24_5"
+
+
+def test_gem_reitveld_pdf_van_empty_run_numbers_rule(job_request):
+    """Test for GEMReitveldPDFVanEmptyRunNumbersRule."""
+    rule = GEMReitveldPDFVanEmptyRunNumbersRule({"Reitveld": {"vanadium_run_number": 100, "empty_run_number": 200},
+                                                 "PDF": {"vanadium_run_number": 300, "empty_run_number": 400}})
+    rule.verify(job_request)
+    assert job_request.additional_values["reitveld_pdf_van_empty_run_numbers"] == {
+        "Reitveld": {
+            "vanadium_run_number": 100,
+            "empty_run_number": 200
+        },
+        "PDF": {
+            "vanadium_run_number": 300,
+            "empty_run_number": 400
+        }
+    }

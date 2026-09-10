@@ -87,3 +87,45 @@ class GEMMultipleScatteringRule(Rule[bool]):
         :return: None.
         """
         job_request.additional_values["multiple_scattering"] = self._value
+
+
+class GEMReitveldPDFVanEmptyRunNumbersRule(Rule[dict[str, dict[str, str]]]):
+    """Rule to set the GEM Reitveld & PDF vanadium & empty run numbers in the job request's additional values."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+        Sets the GEM Reitveld & PDF vanadium & empty run numbers in the job request's additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["reitveld_pdf_van_empty_run_numbers"] = self._value
+
+
+class GEMOffsetFileRule(Rule[str]):
+    """Rule to set the GEM offset file in the job request's additional values."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+        Sets the GEM offset file in the job request's additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["offsets_2023_cycle231.cal"] = self._value
+
+
+class GEMCycleRule(Rule[str]):
+    """Rule to set the current cycle in the job request's additional values."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+        Sets the current cycle in the job request's additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["cycle"] = self._value
