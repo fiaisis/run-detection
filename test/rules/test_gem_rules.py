@@ -98,16 +98,14 @@ def test_gem_cycle_rule(job_request):
 
 def test_gem_reitveld_pdf_van_empty_run_numbers_rule(job_request):
     """Test for GEMReitveldPDFVanEmptyRunNumbersRule."""
-    rule = GEMReitveldPDFVanEmptyRunNumbersRule({"Reitveld": {"vanadium_run_number": 100, "empty_run_number": 200},
-                                                 "PDF": {"vanadium_run_number": 300, "empty_run_number": 400}})
+    rule = GEMReitveldPDFVanEmptyRunNumbersRule(
+        {
+            "Reitveld": {"vanadium_run_number": 100, "empty_run_number": 200},
+            "PDF": {"vanadium_run_number": 300, "empty_run_number": 400},
+        }
+    )
     rule.verify(job_request)
     assert job_request.additional_values["reitveld_pdf_van_empty_run_numbers"] == {
-        "Reitveld": {
-            "vanadium_run_number": 100,
-            "empty_run_number": 200
-        },
-        "PDF": {
-            "vanadium_run_number": 300,
-            "empty_run_number": 400
-        }
+        "Reitveld": {"vanadium_run_number": 100, "empty_run_number": 200},
+        "PDF": {"vanadium_run_number": 300, "empty_run_number": 400},
     }
