@@ -13,7 +13,10 @@ from rundetection.rules.gem_rules import (
     GEMModeRule,
     GEMMultipleScatteringRule,
     GEMOffsetFileRule,
-    GEMReitveldPDFVanEmptyRunNumbersRule,
+    GEMReitveldVanNumberRule,
+    GEMReitveldEmptyNumberRule,
+    GEMPDFVanNumberRule,
+    GEMPDFEmptyNumberRule,
     GEMVanNormRule,
 )
 
@@ -96,16 +99,33 @@ def test_gem_cycle_rule(job_request):
     assert job_request.additional_values["cycle_string"] == "cycle_24_5"
 
 
-def test_gem_reitveld_pdf_van_empty_run_numbers_rule(job_request):
-    """Test for GEMReitveldPDFVanEmptyRunNumbersRule."""
-    rule = GEMReitveldPDFVanEmptyRunNumbersRule(
-        {
-            "Reitveld": {"vanadium_run_number": 100, "empty_run_number": 200},
-            "PDF": {"vanadium_run_number": 300, "empty_run_number": 400},
-        }
-    )
+def test_gem_reitveld_van_number_rule(job_request):
+    """Test for GEMReitveldVanNumberRule."""
+    rule = GEMReitveldVanNumberRule({"vanadium_run_number": 100})
     rule.verify(job_request)
-    assert job_request.additional_values["reitveld_pdf_van_empty_run_numbers"] == {
-        "Reitveld": {"vanadium_run_number": 100, "empty_run_number": 200},
-        "PDF": {"vanadium_run_number": 300, "empty_run_number": 400},
-    }
+
+    assert job_request.additional_values["reitveld_van_number"] == 100
+
+
+def test_gem_reitveld_empty_number_rule(job_request):
+    """Test for GEMReitveldEmptyNumberRule."""
+    rule = GEMReitveldEmptyNumberRule({"empty_run_number": 200})
+    rule.verify(job_request)
+
+    assert job_request.additional_values["reitveld_empty_number"] == 200
+
+
+def test_gem_pdf_van_number_rule(job_request):
+    """Test for GEMPDFVanNumberRule."""
+    rule = GEMPDFVanNumberRule({"vanadium_run_number": 300})
+    rule.verify(job_request)
+
+    assert job_request.additional_values["pdf_van_number"] == 300
+
+
+def test_gem_pdf_empty_number_rule(job_request):
+    """Test for GEMPDFEmptyNumberRule."""
+    rule = GEMPDFEmptyNumberRule({"empty_run_number": 400})
+    rule.verify(job_request)
+
+    assert job_request.additional_values["pdf_empty_number"] == 400
