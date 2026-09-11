@@ -110,8 +110,14 @@ def test_gem_rietveld_pdf_van_empty_rule(job_request):
             "pdf": {"vanadium_run_numbers": 300, "empty_run_numbers": 400},
         }
     )
+    expected_values = {
+        "rietveld_van_number": 100,
+        "rietveld_empty_number": 200,
+        "pdf_van_number": 300,
+        "pdf_empty_number": 400,
+    }
     rule.verify(job_request)
-    assert job_request.additional_values["rietveld_van_number"] == 100
-    assert job_request.additional_values["rietveld_empty_number"] == 200
-    assert job_request.additional_values["pdf_van_number"] == 300
-    assert job_request.additional_values["pdf_empty_number"] == 400
+    assert job_request.additional_values["rietveld_van_number"] == expected_values["rietveld_van_number"]
+    assert job_request.additional_values["rietveld_empty_number"] == expected_values["rietveld_empty_number"]
+    assert job_request.additional_values["pdf_van_number"] == expected_values
+    assert job_request.additional_values["pdf_empty_number"] == expected_values["pdf_empty_number"]
