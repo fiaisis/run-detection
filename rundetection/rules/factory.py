@@ -21,8 +21,8 @@ from rundetection.rules.gem_rules import (
     GEMOffsetFileRule,
     GEMPDFEmptyNumberRule,
     GEMPDFVanNumberRule,
-    GEMReitveldEmptyNumberRule,
-    GEMReitveldVanNumberRule,
+    GEMRietveldEmptyNumberRule,
+    GEMRietveldVanNumberRule,
     GEMVanNormRule,
 )
 from rundetection.rules.imat_rules import IMATFindImagesRule
@@ -162,12 +162,12 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
         case "gemcycle":
             if isinstance(value, str):
                 return GEMCycleRule(value)
-        case "gemreitveldvanrunnumber":
+        case "gemrietveldvanrunnumber":
             if isinstance(value, int | str):
-                return GEMReitveldVanNumberRule(value)
-        case "gemreitveldemptyrunnumber":
+                return GEMRietveldVanNumberRule(value)
+        case "gemrietveldemptyrunnumber":
             if isinstance(value, int | str):
-                return GEMReitveldEmptyNumberRule(value)
+                return GEMRietveldEmptyNumberRule(value)
         case "gempdfvanrunnumber":
             if isinstance(value, int | str):
                 return GEMPDFVanNumberRule(value)

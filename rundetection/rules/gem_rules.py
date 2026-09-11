@@ -90,32 +90,32 @@ class GEMMultipleScatteringRule(Rule[bool]):
         job_request.additional_values["multiple_scattering"] = self._value
 
 
-class GEMReitveldVanNumberRule(Rule[int | str]):
-    """Rule to set the GEM Reitveld vanadium run number in the job request's additional values."""
+class GEMRietveldVanNumberRule(Rule[int | str]):
+    """Rule to set the GEM Rietveld vanadium run number in the job request's additional values."""
 
     def verify(self, job_request: JobRequest) -> None:
         """
         Verify the rule against the job request.
-        Sets the GEM Reitveld vanadium run number in the job request's additional values.
+        Sets the GEM Rietveld vanadium run number in the job request's additional values.
 
         :param job_request: The job request to verify.
         :return: None.
         """
-        job_request.additional_values["reitveld_van_number"] = self._value
+        job_request.additional_values["rietveld_van_number"] = self._value
 
 
-class GEMReitveldEmptyNumberRule(Rule[int | str]):
-    """Rule to set the GEM Reitveld empty run number in the job request's additional values."""
+class GEMRietveldEmptyNumberRule(Rule[int | str]):
+    """Rule to set the GEM Rietveld empty run number in the job request's additional values."""
 
     def verify(self, job_request: JobRequest) -> None:
         """
         Verify the rule against the job request.
-        Sets the GEM Reitveld empty run number in the job request's additional values.
+        Sets the GEM Rietveld empty run number in the job request's additional values.
 
         :param job_request: The job request to verify.
         :return: None.
         """
-        job_request.additional_values["reitveld_empty_number"] = self._value
+        job_request.additional_values["rietveld_empty_number"] = self._value
 
 
 class GEMPDFVanNumberRule(Rule[int | str]):

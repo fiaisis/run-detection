@@ -15,8 +15,8 @@ from rundetection.rules.gem_rules import (
     GEMOffsetFileRule,
     GEMPDFEmptyNumberRule,
     GEMPDFVanNumberRule,
-    GEMReitveldEmptyNumberRule,
-    GEMReitveldVanNumberRule,
+    GEMRietveldEmptyNumberRule,
+    GEMRietveldVanNumberRule,
     GEMVanNormRule,
 )
 
@@ -33,8 +33,8 @@ def job_request():
         experiment_title="Test experiment",
         additional_values={
             "cycle_string": "cycle_22_04",
-            "reitveld_van_number": 100,
-            "reitveld_empty_number": 200,
+            "rietveld_van_number": 100,
+            "rietveld_empty_number": 200,
             "pdf_van_number": 300,
             "pdf_empty_number": 400,
         },
@@ -105,20 +105,20 @@ def test_gem_cycle_rule(job_request):
     assert job_request.additional_values["cycle_string"] == "cycle_22_04"
 
 
-def test_gem_reitveld_van_number_rule(job_request):
-    """Test for GEMReitveldVanNumberRule."""
-    rule = GEMReitveldVanNumberRule(100)
+def test_gem_rietveld_van_number_rule(job_request):
+    """Test for GEMRietveldVanNumberRule."""
+    rule = GEMRietveldVanNumberRule(100)
     rule.verify(job_request)
     expected_value = 100
-    assert job_request.additional_values["reitveld_van_number"] == expected_value
+    assert job_request.additional_values["rietveld_van_number"] == expected_value
 
 
-def test_gem_reitveld_empty_number_rule(job_request):
-    """Test for GEMReitveldEmptyNumberRule."""
-    rule = GEMReitveldEmptyNumberRule(200)
+def test_gem_rietveld_empty_number_rule(job_request):
+    """Test for GEMRietveldEmptyNumberRule."""
+    rule = GEMRietveldEmptyNumberRule(200)
     rule.verify(job_request)
     expected_value = 200
-    assert job_request.additional_values["reitveld_empty_number"] == expected_value
+    assert job_request.additional_values["rietveld_empty_number"] == expected_value
 
 
 def test_gem_pdf_van_number_rule(job_request):
