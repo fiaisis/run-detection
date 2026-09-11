@@ -119,5 +119,5 @@ def test_gem_rietveld_pdf_van_empty_rule(job_request):
     rule.verify(job_request)
     assert job_request.additional_values["rietveld_van_number"] == expected_values["rietveld_van_number"]
     assert job_request.additional_values["rietveld_empty_number"] == expected_values["rietveld_empty_number"]
-    assert job_request.additional_values["pdf_van_number"] == expected_values
+    assert job_request.additional_values["pdf_van_number"] == expected_values["pdf_van_number"]
     assert job_request.additional_values["pdf_empty_number"] == expected_values["pdf_empty_number"]
