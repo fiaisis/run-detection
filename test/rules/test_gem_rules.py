@@ -13,10 +13,10 @@ from rundetection.rules.gem_rules import (
     GEMModeRule,
     GEMMultipleScatteringRule,
     GEMOffsetFileRule,
-    GEMReitveldVanNumberRule,
-    GEMReitveldEmptyNumberRule,
-    GEMPDFVanNumberRule,
     GEMPDFEmptyNumberRule,
+    GEMPDFVanNumberRule,
+    GEMReitveldEmptyNumberRule,
+    GEMReitveldVanNumberRule,
     GEMVanNormRule,
 )
 
@@ -31,12 +31,13 @@ def job_request():
         run_number=100,
         filepath=Path("test/test_data/e2e_data/NDXGEM/Instrument/data/cycle_22_04/GEM00102137.nxs"),
         experiment_title="Test experiment",
-        additional_values={"cycle_string": "cycle_22_04",
-                            "reitveld_van_number": 100,
-                            "reitveld_empty_number": 200,
-                            "pdf_van_number": 300,
-                            "pdf_empty_number": 400
-                    },
+        additional_values={
+            "cycle_string": "cycle_22_04",
+            "reitveld_van_number": 100,
+            "reitveld_empty_number": 200,
+            "pdf_van_number": 300,
+            "pdf_empty_number": 400,
+        },
         additional_requests=[],
         raw_frames=3,
         good_frames=0,

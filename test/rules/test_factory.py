@@ -23,10 +23,10 @@ from rundetection.rules.gem_rules import (
     GEMModeRule,
     GEMMultipleScatteringRule,
     GEMOffsetFileRule,
-    GEMReitveldVanNumberRule,
-    GEMReitveldEmptyNumberRule,
-    GEMPDFVanNumberRule,
     GEMPDFEmptyNumberRule,
+    GEMPDFVanNumberRule,
+    GEMReitveldEmptyNumberRule,
+    GEMReitveldVanNumberRule,
     GEMVanNormRule,
 )
 from rundetection.rules.imat_rules import IMATFindImagesRule

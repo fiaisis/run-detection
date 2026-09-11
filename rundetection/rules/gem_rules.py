@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
-from rundetection.rules.rule import Rule
 from rundetection.ingestion.extracts import get_cycle_string_from_path
+from rundetection.rules.rule import Rule
 
 
 class GEMModeRule(Rule[str]):
@@ -116,6 +116,7 @@ class GEMReitveldEmptyNumberRule(Rule[int]):
         :return: None.
         """
         job_request.additional_values["reitveld_empty_number"] = self._value
+
 
 class GEMPDFVanNumberRule(Rule[int]):
     """Rule to set the GEM PDF vanadium run number in the job request's additional values."""
