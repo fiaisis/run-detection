@@ -160,11 +160,11 @@ class GEMOffsetFileRule(Rule[str]):
 
 
 class GEMCycleRule(Rule[str]):
-    """Rule to set the current cycle in the job request's additional values."""
+    """Rule to set the current cycle in the job request's filepath"""
 
     def verify(self, job_request: JobRequest) -> None:
         """
-        Verify the rule against the job request. Sets the current cycle in the job request's additional values.
+        Verify the rule against the job request.
 
         :param job_request: The job request to verify.
         :return: None.
