@@ -13,11 +13,7 @@ from rundetection.rules.gem_rules import (
     GEMModeRule,
     GEMMultipleScatteringRule,
     GEMOffsetFileRule,
-    GEMPDFEmptyNumberRule,
-    GEMPDFVanNumberRule,
-    GEMRietveldEmptyNumberRule,
     GEMRietveldPDFVanEmptyRule,
-    GEMRietveldVanNumberRule,
     GEMVanNormRule,
 )
 
