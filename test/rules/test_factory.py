@@ -23,10 +23,7 @@ from rundetection.rules.gem_rules import (
     GEMModeRule,
     GEMMultipleScatteringRule,
     GEMOffsetFileRule,
-    GEMPDFEmptyNumberRule,
-    GEMPDFVanNumberRule,
-    GEMRietveldEmptyNumberRule,
-    GEMRietveldVanNumberRule,
+    GEMRietveldPDFVanEmptyRule,
     GEMVanNormRule,
 )
 from rundetection.rules.imat_rules import IMATFindImagesRule
@@ -105,10 +102,11 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("gemmultiplescattering", True, GEMMultipleScatteringRule),
         ("gemoffsetfile", "offsets_2023_cycle231.cal", GEMOffsetFileRule),
         ("gemcycle", "cycle_24_5", GEMCycleRule),
-        ("gemrietveldvanrunnumber", 100, GEMRietveldVanNumberRule),
-        ("gemrietveldemptyrunnumber", 200, GEMRietveldEmptyNumberRule),
-        ("gempdfvanrunnumber", 300, GEMPDFVanNumberRule),
-        ("gempdfemptyrunnumber", 400, GEMPDFEmptyNumberRule),
+        ("gemrietveldpdfvanempty", {"rietveld": {"vanadium_run_numbers": 100,
+                                                 "empty_run_numbers": 200},
+                                    "pdf": {"vanadium_run_numbers": 300,
+                                            "empty_run_numbers": 400}},
+                                            GEMRietveldPDFVanEmptyRule),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):

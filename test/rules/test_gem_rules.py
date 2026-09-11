@@ -16,6 +16,7 @@ from rundetection.rules.gem_rules import (
     GEMPDFEmptyNumberRule,
     GEMPDFVanNumberRule,
     GEMRietveldEmptyNumberRule,
+    GEMRietveldPDFVanEmptyRule,
     GEMRietveldVanNumberRule,
     GEMVanNormRule,
 )
@@ -105,33 +106,16 @@ def test_gem_cycle_rule(job_request):
     assert job_request.additional_values["cycle_string"] == "cycle_22_04"
 
 
-def test_gem_rietveld_van_number_rule(job_request):
-    """Test for GEMRietveldVanNumberRule."""
-    rule = GEMRietveldVanNumberRule(100)
+def test_gem_rietveld_pdf_van_empty_rule(job_request):
+    """Test for GEMRietveldPDFVanEmptyRule."""
+    rule = GEMRietveldPDFVanEmptyRule(
+        {
+            "rietveld": {"vanadium_run_numbers": 100, "empty_run_numbers": 200},
+            "pdf": {"vanadium_run_numbers": 300, "empty_run_numbers": 400},
+        }
+    )
     rule.verify(job_request)
-    expected_value = 100
-    assert job_request.additional_values["rietveld_van_number"] == expected_value
-
-
-def test_gem_rietveld_empty_number_rule(job_request):
-    """Test for GEMRietveldEmptyNumberRule."""
-    rule = GEMRietveldEmptyNumberRule(200)
-    rule.verify(job_request)
-    expected_value = 200
-    assert job_request.additional_values["rietveld_empty_number"] == expected_value
-
-
-def test_gem_pdf_van_number_rule(job_request):
-    """Test for GEMPDFVanNumberRule."""
-    rule = GEMPDFVanNumberRule(300)
-    rule.verify(job_request)
-    expected_value = 300
-    assert job_request.additional_values["pdf_van_number"] == expected_value
-
-
-def test_gem_pdf_empty_number_rule(job_request):
-    """Test for GEMPDFEmptyNumberRule."""
-    rule = GEMPDFEmptyNumberRule(400)
-    rule.verify(job_request)
-    expected_value = 400
-    assert job_request.additional_values["pdf_empty_number"] == expected_value
+    assert job_request.additional_values["rietveld_van_number"] == 100
+    assert job_request.additional_values["rietveld_empty_number"] == 200
+    assert job_request.additional_values["pdf_van_number"] == 300
+    assert job_request.additional_values["pdf_empty_number"] == 400

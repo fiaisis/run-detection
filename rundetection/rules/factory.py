@@ -19,10 +19,7 @@ from rundetection.rules.gem_rules import (
     GEMModeRule,
     GEMMultipleScatteringRule,
     GEMOffsetFileRule,
-    GEMPDFEmptyNumberRule,
-    GEMPDFVanNumberRule,
-    GEMRietveldEmptyNumberRule,
-    GEMRietveldVanNumberRule,
+    GEMRietveldPDFVanEmptyRule,
     GEMVanNormRule,
 )
 from rundetection.rules.imat_rules import IMATFindImagesRule
@@ -162,18 +159,9 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
         case "gemcycle":
             if isinstance(value, str):
                 return GEMCycleRule(value)
-        case "gemrietveldvanrunnumber":
-            if isinstance(value, int | str):
-                return GEMRietveldVanNumberRule(value)
-        case "gemrietveldemptyrunnumber":
-            if isinstance(value, int | str):
-                return GEMRietveldEmptyNumberRule(value)
-        case "gempdfvanrunnumber":
-            if isinstance(value, int | str):
-                return GEMPDFVanNumberRule(value)
-        case "gempdfemptyrunnumber":
-            if isinstance(value, int | str):
-                return GEMPDFEmptyNumberRule(value)
+        case "gemrietveldpdfvanempty":
+            if isinstance(value, dict):
+                return GEMRietveldPDFVanEmptyRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 
