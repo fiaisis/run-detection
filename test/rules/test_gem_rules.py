@@ -108,29 +108,29 @@ def test_gem_reitveld_van_number_rule(job_request):
     """Test for GEMReitveldVanNumberRule."""
     rule = GEMReitveldVanNumberRule(100)
     rule.verify(job_request)
-
-    assert job_request.additional_values["reitveld_van_number"] == 100
+    expected_value = 100
+    assert job_request.additional_values["reitveld_van_number"] == expected_value
 
 
 def test_gem_reitveld_empty_number_rule(job_request):
     """Test for GEMReitveldEmptyNumberRule."""
     rule = GEMReitveldEmptyNumberRule(200)
     rule.verify(job_request)
-
-    assert job_request.additional_values["reitveld_empty_number"] == 200
+    expected_value = 200
+    assert job_request.additional_values["reitveld_empty_number"] == expected_value
 
 
 def test_gem_pdf_van_number_rule(job_request):
     """Test for GEMPDFVanNumberRule."""
     rule = GEMPDFVanNumberRule(300)
     rule.verify(job_request)
-
-    assert job_request.additional_values["pdf_van_number"] == 300
+    expected_value = 300
+    assert job_request.additional_values["pdf_van_number"] == expected_value
 
 
 def test_gem_pdf_empty_number_rule(job_request):
     """Test for GEMPDFEmptyNumberRule."""
     rule = GEMPDFEmptyNumberRule(400)
     rule.verify(job_request)
-
-    assert job_request.additional_values["pdf_empty_number"] == 400
+    expected_value = 400
+    assert job_request.additional_values["pdf_empty_number"] == expected_value
