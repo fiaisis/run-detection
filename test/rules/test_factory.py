@@ -102,11 +102,14 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("gemmultiplescattering", True, GEMMultipleScatteringRule),
         ("gemoffsetfile", "offsets_2023_cycle231.cal", GEMOffsetFileRule),
         ("gemcycle", "cycle_24_5", GEMCycleRule),
-        ("gemrietveldpdfvanempty", {"rietveld": {"vanadium_run_numbers": 100,
-                                                 "empty_run_numbers": 200},
-                                    "pdf": {"vanadium_run_numbers": 300,
-                                            "empty_run_numbers": 400}},
-                                            GEMRietveldPDFVanEmptyRule),
+        (
+            "gemrietveldpdfvanempty",
+            {
+                "rietveld": {"vanadium_run_numbers": 100, "empty_run_numbers": 200},
+                "pdf": {"vanadium_run_numbers": 300, "empty_run_numbers": 400},
+            },
+            GEMRietveldPDFVanEmptyRule,
+        ),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
