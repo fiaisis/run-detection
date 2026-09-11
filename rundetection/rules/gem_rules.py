@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
 from rundetection.rules.rule import Rule
-from rundetection.ingestion.extracts import get_cycle_from_filepath
+from rundetection.ingestion.extracts import get_cycle_string_from_filepath
 
 
 class GEMModeRule(Rule[str]):
@@ -169,5 +169,5 @@ class GEMCycleRule(Rule[str]):
         :param job_request: The job request to verify.
         :return: None.
         """
-        cycle = get_cycle_from_filepath(job_request.filepath)
+        cycle = get_cycle_string_from_filepath(job_request.filepath)
         job_request.additional_values["cycle_string"] = cycle
