@@ -90,7 +90,7 @@ class GEMMultipleScatteringRule(Rule[bool]):
         job_request.additional_values["multiple_scattering"] = self._value
 
 
-class GEMReitveldVanNumberRule(Rule[int]):
+class GEMReitveldVanNumberRule(Rule[int | str]):
     """Rule to set the GEM Reitveld vanadium run number in the job request's additional values."""
 
     def verify(self, job_request: JobRequest) -> None:
@@ -104,7 +104,7 @@ class GEMReitveldVanNumberRule(Rule[int]):
         job_request.additional_values["reitveld_van_number"] = self._value
 
 
-class GEMReitveldEmptyNumberRule(Rule[int]):
+class GEMReitveldEmptyNumberRule(Rule[int | str]):
     """Rule to set the GEM Reitveld empty run number in the job request's additional values."""
 
     def verify(self, job_request: JobRequest) -> None:
@@ -118,7 +118,7 @@ class GEMReitveldEmptyNumberRule(Rule[int]):
         job_request.additional_values["reitveld_empty_number"] = self._value
 
 
-class GEMPDFVanNumberRule(Rule[int]):
+class GEMPDFVanNumberRule(Rule[int | str]):
     """Rule to set the GEM PDF vanadium run number in the job request's additional values."""
 
     def verify(self, job_request: JobRequest) -> None:
@@ -132,7 +132,7 @@ class GEMPDFVanNumberRule(Rule[int]):
         job_request.additional_values["pdf_van_number"] = self._value
 
 
-class GEMPDFEmptyNumberRule(Rule[int]):
+class GEMPDFEmptyNumberRule(Rule[int | str]):
     """Rule to set the GEM PDF empty run number in the job request's additional values."""
 
     def verify(self, job_request: JobRequest) -> None:
