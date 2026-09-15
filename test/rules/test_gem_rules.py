@@ -6,7 +6,6 @@ import pytest
 
 from rundetection.job_requests import JobRequest
 from rundetection.rules.gem_rules import (
-    GEMCalibrationMappingFileRule,
     GEMCycleRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,
@@ -29,7 +28,7 @@ def job_request():
         filepath=Path("test/test_data/e2e_data/NDXGEM/Instrument/data/cycle_22_04/GEM00102137.nxs"),
         experiment_title="Test experiment",
         additional_values={
-            "cycle_string": "cycle_22_04",
+            "cycle": "cycle_22_04",
             "rietveld_van_number": 100,
             "rietveld_empty_number": 200,
             "pdf_van_number": 300,
@@ -58,13 +57,6 @@ def test_gem_input_mode_rule(job_request):
     rule = GEMInputModeRule("Summed")
     rule.verify(job_request)
     assert job_request.additional_values["input_mode"] == "Summed"
-
-
-def test_gem_calibration_mapping_file_rule(job_request):
-    """Test for GEMCalibrationMappingFileRule."""
-    rule = GEMCalibrationMappingFileRule("Gem_Mapping_25_3.yaml")
-    rule.verify(job_request)
-    assert job_request.additional_values["cal_mapping_file"] == "Gem_Mapping_25_3.yaml"
 
 
 def test_gem_van_norm_rule(job_request):
@@ -99,7 +91,7 @@ def test_gem_cycle_rule(job_request):
     """Test for GEMCycleRule."""
     rule = GEMCycleRule("cycle_22_04")
     rule.verify(job_request)
-    assert job_request.additional_values["cycle_string"] == "cycle_22_04"
+    assert job_request.additional_values["cycle"] == "cycle_22_04"
 
 
 def test_gem_rietveld_pdf_van_empty_rule(job_request):
@@ -117,7 +109,7 @@ def test_gem_rietveld_pdf_van_empty_rule(job_request):
         "pdf_empty_number": 400,
     }
     rule.verify(job_request)
-    assert job_request.additional_values["rietveld_van_number"] == expected_values["rietveld_van_number"]
-    assert job_request.additional_values["rietveld_empty_number"] == expected_values["rietveld_empty_number"]
-    assert job_request.additional_values["pdf_van_number"] == expected_values["pdf_van_number"]
-    assert job_request.additional_values["pdf_empty_number"] == expected_values["pdf_empty_number"]
+    assert job_request.additional_values["rietveldvanrunnumbers"] == expected_values["rietveld_van_number"]
+    assert job_request.additional_values["rietveldemptyrunnumbers"] == expected_values["rietveld_empty_number"]
+    assert job_request.additional_values["pdfvanrunnumbers"] == expected_values["pdf_van_number"]
+    assert job_request.additional_values["pdfemptyrunnumbers"] == expected_values["pdf_empty_number"]

@@ -94,7 +94,6 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("enginxceriarun", 34567, EnginxCeriaPathRule),
         ("enginxgroup", "north", EnginxGroupRule),
         ("imatfindimages", True, IMATFindImagesRule),
-        ("gemcalmappingfile", "Gem_Mapping_25_3.yaml", GEMCalibrationMappingFileRule),
         ("gemmode", "PDF", GEMModeRule),
         ("geminputmode", "Summed", GEMInputModeRule),
         ("gemvannorm", True, GEMVanNormRule),

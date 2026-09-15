@@ -141,9 +141,6 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
         case "geminputmode":
             if isinstance(value, str):
                 return GEMInputModeRule(value)
-        case "gemcalmappingfile":
-            if isinstance(value, str):
-                return GEMCalibrationMappingFileRule(value)
         case "gemvannorm":
             if isinstance(value, bool):
                 return GEMVanNormRule(value)
