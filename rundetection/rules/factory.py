@@ -12,11 +12,13 @@ from rundetection.rules.enginx_rules import (
     EnginxVanadiumPathRule,
 )
 from rundetection.rules.gem_rules import (
-    GEMCalibrationMappingFileRule,
+    GEMCycleRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,
     GEMModeRule,
     GEMMultipleScatteringRule,
+    GEMOffsetFileRule,
+    GEMRietveldPDFVanEmptyRule,
     GEMVanNormRule,
 )
 from rundetection.rules.imat_rules import IMATFindImagesRule
@@ -138,9 +140,6 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
         case "geminputmode":
             if isinstance(value, str):
                 return GEMInputModeRule(value)
-        case "gemcalmappingfile":
-            if isinstance(value, str):
-                return GEMCalibrationMappingFileRule(value)
         case "gemvannorm":
             if isinstance(value, bool):
                 return GEMVanNormRule(value)
@@ -150,6 +149,15 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
         case "gemmultiplescattering":
             if isinstance(value, bool):
                 return GEMMultipleScatteringRule(value)
+        case "gemoffsetfile":
+            if isinstance(value, str):
+                return GEMOffsetFileRule(value)
+        case "gemcycle":
+            if isinstance(value, str):
+                return GEMCycleRule(value)
+        case "gemrietveldpdfvanempty":
+            if isinstance(value, dict):
+                return GEMRietveldPDFVanEmptyRule(value)
         case _:
             raise MissingRuleError(f"Implementation of Rule: {key_} does not exist.")
 
