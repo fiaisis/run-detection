@@ -16,7 +16,6 @@ from rundetection.rules.enginx_rules import (
 )
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.gem_rules import (
-    GEMCalibrationMappingFileRule,
     GEMCycleRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,

@@ -12,7 +12,6 @@ from rundetection.rules.enginx_rules import (
     EnginxVanadiumPathRule,
 )
 from rundetection.rules.gem_rules import (
-    GEMCalibrationMappingFileRule,
     GEMCycleRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,
