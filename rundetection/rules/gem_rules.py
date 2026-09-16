@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
+from rundetection.ingestion.extracts import get_cycle_string_from_path
 from rundetection.rules.rule import Rule
 
 
@@ -33,18 +34,6 @@ class GEMInputModeRule(Rule[str]):
         :return: None.
         """
         job_request.additional_values["input_mode"] = self._value
-
-
-class GEMCalibrationMappingFileRule(Rule[str]):
-    """Adds the calibration mapping file to JobRequest."""
-
-    def verify(self, job_request: JobRequest) -> None:
-        """
-        Add the calibration mapping file to the job request's additional values.
-
-        :param job_request: The job request to update with the calibration file.
-        """
-        job_request.additional_values["cal_mapping_file"] = self._value
 
 
 class GEMVanNormRule(Rule[bool]):
@@ -87,3 +76,48 @@ class GEMMultipleScatteringRule(Rule[bool]):
         :return: None.
         """
         job_request.additional_values["multiple_scattering"] = self._value
+
+
+class GEMRietveldPDFVanEmptyRule(Rule[dict[str, dict[str, str]]]):
+    """Rule to set the GEM Rietveld PDF vanadium and empty run numbers in the job request's additional values."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+        Sets the GEM Rietveld PDF vanadium and empty run numbers in the job request's additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["rietveldvanrunnumbers"] = self._value["rietveld"]["vanadium_run_numbers"]
+        job_request.additional_values["rietveldemptyrunnumbers"] = self._value["rietveld"]["empty_run_numbers"]
+        job_request.additional_values["pdfvanrunnumbers"] = self._value["pdf"]["vanadium_run_numbers"]
+        job_request.additional_values["pdfemptyrunnumbers"] = self._value["pdf"]["empty_run_numbers"]
+
+
+class GEMOffsetFileRule(Rule[str]):
+    """Rule to set the GEM offset file in the job request's additional values."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+        Sets the GEM offset file in the job request's additional values.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["offset_file"] = self._value
+
+
+class GEMCycleRule(Rule[str]):
+    """Rule to set the current cycle in the job request's filepath"""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        cycle = get_cycle_string_from_path(job_request.filepath)
+        job_request.additional_values["cycle"] = cycle
