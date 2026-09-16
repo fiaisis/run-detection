@@ -29,10 +29,10 @@ def job_request():
         experiment_title="Test experiment",
         additional_values={
             "cycle": "cycle_22_04",
-            "rietveld_van_number": 100,
-            "rietveld_empty_number": 200,
-            "pdf_van_number": 300,
-            "pdf_empty_number": 400,
+            "rietveldvanrunnumbers": 100,
+            "rietveldemptyrunnumbers": 200,
+            "pdfvanrunnumbers": 300,
+            "pdfemptyrunnumbers": 400,
         },
         additional_requests=[],
         raw_frames=3,
@@ -103,13 +103,13 @@ def test_gem_rietveld_pdf_van_empty_rule(job_request):
         }
     )
     expected_values = {
-        "rietveld_van_number": 100,
-        "rietveld_empty_number": 200,
-        "pdf_van_number": 300,
-        "pdf_empty_number": 400,
+        "rietveldvanrunnumbers": 100,
+        "rietveldemptyrunnumbers": 200,
+        "pdfvanrunnumbers": 300,
+        "pdfemptyrunnumbers": 400,
     }
     rule.verify(job_request)
-    assert job_request.additional_values["rietveldvanrunnumbers"] == expected_values["rietveld_van_number"]
-    assert job_request.additional_values["rietveldemptyrunnumbers"] == expected_values["rietveld_empty_number"]
-    assert job_request.additional_values["pdfvanrunnumbers"] == expected_values["pdf_van_number"]
-    assert job_request.additional_values["pdfemptyrunnumbers"] == expected_values["pdf_empty_number"]
+    assert job_request.additional_values["rietveldvanrunnumbers"] == expected_values["rietveldvanrunnumbers"]
+    assert job_request.additional_values["rietveldemptyrunnumbers"] == expected_values["rietveldemptyrunnumbers"]
+    assert job_request.additional_values["pdfvanrunnumbers"] == expected_values["pdfvanrunnumbers"]
+    assert job_request.additional_values["pdfemptyrunnumbers"] == expected_values["pdfemptyrunnumbers"]
