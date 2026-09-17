@@ -16,7 +16,6 @@ from rundetection.rules.enginx_rules import (
 )
 from rundetection.rules.factory import rule_factory
 from rundetection.rules.gem_rules import (
-    GEMCycleRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,
     GEMModeRule,
@@ -99,7 +98,6 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("gemdoabsorbcorrections", True, GEMDoAbsorbCorrectionsRule),
         ("gemmultiplescattering", True, GEMMultipleScatteringRule),
         ("gemoffsetfile", "offsets_2023_cycle231.cal", GEMOffsetFileRule),
-        ("gemcycle", "cycle_24_5", GEMCycleRule),
         (
             "gemrietveldpdfvanempty",
             {
