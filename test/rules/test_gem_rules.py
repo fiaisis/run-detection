@@ -6,7 +6,6 @@ import pytest
 
 from rundetection.job_requests import JobRequest
 from rundetection.rules.gem_rules import (
-    GEMCycleRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,
     GEMModeRule,
