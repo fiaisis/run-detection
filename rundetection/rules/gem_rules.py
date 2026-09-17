@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
+from rundetection.ingestion.extracts import get_cycle_string_from_path
 from rundetection.rules.rule import Rule
 
 
