@@ -6,7 +6,6 @@ import pytest
 
 from rundetection.job_requests import JobRequest
 from rundetection.rules.gem_rules import (
-    GEMCycleRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,
     GEMModeRule,
@@ -85,13 +84,6 @@ def test_gem_offset_file_rule(job_request):
     rule = GEMOffsetFileRule("offsets_2023_cycle231.cal")
     rule.verify(job_request)
     assert job_request.additional_values["offset_file"] == "offsets_2023_cycle231.cal"
-
-
-def test_gem_cycle_rule(job_request):
-    """Test for GEMCycleRule."""
-    rule = GEMCycleRule("cycle_22_04")
-    rule.verify(job_request)
-    assert job_request.additional_values["cycle"] == "cycle_22_04"
 
 
 def test_gem_rietveld_pdf_van_empty_rule(job_request):

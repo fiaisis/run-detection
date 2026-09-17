@@ -9,6 +9,7 @@ from _pytest.logging import LogCaptureFixture
 
 from rundetection.exceptions import IngestError, ReductionMetadataError
 from rundetection.ingestion.extracts import (
+    gem_extract,
     get_cycle_string_from_path,
     get_extraction_function,
     loq_extract,
@@ -67,6 +68,7 @@ def test_skip_extract(caplog: LogCaptureFixture):
         ("sans2d", "sans2d_extract"),
         ("iris", "iris_extract"),
         ("vesuvio", "vesuvio_extract"),
+        ("gem", "gem_extract"),
     ],
 )
 def test_get_extraction_function(input_value, expected_function_name):
@@ -420,5 +422,19 @@ def test_get_cycle_string_from_path_invalid():
 def test_vesuvio_extract_adds_runno(job_request):
     """Tests that the extract adds runno to Vesuvio jobs."""
     result = vesuvio_extract(job_request, None)
+
+    assert result.additional_values["runno"] == 12345  # noqa: PLR2004
+
+
+def test_gem_extract_add_cycle(job_request):
+    """Tests that extract adds cycle to GEM jobs."""
+    result = gem_extract(job_request, None)
+
+    assert result.additional_values["cycle"] == "cycle_24_5"
+
+
+def test_gem_extract_adds_runno(job_request):
+    """Tests that extract adds runno to GEM jobs."""
+    result = gem_extract(job_request, None)
 
     assert result.additional_values["runno"] == 12345  # noqa: PLR2004

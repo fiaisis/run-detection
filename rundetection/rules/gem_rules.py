@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
-from rundetection.ingestion.extracts import get_cycle_string_from_path
 from rundetection.rules.rule import Rule
 
 
@@ -107,17 +106,3 @@ class GEMOffsetFileRule(Rule[str]):
         :return: None.
         """
         job_request.additional_values["offset_file"] = self._value
-
-
-class GEMCycleRule(Rule[str]):
-    """Rule to set the current cycle in the job request's filepath"""
-
-    def verify(self, job_request: JobRequest) -> None:
-        """
-        Verify the rule against the job request.
-
-        :param job_request: The job request to verify.
-        :return: None.
-        """
-        cycle = get_cycle_string_from_path(job_request.filepath)
-        job_request.additional_values["cycle"] = cycle

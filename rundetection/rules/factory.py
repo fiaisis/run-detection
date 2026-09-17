@@ -12,7 +12,6 @@ from rundetection.rules.enginx_rules import (
     EnginxVanadiumPathRule,
 )
 from rundetection.rules.gem_rules import (
-    GEMCycleRule,
     GEMDoAbsorbCorrectionsRule,
     GEMInputModeRule,
     GEMModeRule,
@@ -152,9 +151,6 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
         case "gemoffsetfile":
             if isinstance(value, str):
                 return GEMOffsetFileRule(value)
-        case "gemcycle":
-            if isinstance(value, str):
-                return GEMCycleRule(value)
         case "gemrietveldpdfvanempty":
             if isinstance(value, dict):
                 return GEMRietveldPDFVanEmptyRule(value)
