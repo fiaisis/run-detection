@@ -9,6 +9,7 @@ from _pytest.logging import LogCaptureFixture
 
 from rundetection.exceptions import IngestError, ReductionMetadataError
 from rundetection.ingestion.extracts import (
+    gem_extract,
     get_cycle_string_from_path,
     get_extraction_function,
     loq_extract,
@@ -19,7 +20,6 @@ from rundetection.ingestion.extracts import (
     skip_extract,
     tosca_extract,
     vesuvio_extract,
-    gem_extract,
 )
 from rundetection.job_requests import JobRequest
 
@@ -436,4 +436,4 @@ def test_gem_extract_adds_runno(job_request):
     """Tests that extract adds runno to GEM jobs."""
     result = gem_extract(job_request, None)
 
-    assert result.additional_values["runno"] == 12345 # noqa: PLR2004
+    assert result.additional_values["runno"] == 12345  # noqa: PLR2004
