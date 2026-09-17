@@ -68,7 +68,7 @@ def test_skip_extract(caplog: LogCaptureFixture):
         ("sans2d", "sans2d_extract"),
         ("iris", "iris_extract"),
         ("vesuvio", "vesuvio_extract"),
-        ("gem", "gem_extract")
+        ("gem", "gem_extract"),
     ],
 )
 def test_get_extraction_function(input_value, expected_function_name):
