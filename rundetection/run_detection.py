@@ -101,10 +101,10 @@ def process_message(message: str, notification_queue: SimpleQueue[JobRequest]) -
 
 
 def process_messages(
-        channel: BlockingChannel,
-        failure_channel: BlockingChannel,
-        notification_queue: SimpleQueue[JobRequest],
-        failure_queue: SimpleQueue[str],
+    channel: BlockingChannel,
+    failure_channel: BlockingChannel,
+    notification_queue: SimpleQueue[JobRequest],
+    failure_queue: SimpleQueue[str],
 ) -> None:
     """
     Consume messages from the ingress and failure queues and enqueue valid notifications.
@@ -161,7 +161,7 @@ def process_messages(
             logger.info(
                 "Processed previous failed message: %s Acking message %s",
                 fail_body.decode(),
-                fail_method_frame.delivery_tag
+                fail_method_frame.delivery_tag,
             )
             failure_channel.basic_ack(fail_method_frame.delivery_tag)
         except InterruptedError:
