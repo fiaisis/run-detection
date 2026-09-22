@@ -110,22 +110,19 @@ def process_messages(
     Consume messages from the ingress and failure queues and enqueue valid notifications.
 
     This function will attempt to consume at most one message from the ingress queue and at most one
-    message from the failure queue per invocation (it breaks after each consume loop iteration). For
-    each consumed message it will:
+    message from the failure queue per invocation using basic_get. For each consumed message it will:
     - Decode the body and call process_message to validate and build JobRequest(s).
     - On success, ack the corresponding message on the queue and put resulting JobRequest(s) on
       notification_queue (handled inside process_message).
 
     Ingress queue error handling:
     - ReductionMetadataError: log and ack the message (it cannot be processed), do not send to failure queue.
-    - AttributeError: ignore (e.g. missing delivery tag/body), do nothing.
-    - InterruptedError: log, nack the message on the failure_channel (to make it available again) and re-raise.
+    - InterruptedError: log, nack the message on the ingress channel (to make it available again) and re-raise.
     - Any other Exception: log, ack the message on the ingress channel, and put the decoded body onto failure_queue
       for later notification and retry via the failure queue.
 
     Failure queue processing:
     - On success, ack the message on failure_channel.
-    - AttributeError: ignore (e.g. missing delivery tag/body), do nothing.
     - InterruptedError: log, nack the message on failure_channel and re-raise.
     - Any other Exception: log, requeue the decoded body to failure_queue and ack the failed message on failure_channel.
 
@@ -135,7 +132,9 @@ def process_messages(
     :param failure_queue: Local in-memory queue used to buffer failed message bodies for later publication.
     :return: None.
     """
-    for method_frame, _, body in channel.consume(INGRESS_QUEUE_NAME, inactivity_timeout=5):
+    method_frame, _, body = channel.basic_get(INGRESS_QUEUE_NAME)
+
+    if method_frame:
         try:
             process_message(body.decode(), notification_queue)
             logger.info("Acking message %s", method_frame.delivery_tag)
@@ -143,42 +142,39 @@ def process_messages(
         except ReductionMetadataError as exc:
             logger.exception("Problem with metadata, cannot reduce, skipping message", exc_info=exc)
             channel.basic_ack(method_frame.delivery_tag)
-        except AttributeError:  # If the message frame or body is missing attributes required e.g. the delivery tag
-            pass
         except InterruptedError:
-            logger.info("Process interupted, nacking message %s", method_frame.delivery_tag)
-            failure_channel.basic_nack(method_frame.delivery_tag)
+            logger.info("Process interrupted, nacking message %s", method_frame.delivery_tag)
+            channel.basic_nack(method_frame.delivery_tag)
             raise
         except Exception as exc:
             logger.exception("Problem processing message: %s", body, exc_info=exc)
             logger.info("Putting message on failure queue and acking message %s", method_frame.delivery_tag)
             channel.basic_ack(method_frame.delivery_tag)
-            failure_queue.put(body.decode())
-        break
+            if body:
+                failure_queue.put(body.decode())
 
-    for method_frame, _, body in failure_channel.consume(FAILURE_QUEUE_NAME, inactivity_timeout=5):
+    fail_method_frame, _, fail_body = failure_channel.basic_get(FAILURE_QUEUE_NAME)
+
+    if fail_method_frame:
         try:
-            process_message(body.decode(), notification_queue)
+            process_message(fail_body.decode(), notification_queue)
             logger.info(
-                "Processed previous failed message: %s Acking message %ss", body.decode(), method_frame.delivery_tag
+                "Processed previous failed message: %s Acking message %s",
+                fail_body.decode(),
+                fail_method_frame.delivery_tag,
             )
-            failure_channel.basic_ack(method_frame.delivery_tag)
-        except AttributeError:  # If the message frame or body is missing attributes required e.g. the delivery tag
-            pass
+            failure_channel.basic_ack(fail_method_frame.delivery_tag)
         except InterruptedError:
-            logger.info("Process interupted, nacking message %s", method_frame.delivery_tag)
-            failure_channel.basic_nack(method_frame.delivery_tag)
+            logger.info("Process interrupted, nacking message %s", fail_method_frame.delivery_tag)
+            failure_channel.basic_nack(fail_method_frame.delivery_tag)
             raise
         except Exception as exc:
-            # Messages on this queue have already failed for unexpected reasons, so we can expect a broad range of
-            # exceptions.
-            logger.info("Problem processing failure message: %s", body.decode())
+            logger.info("Problem processing failure message: %s", fail_body.decode() if fail_body else "None")
             logger.exception("Exception was", exc_info=exc)
             logger.info("Putting back onto failure queue and acking")
-            failure_queue.put(body.decode())
-            failure_channel.basic_ack(method_frame.delivery_tag)
-
-        break
+            if fail_body:
+                failure_queue.put(fail_body.decode())
+            failure_channel.basic_ack(fail_method_frame.delivery_tag)
 
 
 def process_notifications(notification_queue: SimpleQueue[JobRequest]) -> None:
