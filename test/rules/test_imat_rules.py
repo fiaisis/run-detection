@@ -9,7 +9,7 @@ import pytest
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
-from rundetection.rules.imat_rules import IMATFindImagesRule
+from rundetection.rules.imat_rules import IMATFindImagesRule, find_correct_tomo_dir
 
 EXPECTED_ADDITIONAL_VALUES_LEN = 4
 RUN_NUMBER = 100
@@ -23,7 +23,7 @@ def job_request():
     """
     return JobRequest(
         run_number=100,
-        filepath=Path("/imat/MERLIN100.nxs"),
+        filepath=Path("/imat/IMAT100.nxs"),
         experiment_title="Test experiment",
         additional_values={},
         additional_requests=[],
@@ -32,34 +32,9 @@ def job_request():
         users="",
         run_start="",
         run_end="",
-        instrument="MERLIN",
+        instrument="IMAT",
         experiment_number="12345",
     )
-
-
-def test_delete_me(job_request):
-    """Test imat rules can find images successfully"""
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        # Setup
-        os.environ["IMAT_DIR"] = tmpdirname
-        run_number = 36779
-        job_request.run_number = run_number
-        job_request.experiment_number = "2322026"
-        # Create required structure: a file with run number and a Tomo dir
-        exp_dir = Path(tmpdirname).joinpath("RB2322026")
-        exp_dir.mkdir(parents=True, exist_ok=True)
-        exp_dir.joinpath("run36779.csv").touch()
-        tomo_dir = exp_dir.joinpath("Tomo")
-        tomo_dir.mkdir()
-
-        # Test
-        rule = IMATFindImagesRule(True)
-        rule.verify(job_request)
-
-        # Assertions
-        assert len(job_request.additional_values) == EXPECTED_ADDITIONAL_VALUES_LEN
-        assert job_request.additional_values["images_dir"] == str(tomo_dir)
-        assert job_request.additional_values["runno"] == run_number
 
 
 def test_imat_find_images_success(job_request):
@@ -133,7 +108,7 @@ def test_imat_find_images_missing_tomo(job_request):
     with tempfile.TemporaryDirectory() as tmpdirname:
         # Setup
         os.environ["IMAT_DIR"] = tmpdirname
-        os.environ["NGEM_DIR"] = tmpdirname  # Also set this to avoid loading nexus
+        os.environ["IMAT_NGEM_DIR"] = tmpdirname  # Also set this to avoid loading nexus
         exp_dir = Path(tmpdirname).joinpath("RB12345")
         exp_dir.mkdir(parents=True, exist_ok=True)
         exp_dir.joinpath("run100.csv").touch()
@@ -151,7 +126,7 @@ def test_imat_find_images_missing_run_file(job_request):
     with tempfile.TemporaryDirectory() as tmpdirname:
         # Setup
         os.environ["IMAT_DIR"] = tmpdirname
-        os.environ["NGEM_DIR"] = tmpdirname
+        os.environ["IMAT_NGEM_DIR"] = tmpdirname
         exp_dir = Path(tmpdirname).joinpath("RB12345")
         exp_dir.mkdir(parents=True, exist_ok=True)
         exp_dir.joinpath("Tomo").mkdir()
@@ -169,7 +144,7 @@ def test_imat_find_images_failure(job_request):
     with tempfile.TemporaryDirectory() as tmpdirname:
         # Setup
         os.environ["IMAT_DIR"] = tmpdirname
-        os.environ["NGEM_DIR"] = tmpdirname
+        os.environ["IMAT_NGEM_DIR"] = tmpdirname
 
         # Test
         rule = IMATFindImagesRule(True)
@@ -187,7 +162,7 @@ def test_imat_find_images_ngem_success(job_request):
     with tempfile.TemporaryDirectory() as tmpdirname:
         # Setup
         os.environ["IMAT_DIR"] = tmpdirname
-        os.environ["NGEM_DIR"] = tmpdirname
+        os.environ["IMAT_NGEM_DIR"] = tmpdirname
 
         # Cycle information
         cycle_year = "26"
@@ -211,6 +186,7 @@ def test_imat_find_images_ngem_success(job_request):
         assert job_request.additional_values["ngem_path"] == str(possible_path)
         expected_output_path = str(ngem_data_dir) + "_nxs/RUN"
         assert job_request.additional_values["ngem_output_path"] == expected_output_path
+        assert job_request.additional_values["runno"] == RUN_NUMBER
 
 
 def test_imat_find_images_nested_success(job_request):
@@ -234,3 +210,20 @@ def test_imat_find_images_nested_success(job_request):
         # Assertions
         assert job_request.additional_values["images_dir"] == str(tomo_dir)
         assert job_request.additional_values["runno"] == RUN_NUMBER
+
+
+def test_find_correct_tomo_dir_relative_path(monkeypatch):
+    """Test find_correct_tomo_dir handles relative paths correctly"""
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        monkeypatch.chdir(tmpdirname)
+        rel_path = Path("RB12345")
+        rel_path.mkdir()
+        (rel_path / "run100.csv").touch()
+        tomo_dir = rel_path / "Tomo"
+        tomo_dir.mkdir()
+
+        result = find_correct_tomo_dir(rel_path, "100")
+        assert result is not None
+        assert result == tomo_dir
+        assert result.exists()
+

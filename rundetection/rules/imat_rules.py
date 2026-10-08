@@ -1,4 +1,4 @@
-"""Rules for Iris."""
+"""Rules for IMAT."""
 
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ def find_correct_tomo_dir(path: Path, run_number: str) -> Path | None:
                 file_found = True
         if child.is_dir() and child.name == "Tomo":
             # Found a potential Tomo dir
-            tomo = path / child
+            tomo = child
             if file_found:
                 # Tomo and file found, now return
                 return tomo
@@ -103,16 +103,17 @@ class IMATFindImagesRule(Rule[bool]):
             cycle_year, cycle_num = cycle_str.split("_")
 
             # Check if the correct dir exists in the nGEM dir for IMAT.
-            exp_dir_path = Path(ngem_dir) / "DATA" / f"IMAT_20{cycle_year}_0{cycle_num}"
-            if exp_dir_path.exists():
-                possible_path = exp_dir_path / f"IMAT{job_request.run_number:08d}"
+            ngem_cycle_dir = Path(ngem_dir) / "DATA" / f"IMAT_20{cycle_year}_0{cycle_num}"
+            if ngem_cycle_dir.exists():
+                possible_path = ngem_cycle_dir / f"IMAT{job_request.run_number:08d}"
                 if possible_path.exists() and possible_path.is_dir():
                     # We found it
                     job_request.additional_values["recon"] = "false"
                     job_request.additional_values["ngem"] = "true"
                     job_request.additional_values["ngem_path"] = str(possible_path)
-                    output_path = Path(str(exp_dir_path) + "_nxs") / "RUN"
+                    output_path = ngem_cycle_dir.parent / f"{ngem_cycle_dir.name}_nxs" / "RUN"
                     job_request.additional_values["ngem_output_path"] = str(output_path)
+                    job_request.additional_values["runno"] = job_request.run_number
 
         if "ngem" not in job_request.additional_values and "recon" not in job_request.additional_values:
             # We did not find either an IMAT or nGEM detector run.
@@ -120,5 +121,5 @@ class IMATFindImagesRule(Rule[bool]):
                 "Images dir and nGEM run could not be found for experiment number: %s", job_request.experiment_number
             )
             raise RuleViolationError(
-                "Images dir and nGEM run could not be found for experiment number: %s", job_request.experiment_number
+                f"Images dir and nGEM run could not be found for experiment number: {job_request.experiment_number}"
             )
