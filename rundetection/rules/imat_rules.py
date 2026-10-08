@@ -1,4 +1,4 @@
-"""Rules for Iris."""
+"""Rules for IMAT."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import typing
 from pathlib import Path
 
 from rundetection.exceptions import RuleViolationError
+from rundetection.ingestion.ingest import load_h5py_dataset
 from rundetection.rules.rule import Rule
 
 if typing.TYPE_CHECKING:
@@ -35,6 +36,8 @@ def find_correct_tomo_dir(path: Path, run_number: str) -> Path | None:
                     return root.parent
                 if possible_tomo.exists():
                     return possible_tomo
+                if (root / "Tomo").exists():
+                    return root / "Tomo"
     return None
 
 
@@ -58,10 +61,38 @@ class IMATFindImagesRule(Rule[bool]):
             imat_dir_path = find_correct_tomo_dir(exp_dir_path, str(job_request.run_number))
 
         if imat_dir_path is not None and imat_dir_path.exists():
+            job_request.additional_values["recon"] = "true"
+            job_request.additional_values["ngem"] = "false"
             job_request.additional_values["images_dir"] = str(imat_dir_path)
             job_request.additional_values["runno"] = job_request.run_number
         else:
-            logger.error("Images dir could not be found for experiment number: %s", job_request.experiment_number)
+            # Given there are no Images, let's check for an nGEM run.
+            # INES is temporary here and should be adjustable via env vars. Current technical limitation forces IMAT
+            # data here.
+            ngem_dir = os.environ.get("IMAT_NGEM_DIR", "/ngem/nGEM-INES")
+
+            # Grab the cycle from the .nxs file from the path /raw_data_1/run_cycle value in the form 26_1
+            cycle_str = load_h5py_dataset(job_request.filepath).get("run_cycle")[0].decode("utf-8")
+            cycle_year, cycle_num = cycle_str.split("_")
+
+            # Check if the correct dir exists in the nGEM dir for IMAT.
+            ngem_cycle_dir = Path(ngem_dir) / "DATA" / f"IMAT_20{cycle_year}_0{cycle_num}"
+            if ngem_cycle_dir.exists():
+                possible_path = ngem_cycle_dir / f"IMAT{job_request.run_number:08d}"
+                if possible_path.exists() and possible_path.is_dir():
+                    # We found it
+                    job_request.additional_values["recon"] = "false"
+                    job_request.additional_values["ngem"] = "true"
+                    job_request.additional_values["ngem_path"] = str(possible_path)
+                    output_path = ngem_cycle_dir.parent / f"{ngem_cycle_dir.name}_nxs" / "RUN"
+                    job_request.additional_values["ngem_output_path"] = str(output_path)
+                    job_request.additional_values["runno"] = job_request.run_number
+
+        if "ngem" not in job_request.additional_values and "recon" not in job_request.additional_values:
+            # We did not find either an IMAT or nGEM detector run.
+            logger.error(
+                "Images dir and nGEM run could not be found for experiment number: %s", job_request.experiment_number
+            )
             raise RuleViolationError(
-                "Images dir could not be found for experiment number: %s", job_request.experiment_number
+                f"Images dir and nGEM run could not be found for experiment number: {job_request.experiment_number}"
             )
