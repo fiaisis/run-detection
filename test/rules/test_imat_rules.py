@@ -226,4 +226,3 @@ def test_find_correct_tomo_dir_relative_path(monkeypatch):
         assert result is not None
         assert result == tomo_dir
         assert result.exists()
-
