@@ -257,6 +257,18 @@ def enginx_extract(job_request: JobRequest, _: Any) -> JobRequest:
     return job_request
 
 
+def gem_extract(job_request: JobRequest, _: Any) -> JobRequest:
+    """
+    Extract additional metadata specific to the GEM instrument.
+    :param job_request: JobRequest instance for which to extract additional metadata
+    :param _: Unused parameter
+    :return: JobRequest instance with updated additional metadata
+    """
+    job_request.additional_values["runno"] = job_request.run_number
+    job_request.additional_values["cycle"] = get_cycle_string_from_path(job_request.filepath)
+    return job_request
+
+
 def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobRequest]:  # noqa: PLR0911
     """
     Given an instrument name, return the additional metadata extraction function for the instrument.
@@ -281,6 +293,8 @@ def get_extraction_function(instrument: str) -> Callable[[JobRequest, Any], JobR
             return vesuvio_extract
         case "enginx":
             return enginx_extract
+        case "gem":
+            return gem_extract
         case _:
             return skip_extract
 

@@ -107,15 +107,15 @@ def test_process_messages_success_acks(mock_process):
     failure_channel = MagicMock()
     method_frame = MagicMock()
     body = b"message_body"
-    channel.consume.return_value = [(method_frame, None, body)]
-    failure_channel.consume.return_value = []
+    channel.basic_get.return_value = (method_frame, None, body)
+    failure_channel.basic_get.return_value = (None, None, None)
 
     notification_queue = Mock()
     failure_queue = SimpleQueue()
 
     process_messages(channel, failure_channel, notification_queue, failure_queue)
 
-    channel.consume.assert_called_once()
+    channel.basic_get.assert_called_once()
     mock_process.assert_any_call(body.decode(), notification_queue)
     channel.basic_ack.assert_called_once_with(method_frame.delivery_tag)
 
@@ -127,15 +127,17 @@ def test_process_messages_generic_exception_puts_on_failure_queue_and_acks(mock_
     failure_channel = MagicMock()
     method_frame = MagicMock()
     body = b"message_body"
-    channel.consume.return_value = [(method_frame, None, body)]
-    failure_channel.consume.return_value = []
+
+    channel.basic_get.return_value = (method_frame, None, body)
+    failure_channel.basic_get.return_value = (None, None, None)
+
     notification_queue = SimpleQueue()
     failure_queue = SimpleQueue()
     mock_process.side_effect = RuntimeError
 
     process_messages(channel, failure_channel, notification_queue, failure_queue)
 
-    channel.consume.assert_called_once()
+    channel.basic_get.assert_called_once()
     mock_process.assert_any_call(body.decode(), notification_queue)
     channel.basic_ack.assert_called_once_with(method_frame.delivery_tag)
     # Failure message put on failure queue
@@ -145,14 +147,16 @@ def test_process_messages_generic_exception_puts_on_failure_queue_and_acks(mock_
 
 @patch("rundetection.run_detection.process_message")
 def test_process_messages_interruptederror_nacks_and_raises(mock_process):
-    """On InterruptedError, nack on failure_channel and re-raise to break the main loop."""
+    """On InterruptedError, nack on the ingress channel and re-raise to break the main loop."""
     channel = MagicMock()
     failure_channel = MagicMock()
     method_frame = MagicMock()
     method_frame.delivery_tag = "tag1"
     body = b"message_body"
-    channel.consume.return_value = [(method_frame, None, body)]
-    failure_channel.consume.return_value = []
+
+    channel.basic_get.return_value = (method_frame, None, body)
+    failure_channel.basic_get.return_value = (None, None, None)
+
     notification_queue = SimpleQueue()
     failure_queue = SimpleQueue()
     mock_process.side_effect = InterruptedError
@@ -160,7 +164,7 @@ def test_process_messages_interruptederror_nacks_and_raises(mock_process):
     with pytest.raises(InterruptedError):
         process_messages(channel, failure_channel, notification_queue, failure_queue)
 
-    failure_channel.basic_nack.assert_called_once_with(method_frame.delivery_tag)
+    channel.basic_nack.assert_called_once_with(method_frame.delivery_tag)
     channel.basic_ack.assert_not_called()
 
 
@@ -171,34 +175,39 @@ def test_process_messages_raises_metadataerror_still_acks(mock_process):
     failure_channel = MagicMock()
     method_frame = MagicMock()
     body = b"message_body"
-    channel.consume.return_value = [(method_frame, None, body)]
-    failure_channel.consume.return_value = []
+
+    channel.basic_get.return_value = (method_frame, None, body)
+    failure_channel.basic_get.return_value = (None, None, None)
+
     notification_queue = SimpleQueue()
     failure_queue = SimpleQueue()
     mock_process.side_effect = ReductionMetadataError
 
     process_messages(channel, failure_channel, notification_queue, failure_queue)
 
-    channel.consume.assert_called_once()
+    channel.basic_get.assert_called_once()
     mock_process.assert_any_call(body.decode(), notification_queue)
     channel.basic_ack.assert_called_once_with(method_frame.delivery_tag)
 
 
-def test_process_messages_does_not_ack_attribute_error():
-    """Test messages are not acked after AttributeError in processing (e.g., no message consumed)."""
+def test_process_messages_empty_queues_do_nothing():
+    """Test empty queues do not result in any acks/nacks or errors."""
     channel = MagicMock()
     failure_channel = MagicMock()
-    channel.consume.return_value = [(None, None, None)]
-    failure_channel.consume.return_value = []
+
+    channel.basic_get.return_value = (None, None, None)
+    failure_channel.basic_get.return_value = (None, None, None)
 
     notification_queue = Mock()
     failure_queue = SimpleQueue()
 
-    with patch("rundetection.run_detection.process_message"):
+    with patch("rundetection.run_detection.process_message") as mock_process:
         process_messages(channel, failure_channel, notification_queue, failure_queue)
 
-    channel.consume.assert_called_once()
+    channel.basic_get.assert_called_once()
+    failure_channel.basic_get.assert_called_once()
     channel.basic_ack.assert_not_called()
+    mock_process.assert_not_called()
 
 
 @patch("rundetection.run_detection.producer")
@@ -372,12 +381,13 @@ def test_process_messages_failure_channel_success_acks(mock_process):
     """When a message is on the failure channel and processes successfully, it should ack on the failure_channel."""
     channel = MagicMock()
     failure_channel = MagicMock()
+
     # No messages on ingress this run
-    channel.consume.return_value = []
+    channel.basic_get.return_value = (None, None, None)
 
     method_frame = MagicMock()
     body = b"failed_body"
-    failure_channel.consume.return_value = [(method_frame, None, body)]
+    failure_channel.basic_get.return_value = (method_frame, None, body)
 
     notification_queue = SimpleQueue()
     failure_queue = SimpleQueue()
@@ -393,12 +403,12 @@ def test_process_messages_failure_channel_interruptederror_nacks_and_raises(mock
     """Test interuptions will nack the current message and raise to break the main loop."""
     channel = MagicMock()
     failure_channel = MagicMock()
-    channel.consume.return_value = []
+    channel.basic_get.return_value = (None, None, None)
 
     method_frame = MagicMock()
     method_frame.delivery_tag = "f1"
     body = b"failed_body"
-    failure_channel.consume.return_value = [(method_frame, None, body)]
+    failure_channel.basic_get.return_value = (method_frame, None, body)
 
     notification_queue = SimpleQueue()
     failure_queue = SimpleQueue()
@@ -416,10 +426,11 @@ def test_process_messages_failure_channel_exception_requeues_and_acks(mock_proce
     """Test a message on the failure channel is requeded to the bottom of the failure queue and acked."""
     channel = MagicMock()
     failure_channel = MagicMock()
-    channel.consume.return_value = []
+    channel.basic_get.return_value = (None, None, None)
+
     method_frame = MagicMock()
     body = b"failed_body"
-    failure_channel.consume.return_value = [(method_frame, None, body)]
+    failure_channel.basic_get.return_value = (method_frame, None, body)
 
     notification_queue = SimpleQueue()
     failure_queue = SimpleQueue()

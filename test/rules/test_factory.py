@@ -15,6 +15,15 @@ from rundetection.rules.enginx_rules import (
     EnginxVanadiumPathRule,
 )
 from rundetection.rules.factory import rule_factory
+from rundetection.rules.gem_rules import (
+    GEMDoAbsorbCorrectionsRule,
+    GEMInputModeRule,
+    GEMModeRule,
+    GEMMultipleScatteringRule,
+    GEMOffsetFileRule,
+    GEMRietveldPDFVanEmptyRule,
+    GEMVanNormRule,
+)
 from rundetection.rules.imat_rules import IMATFindImagesRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
@@ -83,6 +92,20 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("enginxceriarun", 34567, EnginxCeriaPathRule),
         ("enginxgroup", "north", EnginxGroupRule),
         ("imatfindimages", True, IMATFindImagesRule),
+        ("gemmode", "PDF", GEMModeRule),
+        ("geminputmode", "Summed", GEMInputModeRule),
+        ("gemvannorm", True, GEMVanNormRule),
+        ("gemdoabsorbcorrections", True, GEMDoAbsorbCorrectionsRule),
+        ("gemmultiplescattering", True, GEMMultipleScatteringRule),
+        ("gemoffsetfile", "offsets_2023_cycle231.cal", GEMOffsetFileRule),
+        (
+            "gemrietveldpdfvanempty",
+            {
+                "rietveld": {"vanadium_run_numbers": 100, "empty_run_numbers": 200},
+                "pdf": {"vanadium_run_numbers": 300, "empty_run_numbers": 400},
+            },
+            GEMRietveldPDFVanEmptyRule,
+        ),
     ],
 )
 def test_rule_factory_returns_correct_rule(rule_key, rule_value, expected_rule):
