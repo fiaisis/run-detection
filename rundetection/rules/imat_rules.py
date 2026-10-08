@@ -66,7 +66,7 @@ class IMATFindImagesRule(Rule[bool]):
             job_request.additional_values["images_dir"] = str(imat_dir_path)
             job_request.additional_values["runno"] = job_request.run_number
         else:
-            # Given there is no Images, let's check for an nGEM run.
+            # Given there are no Images, let's check for an nGEM run.
             # INES is temporary here and should be adjustable via env vars. Current technical limitation forces IMAT
             # data here.
             ngem_dir = os.environ.get("IMAT_NGEM_DIR", "/ngem/nGEM-INES")
