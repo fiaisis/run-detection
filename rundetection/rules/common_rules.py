@@ -16,6 +16,33 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def check_default_rules():
+    list_of_rules = [GoodFramesRule]
+    for rule in list_of_rules:
+        rule.verify(job_request)
+        if not job_request.will_reduce:
+            break
+ 
+ 
+class EnabledRule(Rule[bool]):
+    """
+    Rule for the enabled setting in specifications.
+ 
+    If enabled is True, the run will be reduced, if not,
+    it will be skipped.
+    """
+ 
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+ 
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.will_reduce = self._value
+        check_default_rules()
+
+
 class EnabledRule(Rule[bool]):
     """
     Rule for the enabled setting in specifications.
@@ -32,6 +59,23 @@ class EnabledRule(Rule[bool]):
         :return: None.
         """
         job_request.will_reduce = self._value
+
+
+class GoodFramesRule(Rule[bool]):
+    """Rule to check if the run has any good frames."""
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        if not self._value:
+            return
+        if job_request.additional_values["good_frames"] == 0:
+            logger.info("Run %s has no good frames, skipping", job_request.run_number)
+            job_request.will_reduce = False
 
 
 class MolSpecStitchRule(Rule[bool]):
