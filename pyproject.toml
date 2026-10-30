@@ -19,7 +19,7 @@ run-detection = "rundetection.run_detection:main"
 
 [project.optional-dependencies]
 formatting = [
-    "ruff==0.17.1",
+    "ruff==0.17.2",
     "mypy==2.4.0",
     "run-detection[test]",
     "types-requests==2.33.0.20261006",
@@ -31,7 +31,7 @@ test = [
     "pytest-cov==7.1.0",
     "requests==2.34.2",
     "pytest-random-order==1.2.0",
-    "fastapi[all]==0.151.0",
+    "fastapi[all]==0.161.1",
     "pydantic==2.14.1",
 ]
 
