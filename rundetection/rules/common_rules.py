@@ -20,7 +20,7 @@ def check_default_rules(job_request: JobRequest) -> None:
     """Check that default rules all pass."""
     list_of_rules = [GoodFramesRule]
     for rule in list_of_rules:
-        rule.verify(job_request)
+        rule.verify(job_request=job_request)
         if not job_request.will_reduce:
             break
 
