@@ -23,20 +23,20 @@ def check_default_rules(job_request: JobRequest) -> None:
         rule.verify(job_request)
         if not job_request.will_reduce:
             break
- 
- 
+
+
 class EnabledRule(Rule[bool]):
     """
     Rule for the enabled setting in specifications.
- 
+
     If enabled is True, the run will be reduced, if not,
     it will be skipped.
     """
- 
+
     def verify(self, job_request: JobRequest) -> None:
         """
         Verify the rule against the job request.
- 
+
         :param job_request: The job request to verify.
         :return: None.
         """
