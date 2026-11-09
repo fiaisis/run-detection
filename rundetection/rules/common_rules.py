@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def check_default_rules():
+def check_default_rules(job_request: JobRequest) -> None:
     list_of_rules = [GoodFramesRule]
     for rule in list_of_rules:
         rule.verify(job_request)
@@ -40,25 +40,7 @@ class EnabledRule(Rule[bool]):
         :return: None.
         """
         job_request.will_reduce = self._value
-        check_default_rules()
-
-
-class EnabledRule(Rule[bool]):
-    """
-    Rule for the enabled setting in specifications.
-
-    If enabled is True, the run will be reduced, if not,
-    it will be skipped.
-    """
-
-    def verify(self, job_request: JobRequest) -> None:
-        """
-        Verify the rule against the job request.
-
-        :param job_request: The job request to verify.
-        :return: None.
-        """
-        job_request.will_reduce = self._value
+        check_default_rules(job_request)
 
 
 class GoodFramesRule(Rule[bool]):
