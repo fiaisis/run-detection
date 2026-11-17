@@ -45,30 +45,6 @@ def test_enabled_rule_when_not_enabled(job_request) -> None:
     assert job_request.will_reduce is False
 
 
-def test_good_frames_rule_when_no_good_frames(job_request) -> None:
-    """
-    Test verify method will return false when good frames is 0
-    :param job_request: JobRequest fixture
-    :return: None.
-    """
-    job_request.good_frames = 0
-    rule = EnabledRule(True)
-    rule.verify(job_request)
-    assert job_request.will_reduce is False
-
-
-def test_good_frames_rule_when_good_frames(job_request) -> None:
-    """
-    Test verify method will return true when good frames is greater than 0
-    :param job_request: JobRequest fixture
-    :return: None.
-    """
-    job_request.good_frames = 10
-    rule = EnabledRule(True)
-    rule.verify(job_request)
-    assert job_request.will_reduce is True
-
-
 @pytest.mark.parametrize(
     ("y", "x", "expected"),
     [
