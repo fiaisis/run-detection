@@ -54,8 +54,6 @@ class GoodFramesRule(Rule[bool]):
         :param job_request: The job request to verify.
         :return: None.
         """
-        if not self._value:
-            return
         if job_request.good_frames == 0:
             logger.info("Run %s has no good frames, skipping", job_request.run_number)
             job_request.will_reduce = False
