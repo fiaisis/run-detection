@@ -122,7 +122,7 @@ TEST_DATA_PATH = Path("../test_data") if Path("../test_data").exists() else Path
             ),
         ),
     ],
-    ids=["ENGINX00241391.nxs", "IMAT00004217.nxs", "ALF82301.nxs", "MARI25581.nxs"],
+    ids=["ENGINX00241391.nxs", "IMAT00004217.nxs", "ALF82301.nxs", "MARI25581.nxs", "MARI25586.nxs"],
 )
 def test_ingest(pair) -> None:
     """
