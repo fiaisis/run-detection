@@ -84,7 +84,9 @@ class IMATFindImagesRule(Rule[bool]):
                     job_request.additional_values["recon"] = "false"
                     job_request.additional_values["ngem"] = "true"
                     job_request.additional_values["ngem_path"] = str(possible_path)
-                    output_path = ngem_cycle_dir.parent / f"{ngem_cycle_dir.name}_nxs" / "RUN"
+                    # Reduced runs go in the folder alongside the raw cycle folder, which shortens the year
+                    # and drops the cycle padding, e.g. IMAT_2026_01 -> IMAT_26_1_nxs.
+                    output_path = ngem_cycle_dir.parent / f"IMAT_{cycle_year}_{cycle_num}_nxs"
                     job_request.additional_values["ngem_output_path"] = str(output_path)
                     job_request.additional_values["runno"] = job_request.run_number
 
