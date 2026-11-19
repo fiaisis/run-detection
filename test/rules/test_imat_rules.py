@@ -193,7 +193,7 @@ def test_imat_find_images_ngem_success(job_request):
         assert job_request.additional_values["recon"] == "false"
         assert job_request.additional_values["ngem"] == "true"
         assert job_request.additional_values["ngem_path"] == str(possible_path)
-        expected_output_path = str(ngem_data_dir) + "_nxs/RUN"
+        expected_output_path = str(Path(tmpdirname) / "DATA" / f"IMAT_{cycle_year}_{cycle_num}_nxs")
         assert job_request.additional_values["ngem_output_path"] == expected_output_path
         assert job_request.additional_values["runno"] == RUN_NUMBER
 
