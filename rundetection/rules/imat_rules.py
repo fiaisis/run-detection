@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import logging
+import math
 import os
 import typing
 from pathlib import Path
+from typing import Any
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import load_h5py_dataset
@@ -15,6 +17,31 @@ if typing.TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
+
+# The nGEM reduction parameters the script expects, in the order they are written into the job request.
+NGEM_TOF_KEYS = ("start_tof", "end_tof", "bin_width", "L")
+
+
+def _as_number(key: str, value: Any) -> int | float:
+    """
+    Return the specification value as the number the reduction script needs.
+
+    The value editor of the frontend saves specification numbers back as strings, so a numeric string is
+    accepted here and whole numbers are returned as ints to keep the script readable.
+
+    :param key: The name of the value, used for the error message of a value that is not a number.
+    :param value: The value from the specification.
+    :return: The value as an int when whole, otherwise as a float.
+    """
+    if isinstance(value, bool):
+        raise RuleViolationError(f"IMAT nGEM specification value for {key} must be a number, got {value!r}")
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as error:
+        raise RuleViolationError(f"IMAT nGEM specification value for {key} must be a number, got {value!r}") from error
+    if not math.isfinite(number):
+        raise RuleViolationError(f"IMAT nGEM specification value for {key} must be a finite number, got {value!r}")
+    return int(number) if number.is_integer() else number
 
 
 def find_correct_tomo_dir(path: Path, run_number: str) -> Path | None:
@@ -98,3 +125,27 @@ class IMATFindImagesRule(Rule[bool]):
             raise RuleViolationError(
                 f"Images dir and nGEM run could not be found for experiment number: {job_request.experiment_number}"
             )
+
+
+class IMATNgemToFRule(Rule[dict[str, Any]]):
+    """
+    Set the nGEM detector reduction parameters from the instrument specification.
+
+    These are the time of flight window, the bin width and the moderator to detector distance the script
+    would otherwise ship hard coded values for. The values are passed straight through so the FIA API
+    transform can write them into the script, and only the nGEM branch of the reduction reads them.
+    """
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Copies each reduction parameter of the specification into the additional values of the job request.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        for key in NGEM_TOF_KEYS:
+            if key not in self._value:
+                raise RuleViolationError(f"IMAT nGEM specification is missing the value for {key}")
+            job_request.additional_values[key] = _as_number(key, self._value[key])
