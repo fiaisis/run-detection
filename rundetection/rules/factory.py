@@ -20,7 +20,7 @@ from rundetection.rules.gem_rules import (
     GEMRietveldPDFVanEmptyRule,
     GEMVanNormRule,
 )
-from rundetection.rules.imat_rules import IMATFindImagesRule
+from rundetection.rules.imat_rules import IMATFindImagesRule, IMATNgemToFRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
@@ -133,6 +133,9 @@ def rule_factory[T](key_: str, value: T) -> Rule[Any]:  # noqa: C901, PLR0911, P
         case "imatfindimages":
             if isinstance(value, bool):
                 return IMATFindImagesRule(value)
+        case "imatngemtof":
+            if isinstance(value, dict):
+                return IMATNgemToFRule(value)
         case "gemmode":
             if isinstance(value, str):
                 return GEMModeRule(value)

@@ -1,1 +1,5 @@
-{"enabled": true, "imatfindimages": true}
+{
+  "enabled": true,
+  "imatfindimages": true,
+  "imatngemtof": {"start_tof": 20000, "end_tof": 85000, "bin_width": 10, "L": 56.4}
+}

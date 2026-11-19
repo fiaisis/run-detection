@@ -6,6 +6,7 @@ import logging
 import os
 import typing
 from pathlib import Path
+from typing import Any
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.ingestion.ingest import load_h5py_dataset
@@ -98,3 +99,29 @@ class IMATFindImagesRule(Rule[bool]):
             raise RuleViolationError(
                 f"Images dir and nGEM run could not be found for experiment number: {job_request.experiment_number}"
             )
+
+
+class IMATNgemToFRule(Rule[dict[str, Any]]):
+    """
+    Set the nGEM detector reduction parameters from the instrument specification.
+
+    These are the time of flight window, the bin width and the moderator to detector distance the script
+    would otherwise ship hard coded values for. The values are passed straight through so the FIA API
+    transform can write them into the script, and only the nGEM branch of the reduction reads them.
+    """
+
+    def verify(self, job_request: JobRequest) -> None:
+        """
+        Verify the rule against the job request.
+
+        Copies each reduction parameter of the specification into the additional values of the job request.
+        They are cast here because the value editor of the frontend saves specification numbers back as
+        strings, and a bad value fails the run rather than reaching the script.
+
+        :param job_request: The job request to verify.
+        :return: None.
+        """
+        job_request.additional_values["start_tof"] = int(self._value["start_tof"])
+        job_request.additional_values["end_tof"] = int(self._value["end_tof"])
+        job_request.additional_values["bin_width"] = int(self._value["bin_width"])
+        job_request.additional_values["L"] = float(self._value["L"])
