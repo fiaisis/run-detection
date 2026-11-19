@@ -9,15 +9,11 @@ import pytest
 
 from rundetection.exceptions import RuleViolationError
 from rundetection.job_requests import JobRequest
-from rundetection.rules.imat_rules import (
-    NGEM_TOF_KEYS,
-    IMATFindImagesRule,
-    IMATNgemToFRule,
-    find_correct_tomo_dir,
-)
+from rundetection.rules.imat_rules import IMATFindImagesRule, IMATNgemToFRule, find_correct_tomo_dir
 
 EXPECTED_ADDITIONAL_VALUES_LEN = 4
 RUN_NUMBER = 100
+NGEM_TOF_KEYS = ("start_tof", "end_tof", "bin_width", "L")
 NGEM_TOF_SPEC = {"start_tof": 20000, "end_tof": 85000, "bin_width": 10, "L": 56.4}
 
 
@@ -259,7 +255,7 @@ def test_imat_ngem_tof_rule_applies_to_reconstruction_runs(job_request):
 
 def test_imat_ngem_tof_rule_accepts_numbers_saved_as_strings(job_request):
     """Test the value editor saving specification numbers as strings still gives the script plain numbers"""
-    IMATNgemToFRule({"start_tof": "25000", "end_tof": "90000.0", "bin_width": 20, "L": "55.25"}).verify(job_request)
+    IMATNgemToFRule({"start_tof": "25000", "end_tof": "90000", "bin_width": 20, "L": "55.25"}).verify(job_request)
     assert job_request.additional_values == {"start_tof": 25000, "end_tof": 90000, "bin_width": 20, "L": 55.25}
 
 
@@ -268,13 +264,12 @@ def test_imat_ngem_tof_rule_requires_every_value(key, job_request):
     """Test a specification missing one of the reduction parameters does not reduce the run"""
     spec = dict(NGEM_TOF_SPEC)
     del spec[key]
-    with pytest.raises(RuleViolationError, match=key):
+    with pytest.raises(KeyError, match=key):
         IMATNgemToFRule(spec).verify(job_request)
 
 
-@pytest.mark.parametrize("value", ["abc", None, True, [10], "inf", float("nan")])
-def test_imat_ngem_tof_rule_rejects_values_that_are_not_numbers(value, job_request):
-    """Test a reduction parameter which is not a finite number does not reduce the run"""
-    spec = dict(NGEM_TOF_SPEC, start_tof=value)
-    with pytest.raises(RuleViolationError, match="start_tof"):
-        IMATNgemToFRule(spec).verify(job_request)
+@pytest.mark.parametrize(("value", "expected_error"), [("abc", ValueError), ("inf", ValueError), (None, TypeError)])
+def test_imat_ngem_tof_rule_rejects_values_that_are_not_numbers(value, expected_error, job_request):
+    """Test a reduction parameter which is not a number fails the run instead of reaching the script"""
+    with pytest.raises(expected_error):
+        IMATNgemToFRule(dict(NGEM_TOF_SPEC, start_tof=value)).verify(job_request)

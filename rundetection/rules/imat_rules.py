@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import math
 import os
 import typing
 from pathlib import Path
@@ -17,31 +16,6 @@ if typing.TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
-
-# The nGEM reduction parameters the script expects, in the order they are written into the job request.
-NGEM_TOF_KEYS = ("start_tof", "end_tof", "bin_width", "L")
-
-
-def _as_number(key: str, value: Any) -> int | float:
-    """
-    Return the specification value as the number the reduction script needs.
-
-    The value editor of the frontend saves specification numbers back as strings, so a numeric string is
-    accepted here and whole numbers are returned as ints to keep the script readable.
-
-    :param key: The name of the value, used for the error message of a value that is not a number.
-    :param value: The value from the specification.
-    :return: The value as an int when whole, otherwise as a float.
-    """
-    if isinstance(value, bool):
-        raise RuleViolationError(f"IMAT nGEM specification value for {key} must be a number, got {value!r}")
-    try:
-        number = float(value)
-    except (TypeError, ValueError) as error:
-        raise RuleViolationError(f"IMAT nGEM specification value for {key} must be a number, got {value!r}") from error
-    if not math.isfinite(number):
-        raise RuleViolationError(f"IMAT nGEM specification value for {key} must be a finite number, got {value!r}")
-    return int(number) if number.is_integer() else number
 
 
 def find_correct_tomo_dir(path: Path, run_number: str) -> Path | None:
@@ -141,11 +115,13 @@ class IMATNgemToFRule(Rule[dict[str, Any]]):
         Verify the rule against the job request.
 
         Copies each reduction parameter of the specification into the additional values of the job request.
+        They are cast here because the value editor of the frontend saves specification numbers back as
+        strings, and a bad value fails the run rather than reaching the script.
 
         :param job_request: The job request to verify.
         :return: None.
         """
-        for key in NGEM_TOF_KEYS:
-            if key not in self._value:
-                raise RuleViolationError(f"IMAT nGEM specification is missing the value for {key}")
-            job_request.additional_values[key] = _as_number(key, self._value[key])
+        job_request.additional_values["start_tof"] = int(self._value["start_tof"])
+        job_request.additional_values["end_tof"] = int(self._value["end_tof"])
+        job_request.additional_values["bin_width"] = int(self._value["bin_width"])
+        job_request.additional_values["L"] = float(self._value["L"])
