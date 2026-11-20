@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Self
 
 import xmltodict
 
+from rundetection.cache import cache_get_json, cache_set_json
 from rundetection.exceptions import RuleViolationError
 from rundetection.rules.rule import Rule
 
@@ -19,6 +20,23 @@ if TYPE_CHECKING:
     from rundetection.job_requests import JobRequest
 
 logger = logging.getLogger(__name__)
+
+ENGINX_JOURNAL_DIR = Path("/archive/NDXENGINX/Instrument/logs/journal")
+ENGINX_MAP_CACHE_KEY = "run-detection:enginx:run-cycle-map"
+ENGINX_MAP_CACHE_TTL = int(os.environ.get("ENGINX_MAP_CACHE_TTL_SECONDS", "86400"))
+
+
+def _cached_enginx_map() -> dict[int, str] | None:
+    """Return the cached EnginX run cycle map when the payload is usable."""
+    cached = cache_get_json(ENGINX_MAP_CACHE_KEY)
+    if not isinstance(cached, dict) or not cached:
+        return None
+    try:
+        mapping = {int(run): cycle for run, cycle in cached.items() if isinstance(cycle, str)}
+    except (TypeError, ValueError):
+        logger.warning("Ignoring invalid EnginX journal cache payload")
+        return None
+    return mapping or None
 
 
 class EnginxGroupRule(Rule[str]):
@@ -137,6 +155,10 @@ def build_enginx_run_number_cycle_map() -> dict[int, str]:
     :return: A dict[int, str] mapping run numbers to cycle strings.
     """
     logger.info("Building run number cycle map")
+    cached = _cached_enginx_map()
+    if cached is not None:
+        return cached
+
     mapping = {}
 
     def _walk_node(node: list[Any] | dict[str, Any], journal_file: str) -> None:
@@ -152,10 +174,12 @@ def build_enginx_run_number_cycle_map() -> dict[int, str]:
                 _walk_node(item, journal_file)
 
     logger.info("Reading journal files...")
-    for path in Path("/archive/NDXENGINX/Instrument/logs/journal").glob("*.xml"):
+    for path in ENGINX_JOURNAL_DIR.glob("*.xml"):
         logger.info("Reading journal file: %s", path)
         with path.open() as journal:
             journal_dict = xmltodict.parse(journal.read())
             _walk_node(journal_dict, path.stem)
     logger.info("Mapping complete")
+    if mapping:
+        cache_set_json(ENGINX_MAP_CACHE_KEY, mapping, ENGINX_MAP_CACHE_TTL)
     return mapping
