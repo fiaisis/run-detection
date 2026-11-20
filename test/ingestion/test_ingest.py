@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rundetection.exceptions import IngestError
+from rundetection.exceptions import IngestError, ReductionMetadataError
 from rundetection.ingestion.extracts import get_cycle_string_from_path
 from rundetection.ingestion.ingest import (
     JobRequest,
@@ -96,8 +96,33 @@ TEST_DATA_PATH = Path("../test_data") if Path("../test_data").exists() else Path
                 },
             ),
         ),
+        (
+            "e2e_data/25581/cycle_24_5/MAR25586.nxs",
+            JobRequest(
+                run_number=25586,
+                instrument="MARI",
+                experiment_title="No Good Frames Test",
+                experiment_number="1820498",
+                filepath=Path(TEST_DATA_PATH, "e2e_data/25581/cycle_24_5/MAR25586.nxs"),
+                raw_frames=8067,
+                good_frames=0,
+                run_start="2019-03-22T10:15:44",
+                run_end="2019-03-22T10:18:26",
+                users="Wood,Guidi,Benedek,Mansson,Juranyi,Nocerino,Forslund,Matsubara",
+                additional_values={
+                    "cycle_string": "cycle_24_5",
+                    "ei": "'auto'",
+                    "monovan": 0,
+                    "runno": 25586,
+                    "sam_mass": 0.0,
+                    "sam_rmm": 0.0,
+                    "sum_runs": False,
+                    "remove_bkg": False,
+                },
+            ),
+        ),
     ],
-    ids=["ENGINX00241391.nxs", "IMAT00004217.nxs", "ALF82301.nxs", "MARI25581.nxs"],
+    ids=["ENGINX00241391.nxs", "IMAT00004217.nxs", "ALF82301.nxs", "MARI25581.nxs", "MARI25586.nxs"],
 )
 def test_ingest(pair) -> None:
     """
@@ -185,6 +210,15 @@ def test_ingest_to_json_string_produces_no_decode_errors():
     """
     job_request = ingest(Path(TEST_DATA_PATH, "e2e_data/1510111/ENGINX00241391.nxs"))
     job_request.to_json_string()
+
+
+def test_ingest_raises_exception_when_no_good_frames():
+    """
+    Test that a ReductionMetadataError is raised when a run has no good frames.
+    :return: None.
+    """
+    with pytest.raises(ReductionMetadataError):
+        ingest(Path(TEST_DATA_PATH, "e2e_data/25581/cycle_24_5/MAR25586.nxs"))
 
 
 if __name__ == "__main__":

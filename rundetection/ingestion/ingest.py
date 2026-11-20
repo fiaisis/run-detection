@@ -8,6 +8,7 @@ from typing import Any
 
 from h5py import File  # type: ignore
 
+from build.lib.rundetection.exceptions import ReductionMetadataError
 from rundetection.ingestion.extracts import get_extraction_function
 from rundetection.job_requests import JobRequest
 
@@ -112,3 +113,16 @@ def get_run_title(nexus_path: Path) -> str:
     # Instead of using Ingest here and reusing code, we won't bother with loading too much of the file every time and
     # JUST load the title instead of everything.
     return ingest(nexus_path).experiment_title
+
+
+def check_if_good_frames(job_request: JobRequest) -> None:
+    """
+    Check if the job request has good frames, if not set will_reduce to False.
+
+    :param job_request: The job request to check.
+    :return: None.
+    """
+    if job_request.good_frames == 0:
+        logger.info("Run %s has no good frames, skipping", job_request.run_number)
+        job_request.will_reduce = False
+        raise ReductionMetadataError("Run has no good frames, cannot reduce.")
