@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def __post_init__(self) -> None:
-    if self.good_frames == 0:
+    if self.good_frames <= 0:
         logger.info("Run %s has no good frames, skipping", self.run_number)
         self.will_reduce = False
         raise ReductionMetadataError("Run has no good frames, cannot reduce.")
