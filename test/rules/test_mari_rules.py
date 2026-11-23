@@ -31,7 +31,7 @@ def job_request():
         additional_values={"cycle_string": "cycle_24_5"},
         additional_requests=[],
         raw_frames=3,
-        good_frames=0,
+        good_frames=1,
         users="",
         run_start="",
         run_end="",
