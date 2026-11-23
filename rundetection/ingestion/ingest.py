@@ -15,13 +15,6 @@ from rundetection.job_requests import JobRequest
 logger = logging.getLogger(__name__)
 
 
-def __post_init__(self) -> None:
-    if self.good_frames <= 0:
-        logger.info("Run %s has no good frames, skipping", self.run_number)
-        self.will_reduce = False
-        raise ReductionMetadataError("Run has no good frames, cannot reduce.")
-
-
 def _check_if_nexus_file(path: Path) -> None:
     """
     Check if a given path is a nexus file, if not raise ValueError.
