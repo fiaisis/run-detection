@@ -218,7 +218,7 @@ def test_ingest_raises_exception_when_no_good_frames():
     :return: None.
     """
     with pytest.raises(ReductionMetadataError):
-        ingest(Path(TEST_DATA_PATH, "e2e_data/25581/cycle_18_4/MAR25586.nxs"))
+        ingest(Path(TEST_DATA_PATH, "e2e_data/25586/cycle_18_4/MAR25586.nxs"))
 
 
 if __name__ == "__main__":
