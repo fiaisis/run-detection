@@ -124,7 +124,7 @@ def test_get_sibling_runs(mock_ingest: Mock):
     :param mock_ingest: Mock ingest
     :return: None.
     """
-    job_request = JobRequest(1, "inst", "title", "num", Path("path"), "run_start", "run_end", 0, 0, "users")
+    job_request = JobRequest(1, "inst", "title", "num", Path("path"), "run_start", "run_end", 1, 1, "users")
     mock_ingest.return_value = job_request
     with TemporaryDirectory() as temp_dir:
         Path(temp_dir, "1.nxs").touch()
