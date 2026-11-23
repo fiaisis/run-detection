@@ -8,7 +8,6 @@ from typing import Any
 
 from h5py import File  # type: ignore
 
-from build.lib.rundetection.exceptions import ReductionMetadataError
 from rundetection.ingestion.extracts import get_extraction_function
 from rundetection.job_requests import JobRequest
 

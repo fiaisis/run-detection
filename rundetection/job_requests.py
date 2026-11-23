@@ -35,13 +35,11 @@ class JobRequest:
     additional_values: dict[str, Any] = dataclasses.field(default_factory=dict)
     additional_requests: list[JobRequest] = dataclasses.field(default_factory=list)
 
-
     def __post_init__(self) -> None:
         """Post init method to check if the run has good frames. If not, set will_reduce to False and raise an error."""
         if self.good_frames <= 0:
             self.will_reduce = False
             raise ReductionMetadataError("Run has no good frames, cannot reduce.")
-
 
     def to_json_string(self) -> str:
         """
