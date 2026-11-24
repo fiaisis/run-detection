@@ -34,7 +34,7 @@ def job_request():
         filepath=Path("./cycle_24_5/25581.nxs"),
         experiment_number="experiment number",
         raw_frames=0,
-        good_frames=0,
+        good_frames=1,
         run_start="",
         run_end="",
         users="",

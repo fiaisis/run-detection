@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from rundetection.exceptions import IngestError
+from rundetection.exceptions import IngestError, ReductionMetadataError
 from rundetection.ingestion.extracts import get_cycle_string_from_path
 from rundetection.ingestion.ingest import (
     JobRequest,
@@ -124,7 +124,7 @@ def test_get_sibling_runs(mock_ingest: Mock):
     :param mock_ingest: Mock ingest
     :return: None.
     """
-    job_request = JobRequest(1, "inst", "title", "num", Path("path"), "run_start", "run_end", 0, 0, "users")
+    job_request = JobRequest(1, "inst", "title", "num", Path("path"), "run_start", "run_end", 1, 1, "users")
     mock_ingest.return_value = job_request
     with TemporaryDirectory() as temp_dir:
         Path(temp_dir, "1.nxs").touch()
@@ -185,6 +185,15 @@ def test_ingest_to_json_string_produces_no_decode_errors():
     """
     job_request = ingest(Path(TEST_DATA_PATH, "e2e_data/1510111/ENGINX00241391.nxs"))
     job_request.to_json_string()
+
+
+def test_ingest_raises_exception_when_no_good_frames():
+    """
+    Test that a ReductionMetadataError is raised when a run has no good frames.
+    :return: None.
+    """
+    with pytest.raises(ReductionMetadataError):
+        ingest(Path(TEST_DATA_PATH, "e2e_data/25586/cycle_18_4/MAR25586.nxs"))
 
 
 if __name__ == "__main__":
