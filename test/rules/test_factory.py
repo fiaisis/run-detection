@@ -24,7 +24,7 @@ from rundetection.rules.gem_rules import (
     GEMRietveldPDFVanEmptyRule,
     GEMVanNormRule,
 )
-from rundetection.rules.imat_rules import IMATFindImagesRule
+from rundetection.rules.imat_rules import IMATFindImagesRule, IMATNgemToFRule
 from rundetection.rules.inter_rules import InterStitchRule
 from rundetection.rules.iris_rules import IrisCalibrationRule, IrisReductionRule
 from rundetection.rules.mari_rules import MariGitShaRule, MariMaskFileRule, MariStitchRule, MariWBVANRule
@@ -92,6 +92,11 @@ def assert_correct_rule(name: str, value: Any, rule_type: type[Rule]):
         ("enginxceriarun", 34567, EnginxCeriaPathRule),
         ("enginxgroup", "north", EnginxGroupRule),
         ("imatfindimages", True, IMATFindImagesRule),
+        (
+            "imatngemtof",
+            {"start_tof": 20000, "end_tof": 85000, "bin_width": 10, "L": 56.4},
+            IMATNgemToFRule,
+        ),
         ("gemmode", "PDF", GEMModeRule),
         ("geminputmode", "Summed", GEMInputModeRule),
         ("gemvannorm", True, GEMVanNormRule),
@@ -186,6 +191,8 @@ def test_raises_exception_for_incorrect_rule_value_type() -> None:
         rule_factory("enginxceriarun", 3.3)
     with pytest.raises(ValueError):  # noqa: PT011
         rule_factory("enginxgroup", 123)
+    with pytest.raises(ValueError):  # noqa: PT011
+        rule_factory("imatngemtof", 20000)
 
 
 if __name__ == "__main__":
